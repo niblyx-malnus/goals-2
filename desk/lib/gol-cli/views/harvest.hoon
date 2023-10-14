@@ -1,4 +1,4 @@
-/-  gol=goals, vyu=views
+/-  gol=goals, vyu=views, update
 /+  gol-cli-etch, gol-cli-traverse, j=gol-cli-json
 |_  [=store:gol =bowl:gall]
 +*  etch  ~(. gol-cli-etch store)
@@ -59,7 +59,7 @@
 ++  view-diff
   |=  $:  =parm:harvest:vyu
           =data:harvest:vyu
-          [[=pin:gol mod=ship pid=@] upd=update:gol]
+          [[=pin:gol mod=ship pid=@] upd=update:v5:update]
       ==
   ^-  (unit diff:harvest:vyu)
   =;  diff=(unit diff:harvest:vyu)

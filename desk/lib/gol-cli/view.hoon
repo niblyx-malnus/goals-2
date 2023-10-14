@@ -1,4 +1,4 @@
-/-  gol=goals, vyu=views
+/-  gol=goals, vyu=views, update
 /+  gol-cli-node, gol-cli-traverse,
     gol-cli-views-tree, gol-cli-views-harvest,
     gol-cli-views-list-view, gol-cli-views-page
@@ -10,7 +10,7 @@
 :: Convert an update into a diff for a given view
 ::
 ++  view-diff
-  |=  [=view:vyu upd=[[pin:gol ship @] update:gol]]
+  |=  [=view:vyu upd=[[pin:gol ship @] update:v5:update]]
   ^-  (unit diff:vyu)
   ?-  -.view
     %tree       (bind (view-diff:tree parm.view data.view upd) (lead %tree))

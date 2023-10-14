@@ -5,7 +5,6 @@
 +*  this  .
     tv    ~(. gol-cli-traverse goals.p)
     nd    ~(. gol-cli-node goals.p)
-++  vzn  vzn:gol
 ++  abet  (inflate-pool:fl p)
 ++  apex  |=(p=pool:gol this(p p))
 ::

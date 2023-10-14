@@ -1,11 +1,11 @@
-/-  gol=goals
+/-  gol=goals, update
 /+  pl=gol-cli-pool, tv=gol-cli-traverse, *gol-cli-util,
     fl=gol-cli-inflater
 :: apply (etch) updates received from foreign pools
 ::
 |_  =store:gol
 ++  etch
-  |=  [=pin:gol upd=update:gol]
+  |=  [=pin:gol upd=update:v5:update]
   ^-  store:gol
   ?-    +<.upd
     %poke-error  store  :: no-op on poke-error update
@@ -109,7 +109,7 @@
   --
 ::
 ++  pool-etch
-  |=  [p=pool:gol upd=update:gol]
+  |=  [p=pool:gol upd=update:v5:update]
   ^-  pool:gol
   |^
   ?+    +.upd  !!

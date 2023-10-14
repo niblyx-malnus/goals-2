@@ -1,4 +1,4 @@
-/-  *goals
+/-  *goals, update
 :: a view is a distorted view of the store, a perspective, a transformation
 ::
 :: TODO:
@@ -40,7 +40,7 @@
   +$  parm  $:(=type)
   +$  type  $%([%main ~] [%pool =pin] [%goal =id])
   +$  data  $:(pools=tree-pools cache=tree-pools)
-  +$  diff  [[=pin mod=ship pid=@] update]
+  +$  diff  [[=pin mod=ship pid=@] update:v5:update]
   :: trying to slowly sever this from underlying DS
   ::
   +$  tree-pool   pool

@@ -1,4 +1,4 @@
-/-  gol=goals, vyu=views
+/-  gol=goals, vyu=views, update
 /+  gol-cli-traverse, j=gol-cli-json
 |_  =store:gol
 :: TODO: Sever this data structure from the core backend data
@@ -62,7 +62,7 @@
 ++  view-diff
   |=  $:  =parm:tree:vyu
           =data:tree:vyu
-          [[=pin:gol mod=ship pid=@] upd=update:gol]
+          [[=pin:gol mod=ship pid=@] upd=update:v5:update]
       ==
   ^-  (unit diff:tree:vyu)
   =;  diff=(unit diff:tree:vyu)
@@ -113,7 +113,7 @@
   ++  view-diff
     |=  =diff:tree:vyu
     ^-  json
-    =/  upd=update  +.diff
+    =/  upd=update:v5:update  +.diff
     =/  upd  +.upd  :: ignore version
     %-  pairs
     :~  :-  %hed

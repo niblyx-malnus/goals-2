@@ -1,4 +1,4 @@
-/-  gol=goals, vyu=views
+/-  gol=goals, vyu=views, update
 /+  j=gol-cli-json
 |_  =store:gol
 ++  view-data
@@ -19,7 +19,7 @@
 ++  view-diff
   |=  $:  =parm:page:vyu
           =data:page:vyu
-          [[=pin:gol mod=ship pid=@] upd=update:gol]
+          [[=pin:gol mod=ship pid=@] upd=update:v5:update]
       ==
   ^-  (unit diff:page:vyu)
   =;  diff=(unit diff:page:vyu)

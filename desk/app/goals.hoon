@@ -1,14 +1,16 @@
-/-  gol=goals, vyu=views, act=action
+/-  gol=goals, vyu=views, act=action, update
 /+  dbug, default-agent, verb, gol-cli-emot, gs=gol-cli-state, nd=gol-cli-node,
 :: import during development to force compilation
 ::
     gol-cli-json
-/=  mak-  /mar/goal/ask
-/=  mgs-  /mar/goal/say
-/=  mvs-  /mar/goal/view-send
-/=  vak-  /mar/view-ack
-/=  pyk-  /mar/goal/peek
-/=  pyk-  /mar/goal/action
+/=  x  /mar/goal/ask
+/=  x  /mar/goal/say
+/=  x  /mar/goal/view-send
+/=  x  /mar/view-ack
+/=  x  /mar/goal/peek
+/=  x  /mar/goal/action
+/=  x  /mar/goal/update
+/=  x  /mar/goal/away-update
 ::
 |%
 +$  inflated-state  [state-5:gs =views:vyu] 
@@ -16,7 +18,6 @@
 --
 =|  inflated-state
 =*  state  -
-=*  vzn  vzn:gol
 ::
 %+  verb  |
 %-  agent:dbug
@@ -193,7 +194,7 @@
       ::
         %fact
       ?>  =(p.cage.sign %goal-away-update)
-      =/  upd=away-update:gol  !<(away-update:gol q.cage.sign)
+      =/  upd=away-update:v5:update  !<(away-update:v5:update q.cage.sign)
       =^  cards  state
         abet:(handle-etch-pool-update:emot pin upd)
       [cards this]

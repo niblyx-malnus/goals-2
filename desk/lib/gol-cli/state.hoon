@@ -1,9 +1,27 @@
-/-  *goals
+/-  *goals, update, *group :: need to keep for historical reasons
 /+  fl=gol-cli-inflater
 :: step-wisdom vs. step-nomadism
 :: https://gist.github.com/philipcmonk/de5ba03b3ea733387fd13b758062cfce
 |%
+++  vzn   %5
 +$  card  card:agent:gall
+::
++$  state-5-1  [%'5-1' =store]
++$  state-5    [%5 =store:v5]
++$  state-4    [%4 =store:v4 =groups =log:v4:update]
++$  state-3    [%3 =store:v3]
++$  state-2    [%2 =store:v2]
++$  state-1    [%1 =store:v1]
++$  state-0    [%0 =store:v0]
++$  versioned-state
+  $%  state-0
+      state-1
+      state-2
+      state-3
+      state-4
+      state-5
+      state-5-1
+  ==
 ::
 ++  upgrade-io
   |=  [new=state-5 =bowl:gall]
@@ -44,7 +62,18 @@
       |=  [=pin =pool]
       [pin (inflate-pool:fl pool)]
     ==
+    ::
+    %'5-1'  !!
   ==
+::
+:: Development states
+::
+++  convert-5-to-5-1
+  |=  =state-5
+  ^-  state-5-1
+  *state-5-1
+::
+::
 ::
 ++  convert-4-to-5
   |=  =state-4
@@ -59,31 +88,31 @@
   :*  %4
       :*  (index-3-to-4 directory.store.state-3)
           (pools-3-to-4 pools.store.state-3)
-          *pools:s4
+          *pools:v4
       == 
       *groups
-      *log:s4
+      *log:v4:update
   ==
   ::
 ++  index-3-to-4
-  |=  =directory:s3
-  ^-  index:s4
-  (gas:idx-orm:s4 *index:s4 ~(tap by directory))
+  |=  =directory:v3
+  ^-  index:v4
+  (gas:idx-orm:v4 *index:v4 ~(tap by directory))
 ::
 ++  pools-3-to-4
-  |=  =pools:s3
-  ^-  pools:s4
-  %-  ~(gas by *pools:s4)
+  |=  =pools:v3
+  ^-  pools:v4
+  %-  ~(gas by *pools:v4)
   %+  turn
     ~(tap by pools)
-  |=  [=pin:s3 =pool:s3]
-  ^-  [pin:s4 pool:s4]
+  |=  [=pin:v3 =pool:v3]
+  ^-  [pin:v4 pool:v4]
   [pin (pool-3-to-4 pool)]
 ::
 ++  pool-3-to-4
-  |=  =npool:s3
-  ^-  pool:s4
-  =|  =npool:s4
+  |=  =npool:v3
+  ^-  pool:v4
+  =|  =npool:v4
   =.  froze.npool  [birth creator]:froze.^npool
   =.  owner.nexus.npool  owner.froze.^npool
   =.  perms.nexus.npool  (pool-perms-3-to-4 perms.^npool)
@@ -92,8 +121,8 @@
   npool
 ::
 ++  pool-perms-3-to-4
-  |=  pool-perms:s3
-  =|  =pool-perms:s4
+  |=  pool-perms:v3
+  =|  =pool-perms:v4
   =.  pool-perms
     %-  ~(gas by pool-perms)
     %+  murn
@@ -121,28 +150,28 @@
   pool-perms
 ::
 ++  goals-3-to-4
-  |=  =goals:s3
-  ^-  goals:s4
-  %-  ~(gas by *goals:s4)
+  |=  =goals:v3
+  ^-  goals:v4
+  %-  ~(gas by *goals:v4)
   %+  turn
     ~(tap by goals)
-  |=  [=id:s3 =goal:s3]
-  ^-  [id:s4 goal:s4]
+  |=  [=id:v3 =goal:v3]
+  ^-  [id:v4 goal:v4]
   [id (goal-3-to-4 goal goals)]
   ::
 ++  goal-3-to-4
-  |=  [=goal:s3 =goals:s3]
-  ^-  goal:s4
-  =|  =ngoal:s4
-  =.  froze.ngoal  froze:`ngoal:s3`goal
+  |=  [=goal:v3 =goals:v3]
+  ^-  goal:v4
+  =|  =ngoal:v4
+  =.  froze.ngoal  froze:`ngoal:v3`goal
   =.  nexus.ngoal  (nexus-3-to-4 goal)
-  =.  hitch.ngoal  hitch:`ngoal:s3`goal
+  =.  hitch.ngoal  hitch:`ngoal:v3`goal
   ngoal
   ::
 ++  nexus-3-to-4
-  |=  =goal:s3
-  ^-  goal-nexus:s4
-  =|  nexus=goal-nexus:s4
+  |=  =goal:v3
+  ^-  goal-nexus:v4
+  =|  nexus=goal-nexus:v4
   =.  par.nexus  par.goal
   =.  kids.nexus  kids.goal
   =.  kickoff.nexus  (node-3-to-4 kickoff.goal)
@@ -153,9 +182,9 @@
   nexus
 ::
 ++  node-3-to-4
-  |=  =edge:s3
-  ^-  node:s4
-  =|  =node:s4
+  |=  =edge:v3
+  ^-  node:v4
+  =|  =node:v4
   =.  moment.node  moment.edge
   =.  inflow.node  inflow.edge
   =.  outflow.node  outflow.edge
@@ -179,9 +208,9 @@
   ==
   ::
   ++  goal-1-to-2
-    |=  [=id:s1 =goal:s1]
-    ^-  goal:s2
-    =|  =goal:s2
+    |=  [=id:v1 =goal:v1]
+    ^-  goal:v2
+    =|  =goal:v2
     =.  owner.goal       owner.id
     =.  birth.goal       birth.id
     =.  desc.goal        desc.^goal
@@ -198,19 +227,19 @@
     goal
   ::
   ++  goals-1-to-2
-    |=  =goals:s1
-    ^-  goals:s2
-    %-  ~(gas by *goals:s2)
+    |=  =goals:v1
+    ^-  goals:v2
+    %-  ~(gas by *goals:v2)
     %+  turn
       ~(tap by goals)
-    |=  [=id:s1 =goal:s1]
-    ^-  [id:s2 goal:s2]
+    |=  [=id:v1 =goal:v1]
+    ^-  [id:v2 goal:v2]
     [id (goal-1-to-2 id goal)]
   ::
   ++  pool-1-to-2
-    |=  [=pin:s1 =pool:s1]
-    ^-  pool:s2
-    =|  =pool:s2
+    |=  [=pin:v1 =pool:v1]
+    ^-  pool:v2
+    =|  =pool:v2
     =.  owner.pool       owner.pin
     =.  birth.pool       birth.pin
     =.  title.pool       title.^pool
@@ -223,13 +252,13 @@
     pool
   ::
   ++  pools-1-to-2
-    |=  =pools:s1
-    ^-  pools:s2
-    %-  ~(gas by *pools:s2)
+    |=  =pools:v1
+    ^-  pools:v2
+    %-  ~(gas by *pools:v2)
     %+  turn
       ~(tap by pools)
-    |=  [=pin:s1 =pool:s1]
-    ^-  [pin:s2 pool:s2]
+    |=  [=pin:v1 =pool:v1]
+    ^-  [pin:v2 pool:v2]
     [pin (pool-1-to-2 pin pool)]
   --
 :: From state-0 to state-1:
@@ -240,5 +269,5 @@
 ++  convert-0-to-1
   |=  =state-0
   ^-  state-1
-  [%1 `store:s1`store.state-0]
+  [%1 `store:v1`store.state-0]
 --
