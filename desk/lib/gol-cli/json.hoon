@@ -45,6 +45,7 @@
         [%put-private-tags (ot ~[id+id tags+(as tag)])]
         [%subscribe (ot ~[pin+pin])]
         [%unsubscribe (ot ~[pin+pin])]
+        [%reorder-pools (ot ~[pools+(ar pin)])]
     ==
   ::
   ++  tag  (ot ~[text+so color+so private+bo])
@@ -84,9 +85,18 @@
     ==
   ++  unit-di  |=(jon=json ?~(jon ~ (some (di jon))))
   ++  unit-date  |=(jon=json ?~(jon ~ (some (date jon))))
-  ++  pin  (pe %pin id)
-  ++  unit-id  |=(jon=json ?~(jon ~ (some (id jon))))
+  ++  pin  (pe %pin goal-id)
+  ++  unit-id  |=(jon=json ?~(jon ~ (some (goal-id jon))))
   ++  id  (ot ~[owner+ship birth+date])
+  ++  goal-id
+    %-  su
+    ;~  (glue fas)
+      ;~(pfix sig fed:ag)
+      %+  cook
+        |=(=tape (slav %da (crip tape)))
+      (star prn)
+    ==
+  ::
   ++  set-ships  (as ship)
   ++  ship  (su fed:ag)
   ++  date  (su (cook |*(a=* (year +.a)) ;~(plug (just '~') when:^so)))
@@ -125,6 +135,11 @@
       %held-rend   %held-rend
       %held-yoke   %held-yoke
     ==
+  --
+++  enjs
+  =,  enjs:format
+  |%
+  ++  stub  ~
   --
 ::
 ++  enjs-tag
@@ -444,6 +459,9 @@
   |=  =pin
   ^-  json
   (enjs-id +.pin)
+::
+++  pool-id  |=(=pin (rap 3 (scot %p owner.pin) '/' (scot %da birth.pin) ~))
+++  goal-id  |=(=id (rap 3 (scot %p owner.id) '/' (scot %da birth.id) ~))
 ::
 ++  enjs-id
   =,  enjs:format

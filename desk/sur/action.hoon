@@ -8,6 +8,7 @@
 +$  local-action
   $%  [%slot-above dis=id dat=id]  :: slot dis above dat
       [%slot-below dis=id dat=id]  :: slot dis below dat
+      [%reorder-pools pools=(list pin)]
   ==
 ++  pool-action
   =<  pool-action

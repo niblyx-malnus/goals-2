@@ -9,6 +9,14 @@
 +$  state-2  [%2 =store:s2]
 +$  state-1  [%1 =store:s1]
 +$  state-0  [%0 =store:s0]
++$  versioned-state
+  $%  state-0
+      state-1
+      state-2
+      state-3
+      state-4
+      state-5
+  ==
 ::
 +$  id            id:s5
 +$  nid           nid:s5
@@ -195,6 +203,7 @@
     ==
   +$  local
     $:  order=(list id)
+        pools=(list pin)
         goals=(map id goal-local)
     ==
   ::
@@ -271,13 +280,6 @@
 :: STRUCTURES HISTORY
 ::
 :: ============================================================================
-::
-++  convert-4-to-5
-  |=  =state-4
-  ^-  state-5
-  :: TODO: ACTUALLY IMPLEMENT
-  ::       DON'T FORGET TO CONVERT SUB PATHS!!!
-  *state-5 
 ::
 ++  s4
   |%
@@ -446,114 +448,6 @@
   +$  log  ((mop @ log-update) lth)
   +$  logged  (pair @ log-update)
   --
-::
-++  convert-3-to-4
-  |=  =state-3
-  ^-  state-4
-  :*  %4
-      :*  (index-3-to-4 directory.store.state-3)
-          (pools-3-to-4 pools.store.state-3)
-          *pools:s4
-      == 
-      *groups
-      *log:s4
-  ==
-  ::
-++  index-3-to-4
-  |=  =directory:s3
-  ^-  index:s4
-  (gas:idx-orm:s4 *index:s4 ~(tap by directory))
-::
-++  pools-3-to-4
-  |=  =pools:s3
-  ^-  pools:s4
-  %-  ~(gas by *pools:s4)
-  %+  turn
-    ~(tap by pools)
-  |=  [=pin:s3 =pool:s3]
-  ^-  [pin:s4 pool:s4]
-  [pin (pool-3-to-4 pool)]
-::
-++  pool-3-to-4
-  |=  =npool:s3
-  ^-  pool:s4
-  =|  =npool:s4
-  =.  froze.npool  [birth creator]:froze.^npool
-  =.  owner.nexus.npool  owner.froze.^npool
-  =.  perms.nexus.npool  (pool-perms-3-to-4 perms.^npool)
-  =.  goals.nexus.npool  (goals-3-to-4 goals.nexus.^npool)
-  =.  hitch.npool  hitch.^npool
-  npool
-::
-++  pool-perms-3-to-4
-  |=  pool-perms:s3
-  =|  =pool-perms:s4
-  =.  pool-perms
-    %-  ~(gas by pool-perms)
-    %+  murn
-      ~(tap in admins) 
-    |=  =ship
-    ?:  (~(has by pool-perms) ship)
-      ~
-    (some [ship (some %admin)])
-  =.  pool-perms
-    %-  ~(gas by pool-perms)
-    %+  murn
-      ~(tap in captains) 
-    |=  =ship
-    ?:  (~(has by pool-perms) ship)
-      ~
-    (some [ship (some %spawn)])
-  =.  pool-perms
-    %-  ~(gas by pool-perms)
-    %+  murn
-      ~(tap in viewers) 
-    |=  =ship
-    ?:  (~(has by pool-perms) ship)
-      ~
-    (some [ship ~])
-  pool-perms
-::
-++  goals-3-to-4
-  |=  =goals:s3
-  ^-  goals:s4
-  %-  ~(gas by *goals:s4)
-  %+  turn
-    ~(tap by goals)
-  |=  [=id:s3 =goal:s3]
-  ^-  [id:s4 goal:s4]
-  [id (goal-3-to-4 goal goals)]
-  ::
-++  goal-3-to-4
-  |=  [=goal:s3 =goals:s3]
-  ^-  goal:s4
-  =|  =ngoal:s4
-  =.  froze.ngoal  froze:`ngoal:s3`goal
-  =.  nexus.ngoal  (nexus-3-to-4 goal)
-  =.  hitch.ngoal  hitch:`ngoal:s3`goal
-  ngoal
-  ::
-++  nexus-3-to-4
-  |=  =goal:s3
-  ^-  goal-nexus:s4
-  =|  nexus=goal-nexus:s4
-  =.  par.nexus  par.goal
-  =.  kids.nexus  kids.goal
-  =.  kickoff.nexus  (node-3-to-4 kickoff.goal)
-  =.  deadline.nexus  (node-3-to-4 deadline.goal)
-  =.  complete.nexus  complete.goal
-  =.  actionable.nexus  actionable.goal
-  =.  chief.nexus  owner.goal
-  nexus
-::
-++  node-3-to-4
-  |=  =edge:s3
-  ^-  node:s4
-  =|  =node:s4
-  =.  moment.node  moment.edge
-  =.  inflow.node  inflow.edge
-  =.  outflow.node  outflow.edge
-  node
 ::
 ++  s3
   |%

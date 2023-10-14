@@ -300,6 +300,10 @@
   ^-  _this
   =/  mod  src.bowl
   ?-    -.pok.axn
+      %reorder-pools
+    ?>  =((sy pools.local.store) (sy pools.pok.axn))
+    this(pools.local.store pools.pok.axn)
+    ::
       %spawn-goal
     =+  pok.axn
     ?.  =(owner.pin our.bowl)  (relay pin axn)

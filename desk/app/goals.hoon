@@ -1,5 +1,5 @@
 /-  gol=goals, vyu=views, act=action
-/+  dbug, default-agent, verb, gol-cli-emot, fl=gol-cli-inflater,
+/+  dbug, default-agent, verb, gol-cli-emot, gs=gol-cli-state, nd=gol-cli-node,
 :: import during development to force compilation
 ::
     gol-cli-json
@@ -11,21 +11,7 @@
 /=  pyk-  /mar/goal/action
 ::
 |%
-+$  state-0  state-0:gol
-+$  state-1  state-1:gol  
-+$  state-2  state-2:gol
-+$  state-3  state-3:gol
-+$  state-4  state-4:gol
-+$  state-5  state-5:gol
-+$  versioned-state
-  $%  state-0
-      state-1
-      state-2
-      state-3
-      state-4
-      state-5
-  ==
-+$  inflated-state  [state-5 =views:vyu] 
++$  inflated-state  [state-5:gs =views:vyu] 
 +$  card  card:agent:gall
 --
 =|  inflated-state
@@ -49,39 +35,11 @@
 ++  on-load
   |=  =old=vase
   ^-  (quip card _this)
-  =/  old  !<(versioned-state old-vase)
-  |-
-  ?-    -.old
-      %5
-    :: TODO: Reload pool subpaths according to new format
-    :: leave-and-refollow...
-    :-  %+  murn  ~(tap by sup.bowl)
-        |=  [=duct =ship =path]
-        ?.  ?=([%view *] path)  ~
-        (some [%give %kick ~[path] ~])
-    %=    this
-      views  ~
-        -.state
-      %=  old
-        pools.store
-          %-  ~(gas by *pools:gol)
-          %+  turn  ~(tap by pools.store.old)
-          |=  [=pin:gol =pool:gol]
-          [pin (inflate-pool:fl pool)]
-      ==
-    ==
-    ::
-      %4
-    $(old (convert-4-to-5:gol old))
-      %3
-    $(old (convert-3-to-4:gol old))
-      %2
-    $(old (convert-2-to-3:gol old))
-      %1
-    $(old (convert-1-to-2:gol old))
-      %0
-    $(old (convert-0-to-1:gol old))
-  ==
+  =/  old  !<(versioned-state:gs old-vase)
+  =/  new=state-5:gs     (convert-to-latest:gs old)
+  =/  cards=(list card)  (upgrade-io:gs new bowl)
+  [cards this(-.state new, views ~)]
+::
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
@@ -115,6 +73,7 @@
       %goal-action
     =/  axn=action:act  !<(action:act vase)
     ~&  received-axn+axn
+    ~&  [src+src our+our]:bowl
     =^  cards  state
       abet:(handle-action:emot axn)
     [cards this]
@@ -149,6 +108,57 @@
   ?+    pole  (on-peek:def pole)
     [%x %store ~]  ``goal-peek+!>([%store store])
     [%x %views ~]  ``goal-peek+!>([%views views])
+    ::
+      [%x %pools %index ~]
+    :-  ~  :-  ~  :-  %goal-peek  !>
+    :-  %pools-index
+    %+  turn  ~(tap by pools.store)
+    |=  [=pin:gol =pool:gol]
+    [pin title.pool]
+    ::
+      [%x %pool %roots owner=@ta birth=@da ~]
+    =/  =pin:gol   [%pin (slav %p owner.pole) (slav %da birth.pole)]
+    =/  =pool:gol  (~(got by pools.store) pin)
+    :-  ~  :-  ~  :-  %goal-peek  !>
+    :-  %pool-roots
+    %+  turn  (~(root-goals nd goals.pool))
+    |=  =id:gol
+    [id desc:(~(got by goals.pool) id)]
+    ::
+      [%x %goal %kids owner=@ta birth=@da ~]
+    =/  =id:gol    [(slav %p owner.pole) (slav %da birth.pole)]
+    =/  =pin:gol   (got:idx-orm:gol index.store id)
+    =/  =pool:gol  (~(got by pools.store) pin)
+    =/  kids=(set id:gol)  kids:(~(got by goals.pool) id)
+    :-  ~  :-  ~  :-  %goal-peek  !>
+    :-  %goal-kids
+    %+  turn  ~(tap in kids)
+    |=  =id:gol
+    [id desc:(~(got by goals.pool) id)]
+    ::
+      [%x %pool %title owner=@ta birth=@da ~]
+    =/  =pin:gol   [%pin (slav %p owner.pole) (slav %da birth.pole)]
+    =/  =pool:gol  (~(got by pools.store) pin)
+    ``goal-peek+!>([%pool-title title.pool])  
+    ::
+      [%x %pool %note owner=@ta birth=@da ~]
+    =/  =pin:gol   [%pin (slav %p owner.pole) (slav %da birth.pole)]
+    =/  =pool:gol  (~(got by pools.store) pin)
+    ``goal-peek+!>([%pool-note note.pool])  
+    ::
+      [%x %goal %desc owner=@ta birth=@da ~]
+    =/  =id:gol    [(slav %p owner.pole) (slav %da birth.pole)]
+    =/  =pin:gol   (got:idx-orm:gol index.store id)
+    =/  =pool:gol  (~(got by pools.store) pin)
+    =/  =goal:gol  (~(got by goals.pool) id)
+    ``goal-peek+!>([%goal-desc desc.goal])  
+    ::
+      [%x %goal %note owner=@ta birth=@da ~]
+    =/  =id:gol    [(slav %p owner.pole) (slav %da birth.pole)]
+    =/  =pin:gol   (got:idx-orm:gol index.store id)
+    =/  =pool:gol  (~(got by pools.store) pin)
+    =/  =goal:gol  (~(got by goals.pool) id)
+    ``goal-peek+!>([%goal-note note.goal])  
   ==
 ::
 ++  on-agent
