@@ -62,7 +62,7 @@
 ++  view-diff
   |=  $:  =parm:tree:vyu
           =data:tree:vyu
-          [[=pin:gol mod=ship pid=@] upd=update:v5:update]
+          [=pin:gol upd=update:v5:update]
       ==
   ^-  (unit diff:tree:vyu)
   =;  diff=(unit diff:tree:vyu)
@@ -75,7 +75,7 @@
     :: ?>(check diff)
     :: ~&  diff
     diff
-  (some [[pin mod pid] upd])
+  (some [pin upd])
 ::
 ++  etch-diff
   |=  [=data:tree:vyu =diff:tree:vyu]
@@ -119,8 +119,6 @@
     :~  :-  %hed
         %-  pairs
         :~  [%pin (enjs-pin pin.diff)]
-            [%mod (ship mod.diff)]
-            [%pid s+`@t`pid.diff]
         ==
         :-  %tel
         %+  frond  -.upd

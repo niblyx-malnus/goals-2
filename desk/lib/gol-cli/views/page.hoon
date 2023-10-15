@@ -19,7 +19,7 @@
 ++  view-diff
   |=  $:  =parm:page:vyu
           =data:page:vyu
-          [[=pin:gol mod=ship pid=@] upd=update:v5:update]
+          [=pin:gol upd=update:v5:update]
       ==
   ^-  (unit diff:page:vyu)
   =;  diff=(unit diff:page:vyu)
@@ -30,7 +30,7 @@
     ?>(check diff)
   =/  atad=data:page:vyu  (view-data parm)
   ?:  =(data atad)  ~
-  (some [[pin mod pid] %replace atad])
+  (some [pin %replace atad])
 ::
 ++  etch-diff
   |=  [=data:page:vyu =diff:page:vyu]
@@ -103,8 +103,6 @@
     :~  :-  %hed
         %-  pairs
         :~  [%pin (enjs-pin pin.diff)]
-            [%mod (ship mod.diff)]
-            [%pid s+`@t`pid.diff]
         ==
         :-  %tel
         %+  frond  %page

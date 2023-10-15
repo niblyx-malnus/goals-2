@@ -1,13 +1,13 @@
 /-  update
 =,  v5:update
-|_  upd=away-update
+|_  upd=update
 ++  grow
   |%
   ++  noun  upd
   --
 ++  grab
   |%
-  ++  noun  away-update
+  ++  noun  update
   --
 ++  grad  %noun
 --

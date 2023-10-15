@@ -40,7 +40,7 @@
   +$  parm  $:(=type)
   +$  type  $%([%main ~] [%pool =pin] [%goal =id])
   +$  data  $:(pools=tree-pools cache=tree-pools)
-  +$  diff  [[=pin mod=ship pid=@] update:v5:update]
+  +$  diff  [=pin update:v5:update]
   :: trying to slowly sever this from underlying DS
   ::
   +$  tree-pool   pool
@@ -87,7 +87,7 @@
         nest-left=(set id)
         nest-ryte=(set id)
     ==
-  +$  diff  [[=pin mod=ship pid=@] $%([%replace data])]
+  +$  diff  [=pin $%([%replace data])]
   --
 ++  list-view
   |%
@@ -136,7 +136,7 @@
         nest-left=(set id)
         nest-ryte=(set id)
     ==
-  +$  diff  [[=pin mod=ship pid=@] $%([%replace data])]
+  +$  diff  [=pin $%([%replace data])]
   --
 ++  page
   |%
@@ -157,6 +157,6 @@
             tags=(set tag)
         ==
     ==
-  +$  diff  [[=pin mod=ship pid=@] $%([%replace data])]
+  +$  diff  [=pin $%([%replace data])]
   --
 --

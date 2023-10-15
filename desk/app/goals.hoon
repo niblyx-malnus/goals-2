@@ -194,7 +194,7 @@
       ::
         %fact
       ?>  =(p.cage.sign %goal-away-update)
-      =/  upd=away-update:v5:update  !<(away-update:v5:update q.cage.sign)
+      =/  upd=update:v5:update  !<(update:v5:update q.cage.sign)
       =^  cards  state
         abet:(handle-etch-pool-update:emot pin upd)
       [cards this]

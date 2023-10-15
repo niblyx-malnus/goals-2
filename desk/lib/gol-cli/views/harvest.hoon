@@ -59,7 +59,7 @@
 ++  view-diff
   |=  $:  =parm:harvest:vyu
           =data:harvest:vyu
-          [[=pin:gol mod=ship pid=@] upd=update:v5:update]
+          [=pin:gol upd=update:v5:update]
       ==
   ^-  (unit diff:harvest:vyu)
   =;  diff=(unit diff:harvest:vyu)
@@ -70,7 +70,7 @@
     ?>(check diff)
   =/  atad=data:harvest:vyu  (view-data parm)
   ?:  =(data atad)  ~
-  (some [[pin mod pid] %replace atad])
+  (some [pin %replace atad])
 ::
 ++  etch-diff
   |=  [=data:harvest:vyu =diff:harvest:vyu]
@@ -230,8 +230,6 @@
     :~  :-  %hed
         %-  pairs
         :~  [%pin (enjs-pin:j pin.diff)]
-            [%mod (ship mod.diff)]
-            [%pid s+`@t`pid.diff]
         ==
         :-  %tel
         %+  frond  %harvest

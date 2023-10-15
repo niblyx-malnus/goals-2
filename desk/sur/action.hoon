@@ -1,6 +1,6 @@
 /-  *goals
 |%
-+$  action  [pid=@ pok=$%(util-action pool-action goal-action local-action)]
++$  action  $%(util-action pool-action goal-action local-action)
 +$  util-action
   $%  [%subscribe =pin]
       [%unsubscribe =pin]

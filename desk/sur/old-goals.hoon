@@ -2,16 +2,6 @@
 ++  v5
   =+  v4 :: successive states are nested cores
   |%
-  +$  goal-nexus
-    $:  par=(unit id)
-        kids=(set id)
-        kickoff=node
-        deadline=node
-        complete=_|
-        actionable=?
-        chief=ship
-        spawn=(set ship)
-    ==
   :: values implied by the data structure
   ::
   +$  goal-trace
@@ -170,8 +160,8 @@
         kids=(set id)
         kickoff=node
         deadline=node
-        complete=_|
-        actionable=_|
+        complete=$~(%| ?)
+        actionable=$~(%| ?)
         chief=ship
         spawn=(set ship)
     ==

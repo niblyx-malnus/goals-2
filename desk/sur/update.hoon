@@ -57,7 +57,6 @@
         [%poke-error =tang]
     ==
   +$  update        [%5 unver-update]
-  +$  away-update   [[mod=ship pid=@] update]
   --
 ::
 ++  v4

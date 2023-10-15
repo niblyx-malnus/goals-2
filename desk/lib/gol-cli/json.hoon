@@ -7,8 +7,6 @@
     |=  jon=json
     ^-  action:act
     %.  jon
-    %-  ot
-    =-  ~[pid+so pok+-]
     %-  of
     :~  [%spawn-pool (ot ~[title+so])]
         [%clone-pool (ot ~[pin+pin title+so])]

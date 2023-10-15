@@ -71,16 +71,67 @@
 ++  convert-5-to-5-1
   |=  =state-5
   ^-  state-5-1
-  *state-5-1
-::
-::
+  [%'5-1' +.state-5]
 ::
 ++  convert-4-to-5
   |=  =state-4
-  ^-  state-5
-  :: TODO: ACTUALLY IMPLEMENT
-  ::       DON'T FORGET TO CONVERT SUB PATHS!!!
-  *state-5 
+  |^  ^-  state-5
+  [%5 (store-4-to-5 store.state-4)]
+  ++  store-4-to-5
+    |=  =store:v4
+    ^-  store:v5
+    :*  index.store
+        (pools-4-to-5 pools.store)
+        (pools-4-to-5 cache.store)
+        *local:v5 :: need to inflate
+    ==
+  ++  pools-4-to-5
+    |=  =pools:v4
+    ^-  pools:v5
+    %-  ~(gas by *pools:v5)
+    %+  turn  ~(tap by pools)
+    |=  [=pin:v4 =pool:v4]
+    [pin (pool-4-to-5 pool)]
+  ++  pool-4-to-5
+    |=  =pool:v4
+    ^-  pool:v5
+    :*  (pool-nexus-4-to-5 nexus:`npool:v4`pool)
+        froze:`npool:v4`pool :: doesn't change
+        *pool-trace:v5 :: this gets inflated
+        (pool-hitch-4-to-5 hitch:`npool:v4`pool)
+    ==
+  ++  pool-hitch-4-to-5
+    |=  hitch=pool-hitch:v4
+    ^-  pool-hitch:v5
+    [title.hitch '' ~]
+  ++  pool-nexus-4-to-5
+    |=  nexus=pool-nexus:v4
+    ^-  pool-nexus:v5
+    :*  (goals-4-to-5 goals.nexus)
+        (goals-4-to-5 cache.nexus)
+        owner.nexus
+        perms.nexus
+    ==
+  ++  goals-4-to-5
+    |=  =goals:v4
+    ^-  goals:v5
+    %-  ~(gas by *goals:v5)
+    %+  turn  ~(tap by goals)
+    |=  [=id:v4 =goal:v4]
+    [id (goal-4-to-5 goal)]
+  ++  goal-4-to-5
+    |=  =goal:v4
+    ^-  goal:v5
+    :*  nexus:`ngoal:v4`goal
+        froze:`ngoal:v4`goal :: doesn't change
+        *goal-trace:v5 :: this gets inflated
+        (goal-hitch-4-to-5 hitch:`ngoal:v4`goal)
+    ==
+  ++  goal-hitch-4-to-5
+    |=  hitch=goal-hitch:v4
+    ^-  goal-hitch:v5
+    [desc.hitch '' ~ ~]
+  --
 ::
 ++  convert-3-to-4
   |=  =state-3
