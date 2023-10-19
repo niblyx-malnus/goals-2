@@ -40,7 +40,7 @@
   +$  parm  $:(=type)
   +$  type  $%([%main ~] [%pool =pin] [%goal =id])
   +$  data  $:(pools=tree-pools cache=tree-pools)
-  +$  diff  [=pin update:v5:update]
+  +$  diff  [=pin update:v5-1:update]
   :: trying to slowly sever this from underlying DS
   ::
   +$  tree-pool   pool

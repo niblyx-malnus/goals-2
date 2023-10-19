@@ -10,5 +10,7 @@
       [%pool-note note=@t]
       [%goal-desc desc=@t]
       [%goal-note note=@t]
+      [%uid id=(unit id)]
+      [%loob loob=?]
   ==
 --

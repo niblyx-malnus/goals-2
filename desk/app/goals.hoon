@@ -13,7 +13,7 @@
 /=  x  /mar/goal/away-update
 ::
 |%
-+$  inflated-state  [state-5:gs =views:vyu] 
++$  inflated-state  [state-5-1:gs =views:vyu] 
 +$  card  card:agent:gall
 --
 =|  inflated-state
@@ -37,7 +37,7 @@
   |=  =old=vase
   ^-  (quip card _this)
   =/  old  !<(versioned-state:gs old-vase)
-  =/  new=state-5:gs     (convert-to-latest:gs old)
+  =/  new=state-5-1:gs     (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   [cards this(-.state new, views ~)]
 ::
@@ -117,8 +117,8 @@
     |=  [=pin:gol =pool:gol]
     [pin title.pool]
     ::
-      [%x %pool %roots owner=@ta birth=@da ~]
-    =/  =pin:gol   [%pin (slav %p owner.pole) (slav %da birth.pole)]
+      [%x %pool %roots host=@ta name=@ta ~]
+    =/  =pin:gol   [(slav %p host.pole) name.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
     :-  ~  :-  ~  :-  %goal-peek  !>
     :-  %pool-roots
@@ -126,9 +126,9 @@
     |=  =id:gol
     [id desc:(~(got by goals.pool) id)]
     ::
-      [%x %goal %kids owner=@ta birth=@da ~]
-    =/  =id:gol    [(slav %p owner.pole) (slav %da birth.pole)]
-    =/  =pin:gol   (got:idx-orm:gol index.store id)
+      [%x %goal %kids host=@ta name=@ta key=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
+    =/  =id:gol     [pin key.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
     =/  kids=(set id:gol)  kids:(~(got by goals.pool) id)
     :-  ~  :-  ~  :-  %goal-peek  !>
@@ -137,29 +137,50 @@
     |=  =id:gol
     [id desc:(~(got by goals.pool) id)]
     ::
-      [%x %pool %title owner=@ta birth=@da ~]
-    =/  =pin:gol   [%pin (slav %p owner.pole) (slav %da birth.pole)]
+      [%x %pool %title host=@ta name=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
     ``goal-peek+!>([%pool-title title.pool])  
     ::
-      [%x %pool %note owner=@ta birth=@da ~]
-    =/  =pin:gol   [%pin (slav %p owner.pole) (slav %da birth.pole)]
+      [%x %pool %note host=@ta name=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
     ``goal-peek+!>([%pool-note note.pool])  
     ::
-      [%x %goal %desc owner=@ta birth=@da ~]
-    =/  =id:gol    [(slav %p owner.pole) (slav %da birth.pole)]
-    =/  =pin:gol   (got:idx-orm:gol index.store id)
+      [%x %goal %desc host=@ta name=@ta key=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
+    =/  =id:gol     [pin key.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
     =/  =goal:gol  (~(got by goals.pool) id)
     ``goal-peek+!>([%goal-desc desc.goal])  
     ::
-      [%x %goal %note owner=@ta birth=@da ~]
-    =/  =id:gol    [(slav %p owner.pole) (slav %da birth.pole)]
-    =/  =pin:gol   (got:idx-orm:gol index.store id)
+      [%x %goal %note host=@ta name=@da key=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
+    =/  =id:gol     [pin key.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
     =/  =goal:gol  (~(got by goals.pool) id)
     ``goal-peek+!>([%goal-note note.goal])  
+    ::
+      [%x %goal %parent host=@ta name=@da key=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
+    =/  =id:gol     [pin key.pole]
+    =/  =pool:gol  (~(got by pools.store) pin)
+    =/  =goal:gol  (~(got by goals.pool) id)
+    ``goal-peek+!>([%uid par.goal])  
+    ::
+      [%x %goal %actionable host=@ta name=@da key=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
+    =/  =id:gol     [pin key.pole]
+    =/  =pool:gol  (~(got by pools.store) pin)
+    =/  =goal:gol  (~(got by goals.pool) id)
+    ``goal-peek+!>([%loob actionable.goal])  
+    ::
+      [%x %goal %complete host=@ta name=@da key=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
+    =/  =id:gol     [pin key.pole]
+    =/  =pool:gol  (~(got by pools.store) pin)
+    =/  =goal:gol  (~(got by goals.pool) id)
+    ``goal-peek+!>([%loob complete.goal])  
   ==
 ::
 ++  on-agent
@@ -178,7 +199,7 @@
     ::
       [%pool @ @ ~] 
     =/  =pin:gol  (de-pool-path:emot wire)
-    ?>  =(src.bowl owner.pin)
+    ?>  =(src.bowl host.pin)
     ?+    -.sign  (on-agent:def wire sign)
         %watch-ack
       ?~  p.sign  `this
@@ -194,7 +215,7 @@
       ::
         %fact
       ?>  =(p.cage.sign %goal-away-update)
-      =/  upd=update:v5:update  !<(update:v5:update q.cage.sign)
+      =/  upd=update:v5-1:update  !<(update:v5-1:update q.cage.sign)
       =^  cards  state
         abet:(handle-etch-pool-update:emot pin upd)
       [cards this]

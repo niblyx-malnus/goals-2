@@ -3,7 +3,7 @@
 :: step-wisdom vs. step-nomadism
 :: https://gist.github.com/philipcmonk/de5ba03b3ea733387fd13b758062cfce
 |%
-++  vzn   %5
+++  vzn   %'5-1'
 +$  card  card:agent:gall
 ::
 +$  state-5-1  [%'5-1' =store]
@@ -24,7 +24,7 @@
   ==
 ::
 ++  upgrade-io
-  |=  [new=state-5 =bowl:gall]
+  |=  [new=state-5-1 =bowl:gall]
   |^  ^-  (list card)
   :: TODO: Follow all pools and prompt others to refollow?
   ;:  weld
@@ -46,15 +46,16 @@
 ::
 ++  convert-to-latest
   |=  old=versioned-state
-  ^-  state-5
+  ^-  state-5-1
   ?-  -.old
     %0  $(old (convert-0-to-1 old))
     %1  $(old (convert-1-to-2 old))
     %2  $(old (convert-2-to-3 old))
     %3  $(old (convert-3-to-4 old))
     %4  $(old (convert-4-to-5 old))
+    %5  $(old (convert-5-to-5-1 old))
     ::
-      %5
+      %'5-1'
     %=    old
         pools.store
       %-  ~(gas by *pools)
@@ -62,8 +63,6 @@
       |=  [=pin =pool]
       [pin (inflate-pool:fl pool)]
     ==
-    ::
-    %'5-1'  !!
   ==
 ::
 :: Development states
@@ -71,7 +70,9 @@
 ++  convert-5-to-5-1
   |=  =state-5
   ^-  state-5-1
-  [%'5-1' +.state-5]
+  :: TODO: write conversion
+  ::
+  *state-5-1
 ::
 ++  convert-4-to-5
   |=  =state-4

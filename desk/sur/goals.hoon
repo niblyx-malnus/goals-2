@@ -2,7 +2,7 @@
 =,  v5:old-goals
 |%
 +$  pin  [host=ship name=term]
-+$  id   @tagid
++$  id   [=pin key=@ta] :: globally unique, always references source pool
 +$  nid  [?(%k %d) =id]
 +$  stock  (list [=id chief=ship]) :: lineage; youngest to oldest
 +$  ranks  (map ship id) :: map of ship to highest ranking goal id
@@ -26,7 +26,7 @@
       kickoff=node
       deadline=node
       complete=$~(%| ?)
-      actionable=$~(%| ?)
+      actionable=$~(%& ?)
       chief=ship
       spawn=(set ship)
   ==

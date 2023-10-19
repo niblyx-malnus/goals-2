@@ -19,8 +19,6 @@
   |=  [=id:gol chief=ship author=ship]
   ^-  goal:gol
   =|  =goal:gol
-  =.  owner.goal  owner.id
-  =.  birth.goal  birth.id
   =.  chief.goal  chief
   =.  author.goal  author
   :: 

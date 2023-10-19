@@ -3,36 +3,34 @@
 ::
 :: create unique goal id based on source ship and creation time
 ++  unique-id
-  |=  [own=ship now=@da]
+  |=  [=pin:gol now=@da]
   ^-  id:gol
-  ?.  (has:idx-orm:gol index [own now])
-    [own now]
+  =/  =goals:gol  goals:(~(got by pools) pin)
+  =/  =id:gol  [pin (scot %da now)]
+  ?.  (~(has by goals) id)
+    id
   $(now (add now ~s0..0001))
 ::
 :: creating a mapping from old ids to new ids
 :: to be used in the process of copying goals
 ++  new-ids
-  |=  [=(list id:gol) own=ship now=@da]
+  |=  [=(list id:gol) =pin:gol now=@da]
   ^-  (map id:gol id:gol)
   =/  idx  0
   =|  =(map id:gol id:gol)
   |-
   ?:  =(idx (lent list))
     map
-  =/  new-id  (unique-id own now)
+  =/  new-id  (unique-id pin now)
   %=  $
     idx  +(idx)
-    ::
-    :: temporary use of index for use by new-id
-    :: which is not given back by this function
-    index  (put:idx-orm:gol index new-id *pin:gol)
     map  (~(put by map) (snag idx list) new-id)
   ==
 ::
 ++  clone-goals
-  |=  [=goals:gol own=ship now=@da]
+  |=  [=goals:gol =pin:gol now=@da]
   ^-  [id-map=(map id:gol id:gol) =goals:gol]
-  =/  id-map  (new-ids ~(tap in ~(key by goals)) own now)
+  =/  id-map  (new-ids ~(tap in ~(key by goals)) pin now)
   :-  id-map
   |^
   %-  ~(gas by *goals:gol)

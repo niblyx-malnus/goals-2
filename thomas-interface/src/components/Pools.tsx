@@ -77,7 +77,7 @@ function Pools() {
 
   return (
     <div className="bg-gray-200 h-full flex justify-center items-center">
-      <div className="bg-blue-300 p-6 rounded shadow-md w-full">
+      <div className="bg-[#DFF7DC] p-6 rounded shadow-md w-full">
       <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">All Pools</h1>
         <div className="flex items-center mb-4">
           <input
@@ -106,7 +106,7 @@ function Pools() {
                 onDragStart={(e) => dragStart(e, index)}
                 onDragOver={(e) => onDragOver(e)}
                 onDrop={(e) => onDrop(e, index)}
-                to={`/pool/${pool.pin}`}
+                to={`/pool${pool.pin}`}
                 key={pool.pin}
               className="block text-current no-underline hover:no-underline"
               >

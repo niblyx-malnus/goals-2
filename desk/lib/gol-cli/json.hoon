@@ -83,17 +83,19 @@
     ==
   ++  unit-di  |=(jon=json ?~(jon ~ (some (di jon))))
   ++  unit-date  |=(jon=json ?~(jon ~ (some (date jon))))
-  ++  pin  (pe %pin goal-id)
-  ++  unit-id  |=(jon=json ?~(jon ~ (some (goal-id jon))))
-  ++  id  (ot ~[owner+ship birth+date])
-  ++  goal-id
-    %-  su
-    ;~  (glue fas)
-      ;~(pfix sig fed:ag)
-      %+  cook
-        |=(=tape (slav %da (crip tape)))
-      (star prn)
-    ==
+  ++  unit-id  |=(jon=json ?~(jon ~ (some (id jon))))
+  ++  id
+    %+  cu
+      |=  (pole knot)
+      ?>  ?=([host=@ta name=@ta key=@ta ~] +<)
+      [[(slav %p host) name] key]
+    pa
+  ++  pin
+    %+  cu
+      |=  (pole knot)
+      ?>  ?=([host=@ta name=@ta ~] +<)
+      [(slav %p host) name]
+    pa
   ::
   ++  set-ships  (as ship)
   ++  ship  (su fed:ag)
@@ -177,20 +179,9 @@
   |=  =store
   ^-  json
   %-  pairs
-  :~  [%index (enjs-index index.store)]
-      [%pools (enjs-pools pools.store)]
+  :~  [%pools (enjs-pools pools.store)]
       [%cache (enjs-pools cache.store)]
       [%local a+(turn order.local.store enjs-id)]
-  ==
-::
-++  enjs-index
-  =,  enjs:format
-  |=  =index
-  :-  %a  %+  turn  (tap:idx-orm index)
-  |=  [=id =pin] 
-  %-  pairs
-  :~  [%id (enjs-id id)]
-      [%pin (enjs-pin pin)]
   ==
   
 ++  enjs-pools
@@ -199,7 +190,7 @@
   :-  %a  %+  turn  ~(tap by pools) 
   |=  [=pin =pool] 
   %-  pairs
-  :~  [%pin (enjs-pin pin)]
+  :~  [%pin s+(pool-id pin)]
       [%pool (enjs-pool pool)]
   ==
 ::
@@ -452,23 +443,7 @@
       [%id (enjs-id +.nid)]
   ==
 ::
-++  enjs-pin
-  =,  enjs:format
-  |=  =pin
-  ^-  json
-  (enjs-id +.pin)
-::
-++  pool-id  |=(=pin (rap 3 (scot %p owner.pin) '/' (scot %da birth.pin) ~))
-++  goal-id  |=(=id (rap 3 (scot %p owner.id) '/' (scot %da birth.id) ~))
-::
-++  enjs-id
-  =,  enjs:format
-  |=  =id
-  ^-  json
-  %-  pairs
-  :~  [%owner (ship owner.id)]
-      [%birth s+(scot %da birth.id)]
-  ==
-::
+++  pool-id  |=(=pin (rap 3 '/' (scot %p host.pin) '/' name.pin ~))
+++  enjs-id  |=(=id s+(rap 3 (pool-id pin.id) '/' key.id ~))
 ++  enjs-tang  |=(=tang a+(turn tang tank:enjs:format))
 --

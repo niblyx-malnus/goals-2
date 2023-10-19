@@ -33,6 +33,8 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
     setIsEditing(false);
   };
 
+//  List View, Harvest View, Markdown
+
   const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
     setTempText(e.target.value);
   };
@@ -41,6 +43,14 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
     <div className="p-4 border rounded bg-white">
       {isEditing ? (
         <div>
+          <div className="flex justify-center mt-2 mb-4">
+            <button className="mr-2 bg-teal-100 pl-4 pr-4 p-2 rounded" onClick={handleSave}>
+              Save
+            </button>
+            <button className="bg-red-100 pl-4 pr-4 p-2 rounded" onClick={handleCancel}>
+              Cancel
+            </button>
+          </div>
           <textarea
             className="border w-full p-2 rounded"
             rows={10}
@@ -48,23 +58,17 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
             value={tempText}
             onChange={handleTextChange}
           />
-          <div className="flex mt-2">
-            <button className="mr-2 bg-blue-500 text-white p-2 rounded" onClick={handleSave}>
-              Save
-            </button>
-            <button className="bg-red-500 text-white p-2 rounded" onClick={handleCancel}>
-              Cancel
-            </button>
-          </div>
         </div>
       ) : (
         <div>
+          <div className="flex justify-center">
+            <button className="bg-gray-300 p-2 pl-4 pr-4 rounded mt-2" onClick={handleEdit}>
+              Edit
+            </button>
+          </div>
           <div className="markdown-body p-6">
             <ReactMarkdown children={markdownText} />
           </div>
-          <button className="bg-green-500 text-white p-2 rounded mt-2" onClick={handleEdit}>
-            Edit
-          </button>
         </div>
       )}
     </div>

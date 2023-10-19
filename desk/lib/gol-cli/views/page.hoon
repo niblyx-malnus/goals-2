@@ -9,7 +9,7 @@
     %pool  [%pool title note]:(~(got by pools.store) pin.type.parm)
     ::
       %goal
-    =/  =pin:gol  (got:idx-orm:gol index.store id.type.parm)
+    =,  pin=pin.id.type.parm
     =/  pool  (~(got by pools.store) pin)
     =.  goals.pool  (unify-tags goals.pool)
     =/  =goal:gol  (~(got by goals.pool) id.type.parm)
@@ -19,7 +19,7 @@
 ++  view-diff
   |=  $:  =parm:page:vyu
           =data:page:vyu
-          [=pin:gol upd=update:v5:update]
+          [=pin:gol upd=update:v5-1:update]
       ==
   ^-  (unit diff:page:vyu)
   =;  diff=(unit diff:page:vyu)
@@ -88,7 +88,7 @@
         %goal
       %+  frond  %goal
       %-  pairs
-      :~  [%par-pool (enjs-pin par-pool.data)]
+      :~  [%par-pool s+(pool-id par-pool.data)]
           [%par-goal ?~(par-goal.data ~ (enjs-id u.par-goal.data))]
           [%desc s+desc.data]
           [%note s+note.data]
@@ -102,7 +102,7 @@
     %-  pairs
     :~  :-  %hed
         %-  pairs
-        :~  [%pin (enjs-pin pin.diff)]
+        :~  [%pin s+(pool-id pin.diff)]
         ==
         :-  %tel
         %+  frond  %page
@@ -120,7 +120,7 @@
             %goal
           %+  frond  %goal
           %-  pairs
-          :~  [%par-pool (enjs-pin par-pool.data)]
+          :~  [%par-pool s+(pool-id par-pool.data)]
               [%par-goal ?~(par-goal.data ~ (enjs-id u.par-goal.data))]
               [%desc s+desc.data]
               [%note s+note.data]
@@ -139,7 +139,7 @@
     ^-  json
     ?-  -.type
       %main  (frond %main ~)
-      %pool  (frond %pool (enjs-pin pin.type))
+      %pool  (frond %pool s+(pool-id pin.type))
       %goal  (frond %goal (enjs-id id.type))
     ==
   --

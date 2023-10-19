@@ -62,8 +62,7 @@
     goals
     ::
       %goal
-    =/  =pin:gol  (got:idx-orm:gol index.store id.type.parm)
-    =/  pool  (~(got by pools.store) pin)
+    =/  pool  (~(got by pools.store) pin.id.type.parm)
     =/  tv  ~(. gol-cli-traverse goals.pool)
     =/  nd  ~(. gol-cli-node goals.pool)
     ::
@@ -100,7 +99,7 @@
 ++  view-diff
   |=  $:  =parm:list-view:vyu
           =data:list-view:vyu
-          [=pin:gol upd=update:v5:update]
+          [=pin:gol upd=update:v5-1:update]
       ==
   ^-  (unit diff:list-view:vyu)
   =;  diff=(unit diff:list-view:vyu)
@@ -121,8 +120,7 @@
 ++  unify-tags
   |=  =id:gol
   ^-  goal:gol
-  =/  =pin:gol  (got:idx-orm:gol index.store id)
-  =/  =pool:gol  (~(got by pools.store) pin)
+  =/  =pool:gol  (~(got by pools.store) pin.id)
   =/  =goal:gol  (~(got by goals.pool) id)
   %=    goal
       tags
@@ -134,13 +132,12 @@
 ++  id-to-pack
   |=  =id:gol
   ^-  pack:list-view:vyu
-  =/  =pin:gol  (got:idx-orm:gol index.store id)
-  =/  =pool:gol  (~(got by pools.store) pin)
+  =/  =pool:gol  (~(got by pools.store) pin.id)
   =/  pool-role=(unit ?(%owner pool-role:gol))
-    ?:  =(our.bowl owner.pin)  (some %owner)
+    ?:  =(our.bowl host.pin.id)  (some %owner)
     (~(got by perms.pool) our.bowl)
   =/  =goal:gol  (unify-tags id)
-  :*  pin
+  :*  pin.id
       pool-role
       par.goal
       kids.goal
@@ -178,8 +175,7 @@
           tags=(set tag:gol)
       ==
   ^-  ?
-  =/  =pin:gol   (got:idx-orm:gol index.store id)
-  =/  =pool:gol  (~(got by pools.store) pin)
+  =/  =pool:gol  (~(got by pools.store) pin.id)
   =/  =goal:gol  (~(got by goals.pool) id)
   ?-  method
     %any  !=(~ (~(int in tags) tags.goal))
@@ -227,7 +223,7 @@
     ^-  json
     %-  pairs
     :~  [%id (enjs-id:j id)]
-        [%pin (enjs-pin:j pin.pack)]
+        [%pin s+(pool-id:j pin.pack)]
         [%pool-role ?~(pool-role.pack ~ s+u.pool-role.pack)]
         [%goal (enjs-goal:j (convert-to-goal pack))]
     ==
@@ -272,7 +268,7 @@
     %-  pairs
     :~  :-  %hed
         %-  pairs
-        :~  [%pin (enjs-pin:j pin.diff)]
+        :~  [%pin s+(pool-id:j pin.diff)]
         ==
         :-  %tel
         %+  frond  %list-view
@@ -298,7 +294,7 @@
     ^-  json
     ?-    -.type
       %main  (frond %main ~)
-      %pool  (frond %pool (enjs-pin:j pin.type))
+      %pool  (frond %pool s+(pool-id:j pin.type))
       ::
         %goal
       %+  frond  %goal

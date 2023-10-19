@@ -18,8 +18,7 @@
     (~(got by pools.store) pin.type.parm)
     ::
       %goal
-    =/  =pin:gol
-      (got:idx-orm:gol index.store id.type.parm)
+    =,  pin=pin.id.type.parm
     =/  =pool:gol   (~(got by pools.store) pin)
     =/  tv  ~(. gol-cli-traverse goals.pool)
     =/  descendents=(set id:gol)
@@ -62,7 +61,7 @@
 ++  view-diff
   |=  $:  =parm:tree:vyu
           =data:tree:vyu
-          [=pin:gol upd=update:v5:update]
+          [=pin:gol upd=update:v5-1:update]
       ==
   ^-  (unit diff:tree:vyu)
   =;  diff=(unit diff:tree:vyu)
@@ -113,12 +112,12 @@
   ++  view-diff
     |=  =diff:tree:vyu
     ^-  json
-    =/  upd=update:v5:update  +.diff
+    =/  upd=update:v5-1:update  +.diff
     =/  upd  +.upd  :: ignore version
     %-  pairs
     :~  :-  %hed
         %-  pairs
-        :~  [%pin (enjs-pin pin.diff)]
+        :~  [%pin s+(pool-id pin.diff)]
         ==
         :-  %tel
         %+  frond  -.upd
@@ -126,7 +125,7 @@
           %poke-error  (frond %tang (enjs-tang tang.upd))
             %spawn-goal
           %-  pairs
-          :~  [%pin (enjs-pin pin.diff)]
+          :~  [%pin s+(pool-id pin.diff)]
               [%pex (enjs-pex pex.upd)]
               [%nex (enjs-nex nex.upd)]
               [%id (enjs-id id.upd)]
@@ -135,7 +134,7 @@
           ::
             %waste-goal
           %-  pairs
-          :~  [%pin (enjs-pin pin.diff)]
+          :~  [%pin s+(pool-id pin.diff)]
               [%pex (enjs-pex pex.upd)]
               [%nex (enjs-nex nex.upd)]
               [%id (enjs-id id.upd)]
@@ -144,7 +143,7 @@
           ::
             %cache-goal
           %-  pairs
-          :~  [%pin (enjs-pin pin.diff)]
+          :~  [%pin s+(pool-id pin.diff)]
               [%pex (enjs-pex pex.upd)]
               [%nex (enjs-nex nex.upd)]
               [%id (enjs-id id.upd)]
@@ -153,7 +152,7 @@
           ::
           %renew-goal  
           %-  pairs
-          :~  [%pin (enjs-pin pin.diff)]
+          :~  [%pin s+(pool-id pin.diff)]
               [%pex (enjs-pex pex.upd)]
               [%id (enjs-id id.upd)]
               [%ren (enjs-goals ren.upd)]
@@ -161,7 +160,7 @@
           ::
           %trash-goal
           %-  pairs
-          :~  [%pin (enjs-pin pin.diff)]
+          :~  [%pin s+(pool-id pin.diff)]
               [%pex (enjs-pex pex.upd)]
               [%id (enjs-id id.upd)]
               [%tas a+(turn ~(tap in tas.upd) enjs-id)]
@@ -169,10 +168,10 @@
           ::
           %spawn-pool  (frond %pool (enjs-pool pool.upd))
           ::
-          %cache-pool  (frond %pin (enjs-pin pin.upd))
+          %cache-pool  (frond %pin s+(pool-id pin.upd))
           ::
             %renew-pool 
-          (pairs ~[[%pin (enjs-pin pin.upd)] [%pool (enjs-pool pool.upd)]])
+          (pairs ~[[%pin s+(pool-id pin.upd)] [%pool (enjs-pool pool.upd)]])
           ::
           %waste-pool  ~
           %trash-pool  ~
@@ -276,7 +275,7 @@
     ^-  json
     ?-  -.type
       %main  (frond %main ~)
-      %pool  (frond %pool (enjs-pin pin.type))
+      %pool  (frond %pool s+(pool-id pin.type))
       %goal  (frond %goal (enjs-id id.type))
     ==
   --

@@ -5,7 +5,7 @@
 ::
 |_  =store:gol
 ++  etch
-  |=  [=pin:gol upd=update:v5:update]
+  |=  [=pin:gol upd=update:v5-1:update]
   ^-  store:gol
   ?-    +<.upd
     %poke-error  store  :: no-op on poke-error update
@@ -17,20 +17,17 @@
       ::
       %spawn-goal
     =/  p=pool:gol   (pile pin)
-    =.  index.store  (put:idx-orm:gol index.store id.upd pin)
     =.  pools.store  (~(put by pools.store) pin (pool-etch p upd))
     store(order.local fix-order)
     ::
       %waste-goal
     =/  p=pool:gol   (pile pin)
-    =.  index.store  (gus-idx-orm index.store ~(tap in waz.upd))
     =.  pools.store  (~(put by pools.store) pin (pool-etch p upd))
     store(order.local fix-order)
     ::
       %trash-goal
     =/  p=pool:gol   (pile pin)
     =/  prog         ~(tap in (~(progeny tv cache.p) id.upd))
-    =.  index.store  (gus-idx-orm index.store prog)
     =.  pools.store  (~(put by pools.store) pin (pool-etch p upd))
     store(order.local fix-order)
     ::
@@ -74,7 +71,6 @@
     =.  pools.store  (~(put by pools.store) pin pool)
     =/  pinds=(list [id:gol pin:gol])
       (turn (coals-keys pin) |=(=id:gol [id pin]))
-    =.  index.store  (gas:idx-orm:gol index.store pinds)
     store(order.local fix-order)
   ::
   ++  cache-pool
@@ -96,20 +92,18 @@
   ++  waste-pool
     |=  =pin:gol
     ^-  store:gol
-    =.  index.store  (gus-idx-orm index.store (coals-keys pin))
     =.  pools.store  (~(del by pools.store) pin)
     store(order.local fix-order)
   ::
   ++  trash-pool
     |=  =pin:gol
     ^-  store:gol
-    =.  index.store  (gus-idx-orm index.store (coals-keys pin))
     =.  cache.store  (~(del by cache.store) pin)
     store(order.local fix-order)
   --
 ::
 ++  pool-etch
-  |=  [p=pool:gol upd=update:v5:update]
+  |=  [p=pool:gol upd=update:v5-1:update]
   ^-  pool:gol
   |^
   ?+    +.upd  !!
@@ -384,10 +378,4 @@
       (inflate-pool:fl p)  :: keeping track of complete/total
     --
   --
-::
-++  gus-idx-orm
-  |=  [=index:gol ids=(list id:gol)]
-  ^-  index:gol
-  |-  ?~  ids  index
-  $(ids t.ids, index +:(del:idx-orm:gol index i.ids))
 --

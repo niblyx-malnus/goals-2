@@ -291,7 +291,7 @@
     %=  gine
       init
         |=  =nid:gol
-        %-  ~(gas by *(set id:gol))
+        %-  ~(gas in *(set id:gol))
         %+  murn  ~(tap in (iflo nid))
         |=  =nid:gol
         ?.  =(kd -.nid)

@@ -4,10 +4,10 @@ import MarkdownEditor from './MarkdownEditor';
 import api from '../api';
 import '../global.css';
 
-type Goal = { id: string, description: string }; // Type for pool object
+type Goal = { id: string, description: string };
 
-function Pool({ host, date }: { host: any; date: any; }) {
-  const poolId = `${host}/${date}`;
+function Pool({ host, name }: { host: any; name: any; }) {
+  const poolId = `/${host}/${name}`;
   const [roots, setRoots] = useState<Goal[]>([]);
   const [poolTitle, setPoolTitle] = useState<string>('');
   const [poolNote, setPoolNote] = useState<string>('');
@@ -35,8 +35,8 @@ function Pool({ host, date }: { host: any; date: any; }) {
   const handleAddTitle = async () => {
     if (newDescription.trim() !== '') {
       try {
-        await api.spawnGoal(`${host}/${date}`, null, newDescription, true);
-        const updatedRoots = await api.getPoolRoots(`${host}/${date}`);
+        await api.spawnGoal(`/${host}/${name}`, null, newDescription, true);
+        const updatedRoots = await api.getPoolRoots(`/${host}/${name}`);
         setRoots(updatedRoots);
       } catch (error) {
         console.error(error);
@@ -94,19 +94,13 @@ function Pool({ host, date }: { host: any; date: any; }) {
 
   return (
     <div className="bg-gray-200 h-full flex justify-center items-center">
-      <div className="bg-blue-300 p-6 rounded shadow-md w-full">
-      <Link to="/pools" className="mr-2">
-        <h2 className="text-blue-800">All Pools</h2>
-      </Link>
-      <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">
-        Pool: {poolTitle}
-      </h1>
-      <div className="p-6 markdown-container all:unstyled overflow-y-auto h-[50vh]">
-        <MarkdownEditor
-          initialMarkdown={poolNote}
-          onSave={saveMarkdown}
-        />
-      </div>
+      <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full">
+        <a href="/pools" className="mr-2 flex justify-end">
+          <h2 className="text-blue-800">All Pools</h2>
+        </a>
+        <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">
+          {poolTitle}
+        </h1>
         <div className="pt-6 flex items-center mb-4">
           <input
             type="text"
@@ -134,7 +128,7 @@ function Pool({ host, date }: { host: any; date: any; }) {
                 onDragStart={(e) => dragStart(e, index)}
                 onDragOver={(e) => onDragOver(e)}
                 onDrop={(e) => onDrop(e, index)}
-                to={`/goal/${root.id}`}
+                to={`/goal${root.id}`}
                 key={root.id}
               className="block text-current no-underline hover:no-underline"
               >
@@ -146,6 +140,12 @@ function Pool({ host, date }: { host: any; date: any; }) {
             </>
           ))}
         </ul>
+        <div className="p-6 markdown-container all:unstyled overflow-y-auto">
+          <MarkdownEditor
+            initialMarkdown={poolNote}
+            onSave={saveMarkdown}
+          />
+        </div>
       </div>
     </div>
   );

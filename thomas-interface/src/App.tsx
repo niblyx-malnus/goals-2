@@ -15,13 +15,13 @@ declare global {
 window.api = api;
 
 function PoolPageWrapper() {
-  let { host, date } = useParams();
-  return <PoolPage host={host} date={date} />;
+  let { host, name } = useParams();
+  return <PoolPage host={host} name={name} />;
 }
 
 function GoalPageWrapper() {
-  let { host, date } = useParams();
-  return <GoalPage host={host} date={date} />;
+  let { host, name, goalKey } = useParams();
+  return <GoalPage host={host} name={name} goalKey={goalKey} />;
 }
 
 function App() {
@@ -32,8 +32,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Pools />} />
           <Route path="/pools" element={<Pools />} />
-          <Route path="/pool/:host/:date" element={<PoolPageWrapper />} />
-          <Route path="/goal/:host/:date" element={<GoalPageWrapper />} />
+          <Route path="/pool/:host/:name" element={<PoolPageWrapper />} />
+          <Route path="/goal/:host/:name/:goalKey" element={<GoalPageWrapper />} />
         </Routes>
       </div>
     </Router>

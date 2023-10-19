@@ -27,7 +27,7 @@
       %+  turn  roots.pyk
       |=  [=id desc=@t] 
       %-  pairs
-      :~  [%id s+(goal-id id)]
+      :~  [%id (enjs-id id)]
           [%description s+desc]
       ==
       ::
@@ -36,7 +36,7 @@
       %+  turn  kids.pyk
       |=  [=id desc=@t] 
       %-  pairs
-      :~  [%id s+(goal-id id)]
+      :~  [%id (enjs-id id)]
           [%description s+desc]
       ==
       ::
@@ -44,6 +44,8 @@
       %pool-note   s+note.pyk
       %goal-desc   s+desc.pyk
       %goal-note   s+note.pyk
+      %uid         ?~(id.pyk ~ (enjs-id u.id.pyk))
+      %loob        b+loob.pyk
     ==
   --
 ++  grab

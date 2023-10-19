@@ -10,7 +10,7 @@
 :: Convert an update into a diff for a given view
 ::
 ++  view-diff
-  |=  [=view:vyu upd=[pin:gol update:v5:update]]
+  |=  [=view:vyu upd=[pin:gol update:v5-1:update]]
   ^-  (unit diff:vyu)
   ?-  -.view
     %tree       (bind (view-diff:tree parm.view data.view upd) (lead %tree))

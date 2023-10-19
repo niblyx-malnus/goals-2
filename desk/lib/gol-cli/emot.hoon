@@ -3,7 +3,7 @@
     gol-cli-etch, gol-cli-view, fl=gol-cli-inflater, gol-cli-goals,
     gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5:gs =views:vyu]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-1:gs =views:vyu]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -17,38 +17,37 @@
 ::
 ++  cools  (~(uni by pools.store) cache.store)
 ++  pile  |=(=pin:gol (~(got by cools) pin))
-++  pind  |=(=id:gol `pin:gol`(got:idx-orm:gol index.store id))
 ::
 ++  en-pool-path
-  |=(=pin:gol `path`/pool/(scot %p owner.pin)/(scot %da birth.pin))
+  |=(=pin:gol `path`/pool/(scot %p host.pin)/[name.pin])
 ::
 ++  de-pool-path
-  |=  =path
+  |=  =(pole knot)
   ^-  pin:gol
-  ?>  ?=([%pool @ta @ta ~] path)
-  [%pin (slav %p i.t.path) (slav %da i.t.t.path)]
+  ?>  ?=([%pool host=@ta name=@ta ~] pole)
+  [(slav %p host.pole) name.pole]
 ::
 ++  en-relay-wire
   |=  [=pin:gol =term]
   ^-  wire
-  /away/(scot %p owner.pin)/(scot %da birth.pin)/[term]
+  /away/(scot %p host.pin)/[name.pin]/[term]
 ::
 ++  de-relay-wire
   |=  =(pole knot)
   ^-  [pin:gol term]
-  ?>  ?=([%away p=@ta da=@ta term=@ta ~] pole)
-  [[%pin (slav %p p.pole) (slav %da da.pole)] term.pole]
+  ?>  ?=([%away host=@ta name=@ta term=@ta ~] pole)
+  [[(slav %p host.pole) name.pole] term.pole]
 ::
 ++  relay
   |=  [=pin:gol axn=action:act]
   ^-  _this
   ?>  =(src our):bowl
   =/  =wire  (en-relay-wire pin -.axn)
-  =/  =dock  [owner.pin dap.bowl]
+  =/  =dock  [host.pin dap.bowl]
   (emit %pass wire %agent dock %poke goal-action+!>(axn))
 ::
 ++  views-emit
-  |=  [=pin:gol upd=update:v5:update]
+  |=  [=pin:gol upd=update:v5-1:update]
   ^-  _this
   =/  view-list=(list [=vid:vyu weiv=view:vyu])
      %+  turn  ~(tap by views)
@@ -66,7 +65,7 @@
   ==
 ::
 ++  away-emit
-  |=  [=pin:gol upd=update:v5:update]
+  |=  [=pin:gol upd=update:v5-1:update]
   ^-  _this
   =/  path  (en-pool-path pin)
   (emit %give %fact ~[path] goal-away-update+!>(upd))
@@ -85,7 +84,7 @@
   (some [%give %kick ~[path] `ship])
 ::
 ++  send-away-update
-  |=  [=pin:gol upd=update:v5:update]
+  |=  [=pin:gol upd=update:v5-1:update]
   ^-  _this
   =.  this  (views-emit pin upd)
   =.  this  (away-emit:this pin upd)
@@ -100,8 +99,9 @@
 ++  unique-pin
   |=  [own=ship now=@da]
   ^-  pin:gol
-  ?.  (~(has by pools.store) [%pin own now])
-    [%pin own now]
+  =/  =pin:gol  [own (scot %da now)]
+  ?.  (~(has by pools.store) pin)
+    pin
   $(now (add now ~s0..0001))
 ::
 ++  spawn-pool
@@ -109,9 +109,9 @@
   ^-  [pin:gol pool:gol]
   =/  pin  (unique-pin own now)
   =|  =pool:gol
-  =:  owner.pool  owner.pin
-      birth.pool  birth.pin
-      title.pool  title
+  =:  owner.pool    host.pin
+      birth.pool    now
+      title.pool    title
       creator.pool  own
     ==
   [pin pool]
@@ -121,8 +121,8 @@
   ^-  [pin:gol pool:gol]
   =/  old-pool  (~(got by pools.store) old-pin)
   =/  [=pin:gol =pool:gol]  (spawn-pool title own now)
-  =.  pool  pool(creator owner.old-pin)
-  =.  pool  pool(goals goals:(clone-goals:gols goals.old-pool own now))
+  =.  pool  pool(creator host.old-pin)
+  =.  pool  pool(goals goals:(clone-goals:gols goals.old-pool pin now))
   [pin (inflate-pool:fl pool)]
 ::
 :: ============================================================================
@@ -243,8 +243,8 @@
   |=  [=wire =tang]
   ^-  _this
   =/  [=pin:gol =term]  (de-relay-wire wire)
-  ?>  =(src.bowl owner.pin)
-  =/  upd=update:v5:update  [vzn %poke-error tang]
+  ?>  =(src.bowl host.pin)
+  =/  upd=update:v5-1:update  [vzn %poke-error tang]
   (views-emit pin upd)
 ::
 ++  handle-watch
@@ -253,14 +253,14 @@
   =/  =pin:gol  (de-pool-path path)
   =/  pool      (~(got by pools.store) pin)
   ?>  (~(has by perms.pool) src.bowl)
-  =/  way=update:v5:update  [vzn spawn-pool+pool]
+  =/  way=update:v5-1:update  [vzn spawn-pool+pool]
   (emit %give %fact ~ goal-away-update+!>(way))
 ::
 ++  handle-pool-watch-nack
   |=  =pin:gol
   ^-  _this
   :: TODO: purge goals from local, index, and order
-  =|  upd=(unit update:v5:update)
+  =|  upd=(unit update:v5-1:update)
   =?  upd  (~(has by pools.store) pin)
     (some [vzn %waste-pool ~])
   =?  upd  (~(has by cache.store) pin)
@@ -287,7 +287,7 @@
   (emit:this %give %fact ~[/ask] goal-say+!>([view-path data]))
 ::
 ++  handle-etch-pool-update
-  |=  [=pin:gol upd=update:v5:update]
+  |=  [=pin:gol upd=update:v5-1:update]
   ?.  =(vzn -.upd)  :: assert updates are correct version
     ~|("incompatible version" !!)
   =.  store  (etch:etch pin upd)
@@ -304,85 +304,82 @@
     ::
       %spawn-goal
     =+  axn
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
-    =/  =id:gol  (unique-id:gols [our now]:bowl)
+    =/  =id:gol  (unique-id:gols pin now.bowl)
     =/  new=pool:gol  abet:(spawn-goal:(apex:pl old) id upid mod)
     =/  =goal:gol  (~(got by goals.new) id)
     =.  goal  goal(desc desc)
     =.  goals.new  (~(put by goals.new) id goal)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %spawn-goal pex nex.fd id goal]
+    =/  upd=update:v5-1:update  [vzn %spawn-goal pex nex.fd id goal]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store        (~(put by pools.store) pin new)
-    =.  index.store        (put:idx-orm:gol index.store id pin)
     =.  order.local.store  fix-order:etch
     (send-away-update pin upd)
     ::
       %cache-goal
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(cache-goal:(apex:pl old) id mod)
     =/  gdiff  (full-diff goals.old goals.new)
     =/  cdiff  (full-diff goals.old cache.new)
     =/  nex  (~(uni by nex.gdiff) nex.cdiff)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %cache-goal pex nex id ~(key by waz.gdiff)]
+    =/  upd=update:v5-1:update  [vzn %cache-goal pex nex id ~(key by waz.gdiff)]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %renew-goal
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(renew-goal:(apex:pl old) id mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %renew-goal pex id pon.fd]
+    =/  upd=update:v5-1:update  [vzn %renew-goal pex id pon.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %trash-goal
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?:  (~(has by goals.old) id)
       =/  new=pool:gol  abet:(waste-goal:(apex:pl old) id mod)
       =/  fd  (full-diff goals.old goals.new)
       =/  =pex:gol  trace.new
-      =/  upd=update:v5:update  [vzn %waste-goal pex nex.fd id ~(key by waz.fd)]
+      =/  upd=update:v5-1:update  [vzn %waste-goal pex nex.fd id ~(key by waz.fd)]
       ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
       =.  pools.store        (~(put by pools.store) pin new)
-      =.  index.store        (gus-idx-orm:etch index.store ~(tap in ~(key by waz.fd)))
       =.  order.local.store  fix-order:etch
       (send-away-update pin upd)
     =/  new=pool:gol  abet:(trash-goal:(apex:pl old) id mod)
     =/  diff  (diff cache.old cache.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %trash-goal pex id hep.diff]
+    =/  upd=update:v5-1:update  [vzn %trash-goal pex id hep.diff]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store        (~(put by pools.store) pin new)
     =/  prog               ~(tap in (~(progeny tv cache.old) id))
-    =.  index.store        (gus-idx-orm:etch index.store prog)
     =.  order.local.store  fix-order:etch
     (send-away-update pin upd)
     ::
       %move
     =+  axn
-    =/  =pin:gol  (pind cid)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.cid
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(move:(apex:pl old) cid upid mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %pool-nexus %yoke pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %pool-nexus %yoke pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store        (~(put by pools.store) pin new)
     =.  order.local.store  fix-order:etch
@@ -390,39 +387,40 @@
     ::
       %yoke
     =+  axn
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(plex-sequence:(apex:pl old) yoks mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %pool-nexus %yoke pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %pool-nexus %yoke pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store        (~(put by pools.store) pin new)
     =.  order.local.store  fix-order:etch
     (send-away-update pin upd)
     ::
       %mark-actionable
+    ~&  %marking-actionable
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(mark-actionable:(apex:pl old) id mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %goal-dates pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %goal-dates pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %mark-complete
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(mark-complete:(apex:pl old) id mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %goal-dates pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %goal-dates pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     =.  this  (send-away-update pin upd)
@@ -437,59 +435,59 @@
     ::
       %unmark-actionable
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(unmark-actionable:(apex:pl old) id mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %goal-dates pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %goal-dates pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %unmark-complete
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(unmark-complete:(apex:pl old) id mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %goal-dates pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %goal-dates pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %set-kickoff
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(set-kickoff:(apex:pl old) id kickoff mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %goal-dates pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %goal-dates pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %set-deadline
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol  abet:(set-deadline:(apex:pl old) id deadline mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %goal-dates pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %goal-dates pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %update-pool-perms
     =+  axn
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     |^
     =/  new=pool:gol
@@ -502,7 +500,7 @@
       ==
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %pool-perms pex nex.fd perms.new]
+    =/  upd=update:v5-1:update  [vzn %pool-perms pex nex.fd perms.new]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
@@ -524,30 +522,30 @@
     ::
       %update-goal-perms
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  new=pool:gol
       =/  pore  (set-chief:(apex:pl old) id chief rec mod)
       abet:(replace-spawn-set:pore id spawn mod)
     =/  fd  (full-diff goals.old goals.new)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %goal-perms pex nex.fd]
+    =/  upd=update:v5-1:update  [vzn %goal-perms pex nex.fd]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %reorder-young
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-goal-edit-perm:(apex:pl old) id mod)
     ?>  =((sy young) (~(young nd goals.old) id))
     =/  goal  (~(got by goals.old) id)
     =.  young.goal  (en-virt:fl goal young)
     =/  new=pool:gol  old(goals (~(put by goals.old) id goal))
-    =/  upd=update:v5:update
+    =/  upd=update:v5-1:update
       :*  vzn  %goal-young  id
           young.goal
           young-by-precedence.goal
@@ -560,78 +558,78 @@
     ::
       %reorder-roots
     =+  axn
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-pool-edit-perm:(apex:pl old) mod)
     ?>  =((sy roots) (sy (~(waif-goals nd goals.old))))
     =/  new=pool:gol  old(roots.trace roots)
     =/  =pex:gol  trace.new
-    =/  upd=update:v5:update  [vzn %goal-roots pex]
+    =/  upd=update:v5-1:update  [vzn %goal-roots pex]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %edit-goal-desc
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     =/  old=pool:gol  (pile pin)
     ?>  (check-goal-edit-perm:(apex:pl old) id mod)
     =/  goal  (~(got by goals.old) id)
     =/  new=pool:gol  old(goals (~(put by goals.old) id goal(desc desc)))
-    =/  upd=update:v5:update  [vzn %goal-hitch id %desc desc]
+    =/  upd=update:v5-1:update  [vzn %goal-hitch id %desc desc]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %edit-goal-note
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-goal-edit-perm:(apex:pl old) id mod)
     =/  goal  (~(got by goals.old) id)
     =/  new=pool:gol  old(goals (~(put by goals.old) id goal(note note)))
-    =/  upd=update:v5:update  [vzn %goal-hitch id %note note]
+    =/  upd=update:v5-1:update  [vzn %goal-hitch id %note note]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %add-goal-tag
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?<  private.tag
     ?>  (check-goal-edit-perm:(apex:pl old) id mod)
     =/  goal  (~(got by goals.old) id)
     =.  tags.goal  (~(put in tags.goal) tag)
     =/  new=pool:gol  old(goals (~(put by goals.old) id goal))
-    =/  upd=update:v5:update  [vzn %goal-hitch id %add-tag tag]
+    =/  upd=update:v5-1:update  [vzn %goal-hitch id %add-tag tag]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %del-goal-tag
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?<  private.tag
     ?>  (check-goal-edit-perm:(apex:pl old) id mod)
     =/  goal  (~(got by goals.old) id)
     =.  tags.goal  (~(del in tags.goal) tag)
     =/  new=pool:gol  old(goals (~(put by goals.old) id goal))
-    =/  upd=update:v5:update  [vzn %goal-hitch id %del-tag tag]
+    =/  upd=update:v5-1:update  [vzn %goal-hitch id %del-tag tag]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %put-goal-tags
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (~(all in tags) |=(=tag:gol !private.tag)) 
     ?>  (check-goal-edit-perm:(apex:pl old) id mod)
@@ -640,7 +638,7 @@
     :: incorporate private tags into update...
     =/  local-tags=(set tag:gol)
       ?~(get=(~(get by goals.local.store) id) ~ tags.u.get)
-    =/  upd=update:v5:update
+    =/  upd=update:v5-1:update
       [vzn %goal-hitch id %put-tags (~(uni in tags) local-tags)]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -648,7 +646,7 @@
     ::
       %put-private-tags
     =+  axn
-    =/  =pin:gol  (pind id)
+    =/  =pin:gol  pin.id
     ?>  =(src our):bowl
     ?>  (~(all in tags) |=(=tag:gol private.tag)) 
     =/  gl=goal-local:gol
@@ -659,14 +657,14 @@
     =.  goals.local.store  (~(put by goals.local.store) id gl)
     =/  =pool:gol  (~(got by pools.store) pin)
     =/  =goal:gol  (~(got by goals.pool) id)
-    =/  upd=update:v5:update
+    =/  upd=update:v5-1:update
       [vzn %goal-hitch id %put-tags (~(uni in tags) tags.goal)]
     (views-emit pin upd)
     ::
       %add-field-data
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-goal-edit-perm:(apex:pl old) id mod)
     ?>  (~(has by fields.old) field)
@@ -675,62 +673,62 @@
     =/  goal  (~(got by goals.old) id)
     =.  fields.goal  (~(put by fields.goal) field field-data)
     =/  new=pool:gol  old(goals (~(put by goals.old) id goal))
-    =/  upd=update:v5:update  [vzn %goal-hitch id %add-field-data field field-data]
+    =/  upd=update:v5-1:update  [vzn %goal-hitch id %add-field-data field field-data]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %del-field-data
     =+  axn
-    =/  =pin:gol  (pind id)
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    =/  =pin:gol  pin.id
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-goal-edit-perm:(apex:pl old) id mod)
     =/  goal  (~(got by goals.old) id)
     =.  fields.goal  (~(del by fields.goal) field)
     =/  new=pool:gol  old(goals (~(put by goals.old) id goal))
-    =/  upd=update:v5:update  [vzn %goal-hitch id %del-field-data field]
+    =/  upd=update:v5-1:update  [vzn %goal-hitch id %del-field-data field]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     :: 
       %edit-pool-title
     =+  axn
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-pool-edit-perm:(apex:pl old) mod)
     =/  new=pool:gol  old(title title)
-    =/  upd=update:v5:update  [vzn %pool-hitch %title title]
+    =/  upd=update:v5-1:update  [vzn %pool-hitch %title title]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     :: 
       %edit-pool-note
     =+  axn
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-pool-edit-perm:(apex:pl old) mod)
     =/  new=pool:gol  old(note note)
-    =/  upd=update:v5:update  [vzn %pool-hitch %note note]
+    =/  upd=update:v5-1:update  [vzn %pool-hitch %note note]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %add-field-type
     =+  axn
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-pool-edit-perm:(apex:pl old) mod)
     ?<  (~(has by fields.old) field) 
     =/  new=pool:gol  old(fields (~(put by fields.old) field field-type))
-    =/  upd=update:v5:update  [vzn %pool-hitch %add-field-type field field-type]
+    =/  upd=update:v5-1:update  [vzn %pool-hitch %add-field-type field field-type]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
     ::
       %del-field-type
     =+  axn
-    ?.  =(owner.pin our.bowl)  (relay pin axn)
+    ?.  =(host.pin our.bowl)  (relay pin axn)
     =/  old=pool:gol  (pile pin)
     ?>  (check-pool-edit-perm:(apex:pl old) mod)
     =/  new=pool:gol
@@ -743,7 +741,7 @@
         ^-  [id:gol goal:gol]
         [id goal(fields (~(del by fields.goal) field))]
       ==
-    =/  upd=update:v5:update  [vzn %pool-hitch %del-field-type field]
+    =/  upd=update:v5-1:update  [vzn %pool-hitch %del-field-type field]
     ?.  (check-equivalence new (pool-etch:etch old upd))  ~|("non-equivalent-update" !!)
     =.  pools.store  (~(put by pools.store) pin new)
     (send-away-update pin upd)
@@ -752,7 +750,7 @@
     =+  axn
     ?>  =(src our):bowl
     =/  [=pin:gol =pool:gol]  (spawn-pool title [src now]:bowl)
-    =/  upd=update:v5:update        [vzn %spawn-pool pool]
+    =/  upd=update:v5-1:update        [vzn %spawn-pool pool]
     =.  store                 (etch:etch pin upd)
     (views-emit pin upd)
     ::
@@ -760,40 +758,40 @@
     =+  axn
     ?>  =(src our):bowl
     =/  [=pin:gol =pool:gol]  (clone-pool pin title [src now]:bowl)
-    =/  upd=update:v5:update        [vzn %spawn-pool pool]
+    =/  upd=update:v5-1:update        [vzn %spawn-pool pool]
     =.  store                 (etch:etch pin upd)
     (views-emit pin upd)
     ::
       %cache-pool
     =+  axn
     ?>  =(src our):bowl
-    ?>  =(src.bowl owner.pin)
+    ?>  =(src.bowl host.pin)
     =.  this            (emit %give %kick ~[(en-pool-path pin)] ~)
-    =/  upd=update:v5:update  [vzn %cache-pool pin]
+    =/  upd=update:v5-1:update  [vzn %cache-pool pin]
     =.  store           (etch:etch pin upd)
     (views-emit:this pin upd)
     ::
       %renew-pool
     =+  axn
     ?>  =(src our):bowl
-    ?>  =(src.bowl owner.pin)
+    ?>  =(src.bowl host.pin)
     =/  =pool:gol       (~(got by cache.store) pin)
-    =/  upd=update:v5:update  [vzn %renew-pool pin pool]
+    =/  upd=update:v5-1:update  [vzn %renew-pool pin pool]
     =.  store           (etch:etch pin upd)
     (views-emit pin upd)
     ::
       %trash-pool
-    :: TODO: purge locals; purge index; purge order
+    :: TODO: purge locals; purge order
     =+  axn
     ?>  =(src our):bowl
-    ?>  =(src.bowl owner.pin)
+    ?>  =(src.bowl host.pin)
     =.  this  (emit %give %kick ~[(en-pool-path pin)] ~)
     ?:  (~(has by pools.store) pin)
-      =/  upd=update:v5:update  [vzn %waste-pool ~]
+      =/  upd=update:v5-1:update  [vzn %waste-pool ~]
       =.  store           (etch:etch pin upd)
       (views-emit:this pin upd)
     ?>  (~(has by cache.store) pin)
-    =/  upd=update:v5:update  [vzn %trash-pool ~]
+    =/  upd=update:v5-1:update  [vzn %trash-pool ~]
     =.  store           (etch:etch pin upd)
     (views-emit:this pin upd)
     ::
@@ -816,19 +814,19 @@
       %subscribe
     =+  axn
     ?>  =(src our):bowl
-    ?<  =(src.bowl owner.pin)
+    ?<  =(src.bowl host.pin)
     =/  pite=wire  (en-pool-path pin)
-    =/  =dock  [owner.pin dap.bowl]
+    =/  =dock  [host.pin dap.bowl]
     (emit %pass pite %agent dock %watch pite)
     ::
       %unsubscribe
     =+  axn
     ?>  =(src our):bowl
-    ?<  =(src.bowl owner.pin)
+    ?<  =(src.bowl host.pin)
     =/  =wire  (en-pool-path pin)
-    =/  =dock  [owner.pin dap.bowl]
+    =/  =dock  [host.pin dap.bowl]
     =.  this  (emit %pass wire %agent dock %leave ~)
-    =/  upd=update:v5:update
+    =/  upd=update:v5-1:update
       ?:  (~(has by cache.store) pin)  [vzn %trash-pool ~]
       ?>  (~(has by pools.store) pin)  [vzn %waste-pool ~]
     (views-emit:this pin upd)
