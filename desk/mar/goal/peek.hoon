@@ -25,19 +25,24 @@
         %pool-roots
       :-  %a
       %+  turn  roots.pyk
-      |=  [=id desc=@t] 
+      |=  [=id desc=@t complete=? actionable=?] 
       %-  pairs
       :~  [%id (enjs-id id)]
           [%description s+desc]
+          [%complete b+complete]
+          [%actionable b+actionable]
       ==
       ::
-        %goal-kids
+        %goal-young
       :-  %a
-      %+  turn  kids.pyk
-      |=  [=id desc=@t] 
+      %+  turn  young.pyk
+      |=  [=id virtual=? desc=@t complete=? actionable=?] 
       %-  pairs
       :~  [%id (enjs-id id)]
+          [%virtual b+virtual]
           [%description s+desc]
+          [%complete b+complete]
+          [%actionable b+actionable]
       ==
       ::
       %pool-title  s+title.pyk

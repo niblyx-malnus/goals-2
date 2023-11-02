@@ -124,18 +124,17 @@
     :-  %pool-roots
     %+  turn  (~(root-goals nd goals.pool))
     |=  =id:gol
-    [id desc:(~(got by goals.pool) id)]
+    [id [desc complete actionable]:(~(got by goals.pool) id)]
     ::
-      [%x %goal %kids host=@ta name=@ta key=@ta ~]
+      [%x %goal %young host=@ta name=@ta key=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =id:gol     [pin key.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
-    =/  kids=(set id:gol)  kids:(~(got by goals.pool) id)
     :-  ~  :-  ~  :-  %goal-peek  !>
-    :-  %goal-kids
-    %+  turn  ~(tap in kids)
-    |=  =id:gol
-    [id desc:(~(got by goals.pool) id)]
+    :-  %goal-young
+    %+  turn  young:(~(got by goals.pool) id)
+    |=  [=id:gol virtual=?]
+    [id virtual [desc complete actionable]:(~(got by goals.pool) id)]
     ::
       [%x %pool %title host=@ta name=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
