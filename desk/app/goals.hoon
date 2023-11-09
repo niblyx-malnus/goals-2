@@ -1,5 +1,6 @@
 /-  gol=goals, vyu=views, act=action, update
-/+  dbug, default-agent, verb, gol-cli-emot, gs=gol-cli-state, nd=gol-cli-node,
+/+  vio=ventio, dbug, default-agent, verb,
+    gol-cli-emot, gs=gol-cli-state, nd=gol-cli-node,
 :: import during development to force compilation
 ::
     gol-cli-json
@@ -8,13 +9,18 @@
 /=  x  /mar/goal/view-send
 /=  x  /mar/view-ack
 /=  x  /mar/goal/peek
+/=  x  /mar/goal/update
 /=  x  /mar/goal/action
 /=  x  /mar/goal/update
+/=  x  /mar/goal/view
 /=  x  /mar/goal/away-update
+/=  x  /ted/vines/goals
+/=  x  /sur/view
 ::
 |%
 +$  inflated-state  [state-5-1:gs =views:vyu] 
-+$  card  card:agent:gall
++$  card     card:agent:gall
++$  vent-id  vent-id:vio
 --
 =|  inflated-state
 =*  state  -
@@ -44,6 +50,10 @@
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
+  :: forward vent requests directly to the vine
+  ::
+  ?:  ?=(%vent-request mark)  :_(this ~[(to-vine:vio vase bowl)])
+  ::
   ?+    mark  (on-poke:def mark vase)
       %noun
     ?>  =(our src):bowl
@@ -84,7 +94,8 @@
   |=  =(pole knot)
   ^-  (quip card _this)
   ?+    pole  (on-watch:def pole)
-      [%ask ~]    ~&(%watching-ask ?>(=(src our):bowl `this)) :: one-off ui requests
+    [%vent @ @ @ ~]  `this
+    [%ask ~]    ~&(%watching-ask ?>(=(src our):bowl `this)) :: one-off ui requests
       ::
       [%pool @ @ ~]
     =^  cards  state
@@ -122,7 +133,7 @@
     =/  =pool:gol  (~(got by pools.store) pin)
     :-  ~  :-  ~  :-  %goal-peek  !>
     :-  %pool-roots
-    %+  turn  (~(root-goals nd goals.pool))
+    %+  turn  roots:trace:pool
     |=  =id:gol
     [id [desc complete actionable]:(~(got by goals.pool) id)]
     ::
@@ -159,6 +170,13 @@
     =/  =pool:gol  (~(got by pools.store) pin)
     =/  =goal:gol  (~(got by goals.pool) id)
     ``goal-peek+!>([%goal-note note.goal])  
+    ::
+      [%x %goal %tags host=@ta name=@ta key=@ta ~]
+    =/  =pin:gol    [(slav %p host.pole) name.pole]
+    =/  =id:gol     [pin key.pole]
+    =/  =pool:gol  (~(got by pools.store) pin)
+    =/  =goal:gol  (~(got by goals.pool) id)
+    ``goal-peek+!>([%goal-tags ~(tap in tags.goal)])  
     ::
       [%x %goal %parent host=@ta name=@da key=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
@@ -225,6 +243,11 @@
   |=  [=(pole knot) =sign-arvo]
   ^-  (quip card _this)
   ?+    pole  (on-arvo:def pole sign-arvo)
+      [%vent @ @ @ ~]
+    ?.  ?=([%khan %arow *] sign-arvo)  (on-arvo:def pole sign-arvo)
+    %-  (slog ?:(?=(%.y -.p.sign-arvo) ~ p.p.sign-arvo))
+    :_(this (vent-arow:vio pole p.sign-arvo))
+    ::
       [%send-dot v=@ ~]
     ?+    sign-arvo  (on-arvo pole sign-arvo)
         [%behn %wake *]

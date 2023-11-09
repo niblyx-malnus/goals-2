@@ -176,23 +176,18 @@ const GoalRow: React.FC<{
   );
 };
 
-function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goalKey: any; refresh: () => void; }) {
+function Harvest({ host, name, goalKey, refresh }: { host: any; name: any; goalKey: any; refresh: () => void; }) {
   const isPool = goalKey == null;
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [showCompleted, setShowCompleted] = useState(false);
-
-  const displayedGoals = showCompleted ? goals : goals.filter(goal => !goal.complete);
 
   useEffect(() => {
     const fetchGoals = async () => {
       try {
         let fetchedGoals;
         if (isPool) {
-          // If goalKey is null, we're dealing with roots
-          fetchedGoals = await api.getPoolRoots(`/${host}/${name}`);
+          fetchedGoals = await api.poolHarvest(`/${host}/${name}`, 'any', []);
         } else {
-          // Otherwise, we're dealing with the young of a specific goal
-          fetchedGoals = await api.getGoalYoung(`/${host}/${name}/${goalKey}`);
+          fetchedGoals = await api.goalHarvest(`/${host}/${name}/${goalKey}`, 'any', []);
         }
         setGoals(fetchedGoals);
       } catch (error) {
@@ -201,7 +196,7 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
     };
   
     fetchGoals();
-  }, [refresh, isPool]);
+  }, [refresh, isPool, host, name, goalKey]);
 
   const moveGoalUp = async (id: string) => {
     const index = _.findIndex(goals, { id });
@@ -241,17 +236,8 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
 
   return (
     <>
-      <label className="flex items-center space-x-2">
-        <input 
-          type="checkbox" 
-          checked={showCompleted} 
-          onChange={() => setShowCompleted(!showCompleted)} 
-          className="form-checkbox rounded"
-        />
-        <span>Show Completed</span>
-      </label>
       <ul>
-        {displayedGoals.map((goal, index) => (
+        {goals.map((goal, index) => (
           <div
             key={goal.id}
             className="block text-current no-underline hover:no-underline"
@@ -272,4 +258,4 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
   );
 };
 
-export default GoalList;
+export default Harvest;

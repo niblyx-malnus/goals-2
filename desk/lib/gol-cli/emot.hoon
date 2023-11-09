@@ -597,6 +597,7 @@
     (send-away-update pin upd)
     ::
       %add-goal-tag
+    ~&  'adding-goal-tag...'
     =+  axn
     =/  =pin:gol  pin.id
     ?.  =(host.pin our.bowl)  (relay pin axn)

@@ -26,6 +26,7 @@
       [%list-view data:list-view]
       [%page data:page]
   ==
++$  view-vent  $@(~ data)
 :: dots must be acked
 ::
 +$  send  $%([%dot =path] [%diff diff])

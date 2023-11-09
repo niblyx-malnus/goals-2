@@ -174,7 +174,15 @@
   ++  view-data
     |=  =data:harvest:vyu
     ^-  json
-    a+(turn goals.data id-pack)
+    :-  %a
+    %+  turn  goals.data
+    |=  [=id:gol =pack:harvest:vyu]
+    %-  pairs
+    :~  [%id (enjs-id:j id)]
+        [%description s+desc.pack]
+        [%complete b+complete.pack]
+        [%actionable b+actionable.pack]
+    ==
   ::
   ++  id-pack
     |=  [=id:gol =pack:harvest:vyu]

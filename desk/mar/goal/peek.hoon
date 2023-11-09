@@ -49,6 +49,7 @@
       %pool-note   s+note.pyk
       %goal-desc   s+desc.pyk
       %goal-note   s+note.pyk
+      %goal-tags   a+(turn tags.pyk enjs-tag)
       %uid         ?~(id.pyk ~ (enjs-id u.id.pyk))
       %loob        b+loob.pyk
     ==
