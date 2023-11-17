@@ -1,11 +1,10 @@
 /-  gol=goals, act=action
-/+  *gol-cli-util, gol-cli-node, gol-cli-traverse, vd=gol-cli-validate,
-    fl=gol-cli-inflater
+/+  *gol-cli-util, gol-cli-node, gol-cli-traverse, vd=gol-cli-validate
 |_  p=pool:gol
 +*  this  .
     tv    ~(. gol-cli-traverse goals.p)
     nd    ~(. gol-cli-node goals.p)
-++  abet  (inflate-pool:fl p)
+++  abet  p
 ++  apex  |=(p=pool:gol this(p p))
 ::
 :: ============================================================================
@@ -20,7 +19,7 @@
   ^-  goal:gol
   =|  =goal:gol
   =.  chief.goal  chief
-  =.  author.goal  author
+  :: =.  author.goal  author
   :: 
   :: Initialize inflowing and outflowing nodes
   =.  outflow.kickoff.goal  (~(put in *(set nid:gol)) [%d id])
@@ -53,7 +52,9 @@
   ::
   :: both of these should get validated here (validate-goals:vd goals)
   :: return extracted goals and remaining goals
-  [(gat-by goals.p.pore ~(tap in prog)) (gus-by goals.p.pore ~(tap in prog))]
+  :*  (gat-by goals.p.pore ~(tap in prog))
+      (gus-by goals.p.pore ~(tap in prog))
+  ==
 ::
 :: Permanently delete goal and subgoals directly
 ++  waste-goal
@@ -133,77 +134,81 @@
 :: PERMISSIONS UTILITIES
 ::
 :: ============================================================================
+:: owner or admin
 ::
 ++  check-pool-edit-perm
   |=  mod=ship
   ^-  ?
-  ?:  =(mod owner.p)  %&
-  =/  perm  (~(got by perms.p) mod)
-  ?~  perm  %|
-  ?:  ?=(%admin u.perm)  %&  %|
+  ?|  =(mod owner.p)
+      ?=([~ %admin] (~(got by perms.p) mod))
+  ==
+:: owner, admin or deputy
 ::
 ++  check-root-spawn-perm
   |=  mod=ship
   ^-  ?
-  ?:  =(mod owner.p)  %&
-  =/  perm  (~(get by perms.p) mod)
-  ?~  perm  %|   :: not viewer
-  ?~  u.perm  %| :: no %admin or %spawn privileges
-  %&
+  ?|  =(mod owner.p)
+      ?=([~ ?(%admin %creator)] (~(got by perms.p) mod))
+  ==
+:: can edit pool (owner or admin)
+:: or is ranking member on goal
+:: or is a deputy with edit permissions
 ::
 ++  check-goal-edit-perm
   |=  [=id:gol mod=ship]
   ^-  ?
-  ?:  (check-pool-edit-perm mod)  %&
-  =/  goal  (~(got by goals.p) id)
-  ?~  (get-rank:tv mod id)  %|  %&
+  ?|  (check-pool-edit-perm mod)
+      ?=(^ (get-rank:tv mod id))
+      ?=([~ %edit] (~(get by deputies:(~(got by goals.p) id)) mod))
+  ==
+:: can edit goal (owner, admin or ranking member on goal)
+:: or is a deputy on the goal
 ::
 ++  check-goal-spawn-perm
   |=  [=id:gol mod=ship]
   ^-  ?
-  ?:  (check-goal-edit-perm id mod)  %&
-  =/  goal  (~(got by goals.p) id)
-  (~(has in spawn.goal) mod)
-::
+  ?|  (check-goal-edit-perm id mod)
+      (~(has by deputies:(~(got by goals.p) id)) mod)
+  ==
 :: most senior ancestor
+::
 ++  stock-root
   |=  =id:gol
   ^-  [=id:gol chief=ship]
   (snag 0 (flop (get-stock:tv id)))
-::
 :: owner, admin, or chief of stock-root
+::
 ++  check-goal-master
   |=  [=id:gol mod=ship]
   ^-  ?
-  ?:  (check-pool-edit-perm mod)  %&
-  =(mod chief:(stock-root id))
+  ?|  (check-pool-edit-perm mod)
+      =(mod chief:(stock-root id))
+  ==
 ::
 ++  check-move-to-root-perm
   |=  [=id:gol mod=ship]
   ^-  ?
-  &((check-goal-master id mod) (check-root-spawn-perm mod))
-::
+  ?&  (check-goal-master id mod)
+      (check-root-spawn-perm mod)
+  ==
 :: checks if mod can move kid under pid
+::
 ++  check-move-to-goal-perm
   |=  [kid=id:gol pid=id:gol mod=ship]
   ^-  ?
-  ?:  (check-pool-edit-perm mod)  %&
-  :: can move kid under pid if you have permissions on a goal
-  :: which contains them both
-  =/  krank  (get-rank:tv mod kid)
-  =/  prank  (get-rank:tv mod pid)
-  ?~  krank  %|
-  ?~  prank  %|
-  ?:  =(u.krank u.prank)  %&
-  ::
-  :: if chief of stock-root of kid and permissions on pid
-  ?:  ?&  =(mod chief:(stock-root kid))
+  ?|  (check-pool-edit-perm mod)
+      :: permissions on a goal which contains both goals
+      ::
+      =/  krank  (get-rank:tv mod kid)
+      =/  prank  (get-rank:tv mod pid)
+      &(?=(^ krank) ?=(^ prank) =(krank prank))
+      :: if chief of stock-root of kid and permissions on pid
+      ::
+      ?&  =(mod chief:(stock-root kid))
           (check-goal-edit-perm pid mod)
-      ==
-    %&
-  %|
-::
+  ==  ==
 :: checks if mod can modify ship's pool permissions
+::
 ++  check-pool-role-mod
   |=  [=ship mod=ship]
   ^-  ?
@@ -218,13 +223,13 @@
   %&
 ::
 ++  check-in-pool  |=(=ship |(=(ship owner.p) (~(has by perms.p) ship)))
-::
 :: replace all chiefs of goals whose chiefs have been kicked
+::
 ++  replace-chiefs
    |=  kick=(set ship)
    ^-  _this
-   ::
    :: list of all ids of goals with replacable chiefs
+   ::
    =/  kickable=(list id:gol)
      %+  murn
        ~(tap by goals.p)
@@ -232,12 +237,12 @@
      ?.  (~(has in kick) chief.goal)
        ~
      (some id)
-   ::
    :: accurate updated chief information
+   ::
    =/  chiefs
      ((chain:tv id:gol ship) (replace-chief:tv kick owner.p) kickable ~)
-   ::
    :: update goals.p to reflect new chief information
+   ::
   %=  this
     goals.p
       %-  ~(gas by goals.p)
@@ -247,16 +252,22 @@
       =/  goal  (~(got by goals.p) id)
       [id goal(chief (~(got by chiefs) id))]
   ==
+:: remove a kick set from all goal deputies
 ::
-:: remove a kick set from all goal spawn sets
-++  purge-spawn
+++  purge-deputies
   |=  kick=(set ship)
   ^-  _this
-  %=  this
-    goals.p
-      %-  ~(run by goals.p)
-      |=  =goal:gol
-      goal(spawn (~(dif in spawn.goal) kick))
+  %=    this
+      goals.p
+    %-  ~(run by goals.p)
+    |=  =goal:gol
+    %=    goal
+        deputies
+      %-  ~(gas by *deputies:gol)
+      %+  murn  ~(tap by deputies.goal)
+      |=  [=ship role=?(%edit %create)]
+      ?:((~(has in kick) ship) ~ [~ ship role])
+    ==
   ==
 ::
 :: ============================================================================
@@ -268,9 +279,10 @@
 ++  dag-yoke
   |=  [n1=nid:gol n2=nid:gol mod=ship]
   ^-  _this
-  ::
   :: Check mod permissions
   :: Can yoke with permissions on *both* goals
+  :: This only works if "rends" work with perms on *either*
+  ::
   ?.  ?&  (check-goal-edit-perm id.n1 mod)
           (check-goal-edit-perm id.n2 mod)
       ==
@@ -279,11 +291,11 @@
   :: Cannot relate goal to itself
   ?:  =(id.n1 id.n2)  ~|("same-goal" !!)
   ::
-  :: Cannot create relationship where either goal is complete
-  ?:  ?|  complete:(~(got by goals.p) id.n1)
-          complete:(~(got by goals.p) id.n2)
+  :: Cannot create left-undone-right-done relationship
+  ?:  ?&  !done:(got-node:nd n1)
+          done:(got-node:nd n2)
       ==
-    ~|("completed-goal" !!)
+    ~|("left-undone-right-done" !!)
   ::
   :: :: Cannot create relationship with the deadline of the right id
   :: :: if the right id is an actionable goal
@@ -519,13 +531,27 @@
   ?:  (has-nested id)  ~|("has-nested" !!)
   this(goals.p (~(put by goals.p) id goal(actionable %&)))
 ::
+++  mark-done
+  |=  [=nid:gol mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm id.nid mod)
+  =/  goal  (~(got by goals.p) id.nid)
+  ~&  marking-done+-.nid
+  ?:  (left-undone:tv nid)  ~&  %left-undone  ~|("left-undone" !!)
+  =.  goal
+    ?-  -.nid
+      %k  goal(done.kickoff %&)
+      %d  goal(done.deadline %&)
+    ==
+  ~&  goal
+  this(goals.p (~(put by goals.p) id.nid goal))
+::
 ++  mark-complete
   |=  [=id:gol mod=ship]
   ^-  _this
-  ?>  (check-goal-edit-perm id mod)
-  =/  goal  (~(got by goals.p) id)
-  ?:  (left-uncompleted:tv id)  ~|("left-uncompleted" !!)
-  this(goals.p (~(put by goals.p) id goal(complete %&)))
+  ~&  %marking-complete
+  =/  pore  (mark-done k+id mod)
+  (mark-done:pore d+id mod)
 ::
 ++  unmark-actionable
   |=  [=id:gol mod=ship]
@@ -534,13 +560,24 @@
   =/  goal  (~(got by goals.p) id)
   this(goals.p (~(put by goals.p) id goal(actionable %|)))
 ::
+++  unmark-done
+  |=  [=nid:gol mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm id.nid mod)
+  =/  goal  (~(got by goals.p) id.nid)
+  ?:  (right-done:tv nid)  ~|("right-done" !!)
+  =.  goal
+    ?-  -.nid
+      %k  goal(done.kickoff %|)
+      %d  goal(done.deadline %|)
+    ==
+  this(goals.p (~(put by goals.p) id.nid goal))
+::
 ++  unmark-complete
   |=  [=id:gol mod=ship]
   ^-  _this
-  ?>  (check-goal-edit-perm id mod)
-  =/  goal  (~(got by goals.p) id)
-  ?:  (ryte-completed:tv id)  ~|("ryte-completed" !!)
-  this(goals.p (~(put by goals.p) id goal(complete %|)))
+  =/  pore  (unmark-done d+id mod)
+  (unmark-done:pore k+id mod)
 ::
 ++  bounded
   |=  [=nid:gol =moment:gol dir=?(%l %r)]
@@ -582,7 +619,7 @@
   ?>  (check-pool-role-mod ship mod)
   ?~  role
     =/  pore  (replace-chiefs (sy ~[ship]))
-    =/  pore  (purge-spawn:pore (sy ~[ship]))
+    =/  pore  (purge-deputies:pore (sy ~[ship]))
     pore(perms.p (~(del by perms.p) ship))
   this(perms.p (~(put by perms.p) ship u.role))
 ::
@@ -603,13 +640,13 @@
       [id goal(chief chief)]
   ==
 ::
-:: replace the spawn set of a goal with a new spawn set
-++  replace-spawn-set
-  |=  [=id:gol spawn=(set ship) mod=ship]
+:: replace the deputies of a goal with new deputies
+++  replace-deputies
+  |=  [=id:gol =deputies:gol mod=ship]
   ^-  _this
   ?.  (check-goal-edit-perm id mod)  ~|("missing goal perms" !!)
-  ?.  (~(all in spawn) check-in-pool)
-    ~|("some ships in spawn set are not in pool" !!)
+  ?.  (~(all in ~(key by deputies)) check-in-pool)
+    ~|("some ships in deputies are not in pool" !!)
   =/  goal  (~(got by goals.p) id)
-  this(goals.p (~(put by goals.p) id goal(spawn spawn)))
+  this(goals.p (~(put by goals.p) id goal(deputies deputies)))
 --

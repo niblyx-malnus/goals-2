@@ -1,4 +1,4 @@
-/-  *goals, update
+/-  *goals
 :: a view is a distorted view of the store, a perspective, a transformation
 ::
 :: TODO:
@@ -29,19 +29,11 @@
 +$  view-vent  $@(~ data)
 :: dots must be acked
 ::
-+$  send  $%([%dot =path] [%diff diff])
-+$  diff
-  $%  [%tree diff:tree]
-      [%harvest diff:harvest]
-      [%list-view diff:list-view]
-      [%page diff:page]
-  ==
 ++  tree
   |%
   +$  parm  $:(=type)
   +$  type  $%([%main ~] [%pool =pin] [%goal =id])
   +$  data  $:(pools=tree-pools cache=tree-pools)
-  +$  diff  [=pin update:v5-1:update]
   :: trying to slowly sever this from underlying DS
   ::
   +$  tree-pool   pool
@@ -52,7 +44,7 @@
   +$  parm
     $:  =type
         method=?(%any %all)
-        tags=(set tag)
+        tags=(set @t)
     ==
   +$  type  $%([%main ~] [%pool =pin] [%goal =id])
   +$  data  $:(goals=(list [id pack]))
@@ -66,14 +58,9 @@
         complete=_|
         actionable=?
         chief=ship
-        spawn=(set ship)
-        owner=ship
-        birth=@da
-        author=ship
-        desc=@t
-        note=@t
-        tags=(set tag) :: $~(tag-bunt (set tag))
-        fields=(map @t field-data)
+        deputies=(set ship)
+        tags=(set @t)
+        fields=(map @t @t)
         =stock
         =ranks
         young=(list [id virtual=?])
@@ -88,7 +75,6 @@
         nest-left=(set id)
         nest-ryte=(set id)
     ==
-  +$  diff  [=pin $%([%replace data])]
   --
 ++  list-view
   |%
@@ -97,7 +83,7 @@
         first-gen-only=_|
         actionable-only=_|
         method=?(%any %all)
-        tags=(set tag)
+        tags=(set @t)
     ==
   +$  type
     $%  [%main ~]
@@ -115,14 +101,9 @@
         complete=_|
         actionable=?
         chief=ship
-        spawn=(set ship)
-        owner=ship
-        birth=@da
-        author=ship
-        desc=@t
-        note=@t
-        tags=(set tag) :: $~(tag-bunt (set tag))
-        fields=(map @t field-data)
+        deputies=(set ship)
+        tags=(set @t)
+        fields=(map @t @t)
         =stock
         =ranks
         young=(list [id virtual=?])
@@ -137,7 +118,6 @@
         nest-left=(set id)
         nest-ryte=(set id)
     ==
-  +$  diff  [=pin $%([%replace data])]
   --
 ++  page
   |%
@@ -155,9 +135,8 @@
             par-goal=(unit id)
             desc=@t
             note=@t
-            tags=(set tag)
+            tags=(set @t)
         ==
     ==
-  +$  diff  [=pin $%([%replace data])]
   --
 --

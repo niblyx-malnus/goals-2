@@ -2,7 +2,7 @@
 :: There is no way around this. Threads cannot do state.
 :: The venter needs STATE in order to enforce uniqueness on its vent-ids.
 ::
-:: %venter is also responsible for warming vek:vio desk's tubes....
+:: %venter is also responsible for warming this desk's tubes....
 :: improves vent performance when using /ted/vent.hoon
 :: https://github.com/tinnus-napbus/tube-warmer
 ::
@@ -73,6 +73,7 @@
       |=  vid=vent-id
       ?.((~(has in tids) q.vid) ~ `vid)
     ==
+    :: gives a vent response directly from this agent
     ::
       %vent-request
     =+  !<([vid=vent-id:vio req=page] vase)
@@ -90,14 +91,6 @@
     ==
   ==
 ::
-++  on-watch
-  |=  =(pole knot)
-  ^-  (quip card _this)
-  ?+    pole  (on-watch:def pole)
-    [%vent @ @ @ ~]  ?>(=(src our):bowl `this)
-  ==
-++  on-leave  on-leave:def
-::
 ++  on-peek
   |=  =(pole knot)
   ^-  (unit (unit cage))
@@ -105,6 +98,14 @@
     [%x %vents ~]  ``noun+!>(vents)
   ==
 ::
+++  on-watch
+  |=  =(pole knot)
+  ^-  (quip card _this)
+  ?+    pole  (on-watch:def pole)
+    [%vent @ @ @ ~]  ?>(=(src our):bowl `this)
+  ==
+::
+++  on-leave  on-leave:def
 ++  on-agent  on-agent:def
 ::
 ++  on-arvo

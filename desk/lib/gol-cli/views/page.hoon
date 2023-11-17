@@ -6,14 +6,20 @@
   ^-  data:page:vyu
   ?-    -.type.parm
     %main  [%main ~]
-    %pool  [%pool title note]:(~(got by pools.store) pin.type.parm)
+    %pool  !!
     ::
       %goal
     =,  pin=pin.id.type.parm
     =/  pool  (~(got by pools.store) pin)
     =.  goals.pool  (unify-tags goals.pool)
     =/  =goal:gol  (~(got by goals.pool) id.type.parm)
-    [%goal pin [par desc note tags]:goal]
+    :*  %goal  pin
+        :*  par.goal
+            (~(got by fields.goal) 'description')
+            (~(got by fields.goal) 'note')
+            tags.goal
+        ==
+    ==
   ==
 ::
 ++  view-diff
@@ -92,7 +98,7 @@
           [%par-goal ?~(par-goal.data ~ (enjs-id u.par-goal.data))]
           [%desc s+desc.data]
           [%note s+note.data]
-          [%tags a+(turn ~(tap in tags.data) enjs-tag)]
+          [%tags a+(turn ~(tap in tags.data) (lead %s))]
       ==
     ==
   ::
@@ -124,7 +130,7 @@
               [%par-goal ?~(par-goal.data ~ (enjs-id u.par-goal.data))]
               [%desc s+desc.data]
               [%note s+note.data]
-              [%tags a+(turn ~(tap in tags.data) enjs-tag)]
+              [%tags a+(turn ~(tap in tags.data) (lead %s))]
           ==
         ==
     ==

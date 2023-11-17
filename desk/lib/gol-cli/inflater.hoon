@@ -55,10 +55,12 @@
         ryte-plumbs=((chain:tv nid:gol @) (plomb:tv %r) (leaf-nodes:nd) ~)
     ==
   ==
+:: TODO: this is the performance bottleneck; fix
 ::
 ++  inflate-goals
   |=  p=pool:gol
   |^  ^-  pool:gol
+  ~&  %inflate-goals
   %=  p
     goals  (~(rut by goals.p) inflate-goal)
     cache  (~(rut by cache.p) inflate-goal)

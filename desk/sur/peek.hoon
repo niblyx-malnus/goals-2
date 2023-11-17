@@ -2,7 +2,6 @@
 |%
 +$  peek
   $%  [%store =store]
-      [%views =views]
       [%pools-index pools=(list [pin @t])]
       [%pool-roots roots=(list [id @t ? ?])]   :: id, desc, cmp, axn
       [%goal-young young=(list [id ? @t ? ?])] :: id, desc, cmp, axn
@@ -10,7 +9,7 @@
       [%pool-note note=@t]
       [%goal-desc desc=@t]
       [%goal-note note=@t]
-      [%goal-tags tags=(list tag)]
+      [%goal-tags tags=(list @t)]
       [%uid id=(unit id)]
       [%loob loob=?]
   ==

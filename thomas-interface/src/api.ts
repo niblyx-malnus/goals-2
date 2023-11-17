@@ -147,11 +147,7 @@ const api = {
       json: {
         'add-goal-tag': {
           id: goalId,
-          tag: {
-            text: text,
-            color: '',
-            private: false
-          },
+          tag: text
         }
       },
     });
@@ -167,11 +163,7 @@ const api = {
       json: {
         'del-goal-tag': {
           id: goalId,
-          tag: {
-            text: text,
-            color: '',
-            private: false
-          },
+          tag: text
         }
       },
     });
@@ -354,8 +346,7 @@ const api = {
     return await api.createApi().scry( { app: "goals", path: `/goal/note${id}`} );
   },
   getGoalTags: async (id: string) => {
-    const tags = await api.createApi().scry({ app: "goals", path: `/goal/tags${id}`});
-    return tags.map((tag: { text: string, color: string, private: boolean }) => tag.text);
+    return await api.createApi().scry({ app: "goals", path: `/goal/tags${id}`});
   },
   getGoalParent: async (id: string) => {
     return await api.createApi().scry( { app: "goals", path: `/goal/parent${id}`} );

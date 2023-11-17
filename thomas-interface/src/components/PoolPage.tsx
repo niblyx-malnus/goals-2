@@ -19,7 +19,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [goalId2, setGoalId2] = useState<string>('');
   const [activeTab, setActiveTab] = useState('Roots');
   const [tags, setTags] = useState<string[]>([]);
-  const [selectedOperation, setSelectedOperation] = useState('intersection');
+  const [selectedOperation, setSelectedOperation] = useState('some');
 
   // Function to toggle refreshFlag
   const triggerRefreshRoots = () => {
@@ -185,8 +185,8 @@ function Pool({ host, name }: { host: any; name: any; }) {
                     value={selectedOperation}
                     onChange={(e) => setSelectedOperation(e.target.value)}
                   >
-                    <option value="intersection">Intersection</option>
-                    <option value="union">Union</option>
+                    <option value="some">Some</option>
+                    <option value="every">Every</option>
                   </select>
                   <input
                     type="text"
@@ -215,7 +215,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
                 ))}
               </div>
             </div>
-            <Harvest host={host} name={name} goalKey={null} refresh={triggerRefreshHarvest}/>
+            <Harvest host={host} name={name} goalKey={null} method={selectedOperation} tags={tags} refresh={triggerRefreshHarvest}/>
           </>
          )}
         </div>

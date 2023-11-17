@@ -6,6 +6,7 @@ import { FiCopy } from 'react-icons/fi';
 
 type Goal = {
   id: string,
+  tags?: string[],
   description: string,
   complete: boolean,
   actionable: boolean
@@ -176,9 +177,10 @@ const GoalRow: React.FC<{
   );
 };
 
-function Harvest({ host, name, goalKey, refresh }: { host: any; name: any; goalKey: any; refresh: () => void; }) {
+function Harvest({ host, name, goalKey, method, tags, refresh }: { host: any; name: any; goalKey: any; method: string, tags: string[], refresh: () => void; }) {
   const isPool = goalKey == null;
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [filteredGoals, setFilteredGoals] = useState<Goal[]>(goals); // State for filtered goals
 
   useEffect(() => {
     const fetchGoals = async () => {
@@ -197,6 +199,29 @@ function Harvest({ host, name, goalKey, refresh }: { host: any; name: any; goalK
   
     fetchGoals();
   }, [refresh, isPool, host, name, goalKey]);
+
+  // Function to filter goals by selected tags
+  useEffect(() => {
+    if (tags.length === 0) {
+      // If no tags are selected, show all goals
+      setFilteredGoals(goals);
+    } else {
+      // Filter goals based on selected tags and method
+      const filtered = goals.filter((goal) => {
+        if (goal.tags) {
+          if (method === 'every') {
+            // Filter goals that have ALL of the selected tags
+            return tags.every((tag) => goal.tags?.includes(tag));
+          } else if (method === 'some') {
+            // Filter goals that have ANY of the selected tags
+            return tags.some((tag) => goal.tags?.includes(tag));
+          }
+        }
+        return false;
+      });
+      setFilteredGoals(filtered);
+    }
+  }, [refresh, goals, method, tags]);
 
   const moveGoalUp = async (id: string) => {
     const index = _.findIndex(goals, { id });
@@ -237,7 +262,7 @@ function Harvest({ host, name, goalKey, refresh }: { host: any; name: any; goalK
   return (
     <>
       <ul>
-        {goals.map((goal, index) => (
+        {filteredGoals.map((goal, index) => (
           <div
             key={goal.id}
             className="block text-current no-underline hover:no-underline"

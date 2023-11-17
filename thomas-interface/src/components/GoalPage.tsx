@@ -5,7 +5,7 @@ import Harvest from './Harvest';
 import api from '../api';
 import '../global.css';
 
-type Goal = { id: string, description: string, complete: boolean, actionable: boolean }; // Type for pool object
+type Goal = { id: string, tags?: string[], description: string, complete: boolean, actionable: boolean }; // Type for pool object
 
 function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any; }) {
   const poolId = `/${host}/${name}`;
@@ -21,7 +21,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const [goalId2, setGoalId2] = useState<string>('');
   const [activeTab, setActiveTab] = useState('Sub-goals');
   const [harvestTags, setHarvestTags] = useState<string[]>([]);
-  const [selectedOperation, setSelectedOperation] = useState('intersection');
+  const [selectedOperation, setSelectedOperation] = useState('some');
   const [goalTags, setGoalTags] = useState<string[]>([]);
 
   // Function to toggle refreshFlag
@@ -261,8 +261,8 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
                     value={selectedOperation}
                     onChange={(e) => setSelectedOperation(e.target.value)}
                   >
-                    <option value="intersection">Intersection</option>
-                    <option value="union">Union</option>
+                    <option value="some">Some</option>
+                    <option value="every">Every</option>
                   </select>
                   <input
                     type="text"
@@ -286,7 +286,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
                 ))}
               </div>
             </div>
-            <Harvest host={host} name={name} goalKey={goalKey} refresh={triggerRefreshHarvest}/>
+            <Harvest host={host} name={name} goalKey={goalKey} method={selectedOperation} tags={harvestTags} refresh={triggerRefreshHarvest}/>
           </>
         )}
       </div>

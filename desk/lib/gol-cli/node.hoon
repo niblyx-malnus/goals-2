@@ -116,7 +116,7 @@
 ++  incomplete
   |=  ids=(list id:gol)
   ^-  (list id:gol)
-  (skip ids |=(=id:gol complete:(~(got by goals) id)))
+  (skip ids |=(=id:gol done:(got-node d+id)))
 ::
 :: get all nodes from a set of ids
 ++  nodify

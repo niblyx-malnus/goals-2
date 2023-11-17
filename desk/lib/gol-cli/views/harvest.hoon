@@ -56,27 +56,6 @@
     goals
   ==
 ::
-++  view-diff
-  |=  $:  =parm:harvest:vyu
-          =data:harvest:vyu
-          [=pin:gol upd=update:v5-1:update]
-      ==
-  ^-  (unit diff:harvest:vyu)
-  =;  diff=(unit diff:harvest:vyu)
-    ~|  "non-equivalent-harvest-view-diff"
-    =/  check=?
-      ?~  diff  =(data (view-data parm))
-      =((view-data parm) (etch-diff data u.diff))
-    ?>(check diff)
-  =/  atad=data:harvest:vyu  (view-data parm)
-  ?:  =(data atad)  ~
-  (some [pin %replace atad])
-::
-++  etch-diff
-  |=  [=data:harvest:vyu =diff:harvest:vyu]
-  ^-  data:harvest:vyu
-  ?>(?=(%replace +<.diff) +>.diff)
-::
 ++  unify-tags
   |=  =id:gol
   ^-  goal:gol
@@ -106,12 +85,7 @@
       complete.goal
       actionable.goal
       chief.goal
-      spawn.goal
-      owner.goal
-      birth.goal
-      author.goal
-      desc.goal
-      note.goal
+      deputies.goal
       tags.goal
       fields.goal
       stock.goal
@@ -132,7 +106,7 @@
 ++  filter-tags
   |=  $:  =id:gol
           method=?(%any %all)
-          tags=(set tag:gol)
+          tags=(set @t)
       ==
   ^-  ?
   =/  =pool:gol  (~(got by pools.store) pin.id)
@@ -150,7 +124,7 @@
     %-  ot
     :~  type+type
         method+method
-        tags+(as tag:dejs:j)
+        tags+(as so)
     ==
   ::
   ++  method
@@ -179,7 +153,8 @@
     |=  [=id:gol =pack:harvest:vyu]
     %-  pairs
     :~  [%id (enjs-id:j id)]
-        [%description s+desc.pack]
+        [%tags a+(turn ~(tap in tags.pack) (lead %s))]
+        [%description s+(~(got by fields.pack) 'description')]
         [%complete b+complete.pack]
         [%actionable b+actionable.pack]
     ==
@@ -206,12 +181,7 @@
       complete             complete
       actionable           actionable
       chief                chief
-      spawn                spawn
-      owner                owner
-      birth                birth
-      author               author
-      desc                 desc
-      note                 note
+      deputies             deputies
       tags                 tags
       fields               fields
       stock                stock
@@ -228,30 +198,13 @@
       nest-left            nest-ryte
     ==
   ::
-  ++  view-diff
-    |=  =diff:harvest:vyu
-    ^-  json
-    %-  pairs
-    :~  :-  %hed
-        %-  pairs
-        :~  [%pin s+(pool-id:j pin.diff)]
-        ==
-        :-  %tel
-        %+  frond  %harvest
-        ?>  ?=(%replace +<.diff)
-        :-  %a
-        %+  turn
-          `(list [id:gol pack:harvest:vyu])`+>.diff
-        id-pack
-    ==
-  ::
   ++  view-parm
     |=  =parm:harvest:vyu
     ^-  json
     %-  pairs
     :~  [%type (type type.parm)]
         [%method s+method.parm]
-        [%tags a+(turn ~(tap in tags.parm) enjs-tag:j)]
+        [%tags a+(turn ~(tap in tags.parm) (lead %s))]
     ==
   ::
   ++  type

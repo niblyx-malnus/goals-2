@@ -1,34 +1,24 @@
-/-  gol=goals, vyu=views, act=action, update
-/+  vio=ventio, dbug, default-agent, verb,
-    gol-cli-emot, gs=gol-cli-state, nd=gol-cli-node,
+/-  gol=goals, act=action
+/+  vent, dbug, default-agent, verb,
+    gol-cli-emot, gs=gol-cli-state, gol-cli-node,
 :: import during development to force compilation
 ::
     gol-cli-json
-/=  x  /mar/goal/ask
-/=  x  /mar/goal/say
-/=  x  /mar/goal/view-send
-/=  x  /mar/view-ack
 /=  x  /mar/goal/peek
-/=  x  /mar/goal/update
 /=  x  /mar/goal/action
-/=  x  /mar/goal/update
-/=  x  /mar/goal/view
-/=  x  /mar/goal/away-update
-/=  x  /ted/vines/goals
-/=  x  /sur/view
+:: /=  x  /ted/vines/goals
 ::
 |%
-+$  inflated-state  [state-5-1:gs =views:vyu] 
++$  inflated-state  [state-5-9:gs =trace:gol] 
 +$  card     card:agent:gall
-+$  vent-id  vent-id:vio
 --
 =|  inflated-state
 =*  state  -
 ::
 %+  verb  |
 %-  agent:dbug
+%-  agent:vent
 ^-  agent:gall
-=<
 |_  =bowl:gall
 +*  this    .
     def   ~(. (default-agent this %.n) bowl)
@@ -42,45 +32,16 @@
 ++  on-load
   |=  =old=vase
   ^-  (quip card _this)
-  =/  old  !<(versioned-state:gs old-vase)
-  =/  new=state-5-1:gs     (convert-to-latest:gs old)
+  :: =/  old  !<(versioned-state:gs old-vase)
+  =/  old  ;;(versioned-state:gs q.old-vase)
+  =/  new=state-5-9:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
-  [cards this(-.state new, views ~)]
+  [cards this(-.state new, trace *trace:gol)]
 ::
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
-  :: forward vent requests directly to the vine
-  ::
-  ?:  ?=(%vent-request mark)  :_(this ~[(to-vine:vio vase bowl)])
-  ::
   ?+    mark  (on-poke:def mark vase)
-      %noun
-    ?>  =(our src):bowl
-    ?+    q.vase  (on-poke:def mark vase)
-        %print-subs
-      =;  [gsub=(list ship) asub=(list ship)]
-        ~&([goals+gsub ask+asub] `this)
-      :-  %+  murn  ~(tap by sup.bowl)
-          |=  [duct =ship =path]
-          ?.(?=([%goals ~] path) ~ (some ship))
-      %+  murn  ~(tap by sup.bowl)
-      |=  [duct =ship =path]
-      ?.(?=([%goals ~] path) ~ (some ship))
-    ==
-    ::
-      %view-ack
-    =/  =vid:vyu  !<(vid:vyu vase)
-    =/  [ack=_| =view:vyu]  (~(got by views) vid)
-    `this(views (~(put by views) vid [& view]))
-    ::
-      %goal-ask
-    =/  =ask:vyu  !<(ask:vyu vase)
-    ~&  received-ask+ask
-    =^  cards  state
-      abet:(handle-ask:emot ask)
-    [cards this]
-    ::
       %goal-action
     =/  axn=action:act  !<(action:act vase)
     ~&  received-axn+axn
@@ -90,93 +51,74 @@
     [cards this]
   ==
 ::
-++  on-watch
-  |=  =(pole knot)
-  ^-  (quip card _this)
-  ?+    pole  (on-watch:def pole)
-    [%vent @ @ @ ~]  `this
-    [%ask ~]    ~&(%watching-ask ?>(=(src our):bowl `this)) :: one-off ui requests
-      ::
-      [%pool @ @ ~]
-    =^  cards  state
-      abet:(handle-watch:emot pole)
-    [cards this]
-      ::
-      [%view v=@ ~]
-    ?>  =(src our):bowl
-    ?>  (~(has by views) (slav %uv v.pole))
-    `this
-  ==
-::
-++  on-leave
-  |=  =(pole knot)
-  ?+    pole  (on-leave:def pole)
-      [%ask ~]    ~&(%leaving-ask `this) :: one-off ui requests
-  ==
-::
 ++  on-peek
   |=  =(pole knot)
   ^-  (unit (unit cage))
   ?+    pole  (on-peek:def pole)
     [%x %store ~]  ``goal-peek+!>([%store store])
-    [%x %views ~]  ``goal-peek+!>([%views views])
     ::
       [%x %pools %index ~]
     :-  ~  :-  ~  :-  %goal-peek  !>
     :-  %pools-index
     %+  turn  ~(tap by pools.store)
     |=  [=pin:gol =pool:gol]
-    [pin title.pool]
+    [pin (~(got by properties.pool) 'title')]
     ::
       [%x %pool %roots host=@ta name=@ta ~]
     =/  =pin:gol   [(slav %p host.pole) name.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
+    =/  nd          ~(. gol-cli-node goals.pool)
     :-  ~  :-  ~  :-  %goal-peek  !>
     :-  %pool-roots
-    %+  turn  roots:trace:pool
+    %+  turn  (waif-goals:nd)
     |=  =id:gol
-    [id [desc complete actionable]:(~(got by goals.pool) id)]
+    =/  fields=(map @t @t)  (~(got by fields.pool) id)
+    =+  (~(got by goals.pool) id)
+    [id [(~(got by fields) 'description') done.deadline actionable]]
     ::
       [%x %goal %young host=@ta name=@ta key=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =id:gol     [pin key.pole]
-    =/  =pool:gol  (~(got by pools.store) pin)
+    =/  =pool:gol   (~(got by pools.store) pin)
+    =/  nd          ~(. gol-cli-node goals.pool)
     :-  ~  :-  ~  :-  %goal-peek  !>
     :-  %goal-young
-    %+  turn  young:(~(got by goals.pool) id)
-    |=  [=id:gol virtual=?]
-    [id virtual [desc complete actionable]:(~(got by goals.pool) id)]
+    %+  turn  ~(tap in (young:nd id))
+    |=  =id:gol
+    =/  fields=(map @t @t)  (~(got by fields.pool) id)
+    =+  (~(got by goals.pool) id)
+    [id virtual=%| [(~(got by fields) 'description') done.deadline actionable]]
     ::
       [%x %pool %title host=@ta name=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
-    ``goal-peek+!>([%pool-title title.pool])  
+    ``goal-peek+!>([%pool-title (~(gut by properties.pool) 'title' '')])  
     ::
       [%x %pool %note host=@ta name=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
-    ``goal-peek+!>([%pool-note note.pool])  
+    ``goal-peek+!>([%pool-note (~(gut by properties.pool) 'note' '')])  
     ::
       [%x %goal %desc host=@ta name=@ta key=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =id:gol     [pin key.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
-    =/  =goal:gol  (~(got by goals.pool) id)
-    ``goal-peek+!>([%goal-desc desc.goal])  
+    =/  fields=(map @t @t)  (~(got by fields.pool) id)
+    ``goal-peek+!>([%goal-desc (~(gut by fields) 'description' '')])  
     ::
       [%x %goal %note host=@ta name=@da key=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =id:gol     [pin key.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
-    =/  =goal:gol  (~(got by goals.pool) id)
-    ``goal-peek+!>([%goal-note note.goal])  
+    =/  fields=(map @t @t)  (~(got by fields.pool) id)
+    ``goal-peek+!>([%goal-note (~(gut by fields) 'note' '')])  
     ::
       [%x %goal %tags host=@ta name=@ta key=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
     =/  =id:gol     [pin key.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
-    =/  =goal:gol  (~(got by goals.pool) id)
-    ``goal-peek+!>([%goal-tags ~(tap in tags.goal)])  
+    =/  tags=(set @t)  (~(got by tags.pool) id)
+    ``goal-peek+!>([%goal-tags ~(tap in tags)])  
     ::
       [%x %goal %parent host=@ta name=@da key=@ta ~]
     =/  =pin:gol    [(slav %p host.pole) name.pole]
@@ -197,89 +139,12 @@
     =/  =id:gol     [pin key.pole]
     =/  =pool:gol  (~(got by pools.store) pin)
     =/  =goal:gol  (~(got by goals.pool) id)
-    ``goal-peek+!>([%loob complete.goal])  
+    ``goal-peek+!>([%loob done.deadline.goal])  
   ==
 ::
-++  on-agent
-  |=  [=wire =sign:agent:gall]
-  ^-  (quip card _this)
-  ?+    wire  (on-agent:def wire sign)
-      [%away @ @ @ *]
-    ?+    -.sign  (on-agent:def wire sign)
-        %poke-ack
-      ?~  p.sign  `this
-      %-  (slog u.p.sign)
-      =^  cards  state
-        abet:(handle-relay-poke-nack:emot wire u.p.sign)
-      [cards this]
-    ==
-    ::
-      [%pool @ @ ~] 
-    =/  =pin:gol  (de-pool-path:emot wire)
-    ?>  =(src.bowl host.pin)
-    ?+    -.sign  (on-agent:def wire sign)
-        %watch-ack
-      ?~  p.sign  `this
-      %-  (slog 'Subscribe failure.' ~)
-      %-  (slog u.p.sign)
-      =^  cards  state
-        abet:(handle-pool-watch-nack:emot pin)
-      [cards this]
-      ::
-        %kick
-      %-  (slog '%goal-store: Got kick, resubscribing...' ~)
-      :_(this [%pass wire %agent [src dap]:bowl %watch wire]~)
-      ::
-        %fact
-      ?>  =(p.cage.sign %goal-away-update)
-      =/  upd=update:v5-1:update  !<(update:v5-1:update q.cage.sign)
-      =^  cards  state
-        abet:(handle-etch-pool-update:emot pin upd)
-      [cards this]
-    ==
-  ==
-::
-++  on-arvo
-  |=  [=(pole knot) =sign-arvo]
-  ^-  (quip card _this)
-  ?+    pole  (on-arvo:def pole sign-arvo)
-      [%vent @ @ @ ~]
-    ?.  ?=([%khan %arow *] sign-arvo)  (on-arvo:def pole sign-arvo)
-    %-  (slog ?:(?=(%.y -.p.sign-arvo) ~ p.p.sign-arvo))
-    :_(this (vent-arow:vio pole p.sign-arvo))
-    ::
-      [%send-dot v=@ ~]
-    ?+    sign-arvo  (on-arvo pole sign-arvo)
-        [%behn %wake *]
-      ~&  %sending-dot
-      :_  this
-      =/  view-path=path  /view/[v.pole]
-      =/  cack-path=path  /check-ack/[v.pole]
-      :~  [%give %fact ~[view-path] goal-view-send+!>([%dot view-path])]
-          [%pass cack-path %arvo %b %wait (add now.bowl ~s10)]
-      ==
-    ==
-    ::
-      [%check-ack v=@ ~]
-    =/  =vid:vyu  (slav %uv v.pole)
-    ?+    sign-arvo  (on-arvo pole sign-arvo)
-        [%behn %wake *]
-      ~&  %checking-ack
-      ?:  ack:(~(got by views) vid)
-        =/  [ack=_| =view:vyu]  (~(got by views) vid)
-        :_  this(views (~(put by views) vid [| view]))
-        =/  next=@da  (add now.bowl ~s10)
-        [%pass /send-dot/[v.pole] %arvo %b %wait next]~
-      :_  this(views (~(del by views) vid))
-      [%give %kick ~[/view/[v.pole]] ~]~
-    ==
-  ==
-::
+++  on-watch  on-watch:def
+++  on-leave  on-leave:def
+++  on-agent  on-agent:def
+++  on-arvo   on-arvo:def
 ++  on-fail   on-fail:def
---
-|_  [=bowl:gall cards=(list card)]
-+*  core  .
-++  abet  [(flop cards) state]
-++  emit  |=(=card core(cards [card cards]))
-++  emil  |=(cadz=(list card) core(cards (weld cadz cards)))
 --

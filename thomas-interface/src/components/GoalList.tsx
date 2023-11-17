@@ -6,6 +6,7 @@ import { FiCopy } from 'react-icons/fi';
 
 type Goal = {
   id: string,
+  tags: string[],
   description: string,
   complete: boolean,
   actionable: boolean
@@ -201,7 +202,7 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
     };
   
     fetchGoals();
-  }, [refresh, isPool]);
+  }, [refresh, isPool, host, name, goalKey]);
 
   const moveGoalUp = async (id: string) => {
     const index = _.findIndex(goals, { id });

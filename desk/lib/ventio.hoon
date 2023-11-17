@@ -176,6 +176,26 @@
   $(now +(now))
 :: miscellaneous utils
 ::
+:: only works for agents which use lib/vent.hoon agent transformer
+::
+++  agent-send-cards
+  |=  [=dude:gall cards=(list card:agent:gall)]
+  =/  m  (strand ,~)
+  ^-  form:m
+  ;<  our=@p  bind:m  get-our
+  (poke [our dude] send-cards+!>(`noun`cards))
+:: only works for agents which use lib/vent.hoon agent transformer
+::
+++  agent-send-card
+  |=  [=dude:gall =card:agent:gall]
+  =/  m  (strand ,~)
+  ^-  form:m
+  (agent-send-cards dude ~[card])
+::
+++  agent-take-sign  !!
+::
+++  agent-take-sign-arvo  !!
+::
 ++  take-special-fact
   |*  [=wire =mark =mold]
   |=  take=$-(mold ?)

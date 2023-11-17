@@ -1,14 +1,9 @@
 /-  *goals
 |%
-+$  action  $%(util-action pool-action goal-action local-action)
-+$  util-action
-  $%  [%subscribe =pin]
-      [%unsubscribe =pin]
-  ==
++$  action  $%(pool-action goal-action local-action)
 +$  local-action
   $%  [%slot-above dis=id dat=id]  :: slot dis above dat
       [%slot-below dis=id dat=id]  :: slot dis below dat
-      [%reorder-pools pools=(list pin)]
   ==
 ++  pool-action
   =<  pool-action
@@ -29,8 +24,6 @@
   +$  hitch
     $%  [%edit-pool-title =pin title=@t]
         [%edit-pool-note =pin note=@t]
-        [%add-field-type =pin field=@t =field-type]
-        [%del-field-type =pin field=@t]
     ==
   --
 ++  goal-action
@@ -55,22 +48,20 @@
           [%unmark-actionable =id]
           [%mark-complete =id]
           [%unmark-complete =id]
-          [%update-goal-perms =id chief=ship rec=_| spawn=(set ship)]
-          [%reorder-roots =pin roots=(list id)]
-          [%reorder-young =id young=(list id)]
+          [%update-goal-perms =id chief=ship rec=_| =deputies]
       ==
     +$  hitch
       $%  [%edit-goal-desc =id desc=@t]
           [%edit-goal-note =id note=@t]
-          [%add-goal-tag =id =tag]
-          [%del-goal-tag =id =tag]
-          [%put-goal-tags =id tags=(set tag)]
-          [%add-field-data =id field=@t =field-data]
+          [%add-goal-tag =id tag=@t]
+          [%del-goal-tag =id tag=@t]
+          [%put-goal-tags =id new-tags=(set @t)]
+          [%add-field-data =id field=@t data=@t]
           [%del-field-data =id field=@t]
       ==
     --
   +$  local
-    $%  [%put-private-tags =id tags=(set tag)]
+    $%  [%put-private-tags =id tags=(set @t)]
     ==
   --
 ::

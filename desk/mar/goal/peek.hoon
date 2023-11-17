@@ -1,5 +1,5 @@
 /-  *peek
-/+  *gol-cli-json, v=gol-cli-view
+/+  *gol-cli-json
 |_  pyk=peek
 ++  grow
   |%
@@ -11,7 +11,6 @@
     ^-  ^json
     ?-    -.pyk
       %store  (frond %store (enjs-store store.pyk))
-      %views  (frond %views (views:enjs:v views.pyk))
       ::
         %pools-index
       :-  %a
@@ -49,7 +48,7 @@
       %pool-note   s+note.pyk
       %goal-desc   s+desc.pyk
       %goal-note   s+note.pyk
-      %goal-tags   a+(turn tags.pyk enjs-tag)
+      %goal-tags   a+(turn tags.pyk (lead %s))
       %uid         ?~(id.pyk ~ (enjs-id u.id.pyk))
       %loob        b+loob.pyk
     ==

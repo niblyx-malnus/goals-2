@@ -140,19 +140,25 @@
   |=  =goals:gol
   ^-  goals:gol
   :: assert par/kids doubly-linked
-  ?.  (doubly-own-linked goals)  ~|("ownership not doubly linked" !!)
+  ?.  (doubly-own-linked goals)
+    ~|("ownership not doubly linked" !!)
   :: assert nodes doubly-linked
-  ?.  (doubly-dag-linked goals)  ~|("DAG not doubly linked" !!)
+  ?.  (doubly-dag-linked goals)
+    ~|("DAG not doubly linked" !!)
   :: assert corresponding kickoffs and deadlines are linked
-  ?.  (kd-pairs goals)  ~|("kickoffs not linked to deadlines" !!)
+  ?.  (kd-pairs goals)
+    ~|("kickoffs not linked to deadlines" !!)
   :: assert all par/kids relationships reflects containment (held-yoke)
   ?.  (ownership-containment goals)
     ~|("some goals owned but not contained" !!)
   :: assert actionable goals have no kids or nested goals
-  ?.  (bare-actionable goals)  ~|("actionable has nested" !!)
+  ?.  (bare-actionable goals)
+    ~|("actionable has nested" !!)
   :: assert traversal from roots produces correctly ordered moments
-  ?.  (check-bound-mismatch goals)  ~|("bound-mismatch-fail" !!)
+  ?.  (check-bound-mismatch goals)
+    ~|("bound-mismatch-fail" !!)
   :: assert no completed deadline is right of any incomplete deadline
-  ?.  (check-plete-mismatch goals)  ~|("plete-mismatch-fail" !!)
+  ?.  (check-plete-mismatch goals)
+    ~|("plete-mismatch-fail" !!)
   goals
 --

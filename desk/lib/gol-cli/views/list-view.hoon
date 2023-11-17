@@ -146,12 +146,7 @@
       complete.goal
       actionable.goal
       chief.goal
-      spawn.goal
-      owner.goal
-      birth.goal
-      author.goal
-      desc.goal
-      note.goal
+      deputies.goal
       tags.goal
       fields.goal
       stock.goal
@@ -172,7 +167,7 @@
 ++  filter-tags
   |=  $:  =id:gol
           method=?(%any %all)
-          tags=(set tag:gol)
+          tags=(set @t)
       ==
   ^-  ?
   =/  =pool:gol  (~(got by pools.store) pin.id)
@@ -192,7 +187,7 @@
         first-gen-only+bo
         actionable-only+bo
         method+method
-        tags+(as tag:dejs:j)
+        tags+(as so)
     ==
   ::
   ++  method
@@ -240,12 +235,7 @@
       complete             complete
       actionable           actionable
       chief                chief
-      spawn                spawn
-      owner                owner
-      birth                birth
-      author               author
-      desc                 desc
-      note                 note
+      deputies             deputies
       tags                 tags
       fields               fields
       stock                stock
@@ -287,7 +277,7 @@
         [%first-gen-only b+first-gen-only.parm]
         [%actionable-only b+actionable-only.parm]
         [%method s+method.parm]
-        [%tags a+(turn ~(tap in tags.parm) enjs-tag:j)]
+        [%tags a+(turn ~(tap in tags.parm) (lead %s))]
     ==
   ++  type
     |=  =type:list-view:vyu

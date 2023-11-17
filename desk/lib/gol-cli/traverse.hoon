@@ -6,6 +6,7 @@
 ++  iflo  iflo:nd
 ++  oflo  oflo:nd
 ::
+:: TODO: these should be cores
 :: "engine" used to perform different kinds
 :: of graph traversals using the traverse function
 ++  gine
@@ -27,8 +28,8 @@
   gine(exit |~([=nod vis=(map nod med)] (~(got by vis) nod)))
 ::
 :: print nodes for debugging cycles
-++  print-id  |=(=id:gol (trip desc:(~(got by goals) id)))
-++  print-nid  |=(=nid:gol `tape`(weld (trip `@t`-.nid) (print-id id.nid)))
+:: ++  print-id  |=(=id:gol (trip (~(got by fields:(~(got by goals) id)) 'description')))
+:: ++  print-nid  |=(=nid:gol `tape`(weld (trip `@t`-.nid) (print-id id.nid)))
 ::
 :: traverse the underlying DAG (directed acyclic graph)
 ++  traverse
@@ -120,7 +121,7 @@
       init  |=(=nid:gol (~(has in (flo nid)) dst))  :: check for dst
       stop  |=([nid:gol out=?] out)  :: stop on true
       meld  |=([nid:gol nid:gol a=? b=?] |(a b))
-      prnt  print-nid
+      :: prnt  print-nid
     ==
   (((traverse nid:gol ? ?) ginn ~) src)
 ::
@@ -190,7 +191,7 @@
           (some (~(uni in *edges:gol) u.b))
         (some (~(uni in u.a) u.b))
       ::
-      prnt  print-nid
+      :: prnt  print-nid
     ==
   (((traverse nid:gol (unit edges:gol) (unit edges:gol)) ginn ~) src)
 ::
@@ -223,8 +224,11 @@
     ==
   (((traverse nid:gol ? (set nid:gol)) gine ~) src)
 ::
-++  done  |=(=id:gol complete:(~(got by goals) id))
-++  nond  |=(=id:gol !complete:(~(got by goals) id))
+++  plyt  |=(=id:gol done:(got-node:nd d+id))
+++  nolp  |=(=id:gol !done:(got-node:nd d+id))
+::
+++  done  |=(=nid:gol done:(got-node:nd nid))
+++  nond  |=(=nid:gol !done:(got-node:nd nid))
 ::
 :: for use with %[un]mark-complete
 :: check if there are any uncompleted goals to the left OR
@@ -234,7 +238,7 @@
   |=  =id:gol
   ^-  ?
   =/  flo  ?-(dir %l iflo, %r oflo)
-  =/  pyt  ?-(dir %l nond, %r done)
+  =/  pyt  ?-(dir %l nolp, %r plyt)
   =/  ginn  (ginn nid:gol ?)
   =.  ginn
     %=  ginn
@@ -250,12 +254,36 @@
 ++  ryte-completed    (get-plete %r)
 ++  left-uncompleted  (get-plete %l)
 ::
+:: for use with %[un]mark-done
+:: check if there are any undone nodes to the left OR
+:: check if there are any done nodes to the right
+++  check-done-trail
+  |=  dir=?(%l %r)
+  |=  nod=nid:gol
+  ^-  ?
+  =/  flo  ?-(dir %l iflo, %r oflo)
+  =/  don  ?-(dir %l nond, %r done)
+  =/  ginn  (ginn nid:gol _|)
+  =.  ginn
+    %=  ginn
+      flow  |=(=nid:gol ~(tap in (flo nid)))
+      ::
+      :: check doneness of nodes in the flow
+      init  |=(=nid:gol &(!=(nod nid) (don nid)))
+      stop  |=([nid:gol out=_|] out)  :: stop on true
+      meld  |=([nid:gol nid:gol a=_| b=_|] |(a b))
+    ==
+  (((traverse nid:gol _| _|) ginn ~) nod)
+::
+++  right-done   (check-done-trail %r)
+++  left-undone  (check-done-trail %l)
+::
 ++  plete-visit
   |=  dir=?(%l %r)
   |=  [=nid:gol vis=(map nid:gol (unit ?))]
   ^-  (map nid:gol (unit ?))
   =/  flo  ?-(dir %l iflo, %r oflo)
-  =/  pyt  ?-(dir %l nond, %r done)
+  =/  pyt  ?-(dir %l nolp, %r plyt)
   =/  gine  (gine nid:gol (unit ?) (map nid:gol (unit ?)))
   =.  gine
     %=  gine
@@ -273,10 +301,37 @@
         ?:  =(%k -.nid)
           out
         ?:  (pyt id.nid) :: %l: if I am incomplete
-          (some %.y) :: %l: return that there is left-incomplete
-        ?:  u.out :: %l: if I am complete and there is left-incomplete
-          ~ :: fail
-        (some %.n) :: %l: else return that there is no left-incomplete
+          (some %.y)     :: %l: return that there is left-incomplete
+        ?:  u.out  ~     :: %l: if I am complete and there is left-incomplete
+        (some %.n)       :: %l: else return that there is no left-incomplete
+      exit  |=([=nid:gol vis=(map nid:gol (unit ?))] vis)
+    ==
+  (((traverse nid:gol (unit ?) (map nid:gol (unit ?))) gine vis) nid)
+::
+++  done-visit
+  |=  dir=?(%l %r)
+  |=  [=nid:gol vis=(map nid:gol (unit ?))]
+  ^-  (map nid:gol (unit ?))
+  =/  flo  ?-(dir %l iflo, %r oflo)
+  =/  don  ?-(dir %l nond, %r done)
+  =/  gine  (gine nid:gol (unit ?) (map nid:gol (unit ?)))
+  =.  gine
+    %=  gine
+      flow  |=(=nid:gol ~(tap in (flo nid)))
+      init  |=(nid:gol (some %.n))
+      stop  |=([nid:gol out=(unit ?)] =(~ out))
+      meld  
+        |=  [nid:gol nid:gol a=(unit ?) b=(unit ?)]
+        ?~  a  ~
+        ?~  b  ~
+        (some |(u.a u.b))
+      land
+        |=  [=nid:gol out=(unit ?) ?]
+        ?~  out  ~    :: %l: propagate failure
+        ?:  (don nid) :: %l: if I am undone
+          (some %.y)  :: %l: return that there is left-undone
+        ?:  u.out  ~  :: %l: if I am done and there is left-undone, fail
+        (some %.n)    :: %l: else return that there is no left-undone
       exit  |=([=nid:gol vis=(map nid:gol (unit ?))] vis)
     ==
   (((traverse nid:gol (unit ?) (map nid:gol (unit ?))) gine vis) nid)
@@ -429,7 +484,7 @@
         %+  murn
           ~(tap in (iflo nid))
         |=  =nid:gol
-        ?:  complete:(~(got by goals) id.nid)
+        ?:  done:(got-node:nd d+id.nid)
           ~
         (some nid)
       ::
@@ -440,7 +495,7 @@
         |=  [=nid:gol out=(set id:gol) ?]
         ::
         :: a completed goal has no harvest
-        ?:  complete:(~(got by goals) id.nid)
+        ?:  done:(got-node:nd d+id.nid)
           ~
         ::
         :: in general, the harvest of a node is the union of the
@@ -628,7 +683,7 @@
       flow  |=(=id:gol =/(par par:(~(got by goals) id) ?~(par ~ [u.par]~)))
       land  |=([=id:gol =stock:gol ?] [[id chief:(~(got by goals) id)] stock])
       exit  |=([=id:gol vis=(map id:gol stock:gol)] vis)
-      prnt  print-id
+      :: prnt  print-id
     ==
   (((traverse gaso) gine vis) id)
 ::
@@ -695,7 +750,7 @@
 ++  ryte-bound  |=(=nid:gol (~(got by ((get-bounds %r) nid ~)) nid))
 ++  left-plumb  |=(=nid:gol (~(got by ((plomb %l) nid ~)) nid))
 ++  ryte-plumb  |=(=nid:gol (~(got by ((plomb %r) nid ~)) nid))
-++  get-stock  |=(=id:gol (~(got by (get-stocks id ~)) id))
+++  get-stock   |=(=id:gol (~(got by (get-stocks id ~)) id))
 ::
 ++  get-ranks
   |=  =stock:gol
@@ -709,7 +764,6 @@
     ranks  (~(put by ranks) [chief id]:i.stock)
   ==
 ::
-:: get the left or right bound of a node (assumes correct moment order)
 ++  get-rank
   |=  [mod=ship =id:gol]
   ^-  (unit id:gol)

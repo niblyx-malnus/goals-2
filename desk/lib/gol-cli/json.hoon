@@ -25,48 +25,42 @@
         [%unmark-actionable (ot ~[id+id])]
         [%mark-complete (ot ~[id+id])]
         [%unmark-complete (ot ~[id+id])]
-        [%update-goal-perms (ot ~[id+id chief+ship rec+bo spawn+set-ships])]
-        [%reorder-roots (ot ~[pin+pin roots+(ar id)])]
-        [%reorder-young (ot ~[id+id young+(ar id)])]
         [%update-pool-perms (ot ~[pin+pin new+pool-perms])]
         [%edit-goal-desc (ot ~[id+id desc+so])]
         [%edit-pool-title (ot ~[pin+pin title+so])]
         [%edit-goal-note (ot ~[id+id note+so])]
         [%edit-pool-note (ot ~[pin+pin note+so])]
-        [%add-goal-tag (ot ~[id+id tag+tag])]
-        [%del-goal-tag (ot ~[id+id tag+tag])]
-        [%put-goal-tags (ot ~[id+id tags+(as tag)])]
-        [%add-field-type (ot ~[pin+pin field+so field-type+field-type])]
-        [%del-field-type (ot ~[pin+pin field+so])]
-        [%add-field-data (ot ~[id+id field+so field-data+field-data])]
+        [%add-goal-tag (ot ~[id+id tag+so])]
+        [%del-goal-tag (ot ~[id+id tag+so])]
+        [%put-goal-tags (ot ~[id+id tags+(as so)])]
+        [%add-field-data (ot ~[id+id field+so data+so])]
         [%del-field-data (ot ~[id+id field+so])]
-        [%put-private-tags (ot ~[id+id tags+(as tag)])]
-        [%subscribe (ot ~[pin+pin])]
-        [%unsubscribe (ot ~[pin+pin])]
-        [%reorder-pools (ot ~[pools+(ar pin)])]
+        [%put-private-tags (ot ~[id+id tags+(as so)])]
     ==
   ::
   ++  tag  (ot ~[text+so color+so private+bo])
   ::
   ++  field-type
     |=  jon=json
-    ^-  ^field-type
-    %.  jon
-    %-  of
-    :~  [%ct (as so)]
-        [%ud ul]
-        [%rd ul]
-    ==
+    !!
+    :: ^-  ^field-type
+    :: %.  jon
+    :: %-  of
+    :: :~  [%ct (as so)]
+    ::     [%ud ul]
+    ::     [%rd ul]
+    :: ==
   ::
   ++  field-data
     |=  jon=json
-    ^-  ^field-data
-    %.  jon
-    %-  of
-    :~  [%ct (ot ~[d+so])]
-        [%ud (ot ~[d+(cu |=(=@t (slav %ud t)) so)])]
-        [%rd (ot ~[d+(cu |=(=@t (slav %rd t)) so)])]
-    ==
+    !!
+    :: ^-  ^field-data
+    :: %.  jon
+    :: %-  of
+    :: :~  [%ct (ot ~[d+so])]
+    ::     [%ud (ot ~[d+(cu |=(=@t (slav %ud t)) so)])]
+    ::     [%rd (ot ~[d+(cu |=(=@t (slav %rd t)) so)])]
+    :: ==
   ::
   ++  pool-perms
     |=  jon=json
@@ -79,7 +73,7 @@
     %-  su
     ;~  pose
       (cold %admin (jest 'admin'))
-      (cold %spawn (jest 'spawn'))
+      (cold %creator (jest 'creator'))
     ==
   ++  unit-di  |=(jon=json ?~(jon ~ (some (di jon))))
   ++  unit-date  |=(jon=json ?~(jon ~ (some (date jon))))
@@ -142,38 +136,6 @@
   ++  stub  ~
   --
 ::
-++  enjs-tag
-  =,  enjs:format
-  |=  =tag
-  ^-  json
-  %-  pairs
-  :~  [%text s+text.tag]
-      [%color s+color.tag]
-      [%private b+private.tag]
-  ==
-::
-++  enjs-field-type
-  =,  enjs:format
-  |=  =field-type
-  ^-  json
-  %+  frond  -.field-type
-  ?-  -.field-type
-    %ct  a+(turn ~(tap in set.field-type) |=(=@t s+t))
-    %ud  ~
-    %rd  ~
-  ==
-::
-++  enjs-field-data
-  =,  enjs:format
-  |=  =field-data
-  ^-  json
-  %+  frond  -.field-data
-  ?-  -.field-data
-    %ct  s+d.field-data
-    %ud  s+(scot %ud d.field-data)
-    %rd  s+(scot %rd d.field-data)
-  ==
-::
 ++  enjs-store
   =,  enjs:format
   |=  =store
@@ -196,24 +158,24 @@
 ::
 ++  enjs-pool
   =,  enjs:format
-  |=  =npool
-  %-  pairs
-  :~  [%froze (enjs-pool-froze froze.npool owner.nexus.npool)]
-      [%perms (enjs-pool-perms perms.nexus.npool)]
-      [%nexus (enjs-pool-nexus nexus.npool)]
-      [%hitch (enjs-pool-hitch hitch.npool)]
-      [%trace (enjs-pool-trace trace.npool)]
-  ==
+  |=  =pool
+  !!
+  :: |=  =npool
+  :: %-  pairs
+  :: :~  [%perms (enjs-pool-perms perms.nexus.npool)]
+  ::     [%nexus (enjs-pool-nexus nexus.npool)]
+  ::     [%trace (enjs-pool-trace trace.npool)]
+  :: ==
 ::
-++  enjs-pool-froze
-  =,  enjs:format
-  |=  [froze=pool-froze owner=^ship]
-  ^-  json
-  %-  pairs
-  :~  [%owner (ship owner)]
-      [%birth (numb (unm:chrono:userlib birth.froze))]
-      [%creator (ship creator.froze)]
-  ==
+:: ++  enjs-pool-froze
+::   =,  enjs:format
+::   |=  [froze=pool-froze owner=^ship]
+::   ^-  json
+::   %-  pairs
+::   :~  [%owner (ship owner)]
+::       [%birth (numb (unm:chrono:userlib birth.froze))]
+::       [%creator (ship creator.froze)]
+::   ==
 ::
 ++  enjs-pool-perms
   =,  enjs:format
@@ -226,34 +188,34 @@
       [%role ?~(role ~ s+u.role)]
   ==
 ::
-++  enjs-pool-nexus
-  =,  enjs:format
-  |=  nexus=pool-nexus
-  ^-  json
-  %-  pairs
-  :~  [%goals (enjs-goals goals.nexus)]
-      [%cache (enjs-goals cache.nexus)]
-  ==
+:: ++  enjs-pool-nexus
+::   =,  enjs:format
+::   |=  nexus=pool-nexus
+::   ^-  json
+::   %-  pairs
+::   :~  [%goals (enjs-goals goals.nexus)]
+::       [%cache (enjs-goals cache.nexus)]
+::   ==
+:: ::
+:: ++  enjs-pool-hitch
+::   =,  enjs:format
+::   |=  ph=pool-hitch
+::   ^-  json
+::   %-  pairs
+::   :~  [%title s+title.ph]
+::       [%note s+note.ph]
+::       :: [%fields (enjs-field-types fields.ph)]
+::   ==
 ::
-++  enjs-pool-hitch
-  =,  enjs:format
-  |=  ph=pool-hitch
-  ^-  json
-  %-  pairs
-  :~  [%title s+title.ph]
-      [%note s+note.ph]
-      [%fields (enjs-field-types fields.ph)]
-  ==
-::
-++  enjs-field-types
-  =,  enjs:format
-  |=  fields=(map @t field-type)
-  ^-  json
-  %-  pairs
-  %+  turn  ~(tap by fields)
-  |=  [field=@t =field-type]
-  ^-  [@t json]
-  [field (enjs-field-type field-type)]
+:: ++  enjs-field-types
+::   =,  enjs:format
+::   |=  fields=(map @t field-type)
+::   ^-  json
+::   %-  pairs
+::   %+  turn  ~(tap by fields)
+::   |=  [field=@t =field-type]
+::   ^-  [@t json]
+::   [field (enjs-field-type field-type)]
 ::
 ++  enjs-yoke
   =,  enjs:format
@@ -274,33 +236,33 @@
       [%goal (enjs-goal goal)]
   ==
 ::
-++  enjs-pex  enjs-pool-trace
+:: ++  enjs-pex  enjs-pool-trace
+:: ::
+:: ++  enjs-pool-trace
+::   =,  enjs:format
+::   |=  trace=pool-trace
+::   ^-  json
+::   %-  pairs
+::   :~  [%roots a+(turn roots.trace enjs-id)]
+::       [%roots-by-precedence a+(turn roots-by-precedence.trace enjs-id)]
+::       [%roots-by-kickoff a+(turn roots-by-kickoff.trace enjs-id)]
+::       [%roots-by-deadline a+(turn roots-by-deadline.trace enjs-id)]
+::       [%cache-roots a+(turn cache-roots.trace enjs-id)]
+::       [%cache-roots-by-precedence a+(turn cache-roots-by-precedence.trace enjs-id)]
+::       [%cache-roots-by-kickoff a+(turn cache-roots-by-kickoff.trace enjs-id)]
+::       [%cache-roots-by-deadline a+(turn cache-roots-by-deadline.trace enjs-id)]
+::   ==
 ::
-++  enjs-pool-trace
-  =,  enjs:format
-  |=  trace=pool-trace
-  ^-  json
-  %-  pairs
-  :~  [%roots a+(turn roots.trace enjs-id)]
-      [%roots-by-precedence a+(turn roots-by-precedence.trace enjs-id)]
-      [%roots-by-kickoff a+(turn roots-by-kickoff.trace enjs-id)]
-      [%roots-by-deadline a+(turn roots-by-deadline.trace enjs-id)]
-      [%cache-roots a+(turn cache-roots.trace enjs-id)]
-      [%cache-roots-by-precedence a+(turn cache-roots-by-precedence.trace enjs-id)]
-      [%cache-roots-by-kickoff a+(turn cache-roots-by-kickoff.trace enjs-id)]
-      [%cache-roots-by-deadline a+(turn cache-roots-by-deadline.trace enjs-id)]
-  ==
-::
-++  enjs-nex
-  =,  enjs:format
-  |=  =nex
-  ^-  json
-  :-  %a  %+  turn  ~(tap by nex) 
-  |=  [=id nexus=goal-nexus trace=goal-trace] 
-  %-  pairs
-  :~  [%id (enjs-id id)]
-      [%goal (enjs-goal-nexus-trace nexus trace)]
-  ==
+:: ++  enjs-nex
+::   =,  enjs:format
+::   |=  =nex
+::   ^-  json
+::   :-  %a  %+  turn  ~(tap by nex) 
+::   |=  [=id nexus=goal-nexus trace=goal-trace] 
+::   %-  pairs
+::   :~  [%id (enjs-id id)]
+::       [%goal (enjs-goal-nexus-trace nexus trace)]
+::   ==
 ::
 ++  enjs-id-v
   =,  enjs:format
@@ -311,33 +273,35 @@
       [%virtual b+v]
   ==
 ::
-++  enjs-goal-nexus-trace
-  =,  enjs:format
-  |=  nexus=[goal-nexus goal-trace]
-  ^-  json
-  %-  pairs
-  :~  [%par ?~(par.nexus ~ (enjs-id u.par.nexus))]
-      [%kids a+(turn ~(tap in kids.nexus) enjs-id)]
-      [%kickoff (enjs-node kickoff.nexus)]
-      [%deadline (enjs-node deadline.nexus)]
-      [%complete b+complete.nexus]
-      [%actionable b+actionable.nexus]
-      [%chief (ship chief.nexus)]
-      [%spawn a+(turn ~(tap in spawn.nexus) ship)]
-      [%stock (enjs-stock stock.nexus)]
-      [%ranks (enjs-ranks ranks.nexus)]
-      [%young a+(turn young.nexus enjs-id-v)]
-      [%young-by-precedence a+(turn young-by-precedence.nexus enjs-id-v)]
-      [%young-by-kickoff a+(turn young-by-kickoff.nexus enjs-id-v)]
-      [%young-by-deadline a+(turn young-by-deadline.nexus enjs-id-v)]
-      [%progress (enjs-progress progress.nexus)]
-      [%prio-left a+(turn ~(tap in prio-left.nexus) enjs-id)]
-      [%prio-ryte a+(turn ~(tap in prio-ryte.nexus) enjs-id)]
-      [%prec-left a+(turn ~(tap in prec-left.nexus) enjs-id)]
-      [%prec-ryte a+(turn ~(tap in prec-ryte.nexus) enjs-id)]
-      [%nest-left a+(turn ~(tap in nest-left.nexus) enjs-id)]
-      [%nest-ryte a+(turn ~(tap in nest-ryte.nexus) enjs-id)]
-  ==
+:: ++  enjs-goal-nexus-trace
+::   =,  enjs:format
+::   |=  nexus=[goal-nexus goal-trace]
+::   ^-  json
+::   %-  pairs
+::   :~  [%par ?~(par.nexus ~ (enjs-id u.par.nexus))]
+::       [%kids a+(turn ~(tap in kids.nexus) enjs-id)]
+::       [%kickoff (enjs-node kickoff.nexus)]
+::       [%deadline (enjs-node deadline.nexus)]
+::       [%complete b+complete.nexus]
+::       [%actionable b+actionable.nexus]
+::       [%chief (ship chief.nexus)]
+::       [%deputies a+(turn ~(tap in deputies.nexus) ship)]
+::       [%tags a+(turn ~(tap in tags.nexus) (lead %s))]
+::       [%fields (enjs-fields fields.nexus)]
+::       [%stock (enjs-stock stock.nexus)]
+::       [%ranks (enjs-ranks ranks.nexus)]
+::       [%young a+(turn young.nexus enjs-id-v)]
+::       [%young-by-precedence a+(turn young-by-precedence.nexus enjs-id-v)]
+::       [%young-by-kickoff a+(turn young-by-kickoff.nexus enjs-id-v)]
+::       [%young-by-deadline a+(turn young-by-deadline.nexus enjs-id-v)]
+::       [%progress (enjs-progress progress.nexus)]
+::       [%prio-left a+(turn ~(tap in prio-left.nexus) enjs-id)]
+::       [%prio-ryte a+(turn ~(tap in prio-ryte.nexus) enjs-id)]
+::       [%prec-left a+(turn ~(tap in prec-left.nexus) enjs-id)]
+::       [%prec-ryte a+(turn ~(tap in prec-ryte.nexus) enjs-id)]
+::       [%nest-left a+(turn ~(tap in nest-left.nexus) enjs-id)]
+::       [%nest-ryte a+(turn ~(tap in nest-ryte.nexus) enjs-id)]
+::   ==
 ::
 ++  enjs-stock
   =,  enjs:format
@@ -374,42 +338,20 @@
   =,  enjs:format
   |=  =goal
   ^-  json
-  %-  pairs
-  :~  [%froze (enjs-goal-froze froze:`ngoal`goal)]
-      [%nexus (enjs-goal-nexus-trace [nexus trace]:`ngoal`goal)]
-      [%hitch (enjs-goal-hitch hitch:`ngoal`goal)]
-  ==
-::
-++  enjs-goal-froze
-  =,  enjs:format
-  |=  froze=goal-froze
-  ^-  json
-  %-  pairs
-  :~  [%owner (ship owner.froze)]
-      [%birth (numb (unm:chrono:userlib birth.froze))]
-      [%author (ship author.froze)]
-  ==
-::
-++  enjs-goal-hitch
-  =,  enjs:format
-  |=  gh=goal-hitch
-  ^-  json
-  %-  pairs
-  :~  [%desc s+desc.gh]
-      [%note s+note.gh]
-      [%tags a+(turn ~(tap in tags.gh) enjs-tag)]
-      [%fields (enjs-fields fields.gh)]
-  ==
+  !!
+  :: %-  pairs
+  :: :~  [%nexus (enjs-goal-nexus-trace [nexus trace]:`ngoal`goal)]
+  :: ==
 ::
 ++  enjs-fields
   =,  enjs:format
-  |=  fields=(map @t field-data)
+  |=  fields=(map @t @t)
   ^-  json
   %-  pairs
   %+  turn  ~(tap by fields)
-  |=  [field=@t =field-data]
+  |=  [field=@t data=@t]
   ^-  [@t json]
-  [field (enjs-field-data field-data)]
+  [field s+data]
 ::
 ++  enjs-node
    =,  enjs:format
@@ -419,10 +361,10 @@
    :~  [%moment (enjs-moment moment.node)]
        [%inflow a+(turn ~(tap in inflow.node) enjs-nid)]
        [%outflow a+(turn ~(tap in outflow.node) enjs-nid)]
-       [%left-bound (frond %moment (enjs-moment left-bound.node))]
-       [%ryte-bound (frond %moment (enjs-moment ryte-bound.node))]
-       [%left-plumb (numb left-plumb.node)]
-       [%ryte-plumb (numb ryte-plumb.node)]
+       :: [%left-bound (frond %moment (enjs-moment left-bound.node))]
+       :: [%ryte-bound (frond %moment (enjs-moment ryte-bound.node))]
+       :: [%left-plumb (numb left-plumb.node)]
+       :: [%ryte-plumb (numb ryte-plumb.node)]
    ==
 ::
 ++  enjs-moment
