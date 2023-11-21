@@ -4,15 +4,15 @@
 |%
 +$  card  card:agent:gall
 ::
-+$  state-5-9  [%'5-9' =store]
-+$  state-5-8  [%'5-8' =store:old-goals]
++$  state-5-12  [%'5-12' =store]
++$  state-5-11  [%'5-11' =store:old-goals]
 +$  versioned-state
-  $%  state-5-8
-      state-5-9
+  $%  state-5-11
+      state-5-12
   ==
 ::
 ++  upgrade-io
-  |=  [new=state-5-9 =bowl:gall]
+  |=  [new=state-5-12 =bowl:gall]
   |^  ^-  (list card)
   :: TODO: Follow all pools and prompt others to refollow?
   ;:  weld
@@ -34,10 +34,10 @@
 ::
 ++  convert-to-latest
   |=  old=versioned-state
-  ^-  state-5-9
+  ^-  state-5-12
   ?-  -.old
-    %'5-8'  (convert-5-8-to-5-9 old)
-      %'5-9'
+    %'5-11'  (convert-5-11-to-5-12 old)
+      %'5-12'
     %=    old
         pools.store
       %-  ~(gas by *pools)
@@ -50,30 +50,8 @@
 ::
 :: Development states
 ::
-++  convert-5-8-to-5-9
-  |=  =state-5-8
-  ^-  state-5-9
-  =/  =pools
-    %-  ~(gas by *pools)
-    %+  turn  ~(tap by pools.store.state-5-8)
-    |=  [=pin pool:old-goals]
-    ^-  [^pin pool]
-    =/  =^goals
-      %-  ~(gas by *^goals)
-      %+  turn  ~(tap by goals)
-      |=  [=id goal:old-goals]
-      ^-  [^id goal]
-      [id par kids kickoff deadline actionable chief deputies]
-    :-  pin
-    :*  goals
-        ~
-        owner
-        perms
-        properties
-        (~(run by ^goals) |=(goal:old-goals tags))
-        (~(run by ^goals) |=(goal:old-goals fields))
-        tag-properties
-        field-properties
-    ==
-  [%'5-9' pools ~ local.store.state-5-8]
+++  convert-5-11-to-5-12
+  |=  =state-5-11
+  ^-  state-5-12
+  !!
 --

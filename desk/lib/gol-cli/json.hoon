@@ -10,8 +10,6 @@
     %-  of
     :~  [%spawn-pool (ot ~[title+so])]
         [%clone-pool (ot ~[pin+pin title+so])]
-        [%cache-pool (ot ~[pin+pin])]
-        [%renew-pool (ot ~[pin+pin])]
         [%trash-pool (ot ~[pin+pin])]
         [%spawn-goal (ot ~[pin+pin upid+unit-id desc+so actionable+bo])]
         [%cache-goal (ot ~[id+id])]
@@ -25,7 +23,7 @@
         [%unmark-actionable (ot ~[id+id])]
         [%mark-complete (ot ~[id+id])]
         [%unmark-complete (ot ~[id+id])]
-        [%update-pool-perms (ot ~[pin+pin new+pool-perms])]
+        [%update-pool-perms (ot ~[pin+pin new+perms])]
         [%edit-goal-desc (ot ~[id+id desc+so])]
         [%edit-pool-title (ot ~[pin+pin title+so])]
         [%edit-goal-note (ot ~[id+id note+so])]
@@ -62,16 +60,17 @@
     ::     [%rd (ot ~[d+(cu |=(=@t (slav %rd t)) so)])]
     :: ==
   ::
-  ++  pool-perms
+  ++  perms
     |=  jon=json
-    ^-  (map ^ship (unit pool-role))
-    %-  ~(gas by *(map ^ship (unit pool-role)))
+    ^-  (map ^ship (unit ^role))
+    %-  ~(gas by *(map ^ship (unit ^role)))
     %.(jon (ar (ot ~[ship+ship role+unit-role])))
 
   ++  unit-role  |=(jon=json ?~(jon ~ (some (role jon))))
   ++  role
     %-  su
     ;~  pose
+      (cold %owner (jest 'owner'))
       (cold %admin (jest 'admin'))
       (cold %creator (jest 'creator'))
     ==
@@ -142,7 +141,6 @@
   ^-  json
   %-  pairs
   :~  [%pools (enjs-pools pools.store)]
-      [%cache (enjs-pools cache.store)]
       [%local a+(turn order.local.store enjs-id)]
   ==
   
@@ -177,12 +175,12 @@
 ::       [%creator (ship creator.froze)]
 ::   ==
 ::
-++  enjs-pool-perms
+++  enjs-perms
   =,  enjs:format
-  |=  perms=pool-perms
+  |=  =perms
   ^-  json
   :-  %a  %+  turn  ~(tap by perms) 
-  |=  [chip=@p role=(unit pool-role)] 
+  |=  [chip=@p role=(unit role)] 
   %-  pairs
   :~  [%ship (ship chip)]
       [%role ?~(role ~ s+u.role)]

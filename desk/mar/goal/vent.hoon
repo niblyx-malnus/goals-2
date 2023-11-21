@@ -1,20 +1,32 @@
-/-  *views
-/+  vyu=gol-cli-view
-|_  vnt=view-vent
+/-  *action
+/+  *gol-cli-json
+|_  vnt=goal-vent
 ++  grow
   |%
   ++  noun  vnt
   ++  json
     =,  enjs:format
     %.  vnt
-    |=  vnt=view-vent
+    |=  vnt=goal-vent
     ^-  ^json
     ?~  vnt  ~
-    (view-data:enjs:vyu vnt)
+    ?-    -.vnt
+        %harvest
+      :-  %a
+      %+  turn  harvest.vnt
+      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
+      %-  pairs
+      :~  [%id (enjs-id id)]
+          [%description s+desc]
+          [%complete b+complete]
+          [%actionable b+actionable]
+          [%tags a+(turn tags (lead %s))]
+      ==
+    ==
   --
 ++  grab
   |%
-  ++  noun  view-vent
+  ++  noun  goal-vent
   --
 ++  grad  %noun
 --

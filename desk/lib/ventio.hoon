@@ -5,6 +5,8 @@
 ++  vek      %goals :: this desk
 ++  vap      (rap 3 vek '-venter' ~) :: venter app
 +$  vent-id  (trel @p tid @da)
++$  gowl     bowl:gall   :: gall bowl alias
++$  sowl     bowl:spider :: spider bowl alias
 +$  request  (pair vent-id page)
 +$  package
   $:  =dock     :: destination ship/agent
@@ -64,31 +66,6 @@
   ^-  form:m
   ;<  =tube:clay  bind:m  (build-our-tube desk %json mark)
   (pure:m [mark q:(tube !>(body))])
-:: generic thread for vent-based "thread-pokes":
-::   flexible but less performant
-::   performance issues SIGNIFICANTLY ameliorated with tube-warming:
-::     https://github.com/tinnus-napbus/tube-warmer
-::   check this with: |pass [%c %stir %verb 1]
-:: /ted/venter.hoon
-:: /+  *ventio
-:: venter
-::
-++  venter
-  =,  strand=strand:spider
-  ^-  thread:spider
-  |=  arg=vase
-  =/  m  (strand ,vase)
-  ^-  form:m
-  =/  pak=(unit package)  !<((unit package) arg)
-  ?~  pak  (strand-fail %no-arg ~)
-  =+  u.pak :: expose dock, input, output, and body
-  ;<  =page       bind:m  (unpackage body input)
-  ;<  =vase       bind:m  ((vent-as-mark output) dock page)
-  :: convert to json - this allows for generic
-  :: /spider/realm/venter-package/vent/json thread format
-  ::
-  ;<  =tube:clay  bind:m  (build-our-tube desk.output mark.output %json)
-  (pure:m (tube vase))
 ::
 ++  vent
   |*  a=mold
@@ -174,6 +151,46 @@
   ?.  (~(has ju vents) dock [our tid now])
     [our tid now]
   $(now +(now))
+:: generic thread for vent-based "thread-pokes":
+::   flexible but less performant
+::   performance issues SIGNIFICANTLY ameliorated with tube-warming:
+::     https://github.com/tinnus-napbus/tube-warmer
+::   check this with: |pass [%c %stir %verb 1]
+:: /ted/venter.hoon
+:: /+  *ventio
+:: venter
+::
+++  venter
+  =,  strand=strand:spider
+  ^-  thread:spider
+  |=  arg=vase
+  =/  m  (strand ,vase)
+  ^-  form:m
+  =/  pak=(unit package)  !<((unit package) arg)
+  ?~  pak  (strand-fail %no-arg ~)
+  =+  u.pak :: expose dock, input, output, and body
+  ;<  =page       bind:m  (unpackage body input)
+  ;<  =vase       bind:m  ((vent-as-mark output) dock page)
+  :: convert to json - this allows for generic
+  :: /spider/realm/venter-package/vent/json thread format
+  ::
+  ;<  =tube:clay  bind:m  (build-our-tube desk.output mark.output %json)
+  (pure:m (tube vase))
+::
++$  vine  $-([gowl vent-id cage] shed:khan)
+::
+++  vine-thread
+  |=  =vine
+  =,  strand=strand:spider
+  ^-  thread:spider
+  |=  arg=vase
+  =/  m  (strand ,vase)
+  ^-  form:m
+  =+  !<(req=(unit [gowl request]) arg)
+  ?~  req  (strand-fail %no-arg ~)
+  =/  [=gowl vid=vent-id =mark =noun]  u.req
+  ;<  =vase  bind:m  (unpage mark noun)
+  (vine gowl vid mark vase)
 :: miscellaneous utils
 ::
 :: only works for agents which use lib/vent.hoon agent transformer
@@ -184,17 +201,43 @@
   ^-  form:m
   ;<  our=@p  bind:m  get-our
   (poke [our dude] send-cards+!>(`noun`cards))
-:: only works for agents which use lib/vent.hoon agent transformer
 ::
 ++  agent-send-card
   |=  [=dude:gall =card:agent:gall]
   =/  m  (strand ,~)
   ^-  form:m
   (agent-send-cards dude ~[card])
+:: watch from an agent (goes into wex.bowl)
 ::
-++  agent-take-sign  !!
-::
-++  agent-take-sign-arvo  !!
+++  agent-watch-path
+  |=  [=dude:gall =wire =dock =path]
+  =/  m  (strand ,~)
+  ^-  form:m
+  |^
+  :: watch dude for on-agent updates
+  ::
+  ;<  our=ship  bind:m  get-our
+  ;<  ~  bind:m  (watch /[dude]/vent-on-agent [our dude] /vent-on-agent)
+  :: send %watch card
+  ::
+  =/  =card:agent:gall  [%pass wire %agent dock %watch path]
+  ;<  ~  bind:m  (agent-send-card dude card)
+  :: catch the %watch-ack
+  ::
+  ;<  [=bowl:gall wyre=^wire =sign:agent:gall]  bind:m  take-watch-ack
+  ?>  ?=(%watch-ack -.sign)
+  ?~  p.sign
+    (pure:m ~)
+  (strand-fail %agent-watch-ack-fail u.p.sign)
+  ::
+  ++  take-watch-ack
+    %-  %^    take-special-fact
+            /[dude]/vent-on-agent
+          %noun
+        ,[bowl:gall ^wire sign:agent:gall]
+    |=  [=bowl:gall wyre=^wire =sign:agent:gall]
+    &(=(wyre wire) ?=(%watch-ack -.sign))
+  --
 ::
 ++  take-special-fact
   |*  [=wire =mark =mold]
@@ -209,7 +252,7 @@
       `[%skip ~]
     ?.  =(mark p.cage.sign.u.in.tin)
       `[%skip ~]
-    =+  !<(a=mold q.cage.sign.u.in.tin)
+    =+  ;;(a=mold q.cage.sign.u.in.tin)
     ?.  (take a)
       `[%skip ~]
     `[%done a]

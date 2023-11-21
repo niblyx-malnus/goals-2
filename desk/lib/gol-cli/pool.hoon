@@ -34,7 +34,7 @@
       (check-goal-spawn-perm u.upid mod)
   =/  goal  (init-goal id mod mod)
   =.  goals.p  (~(put by goals.p) id goal)
-  (move id upid owner.p) :: divine intervention (owner)
+  (move id upid host.pin.p) :: divine intervention (owner)
 ::
 :: Extract goal from goals
 ++  wrest-goal
@@ -45,7 +45,7 @@
   =/  prog  (progeny:tv id)
   ::
   :: Move goal to root
-  =/  pore  (move id ~ owner.p) :: divine intervention (owner)
+  =/  pore  (move id ~ host.pin.p) :: divine intervention (owner)
   ::
   :: Partition subgoals of goal from rest of goals
   =.  pore  (partition:pore prog mod)
@@ -139,7 +139,7 @@
 ++  check-pool-edit-perm
   |=  mod=ship
   ^-  ?
-  ?|  =(mod owner.p)
+  ?|  =(mod host.pin.p)
       ?=([~ %admin] (~(got by perms.p) mod))
   ==
 :: owner, admin or deputy
@@ -147,7 +147,7 @@
 ++  check-root-spawn-perm
   |=  mod=ship
   ^-  ?
-  ?|  =(mod owner.p)
+  ?|  =(mod host.pin.p)
       ?=([~ ?(%admin %creator)] (~(got by perms.p) mod))
   ==
 :: can edit pool (owner or admin)
@@ -212,17 +212,17 @@
 ++  check-pool-role-mod
   |=  [=ship mod=ship]
   ^-  ?
-  ?:  =(ship owner.p)
-    ~|("Cannot change owner perms." !!)
+  ?:  =(ship host.pin.p)
+    ~|("Cannot change host.pin.perms." !!)
   ?.  (check-pool-edit-perm mod)
     ~|("Do not have owner or admin perms." !!)
   ?:  ?&  =((~(get by perms.p) ship) (some (some %admin)))
-          !|(=(mod owner.p) =(mod ship))
+          !|(=(mod host.pin.p) =(mod ship))
       ==
     ~|("Must be owner or self to modify admin perms." !!)
   %&
 ::
-++  check-in-pool  |=(=ship |(=(ship owner.p) (~(has by perms.p) ship)))
+++  check-in-pool  |=(=ship |(=(ship host.pin.p) (~(has by perms.p) ship)))
 :: replace all chiefs of goals whose chiefs have been kicked
 ::
 ++  replace-chiefs
@@ -240,7 +240,7 @@
    :: accurate updated chief information
    ::
    =/  chiefs
-     ((chain:tv id:gol ship) (replace-chief:tv kick owner.p) kickable ~)
+     ((chain:tv id:gol ship) (replace-chief:tv kick host.pin.p) kickable ~)
    :: update goals.p to reflect new chief information
    ::
   %=  this
@@ -404,7 +404,7 @@
   ?.  (check-move-to-goal-perm kid pid mod)
     ~|("missing-move-to-goal-perms" !!)
   ::
-  =/  pore  (move-to-root kid owner.p) :: divine intervention (owner)
+  =/  pore  (move-to-root kid host.pin.p) :: divine intervention (owner)
   =/  k  (~(got by goals.p.pore) kid)
   =/  q  (~(got by goals.p.pore) pid)
   =.  goals.p.pore  (~(put by goals.p.pore) kid k(par (some pid)))
@@ -614,7 +614,7 @@
 :: If role is [~ u=~], make ship basic viewer.
 :: If role is [~ u=[~ u=?(%admin %spawn)]], make ship ?(%admin %spawn).
 ++  set-pool-role
-  |=  [=ship role=(unit (unit pool-role:gol)) mod=ship]
+  |=  [=ship role=(unit (unit role:gol)) mod=ship]
   ^-  _this
   ?>  (check-pool-role-mod ship mod)
   ?~  role

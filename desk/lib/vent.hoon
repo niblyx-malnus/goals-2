@@ -24,6 +24,7 @@
         %vent-request
       :_(this ~[(to-vine:vio vase bowl)])
         %send-cards
+      ?>  =(our src):bowl
       [;;((list card:agent:gall) q.vase) this]
     ==
   ::
@@ -51,9 +52,9 @@
     ?+    path
       =^  cards  agent  (on-watch:ag path)
       [cards this]
-      [%vent @ @ @ ~]     ?>(=(our src):bowl `this)
-      [%vent-on-arvo ~]   ?>(=(our src):bowl `this)
-      [%vent-on-agent ~]  ?>(=(our src):bowl `this) 
+      [%vent @ta @ta @ta ~]  ?>(=(src.bowl (slav %p i.t.path)) `this)
+      [%vent-on-arvo ~]      ?>(=(our src):bowl `this)
+      [%vent-on-agent ~]     ?>(=(our src):bowl `this) 
     ==
   ::
   ++  on-leave

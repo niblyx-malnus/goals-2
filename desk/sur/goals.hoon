@@ -25,20 +25,24 @@
   ==
 +$  goals  (map id goal)
 ::
-+$  pool-role   ?(%admin %creator)
-+$  pool-perms  (map ship (unit pool-role))
++$  role   ?(%owner %admin %creator)
++$  perms  (map ship (unit role))
 ::
 +$  pool
-  $:  =goals
-      cache=goals
-      owner=ship
-      perms=pool-perms
-      properties=(map @t @t)
+  $:  =pin
+      =goals
+      cache=goals :: TODO: change name to archive
+      =perms
+  ==
+::
++$  pool-data
+  $:  properties=(map @t @t)
       tags=(map id (set @t))
       fields=(map id (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
   ==
+::
 +$  pools  (map pin pool)
 ::
 +$  goal-local
@@ -52,8 +56,8 @@
 ::
 +$  store  
   $:  =pools
-      cache=pools
       =local
+      pool-info=(map pin pool-data)
   ==
 ::
 +$  node-trace

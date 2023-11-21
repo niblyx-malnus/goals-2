@@ -80,7 +80,6 @@ function Pool({ host, name }: { host: any; name: any; }) {
       console.error(error);
     }
   };
-
   return (
     <div className="bg-gray-200 h-full flex justify-center items-center">
       <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full">

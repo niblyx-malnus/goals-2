@@ -1,18 +1,18 @@
 |%
-+$  moment  (unit @da)
-+$  pin  [host=ship name=term]
-+$  id   [=pin key=@ta] :: globally unique, always references source pool
-+$  nid  [?(%k %d) =id]
-+$  stock  (list [=id chief=ship]) :: lineage; youngest to oldest
-+$  ranks  (map ship id) :: map of ship to highest ranking goal id
++$  moment    (unit @da)
++$  pin       [host=ship name=term]
++$  id        [=pin key=@ta] :: globally unique, always references source pool
++$  nid       [?(%k %d) =id]
++$  stock     (list [=id chief=ship]) :: lineage; youngest to oldest
++$  ranks     (map ship id) :: map of ship to highest ranking goal id
 +$  node
-  $:  done=$~(%| ?) :: kickoff: started; deadline: completed
+  $:  done=$~(%| ?) :: kickoff: goal started; deadline: goal completed
       =moment
       inflow=(set nid)
       outflow=(set nid)
   ==
-+$  edge  (pair nid nid)
-+$  edges  (set edge)
++$  edge      (pair nid nid)
++$  edges     (set edge)
 +$  deputies  (map ship ?(%edit %create))
 +$  goal
   $:  par=(unit id)
@@ -22,25 +22,27 @@
       actionable=?
       chief=ship
       =deputies
-      tags=(set @t)      :: metadata about tags can be kept separately at the pool level
-      fields=(map @t @t) :: leave fields incredibly general
   ==
 +$  goals  (map id goal)
 ::
-+$  pool-role  ?(%admin %creator)
-+$  pool-perms  (map ship (unit pool-role))
-::
-+$  properties  (map @t @t)
++$  role   ?(%owner %admin %creator)
++$  perms  (map ship (unit role))
 ::
 +$  pool
-  $:  =goals
-      cache=goals
-      owner=ship
-      perms=pool-perms
-      =properties
-      tag-properties=(map @t properties)
-      field-properties=(map @t properties)
+  $:  =pin
+      =goals
+      cache=goals :: TODO: change name to archive
+      =perms
   ==
+::
++$  pool-data
+  $:  properties=(map @t @t)
+      tags=(map id (set @t))
+      fields=(map id (map @t @t))
+      tag-properties=(map @t (map @t @t))
+      field-properties=(map @t (map @t @t))
+  ==
+::
 +$  pools  (map pin pool)
 ::
 +$  goal-local
@@ -54,8 +56,8 @@
 ::
 +$  store  
   $:  =pools
-      cache=pools
       =local
+      pool-info=(map pin pool-data)
   ==
 ::
 +$  node-trace

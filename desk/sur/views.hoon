@@ -50,7 +50,7 @@
   +$  data  $:(goals=(list [id pack]))
   +$  pack
     $:  =pin
-        pool-role=(unit ?(%owner pool-role))
+        pool-role=(unit role)
         par=(unit id)
         kids=(set id)
         kickoff=node
@@ -93,7 +93,7 @@
   +$  data  $:(goals=(list [id pack]))
   +$  pack
     $:  =pin
-        pool-role=(unit ?(%owner pool-role))
+        pool-role=(unit role)
         par=(unit id)
         kids=(set id)
         kickoff=node

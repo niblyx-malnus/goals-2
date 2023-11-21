@@ -13,13 +13,11 @@
   +$  mutate  $%(life-cycle nexus hitch)
   +$  life-cycle
     $%  [%clone-pool =pin title=@t]
-        [%cache-pool =pin]
-        [%renew-pool =pin]
         [%trash-pool =pin]
     ==
   +$  nexus
     $%  [%yoke =pin yoks=(list plex)]
-        [%update-pool-perms =pin new=pool-perms]
+        [%update-pool-perms =pin new=perms]
     ==
   +$  hitch
     $%  [%edit-pool-title =pin title=@t]
@@ -56,7 +54,7 @@
           [%add-goal-tag =id tag=@t]
           [%del-goal-tag =id tag=@t]
           [%put-goal-tags =id new-tags=(set @t)]
-          [%add-field-data =id field=@t data=@t]
+          [%add-field-data =id field=@t dat=@t]
           [%del-field-data =id field=@t]
       ==
     --
@@ -96,5 +94,20 @@
       [%nuke-nest-left =id]
       [%nuke-nest-ryte =id]
       [%nuke-nest =id]
+  ==
+::
++$  harvest-type
+  $%  [%main ~]
+      [%pool =pin]
+      [%goal =id]
+  ==
+::
++$  goal-view
+  $%  [%harvest type=harvest-type]
+  ==
+::
++$  goal-vent
+  $@  ~
+  $%  [%harvest harvest=(list [id @t ? ? (list @t)])]   :: id, desc, cmp, axn, tags
   ==
 --
