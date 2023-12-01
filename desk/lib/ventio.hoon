@@ -2,11 +2,8 @@
 /+  *strandio
 =,  tid=tid:rand
 |%
-++  vek      %goals :: this desk
-++  vap      (rap 3 vek '-venter' ~) :: venter app
 +$  vent-id  (trel @p tid @da)
-+$  gowl     bowl:gall   :: gall bowl alias
-+$  sowl     bowl:spider :: spider bowl alias
+::
 +$  request  (pair vent-id page)
 +$  package
   $:  =dock     :: destination ship/agent
@@ -18,6 +15,13 @@
 ::
 +$  vents  (jug dock vent-id)
 ::
+++  unique-vent
+  |=  [=dock =vents our=@p =tid now=@da]
+  ^-  vent-id
+  ?.  (~(has ju vents) dock [our tid now])
+    [our tid now]
+  $(now +(now))
+::
 ++  en-path
   |=  vid=vent-id
   ^-  path
@@ -28,29 +32,6 @@
   ^-  vent-id
   =+  ;;([%vent p=@ta q=@ta r=@ta ~] path)
   [(slav %p p.-) q.- (slav %da r.-)]
-:: forward vent requests directly to the vine
-::
-++  to-vine
-  |=  [=vase =bowl:gall]
-  ^-  card:agent:gall
-  =/  [vid=vent-id =mark =noun]  !<(request vase)
-  =/  args=cage          noun+!>((some bowl vid mark noun))
-  :: vine must have same desk and same name as agent in /ted/vines
-  ::
-  =/  =(fyrd:khan cage)  [q.byk.bowl (cat 3 'vines-' dap.bowl) args]
-  [%pass (en-path vid) %arvo %k %fard fyrd]
-::
-++  en-arow  |*(a=* `sign-arvo`[%khan %arow %& %noun !>(a)])
-++  en-eror  |=(=goof `sign-arvo`[%khan %arow %| goof])
-::
-++  vent-arow
-  |=  [=path arow=(avow:khan cage)]
-  ^-  (list card:agent:gall)
-  =/  vid=vent-id  (de-path path)
-  =/  =cage  ?-(-.arow %& p.arow, %| goof+!>(p.arow))
-  :~  [%give %fact ~[path] cage]
-      [%give %kick ~[path] ~]
-  ==
 :: translates poke-ack to vent for regular poke
 ::
 ++  just-poke
@@ -67,36 +48,36 @@
   ;<  =tube:clay  bind:m  (build-our-tube desk %json mark)
   (pure:m [mark q:(tube !>(body))])
 ::
-++  vent
-  |*  a=mold
-  =/  m  (strand ,a)
-  |=  [=dock =page]
-  ^-  form:m
-  ;<  =vase  bind:m  (vent-raw dock p.page q.page)
-  (pure:m ;;(a q.vase))
-::
 ++  unpage
   |=  =page
   =/  m  (strand ,vase)
   ^-  form:m
+  =/  warning
+    ?:  ?=(~ (mole |.(;;(type -.q.page))))  [0 ~]
+    [2 leaf+"WARNING: unpage may be passing cage"]
+  ~>  %slog.warning
   ;<  byk=beak:spider  bind:m  get-beak
   ;<  =tube:clay       bind:m  (build-our-tube q.byk %noun p.page)
   ;<  ~                bind:m  (trace (cat 3 'mark: ' p.page) ~)
   (pure:m (tube !>(q.page)))
+:: vap (local venter agent) must be %[desk-name]-venter
 ::
-++  vent-as-mark
-  |=  [=desk =mark]
-  |=  [=dock =page]
-  =/  m  (strand ,vase)
+++  get-vap
+  =/  m  (strand ,dude:gall)
   ^-  form:m
-  ;<  =vase       bind:m  (vent-raw dock page)
-  ;<  =tube:clay  bind:m  (build-our-tube desk %noun mark)
-  (pure:m (tube vase))
+  ;<  =desk  bind:m  get-desk
+  =/  vap=dude:gall  (cat 3 desk '-venter')
+  ;<  dudes=(set [=dude:gall live=?])  bind:m
+    (scry ,(set [dude:gall ?]) /ge/[desk]/$)
+  ?:  (~(has in dudes) [vap &])
+    (pure:m vap)
+  ~|("{(trip vap)} is not running" !!)
 ::
 ++  vent-soft
   |=  [=dock req=page]
   =/  m  (strand ,thread-result)
   ^-  form:m
+  ;<  vap=dude:gall  bind:m  get-vap :: get local venter agent
   :: get existing vents
   :: 
   ;<  =vents  bind:m  (scry vents /gx/[vap]/vents/noun)
@@ -145,12 +126,22 @@
     %|  (strand-fail p.thread-result)
   ==
 ::
-++  unique-vent
-  |=  [=dock =vents our=@p =tid now=@da]
-  ^-  vent-id
-  ?.  (~(has ju vents) dock [our tid now])
-    [our tid now]
-  $(now +(now))
+++  vent-as-mark
+  |=  [=desk =mark]
+  |=  [=dock =page]
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ;<  =vase       bind:m  (vent-raw dock page)
+  ;<  =tube:clay  bind:m  (build-our-tube desk %noun mark)
+  (pure:m (tube vase))
+::
+++  vent
+  |*  a=mold
+  =/  m  (strand ,a)
+  |=  [=dock =page]
+  ^-  form:m
+  ;<  =vase  bind:m  (vent-raw dock p.page q.page)
+  (pure:m ;;(a q.vase))
 :: generic thread for vent-based "thread-pokes":
 ::   flexible but less performant
 ::   performance issues SIGNIFICANTLY ameliorated with tube-warming:
@@ -193,6 +184,26 @@
   (vine gowl vid mark vase)
 :: miscellaneous utils
 ::
++$  gowl     bowl:gall   :: gall bowl alias
++$  sowl     bowl:spider :: spider bowl alias
+:: common vase strand functions
+::
+++  vand     (strand ,vase)
+++  form-m   form:vand
+++  bind-m   bind:vand
+++  pure-m   pure:vand
+::
+++  get-tid
+  =/  m  (strand ,tid)
+  ^-  form:m
+  |=  tin=strand-input:strand
+  `[%done tid.bowl.tin]
+::
+++  get-desk
+  =/  m  (strand ,desk)
+  ^-  form:m
+  |=  tin=strand-input:strand
+  `[%done q.byk.bowl.tin]
 :: only works for agents which use lib/vent.hoon agent transformer
 ::
 ++  agent-send-cards
@@ -297,6 +308,51 @@
 ::
 ++  vase-to-wain  |=(=vase `wain`(turn (wash [0 80] (sell vase)) crip))
 ++  vase-to-cord  |=(=vase (of-wain:format (vase-to-wain vase)))
+:: TODO: FIX: continues to pulse when thread dies?
+::
+++  pulse-message
+  |*  computation-result=mold
+  =/  m  (strand ,computation-result)
+  |=  [=cord time=@dr computation=form:m]
+  ^-  form:m
+  ;<  now=@da  bind:m  get-time
+  =/  when  (add now time)
+  =/  =card:agent:gall
+    [%pass /pulse/(scot %da when) %arvo %b %wait when]
+  ;<  ~        bind:m  (send-raw-card card)
+  |=  tin=strand-input:strand
+  =/  c-res  (computation tin)
+  :: if done or failed, cancel timer and return result
+  ::
+  ?:  ?=(?(%done %fail) -.next.c-res)
+    =/  =card:agent:gall
+      [%pass /pulse/(scot %da when) %arvo %b %rest when]
+    c-res(cards [card cards.c-res])
+  :: received pulse timer wake
+  ::
+  ?.  ?&  ?=([~ %sign [%pulse @ ~] %behn %wake *] in.tin)
+          =((scot %da when) i.t.wire.u.in.tin)
+      ==
+    :: if continuing, modify self to be like this code
+    ::
+    =?  c-res  ?=(%cont -.next.c-res)
+      c-res(self.next ..$(computation self.next.c-res))
+    c-res
+  :: print the message
+  ::
+  %-  (slog cord ~)
+  :: set a new pulse timer
+  ::
+  =.  when  (add now.bowl.tin time)
+  =/  =card:agent:gall
+    [%pass /pulse/(scot %da when) %arvo %b %wait when]
+  =.  cards.c-res  [card cards.c-res]
+  :: propagate state changes (when)
+  ::
+  ?-  -.next.c-res
+    %cont  c-res(self.next ..$(computation self.next.c-res))
+    ?(%skip %wait)  c-res(next [%cont ..$])
+  ==
 ::
 ++  take-poke-ack-soft
   |=  =wire
@@ -325,6 +381,7 @@
   |*  [=mold =path]
   =/  m  (strand ,(each mold goof))
   ^-  form:m
+  ;<  vap=dude:gall  bind:m  get-vap :: get local venter agent
   ;<  our=@p  bind:m  get-our
   ;<  =thread-result  bind:m  (vent-soft [our vap] scry+path)
   ?-    -.thread-result
@@ -392,9 +449,24 @@
     `[%done ~]
   ==
 ::
-++  get-tid
-  =/  m  (strand ,tid)
++$  iris-response  [=response-header:http data=(unit mime)]
+::
+++  de-mite  |=(=@t `(unit mite)`(rush (cat 3 '/' t) stap))
+::
+++  send-iris-request
+  |=  [=request:http lag=@dr]
+  =/  m  (strand ,iris-response)
   ^-  form:m
-  |=  tin=strand-input:strand
-  `[%done tid.bowl.tin]
+  %+  (set-timeout ,iris-response)  lag
+  =/  =task:iris  [%request request *outbound-config:iris]
+  =/  =card:agent:gall  [%pass /http-req %arvo %i task]
+  ;<  ~  bind:m  (send-raw-card card)
+  ;<  =sign-arvo  bind:m  (take-sign /http-req)
+  ?.  ?=([%iris %http-response %finished *] sign-arvo)
+    (strand-fail:strand %bad-sign ~)
+  =+  client-response.sign-arvo
+  ?~  full-file
+    (pure:m [response-header ~])
+  =/  =mite  (fall (de-mite type.u.full-file) /text/plain)
+  (pure:m [response-header `[mite data.u.full-file]])
 --

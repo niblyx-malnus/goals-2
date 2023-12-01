@@ -21,10 +21,10 @@
     def   ~(. (default-agent this %|) bowl)
 ++  on-init
   ^-  (quip card _this)
-  =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[vek:vio]/(scot %da now.bowl)))
+  =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[q.byk.bowl]/(scot %da now.bowl)))
   :_  this
-  :~  [%pass /next %arvo %c %warp our.bowl vek:vio ~ %many %.y ud+ud ud+ud /]
-      [%pass /tube-warmer %arvo %k %fard vek:vio %tube-warmer noun+!>(`[vek:vio tube-verb])]
+  :~  [%pass /next %arvo %c %warp our.bowl q.byk.bowl ~ %many %.y ud+ud ud+ud /]
+      [%pass /tube-warmer %arvo %k %fard q.byk.bowl %tube-warmer noun+!>(`[q.byk.bowl tube-verb])]
   ==
 ::
 ++  on-save   !>(state)
@@ -34,10 +34,10 @@
   ^-  (quip card _this)
   =/  old=state-0  !<(state-0 ole)
   =.  state  old
-  =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[vek:vio]/(scot %da now.bowl)))
+  =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[q.byk.bowl]/(scot %da now.bowl)))
   :_  this
-  :~  [%pass /next %arvo %c %warp our.bowl vek:vio ~ %many %.y ud+ud ud+ud /]
-      [%pass /tube-warmer %arvo %k %fard vek:vio %tube-warmer noun+!>(`[vek:vio tube-verb])]
+  :~  [%pass /next %arvo %c %warp our.bowl q.byk.bowl ~ %many %.y ud+ud ud+ud /]
+      [%pass /tube-warmer %arvo %k %fard q.byk.bowl %tube-warmer noun+!>(`[q.byk.bowl tube-verb])]
   ==
 ::
 ++  on-poke
@@ -119,10 +119,10 @@
     ::
       [%next ~]
     ?.  ?=([%clay %writ ~] sign)  `this
-    =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[vek:vio]/(scot %da now.bowl)))
+    =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[q.byk.bowl]/(scot %da now.bowl)))
     :_  this
-    :~  [%pass /next %arvo %c %warp our.bowl vek:vio ~ %many %.y ud+ud ud+ud /]
-        [%pass /tube-warmer %arvo %k %fard vek:vio %tube-warmer noun+!>(`[vek:vio tube-verb])]
+    :~  [%pass /next %arvo %c %warp our.bowl q.byk.bowl ~ %many %.y ud+ud ud+ud /]
+        [%pass /tube-warmer %arvo %k %fard q.byk.bowl %tube-warmer noun+!>(`[q.byk.bowl tube-verb])]
     ==
   ==
 ::

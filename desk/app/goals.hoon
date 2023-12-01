@@ -4,13 +4,14 @@
 :: import during development to force compilation
 ::
     gol-cli-json
-/=  x  /mar/goal/peek
 /=  x  /mar/goal/action
 /=  x  /mar/goal/view
+/=  x  /mar/goal/vent
 /=  x  /ted/vines/goals
+/=  x  /ted/test
 ::
 |%
-+$  inflated-state  [state-5-12:gs =trace:gol] 
++$  inflated-state  [state-5-13:gs =trace:gol] 
 +$  card     card:agent:gall
 --
 =|  inflated-state
@@ -35,7 +36,7 @@
   ^-  (quip card _this)
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-12:gs   (convert-to-latest:gs old)
+  =/  new=state-5-13:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   [cards this(-.state new, trace *trace:gol)]
 ::
@@ -56,98 +57,7 @@
   |=  =(pole knot)
   ^-  (unit (unit cage))
   ?+    pole  (on-peek:def pole)
-    [%x %store ~]  ``goal-peek+!>([%store store])
-    ::
-      [%x %pools %index ~]
-    :-  ~  :-  ~  :-  %goal-peek  !>
-    :-  %pools-index
-    %+  turn  ~(tap by pool-info.store)
-    |=  [=pin:gol =pool-data:gol]
-    [pin (~(got by properties.pool-data) 'title')]
-    ::
-      [%x %pool %roots host=@ta name=@ta ~]
-    =/  =pin:gol        [(slav %p host.pole) name.pole]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  =pool-data:gol  (~(got by pool-info.store) pin)
-    =/  nd          ~(. gol-cli-node goals.pool)
-    :-  ~  :-  ~  :-  %goal-peek  !>
-    :-  %pool-roots
-    %+  turn  (waif-goals:nd)
-    |=  =id:gol
-    =/  fields=(map @t @t)  (~(got by fields.pool-data) id)
-    =+  (~(got by goals.pool) id)
-    [id [(~(got by fields) 'description') done.deadline actionable]]
-    ::
-      [%x %goal %young host=@ta name=@ta key=@ta ~]
-    =/  =pin:gol        [(slav %p host.pole) name.pole]
-    =/  =id:gol         [pin key.pole]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  =pool-data:gol  (~(got by pool-info.store) pin)
-    =/  nd          ~(. gol-cli-node goals.pool)
-    :-  ~  :-  ~  :-  %goal-peek  !>
-    :-  %goal-young
-    %+  turn  ~(tap in (young:nd id))
-    |=  =id:gol
-    =/  fields=(map @t @t)  (~(got by fields.pool-data) id)
-    =+  (~(got by goals.pool) id)
-    [id virtual=%| [(~(got by fields) 'description') done.deadline actionable]]
-    ::
-      [%x %pool %title host=@ta name=@ta ~]
-    =/  =pin:gol        [(slav %p host.pole) name.pole]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  =pool-data:gol  (~(got by pool-info.store) pin)
-    ``goal-peek+!>([%pool-title (~(gut by properties.pool-data) 'title' '')])  
-    ::
-      [%x %pool %note host=@ta name=@ta ~]
-    =/  =pin:gol        [(slav %p host.pole) name.pole]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  =pool-data:gol  (~(got by pool-info.store) pin)
-    ``goal-peek+!>([%pool-note (~(gut by properties.pool-data) 'note' '')])  
-    ::
-      [%x %goal %desc host=@ta name=@ta key=@ta ~]
-    =/  =pin:gol        [(slav %p host.pole) name.pole]
-    =/  =id:gol         [pin key.pole]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  =pool-data:gol  (~(got by pool-info.store) pin)
-    =/  fields=(map @t @t)  (~(got by fields.pool-data) id)
-    ``goal-peek+!>([%goal-desc (~(gut by fields) 'description' '')])  
-    ::
-      [%x %goal %note host=@ta name=@da key=@ta ~]
-    =/  =pin:gol        [(slav %p host.pole) name.pole]
-    =/  =id:gol         [pin key.pole]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  =pool-data:gol  (~(got by pool-info.store) pin)
-    =/  fields=(map @t @t)  (~(got by fields.pool-data) id)
-    ``goal-peek+!>([%goal-note (~(gut by fields) 'note' '')])  
-    ::
-      [%x %goal %tags host=@ta name=@ta key=@ta ~]
-    =/  =pin:gol        [(slav %p host.pole) name.pole]
-    =/  =id:gol         [pin key.pole]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  =pool-data:gol  (~(got by pool-info.store) pin)
-    =/  tags=(set @t)  (~(got by tags.pool-data) id)
-    ``goal-peek+!>([%goal-tags ~(tap in tags)])  
-    ::
-      [%x %goal %parent host=@ta name=@da key=@ta ~]
-    =/  =pin:gol    [(slav %p host.pole) name.pole]
-    =/  =id:gol     [pin key.pole]
-    =/  =pool:gol  (~(got by pools.store) pin)
-    =/  =goal:gol  (~(got by goals.pool) id)
-    ``goal-peek+!>([%uid par.goal])  
-    ::
-      [%x %goal %actionable host=@ta name=@da key=@ta ~]
-    =/  =pin:gol    [(slav %p host.pole) name.pole]
-    =/  =id:gol     [pin key.pole]
-    =/  =pool:gol  (~(got by pools.store) pin)
-    =/  =goal:gol  (~(got by goals.pool) id)
-    ``goal-peek+!>([%loob actionable.goal])  
-    ::
-      [%x %goal %complete host=@ta name=@da key=@ta ~]
-    =/  =pin:gol    [(slav %p host.pole) name.pole]
-    =/  =id:gol     [pin key.pole]
-    =/  =pool:gol  (~(got by pools.store) pin)
-    =/  =goal:gol  (~(got by goals.pool) id)
-    ``goal-peek+!>([%loob done.deadline.goal])  
+    [%x %store ~]  ``noun+!>(store)
   ==
 ::
 ++  on-watch  on-watch:def

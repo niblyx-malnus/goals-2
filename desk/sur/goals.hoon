@@ -22,17 +22,26 @@
       actionable=?
       chief=ship
       =deputies
+      :: TODO: summary=@t (140 character summary of a goal)
   ==
-+$  goals  (map id goal)
++$  goals    (map id goal)
 ::
-+$  role   ?(%owner %admin %creator)
-+$  perms  (map ship (unit role))
++$  role     ?(%owner %admin %creator)
++$  perms    (map ship (unit role))
+::
++$  archive  (map id [par=(unit id) goals])
 ::
 +$  pool
   $:  =pin
       =goals
-      cache=goals :: TODO: change name to archive
+      cache=goals :: TODO: replace with archive
       =perms
+  ==
+::
++$  order-by
+  $:  by-precedence=(list id)
+      by-kickoff=(list id)
+      by-deadline=(list id)
   ==
 ::
 +$  pool-data
@@ -41,6 +50,8 @@
       fields=(map id (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
+      :: young=(map id (list id)) :: order on children and "borrowed"
+      :: roots=(list id) :: order on pool roots
   ==
 ::
 +$  pools  (map pin pool)
@@ -52,6 +63,7 @@
   $:  order=(list id)
       pools=(list pin) :: order of pools
       goals=(map id goal-local)
+      settings=(map @t @t)
   ==
 ::
 +$  store  

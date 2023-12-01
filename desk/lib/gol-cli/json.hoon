@@ -3,14 +3,81 @@
 ++  dejs
   =,  dejs:format
   |%
+  :: json parsing for +each
+  ::
+  ++  ea
+    |*  [a=mold b=mold]
+    |=  [h=@ t=*]
+    ?+  h  !!
+      %y  ;;([%.y a] [%.y t])
+      %n  ;;([%.n b] [%.n t])
+    ==
+  :: parse +each based on { "y": ... } vs { "n": ... }
+  ::
+  ++  ec
+    |*  [a=mold b=mold]
+    |*  [y=fist n=fist]
+    (cu (ea a b) (of ~[y+y n+n]))
+  :: parse +each based on
+  :: { "method": "put", ... } vs { "method": "del", ... }
+  ::
+  ++  each-method
+    |=  [ym=@t nm=@t]
+    |*  [a=mold b=mold]
+    |*  [y=fist n=fist]
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    =;  l=?(%y %n)
+      %-  ((ec a b) y n)
+      o+(my [l o+(~(del by p.jon) 'method')]~)
+    =/  met=json  (~(got by p.jon) 'method')
+    ?>  ?=(%s -.met)
+    ?:  =(p.met ym)  %y
+    ?:  =(p.met nm)  %n
+    !!
+  ::
+  ++  pd  (each-method %put %del)
+  ++  ud  (each-method %uni %dif)
+  ::
+  ++  pd-setting
+    %+  (pd ,[@t @t] @t)
+      (ot ~[setting+so contents+so])
+    (ot ~[setting+so])
+  ::
+  ++  pd-goal-field
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (id (~(got by p.jon) 'id'))
+    %.  o+(~(del by p.jon) 'id')
+    %+  (pd ,[@t @t] [@t])
+      (ot ~[field+so data+so])
+    (ot ~[field+so])
+  ::
+  ++  pd-pool-property
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (pin (~(got by p.jon) 'pin'))
+    %.  o+(~(del by p.jon) 'pin')
+    %+  (pd ,[@t @t] [@t])
+      (ot ~[property+so data+so])
+    (ot ~[property+so])
+  ::
+  ++  ud-goal-tags
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (id (~(got by p.jon) 'id'))
+    %.  o+(~(del by p.jon) 'id')
+    %+  (ud (set @t) (set @t))
+      (ot ~[tags+(as so)])
+    (ot ~[tags+(as so)])
+  ::
   ++  action
     |=  jon=json
     ^-  action:act
     %.  jon
     %-  of
-    :~  [%spawn-pool (ot ~[title+so])]
-        [%clone-pool (ot ~[pin+pin title+so])]
-        [%trash-pool (ot ~[pin+pin])]
+    :~  [%create-pool (ot ~[title+so])]
+        [%delete-pool (ot ~[pin+pin])]
         [%spawn-goal (ot ~[pin+pin upid+unit-id desc+so actionable+bo])]
         [%cache-goal (ot ~[id+id])]
         [%renew-goal (ot ~[id+id])]
@@ -24,16 +91,11 @@
         [%mark-complete (ot ~[id+id])]
         [%unmark-complete (ot ~[id+id])]
         [%update-pool-perms (ot ~[pin+pin new+perms])]
-        [%edit-goal-desc (ot ~[id+id desc+so])]
-        [%edit-pool-title (ot ~[pin+pin title+so])]
-        [%edit-goal-note (ot ~[id+id note+so])]
-        [%edit-pool-note (ot ~[pin+pin note+so])]
-        [%add-goal-tag (ot ~[id+id tag+so])]
-        [%del-goal-tag (ot ~[id+id tag+so])]
-        [%put-goal-tags (ot ~[id+id tags+(as so)])]
-        [%add-field-data (ot ~[id+id field+so data+so])]
-        [%del-field-data (ot ~[id+id field+so])]
         [%put-private-tags (ot ~[id+id tags+(as so)])]
+        [%update-pool-property pd-pool-property]
+        [%update-goal-tags ud-goal-tags]
+        [%update-goal-field pd-goal-field]
+        [%update-setting pd-setting]
     ==
   ::
   ++  tag  (ot ~[text+so color+so private+bo])
