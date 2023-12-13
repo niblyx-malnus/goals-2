@@ -62,6 +62,26 @@
       (ot ~[property+so data+so])
     (ot ~[property+so])
   ::
+  ++  pd-pool-tag-property
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (pin (~(got by p.jon) 'pin'))
+    :-  (so (~(got by p.jon) 'tag'))
+    %.  o+(~(del by (~(del by p.jon) 'pin')) 'tag')
+    %+  (pd ,[@t @t] [@t])
+      (ot ~[property+so data+so])
+    (ot ~[property+so])
+  ::
+  ++  pd-pool-field-property
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (pin (~(got by p.jon) 'pin'))
+    :-  (so (~(got by p.jon) 'field'))
+    %.  o+(~(del by (~(del by p.jon) 'pin')) 'field')
+    %+  (pd ,[@t @t] [@t])
+      (ot ~[property+so data+so])
+    (ot ~[property+so])
+  ::
   ++  ud-goal-tags
     |=  jon=json
     ?>  ?=(%o -.jon)
@@ -78,21 +98,28 @@
     %-  of
     :~  [%create-pool (ot ~[title+so])]
         [%delete-pool (ot ~[pin+pin])]
-        [%spawn-goal (ot ~[pin+pin upid+unit-id desc+so actionable+bo])]
-        [%cache-goal (ot ~[id+id])]
-        [%renew-goal (ot ~[id+id])]
-        [%trash-goal (ot ~[id+id])]
+        [%create-goal (ot ~[pin+pin upid+unit-id summary+so actionable+bo])]
+        [%archive-goal (ot ~[id+id])]
+        [%restore-goal (ot ~[id+id])]
+        [%delete-goal (ot ~[id+id])]
         [%yoke (ot ~[pin+pin yoks+yoke-seq])]
         [%move (ot ~[cid+id upid+unit-id])]
+        [%set-summary (ot ~[id+id summary+so])]
         [%set-kickoff (ot ~[id+id kickoff+unit-di])]
         [%set-deadline (ot ~[id+id deadline+unit-di])]
         [%mark-actionable (ot ~[id+id])]
         [%unmark-actionable (ot ~[id+id])]
         [%mark-complete (ot ~[id+id])]
         [%unmark-complete (ot ~[id+id])]
+        [%roots-slot-above (ot ~[dis+id dat+id])]
+        [%roots-slot-below (ot ~[dis+id dat+id])]
+        [%young-slot-above (ot ~[pid+id dis+id dat+id])]
+        [%young-slot-below (ot ~[pid+id dis+id dat+id])]
         [%update-pool-perms (ot ~[pin+pin new+perms])]
         [%put-private-tags (ot ~[id+id tags+(as so)])]
         [%update-pool-property pd-pool-property]
+        [%update-pool-tag-property pd-pool-tag-property]
+        [%update-pool-field-property pd-pool-field-property]
         [%update-goal-tags ud-goal-tags]
         [%update-goal-field pd-goal-field]
         [%update-setting pd-setting]

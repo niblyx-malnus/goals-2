@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-13:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-16:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -28,8 +28,9 @@
 ++  create-pool
   |=  [own=ship now=@da]
   ^-  pool:gol
-  :*  (unique-pin own now)  ~  ~
+  :*  (unique-pin own now)
       (~(put by *perms:gol) own `%owner)
+      ~  ~  ~
   ==
 ::
 ++  clone-pool
@@ -50,52 +51,45 @@
   ^-  _this
   =/  mod  src.bowl
   ?-    -.axn
-      %spawn-goal
+      %create-goal
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  =id:gol  (unique-id:gols pin now.bowl)
     :: edit permissions implied in the success of spawn-goal
-    =/  pore  (spawn-goal:(apex:pl old) id upid mod)
+    =/  pore  (create-goal:(apex:pl old) id upid summary mod)
     :: mark the goal started if possible
     =/  new=pool:gol
       ?~  upor=(mole |.((mark-done:pore k+id mod)))
         abet:pore
       abet:u.upor
-    =.  pools.store         (~(put by pools.store) pin new)
-    =/  data=pool-data:gol  (~(got by pool-info.store) pin)
-    =/  fields=(map @t @t)  (~(gut by fields.data) id ~)
-    =.  fields              (~(put by fields) 'description' desc)
-    =.  fields.data         (~(put by fields.data) id fields)
-    =.  pool-info.store     (~(put by pool-info.store) pin data)
-    this
+    this(pools.store (~(put by pools.store) pin new))
     ::
-      %cache-goal
+      %archive-goal
     =+  axn
     =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
-    =/  new=pool:gol  abet:(cache-goal:(apex:pl old) id mod)
+    =/  new=pool:gol  abet:(archive-goal:(apex:pl old) id mod)
     =.  pools.store  (~(put by pools.store) pin new)
     this
     ::
-      %renew-goal
+      %restore-goal
     =+  axn
     =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
-    =/  new=pool:gol  abet:(renew-goal:(apex:pl old) id mod)
+    =/  new=pool:gol  abet:(restore-goal:(apex:pl old) id mod)
     =.  pools.store  (~(put by pools.store) pin new)
     this
     ::
-      %trash-goal
+      %delete-goal
     =+  axn
     =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     ?:  (~(has by goals.old) id)
-      =/  new=pool:gol  abet:(waste-goal:(apex:pl old) id mod)
+      =/  new=pool:gol  abet:(delete-goal:(apex:pl old) id mod)
       =.  pools.store        (~(put by pools.store) pin new)
       this
-    =/  new=pool:gol  abet:(trash-goal:(apex:pl old) id mod)
+    =/  new=pool:gol  abet:(delete-goal:(apex:pl old) id mod)
     =.  pools.store        (~(put by pools.store) pin new)
-    =/  prog               ~(tap in (~(progeny tv cache.old) id))
     this
     ::
       %move
@@ -152,6 +146,14 @@
     =.  pools.store  (~(put by pools.store) pin new)
     this
     ::
+      %set-summary
+    =+  axn
+    =/  =pin:gol  pin.id
+    =/  old=pool:gol  (~(got by pools.store) pin)
+    =/  new=pool:gol  abet:(set-summary:(apex:pl old) id summary mod)
+    =.  pools.store  (~(put by pools.store) pin new)
+    this
+    ::
       %set-kickoff
     =+  axn
     =/  =pin:gol  pin.id
@@ -165,6 +167,38 @@
     =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(set-deadline:(apex:pl old) id deadline mod)
+    =.  pools.store  (~(put by pools.store) pin new)
+    this
+    ::
+      %roots-slot-above
+    =+  axn
+    =/  =pin:gol  pin.dis
+    =/  old=pool:gol  (~(got by pools.store) pin)
+    =/  new=pool:gol  abet:(roots-slot-above:(apex:pl old) dis dat mod)
+    =.  pools.store  (~(put by pools.store) pin new)
+    this
+    ::
+      %roots-slot-below
+    =+  axn
+    =/  =pin:gol  pin.dis
+    =/  old=pool:gol  (~(got by pools.store) pin)
+    =/  new=pool:gol  abet:(roots-slot-below:(apex:pl old) dis dat mod)
+    =.  pools.store  (~(put by pools.store) pin new)
+    this
+    ::
+      %young-slot-above
+    =+  axn
+    =/  =pin:gol  pin.pid
+    =/  old=pool:gol  (~(got by pools.store) pin)
+    =/  new=pool:gol  abet:(young-slot-above:(apex:pl old) pid dis dat mod)
+    =.  pools.store  (~(put by pools.store) pin new)
+    this
+    ::
+      %young-slot-below
+    =+  axn
+    =/  =pin:gol  pin.pid
+    =/  old=pool:gol  (~(got by pools.store) pin)
+    =/  new=pool:gol  abet:(young-slot-below:(apex:pl old) pid dis dat mod)
     =.  pools.store  (~(put by pools.store) pin new)
     this
     ::
@@ -266,6 +300,34 @@
         %&  (~(put by properties.data) p.p.axn)
         %|  (~(del by properties.data) p.p.axn)
       ==
+    this(pool-info.store (~(put by pool-info.store) pin.axn data))
+    ::
+      %update-pool-tag-property
+    =/  old=pool:gol  (~(got by pools.store) pin.axn)
+    ?>  (check-pool-edit-perm:(apex:pl old) mod)
+    =/  data=pool-data:gol  (~(got by pool-info.store) pin.axn)
+    =/  properties  (~(gut by tag-properties.data) tag.axn ~)
+    =.  properties
+      ?-  -.p.axn
+        %&  (~(put by properties) p.p.axn)
+        %|  (~(del by properties) p.p.axn)
+      ==
+    =.  tag-properties.data
+      (~(put by tag-properties.data) tag.axn properties)
+    this(pool-info.store (~(put by pool-info.store) pin.axn data))
+    ::
+      %update-pool-field-property
+    =/  old=pool:gol  (~(got by pools.store) pin.axn)
+    ?>  (check-pool-edit-perm:(apex:pl old) mod)
+    =/  data=pool-data:gol  (~(got by pool-info.store) pin.axn)
+    =/  properties  (~(gut by field-properties.data) field.axn ~)
+    =.  properties
+      ?-  -.p.axn
+        %&  (~(put by properties) p.p.axn)
+        %|  (~(del by properties) p.p.axn)
+      ==
+    =.  field-properties.data
+      (~(put by field-properties.data) field.axn properties)
     this(pool-info.store (~(put by pool-info.store) pin.axn data))
     ::
       %update-goal-field

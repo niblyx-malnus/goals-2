@@ -15,10 +15,13 @@
 ::
 :: Initialize a goal with initial state
 ++  init-goal
-  |=  [=id:gol chief=ship author=ship]
+  |=  [=id:gol summary=@t chief=ship author=ship]
   ^-  goal:gol
+  ?.  (lte (met 3 summary) 140)
+    ~|("Summary exceeds 140 characters." !!)
   =|  =goal:gol
-  =.  chief.goal  chief
+  =.  chief.goal    chief
+  =.  summary.goal  summary
   :: =.  author.goal  author
   :: 
   :: Initialize inflowing and outflowing nodes
@@ -26,73 +29,85 @@
   =.  inflow.deadline.goal  (~(put in *(set nid:gol)) [%k id])
   goal
 ::
-++  spawn-goal
-  |=  [=id:gol upid=(unit id:gol) mod=ship]
+++  create-goal
+  |=  [=id:gol upid=(unit id:gol) summary=@t mod=ship]
   ^-  _this
   ?>  ?~  upid
-        (check-root-spawn-perm mod)
-      (check-goal-spawn-perm u.upid mod)
-  =/  goal  (init-goal id mod mod)
+        (check-root-create-perm mod)
+      (check-goal-create-perm u.upid mod)
+  =/  goal  (init-goal id summary mod mod)
   =.  goals.p  (~(put by goals.p) id goal)
+  =.  this  (put-roots id)
   (move id upid host.pin.p) :: divine intervention (owner)
 ::
 :: Extract goal from goals
 ++  wrest-goal
   |=  [=id:gol mod=ship]
-  ^-  [trac=goals:gol main=goals:gol]
-  ::
+  ^-  [trac=goals:gol _this]
   :: Get subgoals of goal including self
+  ::
   =/  prog  (progeny:tv id)
-  ::
   :: Move goal to root
+  ::
   =/  pore  (move id ~ host.pin.p) :: divine intervention (owner)
-  ::
   :: Partition subgoals of goal from rest of goals
-  =.  pore  (partition:pore prog mod)
   ::
+  =.  pore  (partition:pore prog mod)
+  :: Get extracted goals
+  ::
+  =/  trac=goals:gol  (gat-by goals.p.pore ~(tap in prog))
+  :: Update goals to remaining
+  ::
+  =.  goals.p  (gus-by goals.p.pore ~(tap in prog))
+  :: Delete from roots
+  ::
+  =.  pore  (del-roots id) :: delete from roots
   :: both of these should get validated here (validate-goals:vd goals)
   :: return extracted goals and remaining goals
-  :*  (gat-by goals.p.pore ~(tap in prog))
-      (gus-by goals.p.pore ~(tap in prog))
-  ==
+  ::
+  [trac pore]
 ::
-:: Permanently delete goal and subgoals directly
-++  waste-goal
-  |=  [=id:gol mod=ship]
+++  set-summary
+  |=  [=id:gol summary=@t mod=ship]
   ^-  _this
-  ?>  (check-pool-edit-perm mod)
-  this(goals.p main:(wrest-goal id mod))
+  ?>  (check-goal-edit-perm id mod)
+  ?.  (lte (met 3 summary) 140)
+    ~|("Summary exceeds 140 characters." !!)
+  =/  =goal:gol  (~(got by goals.p) id)
+  this(goals.p (~(put by goals.p) id goal(summary summary)))
 ::
-:: Move goal and subgoals from main goals to cache
-++  cache-goal
+:: Move goal and subgoals from main goals to archive
+++  archive-goal
   |=  [=id:gol mod=ship]
   ^-  _this
   ?>  (check-goal-edit-perm id mod)
-  =/  wrest  (wrest-goal id mod) :: mod has the correct perms for this
-  %=  this
-    goals.p  main.wrest
-    cache.p  (~(uni by cache.p) trac.wrest)
-  ==
+  =/  par=(unit id:gol)  par:(~(got by goals.p) id)
+  =^  trac  this
+    (wrest-goal id mod) :: mod has the correct perms for this
+  this(archive.p (~(put by archive.p) id [par trac]))
 ::
-:: Restore goal from cache to main goals
-++  renew-goal
+:: Restore goal from archive to main goals
+++  restore-goal
   |=  [=id:gol mod=ship]
   ^-  _this
-  ?>  (check-pool-edit-perm mod) :: only owner/admins can renew
+  :: TODO: Chief of goal etc should be able to renew in some cases?
   ::
-  :: mod has the correct perms for this
-  =/  wrest  (wrest-goal:this(goals.p cache.p) id mod) 
-  %=  this
-    goals.p  (~(uni by goals.p) (validate-goals:vd trac.wrest))
-    cache.p  main.wrest
-  ==
+  ?>  (check-pool-edit-perm mod) :: only owner/admins can renew
+  =/  [par=(unit id:gol) new=goals:gol]  (~(got by archive.p) id)
+  =.  goals.p    (~(uni by goals.p) (validate-goals:vd new))
+  =.  archive.p  (~(del by archive.p) id)
+  ?^  mol=(mole |.((move id par mod)))
+    u.mol
+  ~&(%failed-to-restore-under-old-parent this)
 ::
-:: Permanently delete goal and subgoals from cache
-++  trash-goal
+:: Permanently delete goal and subgoals from archive
+++  delete-goal
   |=  [=id:gol mod=ship]
   ^-  _this
   ?>  (check-pool-edit-perm mod)
-  this(cache.p main:(wrest-goal:this(goals.p cache.p) id mod))
+  =^  trac  this
+    (wrest-goal id mod) :: correctly handles orders
+  this(archive.p (~(del by archive.p) id))
 ::
 :: Partition the set of goals q from its complement q- in goals.p
 ++  partition
@@ -144,7 +159,7 @@
   ==
 :: owner, admin or deputy
 ::
-++  check-root-spawn-perm
+++  check-root-create-perm
   |=  mod=ship
   ^-  ?
   ?|  =(mod host.pin.p)
@@ -164,7 +179,7 @@
 :: can edit goal (owner, admin or ranking member on goal)
 :: or is a deputy on the goal
 ::
-++  check-goal-spawn-perm
+++  check-goal-create-perm
   |=  [=id:gol mod=ship]
   ^-  ?
   ?|  (check-goal-edit-perm id mod)
@@ -189,7 +204,7 @@
   |=  [=id:gol mod=ship]
   ^-  ?
   ?&  (check-goal-master id mod)
-      (check-root-spawn-perm mod)
+      (check-root-create-perm mod)
   ==
 :: checks if mod can move kid under pid
 ::
@@ -275,6 +290,111 @@
 :: YOKES/RENDS
 ::
 :: ============================================================================
+++  put-young
+  |=  [pid=id:gol yid=id:gol]
+  ^-  _this
+  =/  =goal:gol  (~(got by goals.p) pid)
+  ?>  (~(has in inflow.deadline.goal) d+yid)
+  =.  young.goal  [yid young.goal]
+  this(goals.p (~(put by goals.p) pid goal))
+::
+++  del-young
+  |=  [pid=id:gol yid=id:gol]
+  ^-  _this
+  =/  =goal:gol  (~(got by goals.p) pid)
+  ?<  (~(has in inflow.deadline.goal) d+yid)
+  =/  idx=(unit @)  (find ~[yid] young.goal)
+  ?~  idx
+    ~|("couldn't find young..." this)
+  =.  young.goal  (oust [u.idx 1] young.goal)
+  this(goals.p (~(put by goals.p) pid goal))
+::
+++  put-roots
+  |=  =id:gol
+  ^-  _this
+  =/  =goal:gol  (~(got by goals.p) id)
+  ?>  ?=(~ par.goal)
+  this(roots.p [id roots.p])
+::
+++  del-roots
+  |=  =id:gol
+  ^-  _this
+  =/  goal=(unit goal:gol)  (~(get by goals.p) id)
+  ?>  |(?=(~ goal) ?=(^ par.u.goal))
+  =/  idx=(unit @)  (find ~[id] roots.p)
+  ?~  idx
+    ~|("couldn't find root..." this)
+  this(roots.p (oust [u.idx 1] roots.p))
+::
+++  manage-orders
+  |=  [type=?(%yoke %rend) n1=nid:gol n2=nid:gol]
+  ^-  _this
+  ?.  &(?=(%d -.n1) ?=(%d -.n2))  this
+  ?-    type
+      %yoke
+    =.  this
+      =/  =goal:gol  (~(got by goals.p) id.n1)
+      ?.  ?&  ?=(^ par.goal)
+              (~(has in (sy roots.p)) id.n1)
+          ==
+         this
+       (del-roots id.n1)
+    (put-young id.n2 id.n1)
+    ::
+      %rend
+    =.  this
+      =/  =goal:gol  (~(got by goals.p) id.n1)
+      ?.  ?&  ?=(~ par.goal)
+              !(~(has in (sy roots.p)) id.n1)
+          ==
+         this
+       (put-roots id.n1)
+    (del-young id.n2 id.n1)
+  ==
+:: slot dis above dat in pid's young
+::
+++  young-slot-above
+  |=  [pid=id:gol dis=id:gol dat=id:gol mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm pid mod)
+  =/  goal  (~(got by goals.p) pid)
+  ?~  idx=(find [dis]~ young.goal)  !!
+  =.  young.goal  (oust [u.idx 1] young.goal)
+  ?~  idx=(find [dat]~ young.goal)  !!
+  =.  young.goal  (into young.goal u.idx dis)
+  this(goals.p (~(put by goals.p) pid goal))
+:: slot dis below dat in pid's young
+::
+++  young-slot-below
+  |=  [pid=id:gol dis=id:gol dat=id:gol mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm pid mod)
+  =/  goal  (~(got by goals.p) pid)
+  ?~  idx=(find [dis]~ young.goal)  !!
+  =.  young.goal  (oust [u.idx 1] young.goal)
+  ?~  idx=(find [dat]~ young.goal)  !!
+  =.  young.goal  (into young.goal +(u.idx) dis)
+  this(goals.p (~(put by goals.p) pid goal))
+:: slot dis above dat in roots
+::
+++  roots-slot-above
+  |=  [dis=id:gol dat=id:gol mod=ship]
+  ^-  _this
+  ?>  (check-pool-edit-perm mod)
+  ?~  idx=(find [dis]~ roots.p)  !!
+  =.  roots.p  (oust [u.idx 1] roots.p)
+  ?~  idx=(find [dat]~ roots.p)  !!
+  this(roots.p (into roots.p u.idx dis))
+:: slot dis below dat in roots
+::
+++  roots-slot-below
+  |=  [dis=id:gol dat=id:gol mod=ship]
+  ^-  _this
+  ?>  (check-pool-edit-perm mod)
+  ?~  idx=(find [dis]~ roots.p)  !!
+  =.  roots.p  (oust [u.idx 1] roots.p)
+  ?~  idx=(find [dat]~ roots.p)  !!
+  this(roots.p (into roots.p +(u.idx) dis))
 ::
 ++  dag-yoke
   |=  [n1=nid:gol n2=nid:gol mod=ship]
@@ -287,83 +407,72 @@
           (check-goal-edit-perm id.n2 mod)
       ==
     ~|("missing-goal-mod-perms" !!)
-  ::
   :: Cannot relate goal to itself
-  ?:  =(id.n1 id.n2)  ~|("same-goal" !!)
   ::
+  ?:  =(id.n1 id.n2)  ~|("same-goal" !!)
   :: Cannot create left-undone-right-done relationship
+  ::
   ?:  ?&  !done:(got-node:nd n1)
           done:(got-node:nd n2)
       ==
     ~|("left-undone-right-done" !!)
-  ::
-  :: :: Cannot create relationship with the deadline of the right id
-  :: :: if the right id is an actionable goal
-  :: ?:  ?&  =(-.n2 %d)
-  ::         actionable:(~(got by goals.p) id.n2)
-  ::     ==
-  ::   ~|("right-actionable" !!)
   :: If the right id is an actionable goal
   :: and we are relating the left id deadline to the right id deadline,
   :: unmark the right goal actionable
+  ::
   =?  this  &(=(-.n1 %d) =(-.n2 %d) actionable:(~(got by goals.p) id.n2))
     (unmark-actionable id.n2 mod)
-  ::
   :: n2 must not come before n1
+  ::
   ?:  (check-path:tv n2 n1 %r)  ~|("before-n2-n1" !!)
   ::
   =/  node1  (got-node:nd n1)
   =/  node2  (got-node:nd n2)
-  ::
   :: there must be no bound mismatch between n1 and n2
+  ::
   =/  lb  ?~(moment.node1 (left-bound:tv n1) moment.node1)
   =/  rb  ?~(moment.node2 (ryte-bound:tv n2) moment.node2)
   ?:  ?~(lb %| ?~(rb %| (gth u.lb u.rb)))  ~|("bound-mismatch" !!)
-  ::
   :: dag-yoke
+  ::
   =.  outflow.node1  (~(put in outflow.node1) n2)
   =.  inflow.node2  (~(put in inflow.node2) n1)
   =.  goals.p  (update-node:nd n1 node1)
   =.  goals.p  (update-node:nd n2 node2)
-  this
+  ::
+  (manage-orders %yoke n1 n2)
 ::
 ++  dag-rend
   |=  [n1=nid:gol n2=nid:gol mod=ship]
   ^-  _this
-  ::
   :: Check mod permissions
   :: Can rend with permissions on *either* goal
+  ::
   ?.  ?|  (check-goal-edit-perm id.n1 mod)
           (check-goal-edit-perm id.n2 mod)
       ==
     ~|("missing-goal-mod-perms" !!)
-  :: ::
   :: Cannot unrelate goal from itself
+  ::
   ?:  =(id.n1 id.n2)  ~|("same-goal" !!)
-  ::
-  :: THIS SEEMS UNNECESSARILY STRICT:
-  :: Cannot break relationship between completed goals
-  :: ?:  ?&  complete:(~(got by goals.p) id.n1)
-  ::         complete:(~(got by goals.p) id.n2)
-  ::     ==
-  ::   ~|("completed-goals" !!)
-  ::
   :: Cannot destroy containment of an owned goal
+  ::
   =/  l  (~(got by goals.p) id.n1)
   =/  r  (~(got by goals.p) id.n2)
   ?:  ?|  &(=(-.n1 %d) =(-.n2 %d) (~(has in kids.r) id.n1))
           &(=(-.n1 %k) =(-.n2 %k) (~(has in kids.l) id.n2))
       ==
     ~|("owned-goal" !!)
-  ::
   :: dag-rend
+  ::
   =/  node1  (got-node:nd n1)
   =/  node2  (got-node:nd n2)
   =.  outflow.node1  (~(del in outflow.node1) n2)
   =.  inflow.node2  (~(del in inflow.node2) n1)
   =.  goals.p  (update-node:nd n1 node1)
   =.  goals.p  (update-node:nd n2 node2)
-  this
+  ::
+  (manage-orders %rend n1 n2)
 ::
 ++  yoke
   |=  [yok=exposed-yoke:act mod=ship]
@@ -608,11 +717,11 @@
 :: Update pool permissions for individual ship.
 :: If role is ~, remove ship as viewer.
 ::   If we remove a ship as a viewer, we must remove it from all goal
-::   spawn sets. We must also remove it from all goal chiefs and replace
+::   create sets. We must also remove it from all goal chiefs and replace
 ::   the chief with its nearest non-deleted ancestor chief or the pool
 ::   owner when no ancestor is available.
 :: If role is [~ u=~], make ship basic viewer.
-:: If role is [~ u=[~ u=?(%admin %spawn)]], make ship ?(%admin %spawn).
+:: If role is [~ u=[~ u=?(%admin %creator)]], make ship ?(%admin %creator).
 ++  set-pool-role
   |=  [=ship role=(unit (unit role:gol)) mod=ship]
   ^-  _this

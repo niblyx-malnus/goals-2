@@ -10,6 +10,13 @@ const api = {
       urb.onError = (message) => console.log("onError: " + message);
       urb.onOpen = () => console.log("urbit onOpen");
       urb.onRetry = () => console.log("urbit onRetry");
+      urb.subscribe({
+        app: 'goals',
+        path: '/settings',
+        event: (update: any) => console.log(update),
+        quit: () => console.log('quit'),
+        err: () => console.log('err'),
+      });
       urb.connect(); 
       return urb;
   }),
@@ -26,7 +33,7 @@ const api = {
     } catch (e) {
       console.log("poke error");
     }
-  },
+  }, 
   vent: async (vnt: any, desk: string) => {
     const result: any = await api.createApi().thread({
       inputMark: 'vent-package', // input to thread, contains poke
@@ -104,22 +111,18 @@ const api = {
     console.log(json);
     return await api.goalView(json);
   },
-  spawnPool: async (title: string) => {
+  createPool: async (title: string) => {
     try {
     return api.createApi().poke({
       app: 'goals',
       mark: 'goal-action',
-      json: {
-        'spawn-pool': {
-          title: title,
-        }
-      },
+      json: { 'create-pool': { title: title } },
     });
     } catch (e) {
       console.log("poke error");
     }
   },
-  spawnGoal: async (poolId: string, parentId: string | null, description: string, actionable: boolean) => {
+  createGoal: async (poolId: string, parentId: string | null, summary: string, actionable: boolean) => {
     console.log("poolId");
     console.log(poolId);
     try {
@@ -127,10 +130,10 @@ const api = {
       app: 'goals',
       mark: 'goal-action',
       json: {
-        'spawn-goal': {
+        'create-goal': {
           pin: poolId,
           upid: parentId,
-          desc: description,
+          summary: summary,
           actionable: actionable
         }
       },
@@ -145,9 +148,10 @@ const api = {
       app: 'goals',
       mark: 'goal-action',
       json: {
-        'add-goal-tag': {
+        'update-goal-tags': {
           id: goalId,
-          tag: text
+          method: 'uni',
+          tags: [text]
         }
       },
     });
@@ -161,9 +165,28 @@ const api = {
       app: 'goals',
       mark: 'goal-action',
       json: {
-        'del-goal-tag': {
+        'update-goal-tags': {
           id: goalId,
-          tag: text
+          method: 'dif',
+          tags: [text]
+        }
+      },
+    });
+    } catch (e) {
+      console.log("poke error");
+    }
+  },
+  editPoolTitle: async (poolId: string, title: string) => {
+    try {
+    return api.createApi().poke({
+      app: 'goals',
+      mark: 'goal-action',
+      json: {
+        'update-pool-property': {
+          pin: poolId,
+          method: 'put',
+          property: 'title',
+          data: title,
         }
       },
     });
@@ -172,16 +195,16 @@ const api = {
     }
   },
   editPoolNote: async (poolId: string, note: string) => {
-    console.log("poolId");
-    console.log(poolId);
     try {
     return api.createApi().poke({
       app: 'goals',
       mark: 'goal-action',
       json: {
-        'edit-pool-note': {
+        'update-pool-property': {
           pin: poolId,
-          note: note,
+          method: 'put',
+          property: 'note',
+          data: note,
         }
       },
     });
@@ -189,7 +212,26 @@ const api = {
       console.log("poke error");
     }
   },
-  editGoalDescription: async (goalId: string, description: string) => {
+  editPoolTagNote: async (poolId: string, tag: string, note: string) => {
+    try {
+    return api.createApi().poke({
+      app: 'goals',
+      mark: 'goal-action',
+      json: {
+        'update-pool-tag-property': {
+          pin: poolId,
+          tag: tag,
+          method: 'put',
+          property: 'note',
+          data: note,
+        }
+      },
+    });
+    } catch (e) {
+      console.log("poke error");
+    }
+  },
+  setGoalSummary: async (goalId: string, summary: string) => {
     console.log("goalId");
     console.log(goalId);
     try {
@@ -197,9 +239,9 @@ const api = {
       app: 'goals',
       mark: 'goal-action',
       json: {
-        'edit-goal-desc': {
+        'set-summary': {
           id: goalId,
-          desc: description,
+          summary: summary,
         }
       },
     });
@@ -215,9 +257,11 @@ const api = {
       app: 'goals',
       mark: 'goal-action',
       json: {
-        'edit-goal-note': {
+        'update-goal-field': {
           id: goalId,
-          note: note,
+          method: 'put',
+          field: 'note',
+          data: note,
         }
       },
     });
@@ -274,29 +318,51 @@ const api = {
     return api.createApi().poke({
       app: 'goals',
       mark: 'goal-action',
-      json: { 'trash-goal': { id: goalId } },
+      json: { 'delete-goal': { id: goalId } },
     });
     } catch (e) {
       console.log("poke error");
     }
   },
-  reorderYoung: async (parentId: string, newYoung: string[]) => {
+  youngSlotAbove: async (parentId: string, dis: string, dat: string) => {
     try {
     return api.createApi().poke({
       app: 'goals',
       mark: 'goal-action',
-      json: { 'reorder-young': { id: parentId, young: newYoung } },
+      json: { 'young-slot-above': { pid: parentId, dis: dis, dat: dat } },
     });
     } catch (e) {
       console.log("poke error");
     }
   },
-  reorderRoots: async (poolId: string, newRoots: string[]) => {
+  youngSlotBelow: async (parentId: string, dis: string, dat: string) => {
     try {
     return api.createApi().poke({
       app: 'goals',
       mark: 'goal-action',
-      json: { 'reorder-roots': { pin: poolId, roots: newRoots } },
+      json: { 'young-slot-below': { pid: parentId, dis: dis, dat: dat } },
+    });
+    } catch (e) {
+      console.log("poke error");
+    }
+  },
+  rootsSlotAbove: async (dis: string, dat: string) => {
+    try {
+    return api.createApi().poke({
+      app: 'goals',
+      mark: 'goal-action',
+      json: { 'roots-slot-above': { dis: dis, dat: dat } },
+    });
+    } catch (e) {
+      console.log("poke error");
+    }
+  },
+  rootsSlotBelow: async (dis: string, dat: string) => {
+    try {
+    return api.createApi().poke({
+      app: 'goals',
+      mark: 'goal-action',
+      json: { 'roots-slot-below': { dis: dis, dat: dat } },
     });
     } catch (e) {
       console.log("poke error");
@@ -324,38 +390,64 @@ const api = {
       console.log("poke error");
     }
   },
+  updateSetting: async (method: string, setting: string, contents: string) => {
+    try {
+    return api.createApi().poke({
+      app: 'goals',
+      mark: 'goal-action',
+      json: {
+        'update-setting': {
+          method: method,
+          setting: setting,
+          contents: contents
+        }
+      },
+    });
+    } catch (e) {
+      console.log("poke error");
+    }
+  },
   getPoolsIndex: async () => {
-    return await api.createApi().scry( { app: "goals", path: "/pools/index"} );
+    return await api.goalView({ "pools-index": null });
   },
   getPoolRoots: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/pool/roots${id}`} );
+    return await api.goalView({ "pool-roots": { pin: id } });
   },
   getGoalYoung: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/goal/young${id}`} );
+    return await api.goalView({ "goal-young": { id: id } });
   },
   getPoolTitle: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/pool/title${id}`} );
+    return await api.goalView({ "pool-title": { pin: id } });
   },
   getPoolNote: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/pool/note${id}`} );
+    return await api.goalView({ "pool-note": { pin: id } });
   },
-  getGoalDesc: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/goal/desc${id}`} );
+  getPoolTagNote: async (id: string, tag: string) => {
+    return await api.goalView({ "pool-tag-note": { pin: id, tag: tag } });
+  },
+  getGoalSummary: async (id: string) => {
+    return await api.goalView({ "goal-summary": { id: id } });
   },
   getGoalNote: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/goal/note${id}`} );
+    return await api.goalView({ "goal-note": { id: id } });
   },
   getGoalTags: async (id: string) => {
-    return await api.createApi().scry({ app: "goals", path: `/goal/tags${id}`});
+    return await api.goalView({ "goal-tags": { id: id } });
   },
   getGoalParent: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/goal/parent${id}`} );
+    return await api.goalView({ "goal-parent": { id: id } });
   },
   getGoalActionable: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/goal/actionable${id}`} );
+    return await api.goalView({ "goal-actionable": { id: id } });
   },
   getGoalComplete: async (id: string) => {
-    return await api.createApi().scry( { app: "goals", path: `/goal/complete${id}`} );
+    return await api.goalView({ "goal-complete": { id: id } });
+  },
+  getSetting: async (setting: string) => {
+    return await api.goalView({ "setting": { setting: setting } });
+  },
+  getPoolTags: async (id: string) => {
+    return await api.goalView({ "pool-tags": { pin: id } });
   },
 };
 

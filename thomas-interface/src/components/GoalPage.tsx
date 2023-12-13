@@ -4,6 +4,7 @@ import GoalList from './GoalList';
 import Harvest from './Harvest';
 import api from '../api';
 import '../global.css';
+import { useNavigate } from 'react-router-dom';
 
 type Goal = { id: string, tags?: string[], description: string, complete: boolean, actionable: boolean }; // Type for pool object
 
@@ -23,7 +24,47 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const [harvestTags, setHarvestTags] = useState<string[]>([]);
   const [selectedOperation, setSelectedOperation] = useState('some');
   const [goalTags, setGoalTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredTags, setFilteredTags] = useState<string[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const navigate = useNavigate();
+
+  const fetchTags = async () => {
+    try {
+      const fetchedTags = await api.getPoolTags(`/${host}/${name}`);
+      setAllTags(fetchedTags);
+      setFilteredTags(fetchedTags); // Initialize with all tags
+    } catch (error) {
+      console.error("Error fetching tags: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTags();
+  }, [host, name]);
+
+  useEffect(() => {
+    const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    setFilteredTags(filtered);
+  }, [searchTerm, allTags]);
+
+  const navigateToTagPage = (tag: string) => {
+    setDropdownOpen(false);
+    navigate(`/tag/${host}/${name}/${tag}`);
+  };
+
+  const handleInputFocus = async () => {
+    fetchTags();
+    setDropdownOpen(true);
+  };
+
+  const handleInputBlur = () => {
+    setTimeout(() => {
+      setDropdownOpen(false);
+    }, 100);
+  };
   // Function to toggle refreshFlag
   const triggerRefreshKids = () => {
     setRefreshKids(!refreshKids);
@@ -38,7 +79,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   useEffect(() => {
     const fetch = async () => {
       try {
-        const fetchedDesc = await api.getGoalDesc(goalId);
+        const fetchedDesc = await api.getGoalSummary(goalId);
         setGoalDescription(fetchedDesc);
         const fetchedNote = await api.getGoalNote(goalId);
         setGoalNote(fetchedNote);
@@ -56,7 +97,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const handleAddTitle = async () => {
     if (newDescription.trim() !== '') {
       try {
-        await api.spawnGoal(poolId, goalId, newDescription, true);
+        await api.createGoal(poolId, goalId, newDescription, true);
       } catch (error) {
         console.error(error);
       }
@@ -129,6 +170,34 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   return (
     <div className="bg-gray-200 h-full flex justify-center items-center">
       <div className="bg-blue-300 p-6 rounded shadow-md w-full">
+        <div className="flex justify-between items-center mb-4">
+          <div className="tag-search-dropdown relative">
+            <input
+              type="text"
+              placeholder="Search Pool Tags"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              className="p-2 border box-border rounded text-sm"
+              style={{ width: '200px', height: '2rem' }}
+            />
+            {dropdownOpen && (
+              <div className="tag-list absolute right-0 bg-gray-100 border rounded mt-1 w-48 max-h-60 overflow-auto">
+                {filteredTags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className="tag-item p-1 hover:bg-gray-200 cursor-pointer"
+                    onClick={() => navigateToTagPage(tag)}
+                    style={{ lineHeight: '1.5rem' }}
+                  >
+                    {tag}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
         <div className="flex justify-between pb-2">
           {parent && (
             <a href={`/goal${parent}`} className="mr-2">
@@ -156,10 +225,15 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
         <div className="flex flex-wrap justify-center mb-4">
           {goalTags.map((tag, index) => (
             <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-              {tag}
+              <a href={`/tag/${host}/${name}/${tag}`} className="mr-2">
+                {tag}
+              </a>
               <button 
                 className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
-                onClick={() => removeGoalTag(index)}
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent link navigation when clicking the button
+                  removeGoalTag(index);
+                }}
               >
                 ×
               </button>
@@ -275,10 +349,15 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
               <div className="flex flex-wrap justify-center mb-4">
                 {harvestTags.map((tag, index) => (
                   <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-                    {tag}
+                    <a href={`/tag/${host}/${name}/${tag}`} className="mr-2">
+                      {tag}
+                    </a>
                     <button 
                       className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
-                      onClick={() => removeHarvestTag(index)}
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent link navigation when clicking the button
+                        removeHarvestTag(index);
+                      }}
                     >
                       ×
                     </button>

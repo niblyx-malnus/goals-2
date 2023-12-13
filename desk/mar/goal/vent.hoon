@@ -57,7 +57,7 @@
           [%tags a+(turn tags (lead %s))]
       ==
       ::
-      %goal-tags   a+(turn tags.vnt (lead %s))
+      %tags        a+(turn ~(tap in tags.vnt) (lead %s))
       %uid         ?~(id.vnt ~ (enjs-id u.id.vnt))
       %cord        s+p.vnt
       %ucord       ?~(p.vnt ~ s+u.p.vnt)

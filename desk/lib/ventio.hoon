@@ -52,10 +52,8 @@
   |=  =page
   =/  m  (strand ,vase)
   ^-  form:m
-  =/  warning
-    ?:  ?=(~ (mole |.(;;(type -.q.page))))  [0 ~]
-    [2 leaf+"WARNING: unpage may be passing cage"]
-  ~>  %slog.warning
+  =-  ?:  ?=(~ (mole |.(;;(type -.q.page))))  -
+      ~>(%slog.[2 leaf+"WARNING: unpage may be passing cage"] -)
   ;<  byk=beak:spider  bind:m  get-beak
   ;<  =tube:clay       bind:m  (build-our-tube q.byk %noun p.page)
   ;<  ~                bind:m  (trace (cat 3 'mark: ' p.page) ~)

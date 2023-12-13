@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import _ from 'lodash';
-import { FiCopy } from 'react-icons/fi';
+import GoalRow from './GoalRow';
 
 type Goal = {
   id: string,
@@ -10,171 +9,6 @@ type Goal = {
   description: string,
   complete: boolean,
   actionable: boolean
-}; // Type for pool object
-
-const GoalRow: React.FC<{
-    name: string,
-    id: string,
-    complete: boolean,
-    actionable: boolean,
-    refresh: () => void,
-    moveGoalUp: (id: string) => void,
-    moveGoalDown: (id: string) => void
-  }> = ({
-    name,
-    id,
-    complete,
-    actionable,
-    moveGoalUp,
-    moveGoalDown,
-    refresh
-  }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [newDescription, setNewDescription] = useState(name);
-  const [isActionable, setIsActionable] = useState(actionable);
-  const [isComplete, setIsComplete] = useState(complete);
-
-  const deleteGoal = async () => {
-    try {
-      await api.deleteGoal(id);
-      refresh();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const updateGoal = async () => {
-    try {
-      console.log("updating goal...");
-      await api.editGoalDescription(id, newDescription);
-      refresh();
-      setIsEditing(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const cancelUpdateGoal = async () => {
-    try {
-      setNewDescription(name);
-      refresh();
-      setIsEditing(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      updateGoal();
-    }
-    if (event.key === 'Escape') {
-      cancelUpdateGoal();
-    }
-  };
-
-  const navigate = useNavigate();
-
-  const navigateToGoal = (id: string) => {
-    navigate(`/goal${id}`);
-  };
-
-  const toggleActionable = async () => {
-    try {
-      await api.setGoalActionable(id, !isActionable);
-      const actionable = await api.getGoalActionable(id);
-      setIsActionable(actionable);
-      refresh();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
-  const toggleComplete = async () => {
-    try {
-      await api.setGoalComplete(id, !isComplete);
-      const complete = await api.getGoalComplete(id);
-      setIsComplete(complete);
-      refresh();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(id);
-  }
-
-  return (
-    <div className={`flex justify-between items-center p-1 mt-2 rounded ${isActionable ? 'hover:bg-blue-500 bg-blue-400' : 'hover:bg-gray-300 bg-gray-200'}`}>
-      <div className="flex flex-col space-y-1">
-        <input type="checkbox" checked={isActionable} onChange={toggleActionable} />
-        <input type="checkbox" checked={isComplete} onChange={toggleComplete} />
-      </div>
-      <button
-        className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-        onClick={copyToClipboard}
-      >
-        <FiCopy />
-      </button>
-      <button onClick={() => moveGoalUp(id)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
-        ↑
-      </button>
-      <button onClick={() => moveGoalDown(id)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
-        ↓
-      </button>
-      {isEditing ? (
-        <input 
-          type="text" 
-          value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
-          className="bg-white shadow rounded cursor-pointer w-4/5 p-2"
-          onKeyDown={handleKeyDown}
-        />
-      ) : (
-        <div
-          className={`bg-gray-100 rounded cursor-pointer w-4/5 p-2 ${isComplete ? 'line-through' : ''}`}
-          onClick={() => navigateToGoal(id)}
-          onDoubleClick={() => setIsEditing(true)}
-        >
-          {name}
-        </div>
-
-      )}
-      {!isEditing && (
-        <>
-          <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            Edit
-          </button>
-          <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
-            onClick={deleteGoal}
-          >
-            Delete
-          </button>
-        </>
-      )}
-      {isEditing && (
-        <>
-          <button
-            className="bg-teal-100 justify-center flex items-center rounded p-2 w-1/12"
-            onClick={updateGoal}
-          >
-            Save
-          </button>
-          <button
-            className="bg-red-100 justify-center flex items-center rounded p-2 w-1/12"
-            onClick={cancelUpdateGoal}
-          >
-            Cancel
-          </button>
-        </>
-      )}
-    </div>
-  );
 };
 
 function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goalKey: any; refresh: () => void; }) {
@@ -205,15 +39,14 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
   }, [refresh, isPool, host, name, goalKey]);
 
   const moveGoalUp = async (id: string) => {
-    const index = _.findIndex(goals, { id });
+    const index = _.findIndex(displayedGoals, { id });
     if (index > 0) {
-      const reordered = _.cloneDeep(goals);
-      [reordered[index], reordered[index - 1]] = [reordered[index - 1], reordered[index]];
+      const aboveGoalId = displayedGoals[index - 1].id;
       try {
         if (isPool) {
-          await api.reorderRoots(`/${host}/${name}`, reordered.map(goal => goal.id));
+          await api.rootsSlotAbove(id, aboveGoalId);
         } else {
-          await api.reorderYoung(`/${host}/${name}/${goalKey}`, reordered.map(goal => goal.id));
+          await api.youngSlotAbove(`/${host}/${name}/${goalKey}`, id, aboveGoalId);
         }
         refresh();
       } catch (error) {
@@ -223,15 +56,14 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
   };
   
   const moveGoalDown = async (id: string) => {
-    const index = _.findIndex(goals, { id });
-    if (index >= 0 && index < goals.length - 1) {
-      const reordered = _.cloneDeep(goals);
-      [reordered[index], reordered[index + 1]] = [reordered[index + 1], reordered[index]];
+    const index = _.findIndex(displayedGoals, { id });
+    if (index >= 0 && index < displayedGoals.length - 1) {
+      const belowGoalId = displayedGoals[index + 1].id;
       try {
         if (isPool) {
-          await api.reorderRoots(`/${host}/${name}`, reordered.map(goal => goal.id));
+          await api.rootsSlotBelow(id, belowGoalId);
         } else {
-          await api.reorderYoung(`/${host}/${name}/${goalKey}`, reordered.map(goal => goal.id));
+          await api.youngSlotBelow(`/${host}/${name}/${goalKey}`, id, belowGoalId);
         }
         refresh();
       } catch (error) {
@@ -258,10 +90,13 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
             className="block text-current no-underline hover:no-underline"
           >
             <GoalRow
+              host={host}
+              poolName={name}
               name={goal.description}
               id={goal.id}
               complete={goal.complete}
               actionable={goal.actionable}
+              tags={goal.tags}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}

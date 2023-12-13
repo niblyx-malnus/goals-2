@@ -1,18 +1,19 @@
 /-  *goals, old-goals, update, *group :: need to keep for historical reasons
+/+  gol-cli-node
 :: step-wisdom vs. step-nomadism
 :: https://gist.github.com/philipcmonk/de5ba03b3ea733387fd13b758062cfce
 |%
 +$  card  card:agent:gall
 ::
-+$  state-5-13  [%'5-13' =store]
-+$  state-5-12  [%'5-12' =store:old-goals]
++$  state-5-16  [%'5-16' =store]
++$  state-5-15  [%'5-15' =store:old-goals]
 +$  versioned-state
-  $%  state-5-12
-      state-5-13
+  $%  state-5-15
+      state-5-16
   ==
 ::
 ++  upgrade-io
-  |=  [new=state-5-13 =bowl:gall]
+  |=  [new=state-5-16 =bowl:gall]
   |^  ^-  (list card)
   :: TODO: Follow all pools and prompt others to refollow?
   ;:  weld
@@ -34,10 +35,10 @@
 ::
 ++  convert-to-latest
   |=  old=versioned-state
-  ^-  state-5-13
+  ^-  state-5-16
   ?-  -.old
-    %'5-12'  (convert-5-12-to-5-13 old)
-      %'5-13'
+    %'5-15'  (convert-5-15-to-5-16 old)
+      %'5-16'
     %=    old
         pools.store
       %-  ~(gas by *pools)
@@ -47,17 +48,11 @@
       :: [pin (inflate-pool:fl pool)]
     ==
   ==
-::
 :: Development states
 ::
-++  convert-5-12-to-5-13
-  |=  =state-5-12
-  ^-  state-5-13
-  =/  =local
-    :*  order.local.store.state-5-12
-        pools.local.store.state-5-12
-        goals.local.store.state-5-12
-        settings=~
-    ==
-  [%'5-13' pools.store.state-5-12 local pool-info.store.state-5-12]
+++  convert-5-15-to-5-16
+  |=  =state-5-15
+  ^-  state-5-16
+  !!
+  :: [%'5-16' pools local.store.state-5-15 pool-info.store.state-5-15]
 --

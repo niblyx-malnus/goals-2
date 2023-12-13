@@ -19,13 +19,15 @@
         [%goal-young (ot ~[id+id])]
         [%pool-title (ot ~[pin+pin])]
         [%pool-note (ot ~[pin+pin])]
-        [%goal-description (ot ~[id+id])]
+        [%pool-tag-note (ot ~[pin+pin tag+so])]
+        [%goal-summary (ot ~[id+id])]
         [%goal-note (ot ~[id+id])]
         [%goal-tags (ot ~[id+id])]
         [%goal-parent (ot ~[id+id])]
         [%goal-actionable (ot ~[id+id])]
         [%goal-complete (ot ~[id+id])]
         [%setting (ot ~[setting+so])]
+        [%pool-tags (ot ~[pin+pin])]
     ==
     ++  type
       %-  of

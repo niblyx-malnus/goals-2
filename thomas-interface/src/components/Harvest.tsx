@@ -46,7 +46,7 @@ const GoalRow: React.FC<{
   const updateGoal = async () => {
     try {
       console.log("updating goal...");
-      await api.editGoalDescription(id, newDescription);
+      await api.setGoalSummary(id, newDescription);
       refresh();
       setIsEditing(false);
     } catch (error) {
@@ -226,13 +226,12 @@ function Harvest({ host, name, goalKey, method, tags, refresh }: { host: any; na
   const moveGoalUp = async (id: string) => {
     const index = _.findIndex(goals, { id });
     if (index > 0) {
-      const reordered = _.cloneDeep(goals);
-      [reordered[index], reordered[index - 1]] = [reordered[index - 1], reordered[index]];
       try {
+        const aboveGoalId = goals[index - 1].id;
         if (isPool) {
-          await api.reorderRoots(`/${host}/${name}`, reordered.map(goal => goal.id));
+          await api.rootsSlotAbove(id, aboveGoalId);
         } else {
-          await api.reorderYoung(`/${host}/${name}/${goalKey}`, reordered.map(goal => goal.id));
+          await api.youngSlotAbove(`/${host}/${name}/${goalKey}`, id, aboveGoalId);
         }
         refresh();
       } catch (error) {
@@ -244,13 +243,12 @@ function Harvest({ host, name, goalKey, method, tags, refresh }: { host: any; na
   const moveGoalDown = async (id: string) => {
     const index = _.findIndex(goals, { id });
     if (index >= 0 && index < goals.length - 1) {
-      const reordered = _.cloneDeep(goals);
-      [reordered[index], reordered[index + 1]] = [reordered[index + 1], reordered[index]];
+      const belowGoalId = goals[index + 1].id;
       try {
         if (isPool) {
-          await api.reorderRoots(`/${host}/${name}`, reordered.map(goal => goal.id));
+          await api.rootsSlotBelow(id, belowGoalId);
         } else {
-          await api.reorderYoung(`/${host}/${name}/${goalKey}`, reordered.map(goal => goal.id));
+          await api.youngSlotBelow(`/${host}/${name}/${goalKey}`, id, belowGoalId);
         }
         refresh();
       } catch (error) {

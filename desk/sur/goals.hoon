@@ -17,25 +17,27 @@
 +$  goal
   $:  par=(unit id)
       kids=(set id)
+      young=(list id) :: an order on kids and "virtual" subgoals
       kickoff=node
       deadline=node
       actionable=?
       chief=ship
       =deputies
-      :: TODO: summary=@t (140 character summary of a goal)
+      summary=@t      :: (140 character summary of a goal)
   ==
 +$  goals    (map id goal)
 ::
 +$  role     ?(%owner %admin %creator)
 +$  perms    (map ship (unit role))
 ::
-+$  archive  (map id [par=(unit id) goals])
++$  archive  (map id [par=(unit id) =goals])
 ::
 +$  pool
   $:  =pin
-      =goals
-      cache=goals :: TODO: replace with archive
       =perms
+      =goals
+      roots=(list id) :: an order on parentless goals
+      =archive
   ==
 ::
 +$  order-by
@@ -50,8 +52,6 @@
       fields=(map id (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
-      :: young=(map id (list id)) :: order on children and "borrowed"
-      :: roots=(list id) :: order on pool roots
   ==
 ::
 +$  pools  (map pin pool)
@@ -71,6 +71,18 @@
       =local
       pool-info=(map pin pool-data)
   ==
+::
+:: /store
+::   /pools
+::     pool-pin.json
+::   /local
+::     order.json
+::     pools.json
+::     /goals
+::       goal-id.json
+::     settings.json
+::   /pool-info
+::     pool-pin.json
 ::
 +$  node-trace
   $:  left-bound=moment

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import MarkdownEditor from './MarkdownEditor';
+import { useNavigate } from 'react-router-dom';
 import GoalList from './GoalList';
 import Harvest from './Harvest';
 import api from '../api';
@@ -20,6 +21,53 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [activeTab, setActiveTab] = useState('Roots');
   const [tags, setTags] = useState<string[]>([]);
   const [selectedOperation, setSelectedOperation] = useState('some');
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredTags, setFilteredTags] = useState<string[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  
+  const navigate = useNavigate();
+
+  const fetchTags = async () => {
+    try {
+      const fetchedTags = await api.getPoolTags(poolId);
+      setAllTags(fetchedTags);
+      setFilteredTags(fetchedTags); // Initialize with all tags
+    } catch (error) {
+      console.error("Error fetching tags: ", error);
+    }
+  };
+
+  // Fetch all tags on mount
+  useEffect(() => {
+    // Assuming an API method to fetch all tags for the pool
+    fetchTags();
+  }, []);
+
+  // Filter tags based on search term
+  useEffect(() => {
+    const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    setFilteredTags(filtered);
+  }, [searchTerm, allTags]);
+
+    // Navigate to PoolTagPage
+  const navigateToTagPage = (tag: string) => {
+    setDropdownOpen(false);
+    navigate(`/tag/${host}/${name}/${tag}`);
+  };
+
+  // Handle tag search input focus
+  const handleInputFocus = async () => {
+    fetchTags();
+    setDropdownOpen(true);
+  };
+
+  const handleInputBlur = () => {
+    // Delay the close to allow for navigation to tag page
+    setTimeout(() => {
+      setDropdownOpen(false);
+    }, 100);
+  };
 
   // Function to toggle refreshFlag
   const triggerRefreshRoots = () => {
@@ -49,7 +97,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const handleAddTitle = async () => {
     if (newDescription.trim() !== '') {
       try {
-        await api.spawnGoal(`/${host}/${name}`, null, newDescription, true);
+        await api.createGoal(`/${host}/${name}`, null, newDescription, true);
       } catch (error) {
         console.error(error);
       }
@@ -80,12 +128,45 @@ function Pool({ host, name }: { host: any; name: any; }) {
       console.error(error);
     }
   };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
   return (
     <div className="bg-gray-200 h-full flex justify-center items-center">
       <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full">
-        <a href="/pools" className="mr-2 flex">
-          <h2 className="text-blue-800">All Pools</h2>
-        </a>
+        <div className="flex justify-between items-center mb-4">
+          <div className="tag-search-dropdown relative">
+            <input
+              type="text"
+              placeholder="Search Pool Tags"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              className="p-2 border box-border rounded text-sm"
+              style={{ width: '200px', height: '2rem' }}
+            />
+            {dropdownOpen && (
+              <div className="tag-list absolute right-0 bg-gray-100 border rounded mt-1 w-48 max-h-60 overflow-auto">
+                {filteredTags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className="tag-item p-1 hover:bg-gray-200 cursor-pointer"
+                    onClick={() => navigateToTagPage(tag)}
+                    style={{ lineHeight: '1.5rem' }}
+                  >
+                    {tag}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <h2 className="text-blue-800">
+          <a href="/pools" className="mr-2">All Pools</a>
+        </h2>
         <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">
           {poolTitle}
         </h1>

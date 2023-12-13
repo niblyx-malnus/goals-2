@@ -27,7 +27,7 @@ function Pools() {
     if (newTitle.trim() !== '') {
       console.log(newTitle);
       try {
-        await api.spawnPool(newTitle);
+        await api.createPool(newTitle);
         const updatedPools = await api.getPoolsIndex(); // Get updated list
         console.log(updatedPools);
         setPools(updatedPools);
