@@ -1,0 +1,11 @@
+:~
+  title+'Goals'
+  info+''
+  color+0x9c.cfe7
+  version+[0 1 0]
+  image+''
+  website+''
+  license+'MIT'
+  base+'goals'
+  site+/apps/goals
+==
