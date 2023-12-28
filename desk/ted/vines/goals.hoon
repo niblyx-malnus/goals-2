@@ -1,11 +1,12 @@
 /-  gol=goals, axn=action, pyk=peek, spider
-/+  *ventio, gol-cli-traverse, gol-cli-node
+/+  *ventio, tree=filetree, gol-cli-traverse, gol-cli-node
 =,  strand=strand:spider
 ^-  thread:spider
 ::
 =<
 ::
 %-  vine-thread
+%-  vine:tree
 |=  [=gowl vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m

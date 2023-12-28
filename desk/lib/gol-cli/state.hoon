@@ -1,4 +1,4 @@
-/-  *goals, old-goals, update, *group :: need to keep for historical reasons
+/-  *goals, old-goals, update
 /+  gol-cli-node
 :: step-wisdom vs. step-nomadism
 :: https://gist.github.com/philipcmonk/de5ba03b3ea733387fd13b758062cfce

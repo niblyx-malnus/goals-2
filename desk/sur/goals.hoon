@@ -72,18 +72,6 @@
       pool-info=(map pin pool-data)
   ==
 ::
-:: /store
-::   /pools
-::     pool-pin.json
-::   /local
-::     order.json
-::     pools.json
-::     /goals
-::       goal-id.json
-::     settings.json
-::   /pool-info
-::     pool-pin.json
-::
 +$  node-trace
   $:  left-bound=moment
       ryte-bound=moment

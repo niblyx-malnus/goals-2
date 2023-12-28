@@ -150,7 +150,6 @@
 :: venter
 ::
 ++  venter
-  =,  strand=strand:spider
   ^-  thread:spider
   |=  arg=vase
   =/  m  (strand ,vase)
@@ -170,7 +169,6 @@
 ::
 ++  vine-thread
   |=  =vine
-  =,  strand=strand:spider
   ^-  thread:spider
   |=  arg=vase
   =/  m  (strand ,vase)
@@ -405,9 +403,10 @@
   =/  m  (strand ,(unit mold))
   ^-  form:m
   ;<  a=(each mold goof)  bind:m  (scry-soft mold path)
-  ?.  -.a
-    (pure:m ~)
-  (pure:m `p.a)
+  ?-  -.a
+    %|  (pure:m ~)
+    %&  (pure:m [~ p.a])
+  ==
 ::
 ++  pass-arvo
   |=  [=wire =note-arvo]

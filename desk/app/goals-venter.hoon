@@ -81,8 +81,7 @@
     ?+    p.req  (on-poke:def mark vase)
         %scry
       =+  ;;(scry=^path q.req)
-      ?>  ?=(^ scry)
-      ?>  ?=(^ t.scry)
+      ?>  ?=([@ ^] scry)
       =+  .^(p=* i.scry (scot %p our.bowl) i.t.scry (scot %da now.bowl) t.t.scry)
       :_  this
       :~  [%give %fact ~[path] noun+!>(p)]

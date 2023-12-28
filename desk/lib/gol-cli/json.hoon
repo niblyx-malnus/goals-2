@@ -246,7 +246,8 @@
 ++  enjs-pool
   =,  enjs:format
   |=  =pool
-  !!
+  ^-  json
+  s+'Hello! I am a pool!'
   :: |=  =npool
   :: %-  pairs
   :: :~  [%perms (enjs-pool-perms perms.nexus.npool)]
@@ -263,6 +264,35 @@
 ::       [%birth (numb (unm:chrono:userlib birth.froze))]
 ::       [%creator (ship creator.froze)]
 ::   ==
+++  enjs-order
+  =,  enjs:format
+  |=  order=(list id)
+  ^-  json
+  s+'Hello! I am your goal order!'
+::
+++  enjs-pools-order
+  =,  enjs:format
+  |=  order=(list pin)
+  ^-  json
+  s+'Hello! I am your pool order!'
+::
+++  enjs-settings
+  =,  enjs:format
+  |=  settings=(map @t @t)
+  ^-  json
+  s+'Hello! I am your goals settings!'
+::
+++  enjs-goal-local
+  =,  enjs:format
+  |=  =goal-local
+  ^-  json
+  s+'Hello! I am a local goal!'
+::
+++  enjs-pool-data
+  =,  enjs:format
+  |=  =pool-data
+  ^-  json
+  s+'Hello! I am some pool info!'
 ::
 ++  enjs-perms
   =,  enjs:format
