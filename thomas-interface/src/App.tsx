@@ -3,16 +3,6 @@ import Pools from './components/Pools';
 import PoolPage from './components/PoolPage';
 import GoalPage from './components/GoalPage';
 import PoolTagPage from './components/PoolTagPage';
-import api from './api';
-
-// Extend the Window interface to add the 'api' property
-declare global {
-  interface Window {
-    api: any; // Replace 'any' with the actual type of 'api' if possible
-  }
-}
-
-window.api = api;
 
 function PoolPageWrapper() {
   let { host, name } = useParams();
@@ -31,9 +21,8 @@ function PoolTagPageWrapper() {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/apps/goals">
       <div>
-        {/* Route configuration */}
         <Routes>
           <Route path="/" element={<Pools />} />
           <Route path="/pools" element={<Pools />} />

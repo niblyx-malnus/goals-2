@@ -165,7 +165,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
           </div>
         </div>
         <h2 className="text-blue-800">
-          <a href="/pools" className="mr-2">All Pools</a>
+          <a href="/apps/goals/pools" className="mr-2">All Pools</a>
         </h2>
         <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">
           {poolTitle}

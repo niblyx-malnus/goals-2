@@ -1,12 +1,17 @@
 import memoize from "lodash/memoize";
 import Urbit from "@urbit/http-api";
 
-const ship = "pittyp-fogsyt-niblyx-malnus";
-
+const live = false;
+const ship = "niblyx-malnus";
 const api = {
   createApi: memoize(() => {
-      const urb = new Urbit("http://localhost:8080", "");
-      urb.ship = ship;
+      const urb = live
+        ? new Urbit("")
+        : new Urbit(
+          "http://localhost:8080", // process.env.REACT_APP_SHIP_URL
+          "" // process.env.REACT_APP_SHIP_CODE
+        );
+      urb.ship = live ? (window as any).ship : ship; // process.env.REACT_APP_SHIP_NAME;
       urb.onError = (message) => console.log("onError: " + message);
       urb.onOpen = () => console.log("urbit onOpen");
       urb.onRetry = () => console.log("urbit onRetry");
@@ -69,7 +74,7 @@ const api = {
   },
   goalView: async (json: any) => {
     return await api.vent({
-      ship: ship, // the ship to poke
+      ship: live ? (window as any).ship : ship, // process.env.REACT_APP_SHIP_NAME,
       dude: 'goals', // the agent to poke
       inputDesk: 'goals', // where does the input mark live
       inputMark: 'goal-view', // name of input mark

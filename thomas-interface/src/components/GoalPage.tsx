@@ -200,14 +200,14 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
         </div>
         <div className="flex justify-between pb-2">
           {parent && (
-            <a href={`/goal${parent}`} className="mr-2">
+            <a href={`/apps/goals/goal${parent}`} className="mr-2">
               <h2 className="text-blue-800">Parent Goal</h2>
             </a>
           )}
-          <a href={`/pool${poolId}`} className="mr-2">
+          <a href={`/apps/goals/pool${poolId}`} className="mr-2">
             <h2 className="text-blue-800">Parent Pool</h2>
           </a>
-          <a href="/pools" className="mr-2">
+          <a href="/apps/goals/pools" className="mr-2">
             <h2 className="text-blue-800">All Pools</h2>
           </a>
         </div>

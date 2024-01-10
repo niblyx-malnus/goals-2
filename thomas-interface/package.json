@@ -2,6 +2,7 @@
   "name": "interface",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/apps/goals/",
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "@testing-library/jest-dom": "^5.17.0",
