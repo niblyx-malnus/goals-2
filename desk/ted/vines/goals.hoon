@@ -10,11 +10,11 @@
 |=  [=gowl vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m
+?>  |(=(our src):gowl (moon:title [our src]:gowl))
+~?  >>  (moon:title [our src]:gowl)
+  "%goals: moon access from {(scow %p src.gowl)}"
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
     %goal-view
-  ?>  |(=(our src):gowl (moon:title [our src]:gowl))
-  ~?  >>  (moon:title [our src]:gowl)
-    "%goals: moon access from {(scow %p src.gowl)}"
   =+  !<(vyu=goal-view:axn vase)
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   ?-    -.vyu

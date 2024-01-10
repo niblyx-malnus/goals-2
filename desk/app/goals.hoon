@@ -52,10 +52,6 @@
   ^-  (quip card _this)
   ?>  =(src our):bowl
   ?+    mark  (on-poke:def mark vase)
-      %goal-test
-    ~&  goal-test+src.bowl
-    `this
-    ::
       %goal-action
     =/  axn=action:act  !<(action:act vase)
     ~&  received-axn+axn

@@ -5,13 +5,8 @@ const live = false;
 const ship = "niblyx-malnus";
 const api = {
   createApi: memoize(() => {
-      const urb = live
-        ? new Urbit("")
-        : new Urbit(
-          "http://localhost:8080", // process.env.REACT_APP_SHIP_URL
-          "" // process.env.REACT_APP_SHIP_CODE
-        );
-      urb.ship = live ? (window as any).ship : ship; // process.env.REACT_APP_SHIP_NAME;
+      const urb = live ? new Urbit("") : new Urbit("http://localhost:8080", "");
+      urb.ship = live ? (window as any).ship : ship;
       urb.onError = (message) => console.log("onError: " + message);
       urb.onOpen = () => console.log("urbit onOpen");
       urb.onRetry = () => console.log("urbit onRetry");
@@ -74,10 +69,21 @@ const api = {
   },
   goalView: async (json: any) => {
     return await api.vent({
-      ship: live ? (window as any).ship : ship, // process.env.REACT_APP_SHIP_NAME,
+      ship: live ? (window as any).ship : ship,
       dude: 'goals', // the agent to poke
       inputDesk: 'goals', // where does the input mark live
       inputMark: 'goal-view', // name of input mark
+      outputDesk: 'goals', // where does the output mark live
+      outputMark: 'goal-vent', // name of output mark
+      body: json, // the actual poke content
+    }, 'goals');
+  },
+  goalAction: async (json: any) => {
+    return await api.vent({
+      ship: live ? (window as any).ship : ship,
+      dude: 'goals', // the agent to poke
+      inputDesk: 'goals', // where does the input mark live
+      inputMark: 'goal-action', // name of input mark
       outputDesk: 'goals', // where does the output mark live
       outputMark: 'goal-vent', // name of output mark
       body: json, // the actual poke content
@@ -117,112 +123,64 @@ const api = {
     return await api.goalView(json);
   },
   createPool: async (title: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: { 'create-pool': { title: title } },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = { 'create-pool': { title: title } };
+    return await api.goalAction(json);
   },
   createGoal: async (poolId: string, parentId: string | null, summary: string, actionable: boolean) => {
-    console.log("poolId");
-    console.log(poolId);
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'create-goal': {
           pin: poolId,
           upid: parentId,
           summary: summary,
           actionable: actionable
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   addGoalTag: async (goalId: string, text: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'update-goal-tags': {
           id: goalId,
           method: 'uni',
           tags: [text]
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   delGoalTag: async (goalId: string, text: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'update-goal-tags': {
           id: goalId,
           method: 'dif',
           tags: [text]
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   editPoolTitle: async (poolId: string, title: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'update-pool-property': {
           pin: poolId,
           method: 'put',
           property: 'title',
           data: title,
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   editPoolNote: async (poolId: string, note: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'update-pool-property': {
           pin: poolId,
           method: 'put',
           property: 'note',
           data: note,
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   editPoolTagNote: async (poolId: string, tag: string, note: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'update-pool-tag-property': {
           pin: poolId,
           tag: tag,
@@ -230,187 +188,78 @@ const api = {
           property: 'note',
           data: note,
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   setGoalSummary: async (goalId: string, summary: string) => {
-    console.log("goalId");
-    console.log(goalId);
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'set-summary': {
           id: goalId,
           summary: summary,
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   editGoalNote: async (goalId: string, note: string) => {
-    console.log("goalId");
-    console.log(goalId);
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'update-goal-field': {
           id: goalId,
           method: 'put',
           field: 'note',
           data: note,
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   setGoalComplete: async (goalId: string, complete: boolean) => {
-    console.log("goalId");
-    console.log(goalId);
-    try {
-      if (complete) {
-        return api.createApi().poke({
-          app: 'goals',
-          mark: 'goal-action',
-          json: { 'mark-complete': { id: goalId } },
-        });
-      } else {
-        return api.createApi().poke({
-          app: 'goals',
-          mark: 'goal-action',
-          json: { 'unmark-complete': { id: goalId } },
-        });
-      }
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = complete
+      ? { 'mark-complete': { id: goalId } }
+      : { 'unmark-complete': { id: goalId } }
+    return await api.goalAction(json);
   },
   setGoalActionable: async (goalId: string, actionable: boolean) => {
-    console.log("goalId");
-    console.log(goalId);
-    try {
-      if (actionable) {
-        return api.createApi().poke({
-          app: 'goals',
-          mark: 'goal-action',
-          json: { 'mark-actionable': { id: goalId } },
-        });
-      } else {
-        return api.createApi().poke({
-          app: 'goals',
-          mark: 'goal-action',
-          json: { 'unmark-actionable': { id: goalId } },
-        });
-      }
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = actionable
+      ? { 'mark-actionable': { id: goalId } }
+      : { 'unmark-actionable': { id: goalId } }
+    return await api.goalAction(json);
   },
   deleteGoal: async (goalId: string) => {
-    console.log("goalId");
-    console.log(goalId);
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: { 'delete-goal': { id: goalId } },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = { 'delete-goal': { id: goalId } };
+    return await api.goalAction(json);
   },
   youngSlotAbove: async (parentId: string, dis: string, dat: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: { 'young-slot-above': { pid: parentId, dis: dis, dat: dat } },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = { 'young-slot-above': { pid: parentId, dis: dis, dat: dat } };
+    return await api.goalAction(json);
   },
   youngSlotBelow: async (parentId: string, dis: string, dat: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: { 'young-slot-below': { pid: parentId, dis: dis, dat: dat } },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = { 'young-slot-below': { pid: parentId, dis: dis, dat: dat } };
+    return await api.goalAction(json);
   },
   rootsSlotAbove: async (dis: string, dat: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: { 'roots-slot-above': { dis: dis, dat: dat } },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = { 'roots-slot-above': { dis: dis, dat: dat } };
+    return await api.goalAction(json);
   },
   rootsSlotBelow: async (dis: string, dat: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: { 'roots-slot-below': { dis: dis, dat: dat } },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = { 'roots-slot-below': { dis: dis, dat: dat } };
+    return await api.goalAction(json);
   },
   setPoolsIndex: async (pools: string[]) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: { 'reorder-pools': { pools: pools, } },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = { 'reorder-pools': { pools: pools, } };
+    return await api.goalAction(json);
   },
   move: async (cid: string, upid: string | null) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: { 'move': { cid: cid, upid: upid } },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+    const json = { 'move': { cid: cid, upid: upid } };
+    return await api.goalAction(json);
   },
   updateSetting: async (method: string, setting: string, contents: string) => {
-    try {
-    return api.createApi().poke({
-      app: 'goals',
-      mark: 'goal-action',
-      json: {
+    const json = {
         'update-setting': {
           method: method,
           setting: setting,
           contents: contents
         }
-      },
-    });
-    } catch (e) {
-      console.log("poke error");
-    }
+      };
+    return await api.goalAction(json);
   },
   getPoolsIndex: async () => {
     return await api.goalView({ "pools-index": null });
