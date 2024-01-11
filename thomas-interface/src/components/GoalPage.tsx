@@ -28,6 +28,11 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredTags, setFilteredTags] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   const navigate = useNavigate();
 
@@ -168,8 +173,8 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   };
 
   return (
-    <div className="bg-gray-200 h-full flex justify-center items-center">
-      <div className="bg-blue-300 p-6 rounded shadow-md w-full">
+    <div className="bg-gray-200 h-full flex justify-center items-center h-screen">
+      <div className="bg-blue-300 p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <div className="tag-search-dropdown relative">
             <input
@@ -240,36 +245,55 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
             </div>
           ))}
         </div>
-        <div className="flex justify-center mb-4">
-          <div className="p-1">
-            <select onChange={(e) => setActionType(e.target.value)} value={actionType}>
-              <option value="move">Move</option>
-              <option value="nest">Nest</option>
-            </select>
-          </div>
-          <div className="p-1">
-            <input 
-              type="text" 
-              placeholder="Goal ID 1" 
-              value={goalId1} 
-              onChange={(e) => setGoalId1(e.target.value)} 
-            />
-          </div>
-          <div className="p-1">
-            <input 
-              type="text" 
-              placeholder="Goal ID 2" 
-              value={goalId2} 
-              onChange={(e) => setGoalId2(e.target.value)} 
-            />
-          </div>
-          
-          <button
-            className="p-1 bg-gray-100 justify-center flex items-center rounded"
-            onClick={handleGoClick}
+        <div className="w-full px-1">
+          <div 
+            className="flex items-center justify-between cursor-pointer p-2 border-b"
+            onClick={toggleCollapse}
           >
-            Go
-          </button>
+            <span>Yoke Action</span>
+            {/* Optional: Replace the following span with an icon component */}
+            <span>{isCollapsed ? '▼' : '▲'}</span> 
+            {/* <FiChevronDown /> for down arrow and <FiChevronUp /> for up arrow */}
+          </div>
+
+          {!isCollapsed && (
+            <div className="flex flex-col items-center justify-center mb-4">
+              <div className="w-full p-1">
+                <select 
+                  onChange={(e) => setActionType(e.target.value)} 
+                  value={actionType}
+                  className="w-full p-2 border box-border rounded text-sm"
+                >
+                  <option value="move">Move</option>
+                  <option value="nest">Nest</option>
+                </select>
+              </div>
+              <div className="w-full p-1">
+                <input 
+                  type="text" 
+                  placeholder="Goal ID 1" 
+                  value={goalId1} 
+                  onChange={(e) => setGoalId1(e.target.value)}
+                  className="w-full p-2 border box-border rounded text-sm"
+                />
+              </div>
+              <div className="w-full p-1">
+                <input 
+                  type="text" 
+                  placeholder="Goal ID 2 (optional)" 
+                  value={goalId2} 
+                  onChange={(e) => setGoalId2(e.target.value)}
+                  className="w-full p-2 border box-border rounded text-sm"
+                />
+              </div>
+              <button
+                className="p-2 bg-gray-100 rounded flex items-center justify-center"
+                onClick={handleGoClick}
+              >
+                Go
+              </button>
+            </div>
+          )}
         </div>
         <div className="border-b">
           <ul className="flex justify-center -mb-px">

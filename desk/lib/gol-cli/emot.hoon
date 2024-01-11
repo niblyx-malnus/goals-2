@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-16:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-17:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -26,11 +26,11 @@
   $(now (add now ~s0..0001))
 ::
 ++  create-pool
-  |=  [own=ship now=@da]
+  |=  [own=ship now=@da title=@t]
   ^-  pool:gol
   :*  (unique-pin own now)
       (~(put by *perms:gol) own `%owner)
-      ~  ~  ~
+      ~  ~  ~  title
   ==
 ::
 ++  clone-pool
@@ -154,6 +154,13 @@
     =.  pools.store  (~(put by pools.store) pin new)
     this
     ::
+      %set-pool-title
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pin)
+    =/  new=pool:gol  abet:(set-pool-title:(apex:pl old) title mod)
+    =.  pools.store  (~(put by pools.store) pin new)
+    this
+    ::
       %set-kickoff
     =+  axn
     =/  =pin:gol  pin.id
@@ -260,11 +267,8 @@
       %create-pool
     =+  axn
     ?>  =(src our):bowl
-    =/  =pool:gol    (create-pool [src now]:bowl)
+    =/  =pool:gol    (create-pool src.bowl now.bowl title)
     =.  pools.store  (~(put by pools.store) pin.pool pool)
-    =|  =pool-data:gol
-    =.  properties.pool-data  (~(put by *(map @t @t)) 'title' title)
-    =.  pool-info.store  (~(put by pool-info.store) pin.pool pool-data)
     this
     ::
       %delete-pool
@@ -272,7 +276,7 @@
     =+  axn
     ?>  =(src our):bowl
     ?>  =(src.bowl host.pin)
-    :: TODO: implement pool deletion
+    =.  pools.store  (~(del by pools.store) pin)
     this
     ::
       %slot-above

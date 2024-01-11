@@ -1,7 +1,7 @@
 import memoize from "lodash/memoize";
 import Urbit from "@urbit/http-api";
 
-const live = false;
+const live = process.env.REACT_APP_LIVE;
 const ship = "niblyx-malnus";
 const api = {
   createApi: memoize(() => {
@@ -200,6 +200,16 @@ const api = {
       };
     return await api.goalAction(json);
   },
+  setPoolTitle: async (poolId: string, title: string) => {
+    console.log(poolId);
+    const json = {
+        'set-pool-title': {
+          pin: poolId,
+          title: title,
+        }
+      };
+    return await api.goalAction(json);
+  },
   editGoalNote: async (goalId: string, note: string) => {
     const json = {
         'update-goal-field': {
@@ -225,6 +235,10 @@ const api = {
   },
   deleteGoal: async (goalId: string) => {
     const json = { 'delete-goal': { id: goalId } };
+    return await api.goalAction(json);
+  },
+  deletePool: async (poolId: string) => {
+    const json = { 'delete-pool': { pin: poolId } };
     return await api.goalAction(json);
   },
   youngSlotAbove: async (parentId: string, dis: string, dat: string) => {

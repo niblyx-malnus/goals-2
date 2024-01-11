@@ -76,6 +76,14 @@
   =/  =goal:gol  (~(got by goals.p) id)
   this(goals.p (~(put by goals.p) id goal(summary summary)))
 ::
+++  set-pool-title
+  |=  [title=@t mod=ship]
+  ^-  _this
+  ?>  (check-pool-edit-perm mod)
+  ?.  (lte (met 3 title) 140)
+    ~|("Title exceeds 140 characters." !!)
+  this(title.p title)
+::
 :: Move goal and subgoals from main goals to archive
 ++  archive-goal
   |=  [=id:gol mod=ship]

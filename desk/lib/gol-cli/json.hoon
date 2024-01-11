@@ -98,6 +98,7 @@
     %-  of
     :~  [%create-pool (ot ~[title+so])]
         [%delete-pool (ot ~[pin+pin])]
+        [%set-pool-title (ot ~[pin+pin title+so])]
         [%create-goal (ot ~[pin+pin upid+unit-id summary+so actionable+bo])]
         [%archive-goal (ot ~[id+id])]
         [%restore-goal (ot ~[id+id])]

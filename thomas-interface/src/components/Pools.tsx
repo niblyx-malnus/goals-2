@@ -1,27 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import PoolList from './PoolList';
 import api from '../api';
 
-type Pool = { pin: string, title: string }; // Type for pool object
-
 function Pools() {
-  const [pools, setPools] = useState<Pool[]>([]); // Updated from titles to pools
   const [newTitle, setNewTitle] = useState<string>('');
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [refreshPools, setRefreshPools] = useState(false);
 
-
-  // Fetch pools on mount
-  useEffect(() => {
-    const fetchPools = async () => {
-      try {
-        const fetchedPools = await api.getPoolsIndex();
-        setPools(fetchedPools);
-      } catch (error) {
-        console.error("Error fetching pools: ", error);
-      }
-    };
-    fetchPools();
-  }, []);
+  // Function to toggle refreshFlag
+  const triggerRefreshPools = () => {
+    setRefreshPools(!refreshPools);
+  };
 
   const handleAddTitle = async () => {
     if (newTitle.trim() !== '') {
@@ -30,7 +18,7 @@ function Pools() {
         await api.createPool(newTitle);
         const updatedPools = await api.getPoolsIndex(); // Get updated list
         console.log(updatedPools);
-        setPools(updatedPools);
+        setRefreshPools(true);
       } catch (error) {
         console.error(error);
       }
@@ -38,46 +26,9 @@ function Pools() {
     }
   };
 
-  const listRef = useRef<HTMLUListElement>(null);
-
-  const dragStart = (e: React.DragEvent<HTMLAnchorElement>, index: number) => {
-    e.dataTransfer.setData('draggedIndex', index.toString());
-  };
-
-  const onDragOver = (e: React.DragEvent<HTMLElement>) => {
-    e.preventDefault();
-    
-    if (listRef.current) {
-      const rect = listRef.current.getBoundingClientRect();
-      const y = e.clientY - rect.top; // get the y-coordinate within the list
-      const closestIndex = Math.min(
-        pools.length - 1,
-        Math.max(
-          0,
-          Math.floor((y / rect.height) * pools.length)
-        )
-      );
-  
-      setDragOverIndex(closestIndex);
-    }
-  };
-  
-  const onDrop = (e: React.DragEvent<HTMLAnchorElement>, droppedIndex: number) => {
-    const draggedIndex = Number(e.dataTransfer.getData('draggedIndex'));
-    if (isNaN(draggedIndex)) return;
-  
-    const updatedPools = [...pools];
-    const [removed] = updatedPools.splice(draggedIndex, 1);
-    updatedPools.splice(droppedIndex, 0, removed);
-  
-    setPools(updatedPools);
-    setDragOverIndex(null);
-  };
-
-
   return (
-    <div className="bg-gray-200 h-full flex justify-center items-center">
-      <div className="bg-[#DFF7DC] p-6 rounded shadow-md w-full">
+    <div className="bg-gray-200 h-full flex justify-center items-center h-screen">
+      <div className="bg-[#DFF7DC] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
       <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">All Pools</h1>
         <div className="flex items-center mb-4">
           <input
@@ -98,26 +49,7 @@ function Pools() {
             Add
           </button>
         </div>
-        <ul onDragOver={onDragOver} ref={listRef}>
-          {pools.map((pool, index) => (
-            <>
-              <Link
-                draggable
-                onDragStart={(e) => dragStart(e, index)}
-                onDragOver={(e) => onDragOver(e)}
-                onDrop={(e) => onDrop(e, index)}
-                to={`/pool${pool.pin}`}
-                key={pool.pin}
-              className="block text-current no-underline hover:no-underline"
-              >
-              <li className="p-2 bg-gray-200 hover:bg-gray-300 mt-2 rounded" title={pool.pin}>
-                {pool.title}
-              </li>
-              </Link>
-              {dragOverIndex === index && <div className="h-[2px] bg-blue-500 transition-all ease-in-out duration-100 mt-1 mb-1"></div>}
-            </>
-          ))}
-        </ul>
+        <PoolList refresh={triggerRefreshPools}/>
       </div>
     </div>
   );

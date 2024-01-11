@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { FiCopy, FiTag, FiX } from 'react-icons/fi';
+import { FiCopy, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu } from 'react-icons/fi';
 import useStore from '../store';
 
 const GoalRow: React.FC<{
@@ -274,13 +274,19 @@ const GoalRow: React.FC<{
             className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
             onClick={() => setIsEditing(!isEditing)}
           >
-            Edit
+            <FiEdit />
           </button>
           <button
             className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
             onClick={deleteGoal}
           >
-            Delete
+            <FiTrash />
+          </button>
+          <button
+            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
+            onClick={() => console.log("menu")}
+          >
+            <FiMenu />
           </button>
         </>
       )}
@@ -290,13 +296,19 @@ const GoalRow: React.FC<{
             className="bg-teal-100 justify-center flex items-center rounded p-2 w-1/12"
             onClick={updateGoal}
           >
-            Save
+            <FiSave />
           </button>
           <button
             className="bg-red-100 justify-center flex items-center rounded p-2 w-1/12"
             onClick={cancelUpdateGoal}
           >
-            Cancel
+            <FiX />
+          </button>
+          <button
+            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
+            onClick={() => console.log("menu")}
+          >
+            <FiMenu />
           </button>
         </>
       )}

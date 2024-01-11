@@ -9,6 +9,7 @@
   $%  [%create-pool title=@t]
       [%delete-pool =pin]
       [%yoke =pin yoks=(list plex)]
+      [%set-pool-title =pin title=@t]
       [%update-pool-perms =pin new=perms]
       [%update-pool-property =pin p=(each [@t @t] @t)]
       [%update-pool-tag-property =pin tag=@t p=(each [@t @t] @t)]

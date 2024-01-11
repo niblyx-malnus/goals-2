@@ -17,7 +17,7 @@
 +$  goal
   $:  par=(unit id)
       kids=(set id)
-      :: young=(list id) :: an order on kids and "virtual" subgoals
+      young=(list id) :: an order on kids and "virtual" subgoals
       kickoff=node
       deadline=node
       actionable=?
@@ -36,6 +36,7 @@
   $:  =pin
       =perms
       =goals
+      roots=(list id) :: an order on parentless goals
       =archive
   ==
 ::
@@ -51,8 +52,6 @@
       fields=(map id (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
-      :: young=(map id (list id)) :: order on children and "borrowed"
-      :: roots=(list id) :: order on pool roots
   ==
 ::
 +$  pools  (map pin pool)
@@ -72,18 +71,6 @@
       =local
       pool-info=(map pin pool-data)
   ==
-::
-:: /store
-::   /pools
-::     pool-pin.json
-::   /local
-::     order.json
-::     pools.json
-::     /goals
-::       goal-id.json
-::     settings.json
-::   /pool-info
-::     pool-pin.json
 ::
 +$  node-trace
   $:  left-bound=moment
