@@ -55,9 +55,9 @@
       %pools-index
     %-  pure:m  !>
     :-  %pools-index
-    %+  turn  ~(tap by pool-info.store)
-    |=  [=pin:gol =pool-data:gol]
-    [pin (~(gut by properties.pool-data) 'title' '')]
+    %+  turn  ~(tap by pools.store)
+    |=  [=pin:gol =pool:gol]
+    [pin title.pool]
     ::
       %pool-roots
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
@@ -93,8 +93,7 @@
     ::
       %pool-title
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  =pool-data:gol  (~(got by pool-info.store) pin.vyu)
-    (pure:m !>([%cord (~(gut by properties.pool-data) 'title' '')]))
+    (pure:m !>([%cord title.pool]))
     ::
       %pool-note
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
