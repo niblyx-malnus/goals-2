@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import GoalList from './GoalList';
 import Harvest from './Harvest';
 import api from '../api';
-import '../global.css';
+import { FiX, FiSave, FiEdit2 } from 'react-icons/fi';
 
 function Pool({ host, name }: { host: any; name: any; }) {
   const poolId = `/${host}/${name}`;
@@ -24,6 +24,34 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [filteredTags, setFilteredTags] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editableTitle, setEditableTitle] = useState(poolTitle);
+
+  // Function to enable editing mode
+  const handleTitleEdit = () => {
+    setIsEditingTitle(true);
+    setEditableTitle(poolTitle);
+  };
+
+  // Function to save edited title
+  const handleTitleSave = async () => {
+    setIsEditingTitle(false);
+    setPoolTitle(editableTitle);
+    await api.setPoolTitle(poolId, editableTitle); // Assuming this is the correct API call
+  };
+
+  // Function to cancel editing
+  const handleTitleCancel = () => {
+    setIsEditingTitle(false);
+    setEditableTitle(poolTitle);
+  };
+
+  // Function to handle key down events in the input field
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleTitleSave();
+    }
+  };
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -57,6 +85,12 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const navigateToTagPage = (tag: string) => {
     setDropdownOpen(false);
     navigate(`/tag/${host}/${name}/${tag}`);
+  };
+
+    // Navigate to PoolTagPage
+  const navigateToAllPools = () => {
+    setDropdownOpen(false);
+    navigate(`/pools`);
   };
 
   // Handle tag search input focus
@@ -163,11 +197,45 @@ function Pool({ host, name }: { host: any; name: any; }) {
             )}
           </div>
         </div>
-        <h2 className="text-blue-800">
-          <a href="/apps/goals/pools" className="mr-2">All Pools</a>
-        </h2>
-        <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">
-          {poolTitle}
+        <div
+          className="cursor-pointer"
+          onClick={() => navigateToAllPools()}
+        >
+          <h2 className="text-blue-800">All Pools</h2>
+        </div>
+        <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4 flex items-center justify-center">
+          {isEditingTitle ? (
+            <div>
+              <input
+                type="text"
+                value={editableTitle}
+                onChange={(e) => setEditableTitle(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="bg-white shadow rounded cursor-pointer p-2 flex-grow"
+                style={{ width: '30%' }}
+              />
+              <button
+                onClick={handleTitleSave}
+                className="ml-2 p-1 text-teal-500 hover:text-teal-700"
+              >
+                <FiSave />
+              </button>
+              <button
+                onClick={handleTitleCancel}
+                className="ml-2 p-1 text-red-500 hover:text-red-700"
+              >
+                <FiX />
+              </button>
+            </div>
+          ) : (
+            <>
+              {poolTitle}
+              <FiEdit2 
+                onClick={handleTitleEdit}
+                className="ml-2 cursor-pointer text-blue-500 hover:text-blue-700"
+              />
+            </>
+          )}
         </h1>
         <div className="w-full px-1">
           <div 
@@ -265,7 +333,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
               </button>
             </div>
             <GoalList host={host} name={name} goalKey={null} refresh={triggerRefreshRoots}/>
-            <div className="p-6 markdown-container all:unstyled overflow-y-auto">
+            <div className="items-center mt-2 rounded">
               <MarkdownEditor
                 initialMarkdown={poolNote}
                 onSave={saveMarkdown}

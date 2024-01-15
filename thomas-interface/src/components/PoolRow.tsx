@@ -3,7 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { FiCopy, FiEdit, FiSave, FiTrash, FiX, FiMenu } from 'react-icons/fi';
 
-function PoolRow({ pin, title, refresh }: { pin: string; title: string, refresh: () => void }) {
+function PoolRow({
+    pin,
+    title,
+    refresh,
+    showButtons,
+  }: {
+    pin: string;
+    title: string;
+    refresh: () => void;
+    showButtons: boolean;
+  }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
 
@@ -11,7 +21,7 @@ function PoolRow({ pin, title, refresh }: { pin: string; title: string, refresh:
     try {
       await api.setPoolTitle(pin, newTitle);
       setIsEditing(false);
-      // Refresh or update the parent component's state as needed
+      refresh();
     } catch (error) {
       console.error("Error updating pool: ", error);
     }
@@ -34,11 +44,17 @@ function PoolRow({ pin, title, refresh }: { pin: string; title: string, refresh:
   };
 
   const deletePool = async () => {
-    try {
-      await api.deletePool(pin);
-      // Refresh or update the parent component's state as needed
-    } catch (error) {
-      console.error("Error deleting pool: ", error);
+    // Show confirmation dialog
+    const isConfirmed = window.confirm("Deleting a pool is irreversible. Are you sure you want to delete this pool?");
+  
+    // Only proceed if the user confirms
+    if (isConfirmed) {
+      try {
+        await api.deletePool(pin);
+        refresh();
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
@@ -57,23 +73,29 @@ function PoolRow({ pin, title, refresh }: { pin: string; title: string, refresh:
 
   return (
     <div className="flex justify-between items-center p-2 mt-2 bg-gray-200 hover:bg-gray-300 rounded">
-      <button
-        className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-        onClick={copyToClipboard}
-      >
-        <FiCopy />
-      </button>
+      {
+        showButtons && (
+          <>
+            <button
+              className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+              onClick={copyToClipboard}
+            >
+              <FiCopy />
+            </button>
+          </>
+        )
+      }
       {isEditing ? (
         <input 
           type="text" 
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
-          className="bg-white shadow rounded cursor-pointer w-4/5 p-2"
+          className="bg-white shadow rounded cursor-pointer flex-grow p-2"
           onKeyDown={handleKeyDown}
         />
       ) : (
         <div
-          className={"bg-gray-100 rounded cursor-pointer w-4/5 p-2"}
+          className={"truncate bg-gray-100 rounded cursor-pointer flex-grow p-2"}
           onClick={() => navigateToPool(pin)}
           onDoubleClick={() => setIsEditing(true)}
         >
@@ -81,56 +103,44 @@ function PoolRow({ pin, title, refresh }: { pin: string; title: string, refresh:
         </div>
 
       )}
-      <button
-        className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-        onClick={copyToClipboard}
-      >
-        <FiCopy />
-      </button>
-      {!isEditing && (
+      {showButtons && !isEditing && (
         <>
           <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
+            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
             onClick={() => setIsEditing(!isEditing)}
           >
             <FiEdit />
           </button>
           <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
+            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
             onClick={deletePool}
           >
             <FiTrash />
           </button>
-          <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
-            onClick={() => console.log("menu")}
-          >
-            <FiMenu />
-          </button>
         </>
       )}
-      {isEditing && (
+      {showButtons && isEditing && (
         <>
           <button
-            className="bg-teal-100 justify-center flex items-center rounded p-2 w-1/12"
+            className="p-2 rounded bg-teal-100 hover:bg-teal-200"
             onClick={updatePool}
           >
             <FiSave />
           </button>
           <button
-            className="bg-red-100 justify-center flex items-center rounded p-2 w-1/12"
+            className="p-2 rounded bg-red-100 hover:bg-red-200"
             onClick={cancelUpdatePool}
           >
             <FiX />
           </button>
-          <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
-            onClick={() => console.log("menu")}
-          >
-            <FiMenu />
-          </button>
         </>
       )}
+      <button
+        className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+        onClick={() => console.log("menu")}
+      >
+        <FiMenu />
+      </button>
     </div>
   );
 }

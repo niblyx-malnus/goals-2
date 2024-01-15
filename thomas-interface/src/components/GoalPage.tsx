@@ -5,6 +5,7 @@ import Harvest from './Harvest';
 import api from '../api';
 import '../global.css';
 import { useNavigate } from 'react-router-dom';
+import { FiX, FiSave, FiEdit2 } from 'react-icons/fi';
 
 type Goal = { id: string, tags?: string[], description: string, complete: boolean, actionable: boolean }; // Type for pool object
 
@@ -29,6 +30,36 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const [filteredTags, setFilteredTags] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isEditingSummary, setIsEditingSummary] = useState(false);
+  const [editableSummary, setEditableSummary] = useState(goalDescription);
+  const [completed, setCompleted] = useState(false);
+  const [actionable, setActionable] = useState(false);
+
+  const handleSummaryEdit = () => {
+    setIsEditingSummary(true);
+  };
+
+  const handleSummaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditableSummary(e.target.value);
+  };
+  
+  const handleSummarySave = () => {
+    setIsEditingSummary(false);
+    setGoalDescription(editableSummary);
+    api.setGoalSummary(goalId, editableSummary);
+  };
+
+  const handleSummaryCancel = () => {
+    setIsEditingSummary(false);
+    setEditableSummary(goalDescription); // Revert to the original description
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent default Enter key behavior
+      handleSummarySave();
+    }
+  };
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -46,9 +77,68 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
     }
   };
 
+  const fetchCompleted = async () => {
+    try {
+      const fetchedCompleted = await api.getGoalComplete(goalId);
+      setCompleted(fetchedCompleted);
+    } catch (error) {
+      console.error("Error fetching tags: ", error);
+    }
+  };
+
+  const fetchActionable = async () => {
+    try {
+      const fetchedActionable = await api.getGoalActionable(goalId);
+      setActionable(fetchedActionable);
+    } catch (error) {
+      console.error("Error fetching tags: ", error);
+    }
+  };
+
+  const toggleActionable = async () => {
+    try {
+      await api.setGoalActionable(goalId, !actionable);
+      const temp = await api.getGoalActionable(goalId);
+      setActionable(temp);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  const toggleComplete = async () => {
+    try {
+      await api.setGoalComplete(goalId, !completed);
+      const temp = await api.getGoalComplete(goalId);
+      setCompleted(temp);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchTags();
+    fetchCompleted();
+    fetchActionable();
   }, [host, name]);
+
+  // Ensure editableSummary is updated when goalDescription changes
+  useEffect(() => {
+    setEditableSummary(goalDescription);
+  }, [goalDescription]);
+
+  // Fetch goal data (make sure to include dependencies in the array)
+  useEffect(() => {
+    const fetchGoalData = async () => {
+      try {
+        const fetchedDesc = await api.getGoalSummary(goalId);
+        setGoalDescription(fetchedDesc);
+        // ... other fetch calls
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      }
+    };
+    fetchGoalData();
+  }, [goalId, api]);
 
   useEffect(() => {
     const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -58,6 +148,21 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const navigateToTagPage = (tag: string) => {
     setDropdownOpen(false);
     navigate(`/tag/${host}/${name}/${tag}`);
+  };
+
+  const navigateToAllPools = () => {
+    setDropdownOpen(false);
+    navigate(`/pools`);
+  };
+
+  const navigateToPoolPage = (poolId: string) => {
+    setDropdownOpen(false);
+    navigate(`/pool${poolId}`);
+  };
+
+  const navigateToGoalPage = (goalId: string) => {
+    setDropdownOpen(false);
+    navigate(`/goal${goalId}`);
   };
 
   const handleInputFocus = async () => {
@@ -205,20 +310,80 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
         </div>
         <div className="flex justify-between pb-2">
           {parent && (
-            <a href={`/apps/goals/goal${parent}`} className="mr-2">
+            <div
+              className="cursor-pointer"
+              onClick={() => navigateToGoalPage(parent)}
+            >
               <h2 className="text-blue-800">Parent Goal</h2>
-            </a>
+            </div>
           )}
-          <a href={`/apps/goals/pool${poolId}`} className="mr-2">
+          <div
+            className="cursor-pointer"
+            onClick={() => navigateToPoolPage(poolId)}
+          >
             <h2 className="text-blue-800">Parent Pool</h2>
-          </a>
-          <a href="/apps/goals/pools" className="mr-2">
+          </div>
+          <div
+            className="cursor-pointer"
+            onClick={() => navigateToAllPools()}
+          >
             <h2 className="text-blue-800">All Pools</h2>
-          </a>
+          </div>
         </div>
-        <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">
-          {goalDescription}
+        <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4 flex items-center justify-center">
+          {isEditingSummary ? (
+            <div>
+              <input
+                type="text"
+                value={editableSummary}
+                onChange={handleSummaryChange}
+                onKeyDown={handleKeyDown}
+                className="bg-white shadow rounded cursor-pointer p-2 flex-grow"
+                style={{ width: '30%' }}
+              />
+              <button
+                onClick={handleSummarySave}
+                className="ml-2 p-1 text-teal-500 hover:text-teal-700"
+              >
+                <FiSave />
+              </button>
+              <button
+                onClick={handleSummaryCancel}
+                className="ml-2 p-1 text-red-500 hover:text-red-700"
+              >
+                <FiX />
+              </button>
+            </div>
+          ) : (
+            <>
+              {goalDescription}
+              <FiEdit2 
+                onClick={handleSummaryEdit}
+                className="ml-2 cursor-pointer text-blue-500 hover:text-blue-700"
+              />
+            </>
+          )}
         </h1>
+        <div className="flex justify-center space-x-4 mb-4">
+          <label className="flex items-center space-x-2">
+            <input 
+              type="checkbox" 
+              checked={completed} 
+              onChange={toggleComplete} 
+              className="form-checkbox rounded"
+            />
+            <span>Complete</span>
+          </label>
+          <label className="flex items-center space-x-2">
+            <input 
+              type="checkbox" 
+              checked={actionable} 
+              onChange={toggleActionable} 
+              className="form-checkbox rounded"
+            />
+            <span>Actionable</span>
+          </label>
+        </div>
         <div className="flex flex-row justify-center items-center w-full mb-4 h-auto">
           <input
             type="text"
@@ -341,7 +506,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
               </button>
             </div>
             <GoalList host={host} name={name} goalKey={goalKey} refresh={triggerRefreshKids}/>
-            <div className="p-6 markdown-container all:unstyled overflow-y-auto">
+            <div className="items-center mt-2 rounded">
               <MarkdownEditor
                 initialMarkdown={goalNote}
                 onSave={saveMarkdown}

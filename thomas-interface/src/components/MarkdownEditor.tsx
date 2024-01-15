@@ -40,7 +40,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
   };
 
   return (
-    <div className="p-4 border rounded bg-white">
+    <div className="p-2 border rounded bg-white">
       {isEditing ? (
         <div>
           <div className="flex justify-center mt-2 mb-4">
@@ -52,7 +52,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
             </button>
           </div>
           <textarea
-            className="border w-full p-2 rounded"
+            className="border w-full p-1 rounded"
             rows={10}
             cols={50}
             value={tempText}
@@ -66,9 +66,11 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
               Edit
             </button>
           </div>
-          <div className="markdown-body p-6">
-            <ReactMarkdown children={markdownText} />
-          </div>
+          {markdownText && (
+            <div className="p-6">
+              <ReactMarkdown children={markdownText} />
+            </div>
+          )}
         </div>
       )}
     </div>

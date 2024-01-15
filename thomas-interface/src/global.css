@@ -1,13 +1,22 @@
-.markdown-container {
-  overflow-y: scroll;
+.markdown-body ol {
+    list-style-type: decimal;
 }
 
-.markdown-container::-webkit-scrollbar {
-  width: 12px !important;
+.markdown-body ul {
+    list-style-type: disc;
 }
 
-.markdown-container::-webkit-scrollbar-thumb,
-.markdown-container::-webkit-scrollbar-thumb:hover {
-  background: darkgrey !important;
-  outline: 1px solid slategrey !important;
-}
+/* .markdown-container {
+   overflow-y: scroll;
+ }
+ 
+ .markdown-container::-webkit-scrollbar {
+   width: 12px !important;
+ }
+ 
+ .markdown-container::-webkit-scrollbar-thumb,
+ .markdown-container::-webkit-scrollbar-thumb:hover {
+   background: darkgrey !important;
+   outline: 1px solid slategrey !important;
+ }
+*/

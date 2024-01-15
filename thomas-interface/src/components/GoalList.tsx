@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import _ from 'lodash';
 import GoalRow from './GoalRow';
+import useStore from '../store';
 
 type Goal = {
   id: string,
@@ -14,7 +15,17 @@ type Goal = {
 function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goalKey: any; refresh: () => void; }) {
   const isPool = goalKey == null;
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [showCompleted, setShowCompleted] = useState(false);
+
+  // Use Zustand store
+  const { showCompleted, setShowCompleted } = useStore(state => ({ 
+      showCompleted: state.showCompleted, 
+      setShowCompleted: state.setShowCompleted 
+    }));
+
+  const { showButtons, setShowButtons } = useStore(state => ({ 
+      showButtons: state.showButtons, 
+      setShowButtons: state.setShowButtons 
+    }));
 
   const displayedGoals = showCompleted ? goals : goals.filter(goal => !goal.complete);
 
@@ -74,15 +85,26 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
 
   return (
     <>
-      <label className="flex items-center space-x-2">
-        <input 
-          type="checkbox" 
-          checked={showCompleted} 
-          onChange={() => setShowCompleted(!showCompleted)} 
-          className="form-checkbox rounded"
-        />
-        <span>Show Completed</span>
-      </label>
+      <div className="flex space-x-4 mb-4">
+        <label className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            checked={showCompleted} 
+            onChange={() => setShowCompleted(!showCompleted)} 
+            className="form-checkbox rounded"
+          />
+          <span>Show Completed</span>
+        </label>
+        <label className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            checked={showButtons} 
+            onChange={() => setShowButtons(!showButtons)} 
+            className="form-checkbox rounded"
+          />
+          <span>Show Buttons</span>
+        </label>
+      </div>
       <ul>
         {displayedGoals.map((goal, index) => (
           <div
@@ -96,6 +118,7 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
               id={goal.id}
               complete={goal.complete}
               actionable={goal.actionable}
+              showButtons={showButtons}
               tags={goal.tags}
               refresh={refresh}
               moveGoalUp={moveGoalUp}

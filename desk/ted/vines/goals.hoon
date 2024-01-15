@@ -22,11 +22,9 @@
     =/  harvest=(list id:gol)
       ?-    -.type.vyu
           %main
-        :: =/  all-goals=goals:gol  (all-goals store)
-        :: =/  tv  ~(. gol-cli-traverse all-goals)
-        :: =/  harvest=(list id:gol)
-        ::   (ordered-goals-harvest:tv order.local.store)
-        !!
+        =/  all-goals=goals:gol  (all-goals store)
+        =/  tv  ~(. gol-cli-traverse all-goals)
+        (ordered-goals-harvest:tv order.local.store)
         ::
           %pool
         =/  =pool:gol       (~(got by pools.store) pin.type.vyu)

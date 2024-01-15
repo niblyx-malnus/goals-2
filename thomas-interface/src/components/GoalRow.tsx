@@ -11,6 +11,7 @@ const GoalRow: React.FC<{
     id: string,
     complete: boolean,
     actionable: boolean,
+    showButtons: boolean,
     tags: string[],
     refresh: () => void,
     moveGoalUp: (id: string) => void,
@@ -22,6 +23,7 @@ const GoalRow: React.FC<{
     id,
     complete,
     actionable,
+    showButtons,
     tags = [],
     moveGoalUp,
     moveGoalDown,
@@ -65,13 +67,20 @@ const GoalRow: React.FC<{
   }, [rowRef]);
 
   const deleteGoal = async () => {
-    try {
-      await api.deleteGoal(id);
-      refresh();
-    } catch (error) {
-      console.error(error);
+    // Show confirmation dialog
+    const isConfirmed = window.confirm("Deleting a goal is irreversible. Are you sure you want to delete this goal?");
+  
+    // Only proceed if the user confirms
+    if (isConfirmed) {
+      try {
+        await api.deleteGoal(id);
+        refresh();
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
+
 
   const updateGoal = async () => {
     try {
@@ -197,121 +206,124 @@ const GoalRow: React.FC<{
   
   return (
     <div ref={rowRef} className={`flex justify-between items-center p-1 mt-2 rounded ${isActionable ? 'hover:bg-blue-500 bg-blue-400' : 'hover:bg-gray-300 bg-gray-200'}`}>
-      <div className="flex flex-col space-y-1">
-        <input type="checkbox" checked={isActionable} onChange={toggleActionable} />
-        <input type="checkbox" checked={isComplete} onChange={toggleComplete} />
-      </div>
-      <button
-        className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-        onClick={copyToClipboard}
-      >
-        <FiCopy />
-      </button>
-      <button onClick={() => moveGoalUp(id)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
-        ↑
-      </button>
-      <button onClick={() => moveGoalDown(id)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
-        ↓
-      </button>
+      {
+        showButtons && (
+          <>
+            <div className="flex flex-col space-y-1">
+              <input type="checkbox" checked={isActionable} onChange={toggleActionable} />
+              <input type="checkbox" checked={isComplete} onChange={toggleComplete} />
+            </div>
+            <button
+              className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+              onClick={copyToClipboard}
+            >
+              <FiCopy />
+            </button>
+            <button onClick={() => moveGoalUp(id)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+              ↑
+            </button>
+            <button onClick={() => moveGoalDown(id)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+              ↓
+            </button>
+          </>
+        )
+      }
       {isEditing ? (
         <input 
           type="text" 
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
-          className="bg-white shadow rounded cursor-pointer w-4/5 p-2"
+          className="bg-white shadow rounded cursor-pointer flex-grow p-2"
           onKeyDown={handleKeyDown}
         />
       ) : (
         <div
-          className={`bg-gray-100 rounded cursor-pointer w-4/5 p-2 ${isComplete ? 'line-through' : ''}`}
+          className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-2 ${isComplete ? 'line-through' : ''}`}
           onClick={() => navigateToGoal(id)}
           onDoubleClick={() => setIsEditing(true)}
         >
           {name}
         </div>
-
       )}
-      <div className="relative group">
-        <button
-          className="p-2 rounded bg-gray-100 hover:bg-gray-200 relative justify-center flex items-center"
-          onClick={handleTagButtonClick}
-        >
-          <FiTag />
-          {tags.length > 0 && (
-            <span className="absolute bottom-0 right-0 bg-gray-300 rounded-full text-xs px-1">
-              {tags.length}
-            </span>
-          )}
-        </button>
-        {showTagDropdown && (
-          <div className="absolute right-full bottom-0 ml-1 w-40 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
-            <ul>
-              {tags.map((tag, index) => (
-                <li key={index} className="flex justify-between items-center p-1 hover:bg-gray-200">
-                  <span onClick={() => navigateToTag(tag)} className="cursor-pointer">
-                    {tag}
-                  </span>
-                  <button onClick={() => removeTag(tag)} className="text-xs p-1">
-                    <FiX />
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <input
-              type="text"
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={handleNewTagKeyDown}
-              className="w-full p-1 mt-2 border rounded"
-              placeholder={"Add tag: " + placeholderTag}
-            />
+      { 
+        showButtons && (
+          <div className="relative group">
+            <button
+              className="p-2 rounded bg-gray-100 hover:bg-gray-200 relative justify-center flex items-center"
+              onClick={handleTagButtonClick}
+            >
+              <FiTag />
+              {tags.length > 0 && (
+                <span className="absolute bottom-0 right-0 bg-gray-300 rounded-full text-xs px-1">
+                  {tags.length}
+                </span>
+              )}
+            </button>
+            {showTagDropdown && (
+              <div className="absolute right-full bottom-0 ml-1 w-40 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
+                <ul>
+                  {tags.map((tag, index) => (
+                    <li key={index} className="flex justify-between items-center p-1 hover:bg-gray-200">
+                      <span onClick={() => navigateToTag(tag)} className="cursor-pointer">
+                        {tag}
+                      </span>
+                      <button onClick={() => removeTag(tag)} className="text-xs p-1">
+                        <FiX />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <input
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={handleNewTagKeyDown}
+                  className="w-full p-1 mt-2 border rounded"
+                  placeholder={"Add tag: " + placeholderTag}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      {!isEditing && (
+        )
+      }
+      {showButtons && !isEditing && (
         <>
           <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
+            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
             onClick={() => setIsEditing(!isEditing)}
           >
             <FiEdit />
           </button>
           <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
+            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
             onClick={deleteGoal}
           >
             <FiTrash />
           </button>
-          <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
-            onClick={() => console.log("menu")}
-          >
-            <FiMenu />
-          </button>
         </>
       )}
-      {isEditing && (
+      {showButtons && isEditing && (
         <>
           <button
-            className="bg-teal-100 justify-center flex items-center rounded p-2 w-1/12"
+            className="p-2 rounded bg-teal-100 hover:bg-teal-200"
             onClick={updateGoal}
           >
             <FiSave />
           </button>
           <button
-            className="bg-red-100 justify-center flex items-center rounded p-2 w-1/12"
+            className="p-2 rounded bg-red-100 hover:bg-red-200"
             onClick={cancelUpdateGoal}
           >
             <FiX />
           </button>
-          <button
-            className="bg-gray-100 justify-center flex items-center rounded p-2 w-1/12"
-            onClick={() => console.log("menu")}
-          >
-            <FiMenu />
-          </button>
         </>
       )}
+      <button
+        className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+        onClick={() => console.log("menu")}
+      >
+        <FiMenu />
+      </button>
     </div>
   );
 };
