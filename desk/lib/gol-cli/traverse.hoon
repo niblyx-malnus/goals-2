@@ -501,10 +501,10 @@
         :: in general, the harvest of a node is the union of the
         ::   harvests of its immediate inflow
         :: a deadline with an otherwise empty harvest
-        ::   returns itself as its own harvest
-        ?:  &(=(~ out) =(%d -.nid))
-          (~(put in *(set id:gol)) id.nid)
-        out
+        ::   returns itself as its own harvest if it is actionable
+        ?.  &(=(~ out) =(%d -.nid) actionable:(~(got by goals) id.nid))
+          out
+        (~(put in *(set id:gol)) id.nid)
       exit  |=([=nid:gol vis=(map nid:gol (set id:gol))] vis)
     ==
   ::
