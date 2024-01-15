@@ -348,13 +348,19 @@ function Harvest({
     }));
 
   useEffect(() => {
+    console.log("host: " + host);
+    console.log("name: " + name);
+    console.log("goalKey: " + goalKey);
     const fetchGoals = async () => {
       try {
         let fetchedGoals;
-        if (isPool) {
-          fetchedGoals = await api.poolHarvest(`/${host}/${name}`, 'any', []);
+        const isMain = host === null && name === null && goalKey === null;
+        if (isMain) {
+          fetchedGoals = await api.mainHarvest(method, tags);
+        } else if (host && name && goalKey != null) {
+          fetchedGoals = await api.goalHarvest(`/${host}/${name}/${goalKey}`, method, tags);
         } else {
-          fetchedGoals = await api.goalHarvest(`/${host}/${name}/${goalKey}`, 'any', []);
+          fetchedGoals = await api.poolHarvest(`/${host}/${name}`, method, tags);
         }
         setGoals(fetchedGoals);
       } catch (error) {
@@ -363,7 +369,7 @@ function Harvest({
     };
   
     fetchGoals();
-  }, [refresh, isPool, host, name, goalKey]);
+  }, [refresh, host, name, goalKey, method, tags]);
 
   // Function to filter goals by selected tags
   useEffect(() => {

@@ -124,7 +124,7 @@ function Pools() {
                 </div>
               ))}
             </div>
-            <Harvest method={selectedOperation} tags={tags} refresh={() => { } } host={undefined} name={undefined} goalKey={undefined} />
+            <Harvest method={selectedOperation} tags={tags} refresh={() => { } } host={null} name={null} goalKey={null} />
           </div>
         )}
       </div>

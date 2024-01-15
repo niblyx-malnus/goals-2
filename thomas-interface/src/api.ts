@@ -100,6 +100,17 @@ const api = {
     console.log(json);
     return await api.goalView(json);
   },
+  mainHarvest: async (method: string, tags: string[]) => {
+    const json = {
+      harvest: {
+        type: { main: null },
+        method: method,
+        tags: tags,
+      }
+    };
+    console.log(json);
+    return await api.goalView(json);
+  },
   poolHarvest: async (poolId: string, method: string, tags: string[]) => {
     const json = {
       harvest: {
