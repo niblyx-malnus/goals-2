@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { FiCopy, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu } from 'react-icons/fi';
+import { FiCopy, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu, FiInfo } from 'react-icons/fi';
 import useStore from '../store';
 
 const GoalRow: React.FC<{
@@ -36,6 +36,13 @@ const GoalRow: React.FC<{
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [newTag, setNewTag] = useState('');
   const rowRef = useRef<HTMLDivElement>(null);
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+
+  const toggleInfoPanel = () => {
+    console.log("Toggling info panel"); // Debugging log
+    setShowInfoPanel(!showInfoPanel);
+    console.log("showInfoPanel state after toggle:", !showInfoPanel); // Check the updated state
+  };
 
   // Use Zustand store
   const { placeholderTag, setPlaceholderTag } = useStore(state => ({ 
@@ -57,6 +64,7 @@ const GoalRow: React.FC<{
     const handleClickOutside = (event: MouseEvent) => {
       if (rowRef.current && !rowRef.current.contains(event.target as Node)) {
         setShowTagDropdown(false);
+        setShowInfoPanel(false);
       }
     };
 
@@ -318,6 +326,22 @@ const GoalRow: React.FC<{
           </button>
         </>
       )}
+      <div className="relative group">
+        <button
+          className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+          onClick={toggleInfoPanel}
+        >
+          <FiInfo />
+        </button>
+        {
+          showInfoPanel && (
+            <div className="absolute right-full bottom-0 ml-1 w-40 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
+              <p>Info Panel</p>
+              {/* Place your info content here */}
+            </div>
+          )
+        }
+      </div>
       <button
         className="p-2 rounded bg-gray-100 hover:bg-gray-200"
         onClick={() => console.log("menu")}

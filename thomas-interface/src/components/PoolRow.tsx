@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { FiCopy, FiEdit, FiSave, FiTrash, FiX, FiMenu } from 'react-icons/fi';
+import { FiCopy, FiEdit, FiSave, FiTrash, FiX, FiMenu, FiInfo } from 'react-icons/fi';
 
 function PoolRow({
     pin,
@@ -135,6 +135,12 @@ function PoolRow({
           </button>
         </>
       )}
+      <button
+        className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+        onClick={() => console.log("info")}
+      >
+        <FiInfo />
+      </button>
       <button
         className="p-2 rounded bg-gray-100 hover:bg-gray-200"
         onClick={() => console.log("menu")}

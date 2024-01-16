@@ -694,7 +694,10 @@
   |=  [=id:gol mod=ship]
   ^-  _this
   =/  pore  (unmark-done d+id mod)
-  (unmark-done:pore k+id mod)
+  :: Unmark kickoff done if possible
+  ?~  unk=(mole |.((unmark-done:pore k+id mod)))
+    pore
+  u.unk
 ::
 ++  bounded
   |=  [=nid:gol =moment:gol dir=?(%l %r)]
