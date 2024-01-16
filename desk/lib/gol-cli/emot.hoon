@@ -337,7 +337,7 @@
       %update-goal-field
     =/  old=pool:gol  (~(got by pools.store) pin.id.axn)
     ?>  (check-goal-edit-perm:(apex:pl old) id.axn mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.axn *pool-data:gol)
+    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.id.axn *pool-data:gol)
     =/  fields=(map @t @t)  (~(gut by fields.data) id.axn ~)
     =.  fields
       ?-  -.p.axn
@@ -350,7 +350,7 @@
       %update-goal-tags
     =/  old=pool:gol  (~(got by pools.store) pin.id.axn)
     ?>  (check-goal-edit-perm:(apex:pl old) id.axn mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.axn *pool-data:gol)
+    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.id.axn *pool-data:gol)
     =/  tags=(set @t)       (~(gut by tags.data) id.axn ~)
     =.  tags
       ?-  -.p.axn
