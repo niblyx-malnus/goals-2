@@ -38,6 +38,7 @@
       =goals
       roots=(list id) :: an order on parentless goals
       =archive
+      title=@t
   ==
 ::
 +$  order-by

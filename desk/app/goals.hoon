@@ -11,7 +11,7 @@
 /=  x  /ted/test
 ::
 |%
-+$  inflated-state  [state-5-17:gs =trace:gol] 
++$  inflated-state  [state-5-18:gs =trace:gol] 
 +$  card     card:agent:gall
 ++  non-cab
   %+  cook
@@ -43,7 +43,7 @@
   ^-  (quip card _this)
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-17:gs   (convert-to-latest:gs old)
+  =/  new=state-5-18:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   [cards this(-.state new, trace *trace:gol)]
 ::
@@ -102,25 +102,27 @@
     ~[%goals]
     ::
       [%local %order %json ~]
-    [%& json+!>((enjs-order:gol-cli-json order.local.store))]
+    [%& json+!>((enjs-goal-order:gol-cli-json goal-order.local.store))]
     ::
       [%local %pools %json ~]
-    [%& json+!>((enjs-pools-order:gol-cli-json pools.local.store))]
+    [%& json+!>((enjs-pool-order:gol-cli-json pool-order.local.store))]
     ::
       [%local %settings %json ~]
     [%& json+!>((enjs-settings:gol-cli-json settings.local.store))]
     ::
       [%local %goals ~]
-    :-  %|  :_  ~
-    %+  turn  ~(tap in ~(key by goals.local.store))
-    |=  =id:gol
-    :_  %json
-    (rap 3 (scot %p host.pin.id) '_' name.pin.id '_' key.id ~)
+    !!
+    :: :-  %|  :_  ~
+    :: %+  turn  ~(tap in ~(key by goals.local.store))
+    :: |=  =id:gol
+    :: :_  %json
+    :: (rap 3 (scot %p host.pin.id) '_' name.pin.id '_' key.id ~)
     ::
       [%local %goals id=@ta %json ~]
-    =+  ;;  id=[host=@t name=@t key=@t ~]  (rash id.pole cab-split)
-    =/  host=@p  (slav %p host.id)
-    [%& json+!>((enjs-goal-local:gol-cli-json (~(got by goals.local.store) [[host name.id] key.id])))]
+    !!
+    :: =+  ;;  id=[host=@t name=@t key=@t ~]  (rash id.pole cab-split)
+    :: =/  host=@p  (slav %p host.id)
+    :: [%& json+!>((enjs-goal-local:gol-cli-json (~(got by goals.local.store) [[host name.id] key.id])))]
     ::
       [%'pool_info' ~]
     :-  %|  :_  ~

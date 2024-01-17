@@ -24,17 +24,17 @@
           %main
         =/  all-goals=goals:gol  (all-goals store)
         =/  tv  ~(. gol-cli-traverse all-goals)
-        (ordered-goals-harvest:tv order.local.store)
+        (ordered-goals-harvest:tv goal-order.local.store)
         ::
           %pool
         =/  =pool:gol       (~(got by pools.store) pin.type.vyu)
         =/  tv  ~(. gol-cli-traverse goals.pool)
-        (ordered-goals-harvest:tv order.local.store)
+        (ordered-goals-harvest:tv goal-order.local.store)
         ::
           %goal
         =/  =pool:gol       (~(got by pools.store) pin.id.type.vyu)
         =/  tv  ~(. gol-cli-traverse goals.pool)
-        (ordered-harvest:tv id.type.vyu order.local.store)
+        (ordered-harvest:tv id.type.vyu goal-order.local.store)
       ==
     %-  pure:m  !>
     :-  %harvest

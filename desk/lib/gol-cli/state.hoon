@@ -5,15 +5,15 @@
 |%
 +$  card  card:agent:gall
 ::
-+$  state-5-17  [%'5-17' =store]
-+$  state-5-16  [%'5-16' =store:old-goals]
++$  state-5-18  [%'5-18' =store]
++$  state-5-17  [%'5-17' =store:old-goals]
 +$  versioned-state
-  $%  state-5-16
-      state-5-17
+  $%  state-5-17
+      state-5-18
   ==
 ::
 ++  upgrade-io
-  |=  [new=state-5-17 =bowl:gall]
+  |=  [new=state-5-18 =bowl:gall]
   |^  ^-  (list card)
   :: TODO: Follow all pools and prompt others to refollow?
   ;:  weld
@@ -35,10 +35,10 @@
 ::
 ++  convert-to-latest
   |=  old=versioned-state
-  ^-  state-5-17
+  ^-  state-5-18
   ?-  -.old
-    %'5-16'  (convert-5-16-to-5-17 old)
-      %'5-17'
+    %'5-17'  (convert-5-17-to-5-18 old)
+      %'5-18'
     %=    old
         pools.store
       %-  ~(gas by *pools)
@@ -50,20 +50,14 @@
   ==
 :: Development states
 ::
-++  convert-5-16-to-5-17
-  |=  =state-5-16
-  ^-  state-5-17
-  =/  =pools
-    %-  ~(gas by *pools)
-    %+  turn  ~(tap by pools.store.state-5-16)
-    |=  [=pin =pool:old-goals]
-    :-  pin
-    :*  pin.pool
-        perms.pool
-        goals.pool
-        roots.pool
-        archive.pool
-        (~(got by properties:(~(got by pool-info.store.state-5-16) pin)) 'title')
+++  convert-5-17-to-5-18
+  |=  =state-5-17
+  ^-  state-5-18
+  =/  =local
+    :*  order.local.store.state-5-17
+        pools.local.store.state-5-17
+        ~  ~
+        settings.local.store.state-5-17
     ==
-  [%'5-17' pools local.store.state-5-16 pool-info.store.state-5-16]
+  [%'5-18' pools.store.state-5-17 local pool-info.store.state-5-17]
 --

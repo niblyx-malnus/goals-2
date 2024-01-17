@@ -231,7 +231,7 @@
   ^-  json
   %-  pairs
   :~  [%pools (enjs-pools pools.store)]
-      [%local a+(turn order.local.store enjs-id)]
+      [%local a+(turn goal-order.local.store enjs-id)]
   ==
   
 ++  enjs-pools
@@ -265,13 +265,13 @@
 ::       [%birth (numb (unm:chrono:userlib birth.froze))]
 ::       [%creator (ship creator.froze)]
 ::   ==
-++  enjs-order
+++  enjs-goal-order
   =,  enjs:format
   |=  order=(list id)
   ^-  json
   s+'Hello! I am your goal order!'
 ::
-++  enjs-pools-order
+++  enjs-pool-order
   =,  enjs:format
   |=  order=(list pin)
   ^-  json
@@ -282,12 +282,6 @@
   |=  settings=(map @t @t)
   ^-  json
   s+'Hello! I am your goals settings!'
-::
-++  enjs-goal-local
-  =,  enjs:format
-  |=  =goal-local
-  ^-  json
-  s+'Hello! I am a local goal!'
 ::
 ++  enjs-pool-data
   =,  enjs:format

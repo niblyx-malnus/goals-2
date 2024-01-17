@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-17:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-18:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -254,14 +254,14 @@
     =/  =pin:gol  pin.id
     ?>  =(src our):bowl
     :: ?>  (~(all in tags) |=(=tag:gol private.tag)) 
-    =/  gl=goal-local:gol
-      ?~  get=(~(get by goals.local.store) id)
-        *goal-local:gol
-      u.get
-    =.  tags.gl  tags
-    =.  goals.local.store  (~(put by goals.local.store) id gl)
-    =/  =pool:gol  (~(got by pools.store) pin)
-    =/  =goal:gol  (~(got by goals.pool) id)
+    :: =/  gl=goal-local:gol
+    ::   ?~  get=(~(get by goals.local.store) id)
+    ::     *goal-local:gol
+    ::   u.get
+    :: =.  tags.gl  tags
+    :: =.  goals.local.store  (~(put by goals.local.store) id gl)
+    :: =/  =pool:gol  (~(got by pools.store) pin)
+    :: =/  =goal:gol  (~(got by goals.pool) id)
     this
     ::
       %create-pool
@@ -281,18 +281,18 @@
     ::
       %slot-above
     =+  axn
-    ?~  idx=(find [dis]~ order.local.store)  !!
-    =.  order.local.store  (oust [u.idx 1] order.local.store)
-    ?~  idx=(find [dat]~ order.local.store)  !!
-    =.  order.local.store  (into order.local.store u.idx dis)
+    ?~  idx=(find [dis]~ goal-order.local.store)  !!
+    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
+    ?~  idx=(find [dat]~ goal-order.local.store)  !!
+    =.  goal-order.local.store  (into goal-order.local.store u.idx dis)
     this
     ::
       %slot-below
     =+  axn
-    ?~  idx=(find [dis]~ order.local.store)  !!
-    =.  order.local.store  (oust [u.idx 1] order.local.store)
-    ?~  idx=(find [dat]~ order.local.store)  !!
-    =.  order.local.store  (into order.local.store +(u.idx) dis)
+    ?~  idx=(find [dis]~ goal-order.local.store)  !!
+    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
+    ?~  idx=(find [dat]~ goal-order.local.store)  !!
+    =.  goal-order.local.store  (into goal-order.local.store +(u.idx) dis)
     this
     ::
       %update-pool-property
