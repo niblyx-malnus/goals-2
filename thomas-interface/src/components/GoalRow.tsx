@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { FiCopy, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu, FiInfo } from 'react-icons/fi';
+import { FiCopy, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu, FiInfo, FiEye, FiEyeOff } from 'react-icons/fi';
 import useStore from '../store';
 
 const GoalRow: React.FC<{
@@ -37,6 +37,8 @@ const GoalRow: React.FC<{
   const [newTag, setNewTag] = useState('');
   const rowRef = useRef<HTMLDivElement>(null);
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
+
 
   const toggleInfoPanel = () => {
     console.log("Toggling info panel"); // Debugging log
@@ -272,6 +274,10 @@ const GoalRow: React.FC<{
                 <ul>
                   {tags.map((tag, index) => (
                     <li key={index} className="flex justify-between items-center p-1 hover:bg-gray-200">
+                      { false
+                        ?  <FiEye className="mr-2"/>
+                        : <FiEyeOff className="mr-2"/>
+                      }
                       <span onClick={() => navigateToTag(tag)} className="cursor-pointer">
                         {tag}
                       </span>
@@ -281,14 +287,24 @@ const GoalRow: React.FC<{
                     </li>
                   ))}
                 </ul>
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={handleNewTagKeyDown}
-                  className="w-full p-1 mt-2 border rounded"
-                  placeholder={"Add tag: " + placeholderTag}
-                />
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setIsPublic(!isPublic)}
+                    className="p-2 mr-2 border border-gray-300 rounded hover:bg-gray-200 flex items-center justify-center"
+                    style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+                  >
+                    {isPublic ? <FiEye /> : <FiEyeOff />}
+                  </button>
+                  <input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyDown={handleNewTagKeyDown}
+                    className="w-full p-1 border rounded"
+                    placeholder={"Add tag: " + placeholderTag}
+                    style={{ height: '2rem' }} // Match the height of the button
+                  />
+                </div>
               </div>
             )}
           </div>

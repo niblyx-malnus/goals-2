@@ -116,13 +116,15 @@
         [%roots-slot-below (ot ~[dis+id dat+id])]
         [%young-slot-above (ot ~[pid+id dis+id dat+id])]
         [%young-slot-below (ot ~[pid+id dis+id dat+id])]
+        [%pools-slot-above (ot ~[dis+pin dat+pin])]
+        [%pools-slot-below (ot ~[dis+pin dat+pin])]
         [%update-pool-perms (ot ~[pin+pin new+perms])]
-        [%put-private-tags (ot ~[id+id tags+(as so)])]
         [%update-pool-property pd-pool-property]
         [%update-pool-tag-property pd-pool-tag-property]
         [%update-pool-field-property pd-pool-field-property]
         [%update-goal-tags ud-goal-tags]
         [%update-goal-field pd-goal-field]
+        [%update-local-goal-tags ud-goal-tags]
         [%update-setting pd-setting]
     ==
   ::

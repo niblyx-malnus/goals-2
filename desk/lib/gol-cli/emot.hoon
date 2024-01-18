@@ -209,6 +209,22 @@
     =.  pools.store  (~(put by pools.store) pin new)
     this
     ::
+      %pools-slot-above
+    =+  axn
+    ?~  idx=(find [dis]~ pool-order.local.store)  !!
+    =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
+    ?~  idx=(find [dat]~ pool-order.local.store)  !!
+    =.  pool-order.local.store  (into pool-order.local.store u.idx dis)
+    this
+    ::
+      %pools-slot-below
+    =+  axn
+    ?~  idx=(find [dis]~ pool-order.local.store)  !!
+    =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
+    ?~  idx=(find [dat]~ pool-order.local.store)  !!
+    =.  pool-order.local.store  (into pool-order.local.store +(u.idx) dis)
+    this
+    ::
       %update-pool-perms
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pin)
@@ -249,20 +265,17 @@
     =.  pools.store  (~(put by pools.store) pin new)
     this
     ::
-      %put-private-tags
+      %update-local-goal-tags
     =+  axn
     =/  =pin:gol  pin.id
     ?>  =(src our):bowl
-    :: ?>  (~(all in tags) |=(=tag:gol private.tag)) 
-    :: =/  gl=goal-local:gol
-    ::   ?~  get=(~(get by goals.local.store) id)
-    ::     *goal-local:gol
-    ::   u.get
-    :: =.  tags.gl  tags
-    :: =.  goals.local.store  (~(put by goals.local.store) id gl)
-    :: =/  =pool:gol  (~(got by pools.store) pin)
-    :: =/  =goal:gol  (~(got by goals.pool) id)
-    this
+    =/  tags=(set @t)  (~(gut by tags.local.store) id.axn ~)
+    =.  tags
+      ?-  -.p.axn
+        %&  (~(uni in tags) p.p.axn)
+        %|  (~(dif in tags) p.p.axn)
+      ==
+    this(tags.local.store (~(put by tags.local.store) id.axn tags))
     ::
       %create-pool
     =+  axn

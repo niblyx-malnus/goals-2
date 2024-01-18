@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PoolRow from './PoolRow';
 import api from '../api';
+import _ from 'lodash';
 import useStore from '../store';
 
 type Pool = { pin: string, title: string }; // Type for pool object
@@ -27,6 +28,32 @@ function PoolList({ refresh } : { refresh: () => void; }) {
     fetchPools();
   }, [refresh]);
 
+  const movePoolUp = async (pin: string) => {
+    const index = _.findIndex(pools, { pin });
+    if (index > 0) {
+      const abovePoolId = pools[index - 1].pin;
+      try {
+        await api.poolsSlotAbove(pin, abovePoolId);
+        refresh();
+      } catch (error) {
+        console.error("Error reordering", error);
+      }
+    }
+  };
+  
+  const movePoolDown = async (pin: string) => {
+    const index = _.findIndex(pools, { pin });
+    if (index >= 0 && index < pools.length - 1) {
+      const belowGoalId = pools[index + 1].pin;
+      try {
+        await api.poolsSlotBelow(pin, belowGoalId);
+        refresh();
+      } catch (error) {
+        console.error("Error reordering", error);
+      }
+    }
+  };
+
   return (
     <>
       <label className="flex items-center space-x-2">
@@ -44,7 +71,7 @@ function PoolList({ refresh } : { refresh: () => void; }) {
             key={pool.pin}
             className="block text-current no-underline hover:no-underline"
           >
-            <PoolRow pin={pool.pin} title={pool.title} refresh={refresh} showButtons={showButtons}/>
+            <PoolRow pin={pool.pin} title={pool.title} refresh={refresh} movePoolUp={movePoolUp} movePoolDown={movePoolDown} showButtons={showButtons}/>
           </div>
         ))}
       </ul>

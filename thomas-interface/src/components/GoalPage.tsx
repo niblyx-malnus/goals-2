@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import MarkdownEditor from './MarkdownEditor';
 import GoalList from './GoalList';
 import Harvest from './Harvest';
+import PoolTagSearch from './TagSearchBar';
 import api from '../api';
 import '../global.css';
 import { useNavigate } from 'react-router-dom';
-import { FiX, FiSave, FiEdit2 } from 'react-icons/fi';
-
-type Goal = { id: string, tags?: string[], description: string, complete: boolean, actionable: boolean }; // Type for pool object
+import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
 
 function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any; }) {
   const poolId = `/${host}/${name}`;
@@ -34,6 +33,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const [editableSummary, setEditableSummary] = useState(goalDescription);
   const [completed, setCompleted] = useState(false);
   const [actionable, setActionable] = useState(false);
+  const [tagIsPublic, setTagIsPublic] = useState(false);
 
   const handleSummaryEdit = () => {
     setIsEditingSummary(true);
@@ -138,7 +138,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
       }
     };
     fetchGoalData();
-  }, [goalId, api]);
+  }, [goalId]);
 
   useEffect(() => {
     const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -281,32 +281,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
     <div className="bg-gray-200 h-full flex justify-center items-center h-screen">
       <div className="bg-blue-300 p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <div className="tag-search-dropdown relative">
-            <input
-              type="text"
-              placeholder="Search Pool Tags"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              className="p-2 border box-border rounded text-sm"
-              style={{ width: '200px', height: '2rem' }}
-            />
-            {dropdownOpen && (
-              <div className="tag-list absolute right-0 bg-gray-100 border rounded mt-1 w-48 max-h-60 overflow-auto">
-                {filteredTags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className="tag-item p-1 hover:bg-gray-200 cursor-pointer"
-                    onClick={() => navigateToTagPage(tag)}
-                    style={{ lineHeight: '1.5rem' }}
-                  >
-                    {tag}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <PoolTagSearch host={host} name={name}/>
         </div>
         <div className="flex justify-between pb-2">
           {parent && (
@@ -395,6 +370,10 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
         <div className="flex flex-wrap justify-center mb-4">
           {goalTags.map((tag, index) => (
             <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
+              { false
+                ?  <FiEye className="mr-2"/>
+                : <FiEyeOff className="mr-2"/>
+              }
               <a href={`/tag/${host}/${name}/${tag}`} className="mr-2">
                 {tag}
               </a>
@@ -527,6 +506,13 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
                     <option value="some">Some</option>
                     <option value="every">Every</option>
                   </select>
+                  <button
+                    onClick={() => setTagIsPublic(!tagIsPublic)}
+                    className="p-2 mr-2 border border-gray-300 bg-gray-200 rounded hover:bg-gray-200 flex items-center justify-center"
+                    style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+                  >
+                    {tagIsPublic ? <FiEye /> : <FiEyeOff />}
+                  </button>
                   <input
                     type="text"
                     placeholder="Enter tags..."
@@ -538,6 +524,10 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
               <div className="flex flex-wrap justify-center mb-4">
                 {harvestTags.map((tag, index) => (
                   <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
+                    { false
+                      ?  <FiEye className="mr-2"/>
+                      : <FiEyeOff className="mr-2"/>
+                    }
                     <a href={`/tag/${host}/${name}/${tag}`} className="mr-2">
                       {tag}
                     </a>

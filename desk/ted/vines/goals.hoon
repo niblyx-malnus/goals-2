@@ -124,6 +124,9 @@
     =/  tags=(set @t)   (~(gut by ?~(pd ~ tags.u.pd)) id.vyu ~)
     (pure:m !>([%tags tags]))
     ::
+      %local-goal-tags
+    (pure:m !>([%tags `(set @t)`(~(gut by tags.local.store) id.vyu ~)]))
+    ::
       %goal-parent
     =/  =pool:gol  (~(got by pools.store) pin.id.vyu)
     =/  =goal:gol  (~(got by goals.pool) id.vyu)
@@ -143,6 +146,14 @@
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
     =/  vals  ~(val by ?~(pd ~ tags.u.pd))
+    =|  tags=(set @t)
+    |-
+    ?~  vals
+      (pure:m !>([%tags tags]))
+    $(vals t.vals, tags (~(uni in tags) i.vals))
+    ::
+      %all-local-goal-tags
+    =/  vals  ~(val by tags.local.store)
     =|  tags=(set @t)
     |-
     ?~  vals

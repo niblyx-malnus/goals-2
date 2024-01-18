@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import PoolList from './PoolList';
-import Harvest from './Harvest'; // Import the Harvest component
+import Harvest from './Harvest';
+import PoolTagSearch from './TagSearchBar';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import api from '../api';
 
 function Pools() {
@@ -9,6 +11,7 @@ function Pools() {
   const [tags, setTags] = useState<string[]>([]); // For managing Harvest tags
   const [selectedOperation, setSelectedOperation] = useState('some'); // For managing the Harvest operation
   const [activeTab, setActiveTab] = useState('Pools'); // New state for active tab
+  const [tagIsPublic, setTagIsPublic] = useState(false);
 
   // Function to toggle refreshFlag
   const triggerRefreshPools = () => {
@@ -46,6 +49,9 @@ function Pools() {
   return (
     <div className="bg-gray-200 h-full flex justify-center items-center h-screen">
       <div className="bg-[#DFF7DC] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <PoolTagSearch host={''} name={''}/>
+        </div>
         <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">All Pools</h1>
         <ul className="flex justify-center -mb-px">
           <li className={`${activeTab === 'Pools' ? 'border-blue-500' : ''}`}>
@@ -104,6 +110,13 @@ function Pools() {
                 <option value="some">Some</option>
                 <option value="every">Every</option>
               </select>
+              <button
+                onClick={() => setTagIsPublic(!tagIsPublic)}
+                className="p-2 mr-2 border border-gray-300 bg-gray-200 rounded hover:bg-gray-200 flex items-center justify-center"
+                style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+              >
+                {tagIsPublic ? <FiEye /> : <FiEyeOff />}
+              </button>
               <input
                 type="text"
                 placeholder="Enter tags..."
@@ -114,6 +127,10 @@ function Pools() {
             <div className="flex flex-wrap justify-center mb-4">
               {tags.map((tag, index) => (
                 <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
+                  { false
+                    ?  <FiEye className="mr-2"/>
+                    : <FiEyeOff className="mr-2"/>
+                  }
                   {tag}
                   <button 
                     className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"

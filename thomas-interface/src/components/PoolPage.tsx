@@ -3,8 +3,9 @@ import MarkdownEditor from './MarkdownEditor';
 import { useNavigate } from 'react-router-dom';
 import GoalList from './GoalList';
 import Harvest from './Harvest';
+import PoolTagSearch from './TagSearchBar';
 import api from '../api';
-import { FiX, FiSave, FiEdit2 } from 'react-icons/fi';
+import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
 
 function Pool({ host, name }: { host: any; name: any; }) {
   const poolId = `/${host}/${name}`;
@@ -19,13 +20,10 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [activeTab, setActiveTab] = useState('Roots');
   const [tags, setTags] = useState<string[]>([]);
   const [selectedOperation, setSelectedOperation] = useState('some');
-  const [allTags, setAllTags] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredTags, setFilteredTags] = useState<string[]>([]);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
-    const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editableTitle, setEditableTitle] = useState(poolTitle);
+  const [tagIsPublic, setTagIsPublic] = useState(false);
 
   // Function to enable editing mode
   const handleTitleEdit = () => {
@@ -59,51 +57,8 @@ function Pool({ host, name }: { host: any; name: any; }) {
   
   const navigate = useNavigate();
 
-  const fetchTags = async () => {
-    try {
-      const fetchedTags = await api.getPoolTags(poolId);
-      setAllTags(fetchedTags);
-      setFilteredTags(fetchedTags); // Initialize with all tags
-    } catch (error) {
-      console.error("Error fetching tags: ", error);
-    }
-  };
-
-  // Fetch all tags on mount
-  useEffect(() => {
-    // Assuming an API method to fetch all tags for the pool
-    fetchTags();
-  }, []);
-
-  // Filter tags based on search term
-  useEffect(() => {
-    const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    setFilteredTags(filtered);
-  }, [searchTerm, allTags]);
-
-    // Navigate to PoolTagPage
-  const navigateToTagPage = (tag: string) => {
-    setDropdownOpen(false);
-    navigate(`/tag/${host}/${name}/${tag}`);
-  };
-
-    // Navigate to PoolTagPage
   const navigateToAllPools = () => {
-    setDropdownOpen(false);
     navigate(`/pools`);
-  };
-
-  // Handle tag search input focus
-  const handleInputFocus = async () => {
-    fetchTags();
-    setDropdownOpen(true);
-  };
-
-  const handleInputBlur = () => {
-    // Delay the close to allow for navigation to tag page
-    setTimeout(() => {
-      setDropdownOpen(false);
-    }, 100);
   };
 
   // Function to toggle refreshFlag
@@ -170,32 +125,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
     <div className="bg-gray-200 flex justify-center items-center h-screen">
       <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <div className="tag-search-dropdown relative">
-            <input
-              type="text"
-              placeholder="Search Pool Tags"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              className="p-2 border box-border rounded text-sm"
-              style={{ width: '200px', height: '2rem' }}
-            />
-            {dropdownOpen && (
-              <div className="tag-list absolute right-0 bg-gray-100 border rounded mt-1 w-48 max-h-60 overflow-auto">
-                {filteredTags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className="tag-item p-1 hover:bg-gray-200 cursor-pointer"
-                    onClick={() => navigateToTagPage(tag)}
-                    style={{ lineHeight: '1.5rem' }}
-                  >
-                    {tag}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <PoolTagSearch host={host} name={name} />
         </div>
         <div
           className="cursor-pointer"
@@ -354,6 +284,13 @@ function Pool({ host, name }: { host: any; name: any; }) {
                     <option value="some">Some</option>
                     <option value="every">Every</option>
                   </select>
+                  <button
+                    onClick={() => setTagIsPublic(!tagIsPublic)}
+                    className="p-2 mr-2 border border-gray-300 bg-gray-200 rounded hover:bg-gray-200 flex items-center justify-center"
+                    style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+                  >
+                    {tagIsPublic ? <FiEye /> : <FiEyeOff />}
+                  </button>
                   <input
                     type="text"
                     placeholder="Enter tags..."
@@ -370,6 +307,10 @@ function Pool({ host, name }: { host: any; name: any; }) {
               <div className="flex flex-wrap justify-center mb-4">
                 {tags.map((tag, index) => (
                   <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
+                    { false
+                      ?  <FiEye className="mr-2"/>
+                      : <FiEyeOff className="mr-2"/>
+                    }
                     {tag}
                     <button 
                       className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"

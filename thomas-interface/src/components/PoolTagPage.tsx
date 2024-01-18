@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import MarkdownEditor from './MarkdownEditor';
-import Harvest from './Harvest';
 import api from '../api';
 import '../global.css';
 
 function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
   const poolId = `/${host}/${name}`;
   const [poolTagNote, setPoolTagNote] = useState<string>('');
-  const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [selectedOperation, setSelectedOperation] = useState('some');
   const [tags, setTags] = useState<string[]>([]);
-
-  // Function to toggle refreshFlag
-  const triggerRefreshHarvest = () => {
-    setRefreshHarvest(!refreshHarvest);
-  };
 
   // Fetch pool tag details on mount
   useEffect(() => {

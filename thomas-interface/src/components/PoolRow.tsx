@@ -7,11 +7,15 @@ function PoolRow({
     pin,
     title,
     refresh,
+    movePoolUp,
+    movePoolDown,
     showButtons,
   }: {
     pin: string;
     title: string;
     refresh: () => void;
+    movePoolUp: (poolId: string) => void,
+    movePoolDown: (poolId: string) => void
     showButtons: boolean;
   }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -81,6 +85,12 @@ function PoolRow({
               onClick={copyToClipboard}
             >
               <FiCopy />
+            </button>
+            <button onClick={() => movePoolUp(pin)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+              ↑
+            </button>
+            <button onClick={() => movePoolDown(pin)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+              ↓
             </button>
           </>
         )

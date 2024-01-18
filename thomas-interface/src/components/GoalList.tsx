@@ -85,7 +85,7 @@ function GoalList({ host, name, goalKey, refresh }: { host: any; name: any; goal
 
   return (
     <>
-      <div className="flex space-x-4 mb-4">
+      <div className="flex items-center space-x-4 mb-4">
         <label className="flex items-center space-x-2">
           <input 
             type="checkbox" 

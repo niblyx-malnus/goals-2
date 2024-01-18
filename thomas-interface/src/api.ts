@@ -168,6 +168,26 @@ const api = {
       };
     return await api.goalAction(json);
   },
+  addLocalGoalTag: async (goalId: string, text: string) => {
+    const json = {
+        'update-local-goal-tags': {
+          id: goalId,
+          method: 'uni',
+          tags: [text]
+        }
+      };
+    return await api.goalAction(json);
+  },
+  delLocalGoalTag: async (goalId: string, text: string) => {
+    const json = {
+        'update-local-goal-tags': {
+          id: goalId,
+          method: 'dif',
+          tags: [text]
+        }
+      };
+    return await api.goalAction(json);
+  },
   editPoolTitle: async (poolId: string, title: string) => {
     const json = {
         'update-pool-property': {
@@ -268,6 +288,14 @@ const api = {
     const json = { 'roots-slot-below': { dis: dis, dat: dat } };
     return await api.goalAction(json);
   },
+  poolsSlotAbove: async (dis: string, dat: string) => {
+    const json = { 'pools-slot-above': { dis: dis, dat: dat } };
+    return await api.goalAction(json);
+  },
+  poolsSlotBelow: async (dis: string, dat: string) => {
+    const json = { 'pools-slot-below': { dis: dis, dat: dat } };
+    return await api.goalAction(json);
+  },
   setPoolsIndex: async (pools: string[]) => {
     const json = { 'reorder-pools': { pools: pools, } };
     return await api.goalAction(json);
@@ -313,6 +341,9 @@ const api = {
   getGoalTags: async (id: string) => {
     return await api.goalView({ "goal-tags": { id: id } });
   },
+  getLocalGoalTags: async (id: string) => {
+    return await api.goalView({ "local-goal-tags": { id: id } });
+  },
   getGoalParent: async (id: string) => {
     return await api.goalView({ "goal-parent": { id: id } });
   },
@@ -325,8 +356,11 @@ const api = {
   getSetting: async (setting: string) => {
     return await api.goalView({ "setting": { setting: setting } });
   },
-  getPoolTags: async (id: string) => {
-    return await api.goalView({ "pool-tags": { pin: id } });
+  getPoolTags: async (poolId: string) => {
+    return await api.goalView({ "pool-tags": { pin: poolId } });
+  },
+  getAllLocalGoalTags: async () => {
+    return await api.goalView({ "all-local-goal-tags": null });
   },
 };
 

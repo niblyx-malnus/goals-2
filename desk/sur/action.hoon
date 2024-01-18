@@ -14,6 +14,8 @@
       [%update-pool-property =pin p=(each [@t @t] @t)]
       [%update-pool-tag-property =pin tag=@t p=(each [@t @t] @t)]
       [%update-pool-field-property =pin field=@t p=(each [@t @t] @t)]
+      [%pools-slot-above dis=pin dat=pin]
+      [%pools-slot-below dis=pin dat=pin]
   ==
 ++  goal-action
   =<  goal-action
@@ -50,7 +52,7 @@
       ==
     --
   +$  local
-    $%  [%put-private-tags =id tags=(set @t)]
+    $%  [%update-local-goal-tags =id p=(each (set @t) (set @t))]
         [%update-setting p=(each [@t @t] @t)]
     ==
   --
@@ -105,11 +107,13 @@
       [%goal-summary =id]
       [%goal-note =id]
       [%goal-tags =id]
+      [%local-goal-tags =id]
       [%goal-parent =id]
       [%goal-actionable =id]
       [%goal-complete =id]
       [%setting setting=@t]
       [%pool-tags =pin]
+      [%all-local-goal-tags ~]
   ==
 ::
 +$  goal-vent
