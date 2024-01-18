@@ -118,6 +118,8 @@
         [%young-slot-below (ot ~[pid+id dis+id dat+id])]
         [%pools-slot-above (ot ~[dis+pin dat+pin])]
         [%pools-slot-below (ot ~[dis+pin dat+pin])]
+        [%goals-slot-above (ot ~[dis+id dat+id])]
+        [%goals-slot-below (ot ~[dis+id dat+id])]
         [%update-pool-perms (ot ~[pin+pin new+perms])]
         [%update-pool-property pd-pool-property]
         [%update-pool-tag-property pd-pool-tag-property]

@@ -225,6 +225,22 @@
     =.  pool-order.local.store  (into pool-order.local.store +(u.idx) dis)
     this
     ::
+      %goals-slot-above
+    =+  axn
+    ?~  idx=(find [dis]~ goal-order.local.store)  !!
+    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
+    ?~  idx=(find [dat]~ goal-order.local.store)  !!
+    =.  goal-order.local.store  (into goal-order.local.store u.idx dis)
+    this
+    ::
+      %goals-slot-below
+    =+  axn
+    ?~  idx=(find [dis]~ goal-order.local.store)  !!
+    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
+    ?~  idx=(find [dat]~ goal-order.local.store)  !!
+    =.  goal-order.local.store  (into goal-order.local.store +(u.idx) dis)
+    this
+    ::
       %update-pool-perms
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pin)

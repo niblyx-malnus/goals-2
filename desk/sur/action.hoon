@@ -16,6 +16,8 @@
       [%update-pool-field-property =pin field=@t p=(each [@t @t] @t)]
       [%pools-slot-above dis=pin dat=pin]
       [%pools-slot-below dis=pin dat=pin]
+      [%goals-slot-above dis=id dat=id]
+      [%goals-slot-below dis=id dat=id]
   ==
 ++  goal-action
   =<  goal-action

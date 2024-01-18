@@ -296,6 +296,14 @@ const api = {
     const json = { 'pools-slot-below': { dis: dis, dat: dat } };
     return await api.goalAction(json);
   },
+  goalsSlotAbove: async (dis: string, dat: string) => {
+    const json = { 'goals-slot-above': { dis: dis, dat: dat } };
+    return await api.goalAction(json);
+  },
+  goalsSlotBelow: async (dis: string, dat: string) => {
+    const json = { 'goals-slot-below': { dis: dis, dat: dat } };
+    return await api.goalAction(json);
+  },
   setPoolsIndex: async (pools: string[]) => {
     const json = { 'reorder-pools': { pools: pools, } };
     return await api.goalAction(json);
