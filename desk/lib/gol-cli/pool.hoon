@@ -38,7 +38,12 @@
   =/  goal  (init-goal id summary mod mod)
   =.  goals.p  (~(put by goals.p) id goal)
   =.  this  (put-roots id)
-  (move id upid host.pin.p) :: divine intervention (owner)
+  =.  this  (move id upid host.pin.p) :: divine intervention (owner)
+  :: mark the goal started if possible
+  ::
+  ?^  mol=(mole |.((mark-done k+id mod)))
+    u.mol
+  this
 ::
 :: Extract goal from goals
 ++  wrest-goal

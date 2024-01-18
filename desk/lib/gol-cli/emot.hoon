@@ -56,12 +56,10 @@
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  =id:gol  (unique-id:gols pin now.bowl)
     :: edit permissions implied in the success of spawn-goal
-    =/  pore  (create-goal:(apex:pl old) id upid summary mod)
     :: mark the goal started if possible
     =/  new=pool:gol
-      ?~  upor=(mole |.((mark-done:pore k+id mod)))
-        abet:pore
-      abet:u.upor
+      abet:(create-goal:(apex:pl old) id upid summary mod)
+    =.  goal-order.local.store  [id goal-order.local.store]
     this(pools.store (~(put by pools.store) pin new))
     ::
       %archive-goal
@@ -87,9 +85,13 @@
     ?:  (~(has by goals.old) id)
       =/  new=pool:gol  abet:(delete-goal:(apex:pl old) id mod)
       =.  pools.store        (~(put by pools.store) pin new)
+      ?~  idx=(find [id]~ goal-order.local.store)  this
+      =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
       this
     =/  new=pool:gol  abet:(delete-goal:(apex:pl old) id mod)
     =.  pools.store        (~(put by pools.store) pin new)
+    ?~  idx=(find [id]~ goal-order.local.store)  this
+    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
     this
     ::
       %move
