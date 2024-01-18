@@ -282,6 +282,7 @@
     ?>  =(src our):bowl
     =/  =pool:gol    (create-pool src.bowl now.bowl title)
     =.  pools.store  (~(put by pools.store) pin.pool pool)
+    =.  pool-order.local.store  [pin.pool pool-order.local.store]
     this
     ::
       %delete-pool
@@ -290,6 +291,8 @@
     ?>  =(src our):bowl
     ?>  =(src.bowl host.pin)
     =.  pools.store  (~(del by pools.store) pin)
+    ?~  idx=(find [pin]~ pool-order.local.store)  this
+    =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
     this
     ::
       %slot-above

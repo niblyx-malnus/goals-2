@@ -46,6 +46,18 @@
       |=  [=pin =pool]
       [pin pool]
       :: [pin (inflate-pool:fl pool)]
+      ::
+        pool-order.local.store
+      ?:  =((sy pool-order.local.store.old) ~(key by pools.store.old))
+        pool-order.local.store.old
+      ~(tap in ~(key by pools.store.old))
+      ::
+      ::   goal-order.local.store
+      :: =/  all-goals=(set id)
+      ::   
+      :: ?:  =((sy goal-order.local.store.old) ~(key by goals.store.old))
+      ::   goal-order.local.store.old
+      :: ~(tap in ~(key by goals.store.old))
     ==
   ==
 :: Development states
