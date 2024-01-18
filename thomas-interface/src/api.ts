@@ -91,13 +91,8 @@ const api = {
   },
   allPoolsHarvest: async (method: string, tags: string[]) => {
     const json = {
-      harvest: {
-        type: { main: null },
-        method: method,
-        tags: tags,
-      }
+      harvest: { type: { main: null } }
     };
-    console.log(json);
     return await api.goalView(json);
   },
   mainHarvest: async (method: string, tags: string[]) => {
@@ -108,7 +103,6 @@ const api = {
         tags: tags,
       }
     };
-    console.log(json);
     return await api.goalView(json);
   },
   poolHarvest: async (poolId: string, method: string, tags: string[]) => {
@@ -119,7 +113,6 @@ const api = {
         tags: tags,
       }
     };
-    console.log(json);
     return await api.goalView(json);
   },
   goalHarvest: async (goalId: string, method: string, tags: string[]) => {
@@ -130,7 +123,6 @@ const api = {
         tags: tags,
       }
     };
-    console.log(json);
     return await api.goalView(json);
   },
   createPool: async (title: string) => {
@@ -232,7 +224,6 @@ const api = {
     return await api.goalAction(json);
   },
   setPoolTitle: async (poolId: string, title: string) => {
-    console.log(poolId);
     const json = {
         'set-pool-title': {
           pin: poolId,
@@ -330,6 +321,12 @@ const api = {
   },
   getGoalYoung: async (id: string) => {
     return await api.goalView({ "goal-young": { id: id } });
+  },
+  getPoolTagGoals: async (pin: string, tag: string) => {
+    return await api.goalView({ "pool-tag-goals": { pin: pin, tag: tag } });
+  },
+  getPoolTagHarvest: async (pin: string, tag: string) => {
+    return await api.goalView({ "pool-tag-harvest": { pin: pin, tag: tag } });
   },
   getPoolTitle: async (id: string) => {
     return await api.goalView({ "pool-title": { pin: id } });

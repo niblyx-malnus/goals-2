@@ -1,13 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MarkdownEditor from './MarkdownEditor';
+import TagGoalList from './TagGoalList';
+import Harvest from './Harvest'; // Assuming this is the correct import
 import api from '../api';
 import '../global.css';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
   const poolId = `/${host}/${name}`;
   const [poolTagNote, setPoolTagNote] = useState<string>('');
   const [selectedOperation, setSelectedOperation] = useState('some');
+  const [refreshGoals, setRefreshGoals] = useState(false);
+  const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState('Goals');
+  const [tagIsPublic, setTagIsPublic] = useState(false);
+
+  const navigate = useNavigate();
+
+  const navigateToAllPools = () => {
+    navigate(`/pools`);
+  };
+
+  const navigateToPoolPage = () => {
+    navigate(`/pool/${host}/${name}`);
+  };
 
   // Fetch pool tag details on mount
   useEffect(() => {
@@ -20,7 +38,7 @@ function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
       }
     };
     fetch();
-  }, []);
+  }, [poolId, tag]);
 
   const saveMarkdown = async (markdown: string) => {
     try {
@@ -32,12 +50,38 @@ function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
     }
   };
 
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
+      setTags([...tags, e.currentTarget.value.trim()]);
+      e.currentTarget.value = ''; // Clear the input
+    }
+  };
+
+  const triggerRefreshRoots = () => {
+    setRefreshGoals(!refreshGoals);
+  };
+
+  const triggerRefreshHarvest = () => {
+    setRefreshHarvest(!refreshHarvest);
+  };
+
   return (
     <div className="bg-gray-200 h-full flex justify-center items-center">
       <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full">
-        <a href={`/pool${poolId}`} className="mr-2 flex">
-          <h2 className="text-blue-800">Parent Pool</h2>
-        </a>
+        <div className="flex justify-between pb-2">
+          <div
+            className="cursor-pointer"
+            onClick={navigateToPoolPage}
+          >
+            <h2 className="text-blue-800">Parent Pool</h2>
+          </div>
+          <div
+            className="cursor-pointer"
+            onClick={navigateToAllPools}
+          >
+            <h2 className="text-blue-800">All Pools</h2>
+          </div>
+        </div>
         <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">
           {tag}
         </h1>
@@ -47,49 +91,43 @@ function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
             onSave={saveMarkdown}
           />
         </div>
-        <div className="flex flex-col items-center h-auto">
-          <div className="flex justify-center items-center w-full mb-4">
-            <div className="flex flex-row justify-center items-center">
-              <select
-                className="p-2 border rounded mr-2"
-                value={selectedOperation}
-                onChange={(e) => setSelectedOperation(e.target.value)}
+        <div className="border-b">
+          <ul className="flex justify-center -mb-px">
+            <li className={`${activeTab === 'Goals' ? 'border-blue-500' : ''}`}>
+              <button 
+                className={`inline-block p-4 text-md font-medium text-center cursor-pointer focus:outline-none ${
+                  activeTab === 'Goals' ? 'border-b-2 text-blue-600 border-blue-500' : 'text-gray-500 hover:text-gray-800 hover:border-gray-300'
+                }`} 
+                onClick={() => setActiveTab('Goals')}
               >
-                <option value="some">Some</option>
-                <option value="every">Every</option>
-              </select>
-              <input
-                type="text"
-                placeholder="Enter tags..."
-                className="p-2 flex-grow border box-border rounded"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-                    setTags([...tags, e.currentTarget.value.trim()]);
-                    e.currentTarget.value = ''; // Clear the input
-                  }
-                }}
-              />
-            </div>
-          </div>
-          <div className="flex flex-wrap justify-center mb-4">
-            {tags.map((tag, index) => (
-              <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-                {tag}
-                <button 
-                  className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
-                  onClick={() => setTags(tags.filter((_, i) => i !== index))}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
+                Goals
+              </button>
+            </li>
+            <li className={`${activeTab === 'Harvest' ? 'border-blue-500' : ''}`}>
+              <button 
+                className={`inline-block p-4 text-md font-medium text-center cursor-pointer focus:outline-none ${
+                  activeTab === 'Harvest' ? 'border-b-2 text-blue-600 border-blue-500' : 'text-gray-500 hover:text-gray-800 hover:border-gray-300'
+                }`} 
+                onClick={() => setActiveTab('Harvest')}
+              >
+                Harvest
+              </button>
+            </li>
+          </ul>
         </div>
+        {activeTab === 'Goals' && (
+          <>
+            <TagGoalList host={host} name={name} tag={tag} refresh={triggerRefreshRoots}/>
+          </>
+        )}
+        {activeTab === 'Harvest' && (
+          <>
+            <Harvest host={host} name={name} goalKey={tag} method={selectedOperation} tags={tags} refresh={triggerRefreshHarvest}/>
+          </>
+        )}
       </div>
     </div>
   );
 }
-
-// <Harvest host={host} name={name} goalKey={tag} method={selectedOperation} tags={tags} refresh={triggerRefreshHarvest}/>
 
 export default PoolTagPage;

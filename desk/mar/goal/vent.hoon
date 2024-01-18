@@ -11,27 +11,6 @@
     ^-  ^json
     ?~  vnt  ~
     ?-    -.vnt
-        %harvest
-      :-  %a
-      %+  turn  harvest.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
-      %-  pairs
-      :~  [%id (enjs-id id)]
-          [%description s+desc]
-          [%complete b+complete]
-          [%actionable b+actionable]
-          [%tags a+(turn tags (lead %s))]
-      ==
-      ::
-        %pools-index
-      :-  %a
-      %+  turn  pools.vnt
-      |=  [=pin title=@t] 
-      %-  pairs
-      :~  [%pin s+(pool-id pin)]
-          [%title s+title]
-      ==
-      ::
         %pool-roots
       :-  %a
       %+  turn  roots.vnt
@@ -55,6 +34,51 @@
           [%complete b+complete]
           [%actionable b+actionable]
           [%tags a+(turn tags (lead %s))]
+      ==
+      ::
+        %harvest
+      :-  %a
+      %+  turn  harvest.vnt
+      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
+      %-  pairs
+      :~  [%id (enjs-id id)]
+          [%description s+desc]
+          [%complete b+complete]
+          [%actionable b+actionable]
+          [%tags a+(turn tags (lead %s))]
+      ==
+      ::
+        %pool-tag-goals
+      :-  %a
+      %+  turn  goals.vnt
+      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
+      %-  pairs
+      :~  [%id (enjs-id id)]
+          [%description s+desc]
+          [%complete b+complete]
+          [%actionable b+actionable]
+          [%tags a+(turn tags (lead %s))]
+      ==
+      ::
+        %pool-tag-harvest
+      :-  %a
+      %+  turn  harvest.vnt
+      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
+      %-  pairs
+      :~  [%id (enjs-id id)]
+          [%description s+desc]
+          [%complete b+complete]
+          [%actionable b+actionable]
+          [%tags a+(turn tags (lead %s))]
+      ==
+      ::
+        %pools-index
+      :-  %a
+      %+  turn  pools.vnt
+      |=  [=pin title=@t] 
+      %-  pairs
+      :~  [%pin s+(pool-id pin)]
+          [%title s+title]
       ==
       ::
       %tags        a+(turn ~(tap in tags.vnt) (lead %s))

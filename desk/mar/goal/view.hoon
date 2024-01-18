@@ -13,10 +13,13 @@
     |^
     ^-  $-(json goal-view)
     %-  of
-    :~  [%harvest (ot ~[type+type])]
+    :~ 
         [%pools-index ul]
         [%pool-roots (ot ~[pin+pin])]
         [%goal-young (ot ~[id+id])]
+        [%harvest (ot ~[type+type])]
+        [%pool-tag-goals (ot ~[pin+pin tag+so])]
+        [%pool-tag-harvest (ot ~[pin+pin tag+so])]
         [%pool-title (ot ~[pin+pin])]
         [%pool-note (ot ~[pin+pin])]
         [%pool-tag-note (ot ~[pin+pin tag+so])]

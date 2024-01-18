@@ -515,9 +515,8 @@
   |=(=id:gol `(set id:gol)`(~(got by (harvests [%d id] ~)) [%d id]))
 ::
 ++  goals-harvest
-  |.
+  |=  root-nodes=(list nid:gol)
   ^-  (set id:gol)
-  =/  root-nodes  (root-nodes:nd)
   =/  vis=(map nid:gol (set id:gol))
     ((chain nid:gol (set id:gol)) harvests root-nodes ~)
   =|  harvest=(set id:gol)
@@ -535,7 +534,18 @@
 ++  ordered-goals-harvest
   |=  order=(list id:gol)
   ^-  (list id:gol)
-  (fix-list-and-sort %p (precedents-map %d %k) order (goals-harvest))
+  %:  fix-list-and-sort
+      %p     (precedents-map %d %k)
+      order  (goals-harvest (root-nodes:nd))
+  ==
+::
+++  custom-roots-ordered-goals-harvest
+  |=  [roots=(list id:gol) order=(list id:gol)]
+  ^-  (list id:gol)
+  %:  fix-list-and-sort
+      %p     (precedents-map %d %k)
+      order  (goals-harvest (turn roots (lead %d)))
+  ==
 ::
 :: get priority of a given goal - highest priority is 0
 :: priority is the number of unique goals which must be started

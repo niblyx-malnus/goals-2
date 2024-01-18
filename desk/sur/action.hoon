@@ -99,10 +99,12 @@
   ==
 ::
 +$  goal-view
-  $%  [%harvest type=harvest-type]
-      [%pools-index ~]
-      [%pool-roots =pin]   :: id, summary, cmp, axn
+  $%  [%pool-roots =pin]   :: id, summary, cmp, axn
       [%goal-young =id] :: id, summary, cmp, axn
+      [%harvest type=harvest-type]
+      [%pool-tag-goals =pin tag=@t]
+      [%pool-tag-harvest =pin tag=@t]
+      [%pools-index ~]
       [%pool-title =pin]
       [%pool-note =pin]
       [%pool-tag-note =pin tag=@t]
@@ -120,10 +122,12 @@
 ::
 +$  goal-vent
   $@  ~
-  $%  [%harvest harvest=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
-      [%pools-index pools=(list [pin @t])]
-      [%pool-roots roots=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
+  $%  [%pool-roots roots=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
       [%goal-young young=(list [id ? @t ? ? (list @t)])] :: id, summary, cmp, axn, tags
+      [%harvest harvest=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
+      [%pool-tag-goals goals=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
+      [%pool-tag-harvest harvest=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
+      [%pools-index pools=(list [pin @t])]
       [%tags tags=(set @t)]
       [%uid id=(unit id)]
       [%cord p=@t]

@@ -8,6 +8,7 @@ import api from '../api';
 function Pools() {
   const [newTitle, setNewTitle] = useState<string>('');
   const [refreshPools, setRefreshPools] = useState(false);
+  const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [tags, setTags] = useState<string[]>([]); // For managing Harvest tags
   const [selectedOperation, setSelectedOperation] = useState('some'); // For managing the Harvest operation
   const [activeTab, setActiveTab] = useState('Pools'); // New state for active tab
@@ -18,13 +19,15 @@ function Pools() {
     setRefreshPools(!refreshPools);
   };
 
+  const triggerRefreshHarvest = () => {
+    setRefreshHarvest(!refreshHarvest);
+  };
+
   const handleAddTitle = async () => {
     if (newTitle.trim() !== '') {
-      console.log(newTitle);
       try {
         await api.createPool(newTitle);
         const updatedPools = await api.getPoolsIndex(); // Get updated list
-        console.log(updatedPools);
         setRefreshPools(true);
       } catch (error) {
         console.error(error);
@@ -141,7 +144,7 @@ function Pools() {
                 </div>
               ))}
             </div>
-            <Harvest method={selectedOperation} tags={tags} refresh={() => { } } host={null} name={null} goalKey={null} />
+            <Harvest method={selectedOperation} tags={tags} host={null} name={null} goalKey={null} refresh={triggerRefreshHarvest}/>
           </div>
         )}
       </div>

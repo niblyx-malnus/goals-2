@@ -10,44 +10,28 @@ type Goal = {
   description: string,
   complete: boolean,
   actionable: boolean
-}; // Type for pool object
+};
 
-function Harvest({
-  host,
-  name,
-  goalKey,
-  method,
-  tags,
-  refresh,
-}: {
-  host: any;
-  name: any;
-  goalKey: any;
-  method: string;
-  tags: string[];
-  refresh: () => void;
-}) {
-  const isPool = goalKey == null;
+function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
   const [goals, setGoals] = useState<Goal[]>([]);
-  const [filteredGoals, setFilteredGoals] = useState<Goal[]>(goals); // State for filtered goals
+
+  // Use Zustand store
+  const { showCompleted, setShowCompleted } = useStore(state => ({ 
+      showCompleted: state.showCompleted, 
+      setShowCompleted: state.setShowCompleted 
+    }));
 
   const { showButtons, setShowButtons } = useStore(state => ({ 
       showButtons: state.showButtons, 
       setShowButtons: state.setShowButtons 
     }));
 
+  const displayedGoals = showCompleted ? goals : goals.filter(goal => !goal.complete);
+
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        let fetchedGoals;
-        const isMain = host === null && name === null && goalKey === null;
-        if (isMain) {
-          fetchedGoals = await api.mainHarvest(method, tags);
-        } else if (host && name && goalKey != null) {
-          fetchedGoals = await api.goalHarvest(`/${host}/${name}/${goalKey}`, method, tags);
-        } else {
-          fetchedGoals = await api.poolHarvest(`/${host}/${name}`, method, tags);
-        }
+        const fetchedGoals = await api.getPoolTagGoals(`/${host}/${name}`, tag);
         setGoals(fetchedGoals);
       } catch (error) {
         console.error("Error fetching goals: ", error);
@@ -55,30 +39,7 @@ function Harvest({
     };
   
     fetchGoals();
-  }, [refresh, host, name, goalKey, method, tags]);
-
-  // Function to filter goals by selected tags
-  useEffect(() => {
-    if (tags.length === 0) {
-      // If no tags are selected, show all goals
-      setFilteredGoals(goals);
-    } else {
-      // Filter goals based on selected tags and method
-      const filtered = goals.filter((goal) => {
-        if (goal.tags) {
-          if (method === 'every') {
-            // Filter goals that have ALL of the selected tags
-            return tags.every((tag) => goal.tags?.includes(tag));
-          } else if (method === 'some') {
-            // Filter goals that have ANY of the selected tags
-            return tags.some((tag) => goal.tags?.includes(tag));
-          }
-        }
-        return false;
-      });
-      setFilteredGoals(filtered);
-    }
-  }, [refresh, goals, method, tags]);
+  }, [refresh, host, name, tag]);
 
   const moveGoalUp = async (id: string) => {
     const index = _.findIndex(goals, { id });
@@ -108,17 +69,28 @@ function Harvest({
 
   return (
     <>
-      <label className="flex items-center space-x-2">
-        <input 
-          type="checkbox" 
-          checked={showButtons} 
-          onChange={() => setShowButtons(!showButtons)} 
-          className="form-checkbox rounded"
-        />
-        <span>Show Buttons</span>
-      </label>
+      <div className="flex items-center space-x-4 mb-4">
+        <label className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            checked={showCompleted} 
+            onChange={() => setShowCompleted(!showCompleted)} 
+            className="form-checkbox rounded"
+          />
+          <span>Show Completed</span>
+        </label>
+        <label className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            checked={showButtons} 
+            onChange={() => setShowButtons(!showButtons)} 
+            className="form-checkbox rounded"
+          />
+          <span>Show Buttons</span>
+        </label>
+      </div>
       <ul>
-        {filteredGoals.map((goal, index) => (
+        {displayedGoals.map((goal, index) => (
           <div
             key={goal.id}
             className="block text-current no-underline hover:no-underline"
@@ -143,4 +115,4 @@ function Harvest({
   );
 };
 
-export default Harvest;
+export default TagGoalList;
