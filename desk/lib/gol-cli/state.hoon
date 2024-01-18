@@ -46,18 +46,26 @@
       |=  [=pin =pool]
       [pin pool]
       :: [pin (inflate-pool:fl pool)]
+      :: Reorder pool-order if incorrect
       ::
         pool-order.local.store
       ?:  =((sy pool-order.local.store.old) ~(key by pools.store.old))
         pool-order.local.store.old
       ~(tap in ~(key by pools.store.old))
+      :: Reorder goal-order if incorrect
       ::
-      ::   goal-order.local.store
-      :: =/  all-goals=(set id)
-      ::   
-      :: ?:  =((sy goal-order.local.store.old) ~(key by goals.store.old))
-      ::   goal-order.local.store.old
-      :: ~(tap in ~(key by goals.store.old))
+        goal-order.local.store
+      =/  goals=(list (set id))
+        (turn ~(val by pools.store.old) |=(pool ~(key by goals)))
+      =/  all-goals=(set id)
+        =|  all-goals=(set id)
+        |-
+        ?~  goals
+          all-goals
+        $(goals t.goals, all-goals (~(uni in all-goals) i.goals))
+      ?:  =((sy goal-order.local.store.old) all-goals)
+        goal-order.local.store.old
+      ~(tap in all-goals)
     ==
   ==
 :: Development states
