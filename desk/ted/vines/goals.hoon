@@ -53,9 +53,8 @@
       %pools-index
     %-  pure:m  !>
     :-  %pools-index
-    %+  turn  ~(tap by pools.store)
-    |=  [=pin:gol =pool:gol]
-    [pin title.pool]
+    %+  turn  pool-order.local.store
+    |=(=pin:gol [pin title:(~(got by pools.store) pin)])
     ::
       %pool-roots
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
