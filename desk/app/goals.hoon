@@ -11,7 +11,7 @@
 /=  x  /ted/test
 ::
 |%
-+$  inflated-state  [state-5-18:gs =trace:gol] 
++$  inflated-state  [state-5-19:gs =trace:gol] 
 +$  card     card:agent:gall
 ++  non-cab
   %+  cook
@@ -43,7 +43,7 @@
   ^-  (quip card _this)
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-18:gs   (convert-to-latest:gs old)
+  =/  new=state-5-19:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   [cards this(-.state new, trace *trace:gol)]
 ::

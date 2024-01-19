@@ -57,13 +57,11 @@
 ::
 +$  pools  (map pin pool)
 ::
-+$  goal-local
-  $:  tags=(set @t)
-  ==
 +$  local
-  $:  order=(list id)
-      pools=(list pin) :: order of pools
-      goals=(map id goal-local)
+  $:  goal-order=(list id)
+      pool-order=(list pin) :: order of pools
+      tags=(map id (set @t))
+      fields=(map id (map @t @t))
       settings=(map @t @t)
   ==
 ::

@@ -38,7 +38,8 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const [editableSummary, setEditableSummary] = useState(goalDescription);
   const [completed, setCompleted] = useState(false);
   const [actionable, setActionable] = useState(false);
-  const [tagIsPublic, setTagIsPublic] = useState(false);
+  const [harvestTagIsPublic, setHarvestTagIsPublic] = useState(false);
+  const [newTagIsPublic, setNewTagIsPublic] = useState(true);
 
   const handleSummaryEdit = () => {
     setIsEditingSummary(true);
@@ -152,7 +153,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
 
   const navigateToTagPage = (tag: string) => {
     setDropdownOpen(false);
-    navigate(`/tag/${host}/${name}/${tag}`);
+    navigate(`/pool-tag/${host}/${name}/${tag}`);
   };
 
   const navigateToAllPools = () => {
@@ -260,7 +261,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const addGoalTag = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
       try {
-        await api.addGoalTag(goalId, e.currentTarget.value.trim()); // Assuming such a function exists in your API
+        await api.addGoalTag(goalId, newTagIsPublic, e.currentTarget.value.trim()); // Assuming such a function exists in your API
         const fetchedTags = await api.getGoalTags(goalId);
         setGoalTags(fetchedTags);
         e.currentTarget.value = ''; // Clear the input
@@ -274,7 +275,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const removeGoalTag = async (index: number) => {
     const tagToRemove = goalTags[index];
     try {
-      await api.delGoalTag(goalId, tagToRemove.tag); // Assuming such a function exists in your API
+      await api.delGoalTag(goalId, tagToRemove.isPublic, tagToRemove.tag); // Assuming such a function exists in your API
       const fetchedTags = await api.getGoalTags(goalId);
       setGoalTags(fetchedTags);
     } catch (error) {
@@ -365,6 +366,13 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
           </label>
         </div>
         <div className="flex flex-row justify-center items-center w-full mb-4 h-auto">
+          <button
+            onClick={() => setNewTagIsPublic(!newTagIsPublic)}
+            className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
+            style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+          >
+            {newTagIsPublic ? <FiEye /> : <FiEyeOff />}
+          </button>
           <input
             type="text"
             placeholder="Enter tags..."
@@ -375,8 +383,8 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
         <div className="flex flex-wrap justify-center mb-4">
           {goalTags.map((tag, index) => (
             <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-              { tagIsPublic
-                ?  <FiEye className="mr-2"/>
+              { tag.isPublic
+                ? <FiEye className="mr-2"/>
                 : <FiEyeOff className="mr-2"/>
               }
               <div
@@ -516,11 +524,11 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
                     <option value="every">Every</option>
                   </select>
                   <button
-                    onClick={() => setTagIsPublic(!tagIsPublic)}
+                    onClick={() => setHarvestTagIsPublic(!harvestTagIsPublic)}
                     className="p-2 mr-2 border border-gray-300 bg-gray-200 rounded hover:bg-gray-200 flex items-center justify-center"
                     style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
                   >
-                    {tagIsPublic ? <FiEye /> : <FiEyeOff />}
+                    {harvestTagIsPublic ? <FiEye /> : <FiEyeOff />}
                   </button>
                   <input
                     type="text"
@@ -533,13 +541,17 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
               <div className="flex flex-wrap justify-center mb-4">
                 {harvestTags.map((tag, index) => (
                   <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-                    { false
-                      ?  <FiEye className="mr-2"/>
+                    { tag.isPublic
+                      ? <FiEye className="mr-2"/>
                       : <FiEyeOff className="mr-2"/>
                     }
-                    <a href={`/tag/${host}/${name}/${tag}`} className="mr-2">
+                    <div
+                      key={index}
+                      className="flex items-center bg-gray-200 rounded cursor-pointer"
+                      onClick={() => navigateToTagPage(tag.tag)}
+                    >
                       {tag.tag}
-                    </a>
+                    </div>
                     <button 
                       className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
                       onClick={(e) => {

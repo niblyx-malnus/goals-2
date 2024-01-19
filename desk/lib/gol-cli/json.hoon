@@ -82,6 +82,24 @@
       (ot ~[property+so data+so])
     (ot ~[property+so])
   ::
+  ++  pd-local-tag-property
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (so (~(got by p.jon) 'tag'))
+    %.  o+(~(del by p.jon) 'tag')
+    %+  (pd ,[@t @t] [@t])
+      (ot ~[property+so data+so])
+    (ot ~[property+so])
+  ::
+  ++  pd-local-field-property
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (so (~(got by p.jon) 'field'))
+    %.  o+(~(del by p.jon) 'field')
+    %+  (pd ,[@t @t] [@t])
+      (ot ~[property+so data+so])
+    (ot ~[property+so])
+  ::
   ++  ud-goal-tags
     |=  jon=json
     ?>  ?=(%o -.jon)
@@ -128,6 +146,7 @@
         [%update-goal-tags ud-goal-tags]
         [%update-goal-field pd-goal-field]
         [%update-local-goal-tags ud-goal-tags]
+        [%update-local-tag-property pd-local-tag-property]
         [%update-setting pd-setting]
     ==
   ::

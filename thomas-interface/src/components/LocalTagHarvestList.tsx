@@ -17,7 +17,7 @@ type Goal = {
   actionable: boolean
 };
 
-function PoolTagHarvestList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
+function LocalTagHarvestList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
   const [goals, setGoals] = useState<Goal[]>([]);
 
   const { showButtons, setShowButtons } = useStore(state => ({ 
@@ -28,7 +28,7 @@ function PoolTagHarvestList({ host, name, tag, refresh }: { host: any; name: any
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const fetchedGoals = await api.getPoolTagHarvest(`/${host}/${name}`, tag);
+        const fetchedGoals = await api.getLocalTagHarvest(`/${host}/${name}`, tag);
         setGoals(fetchedGoals);
       } catch (error) {
         console.error("Error fetching goals: ", error);
@@ -103,4 +103,4 @@ function PoolTagHarvestList({ host, name, tag, refresh }: { host: any; name: any
   );
 };
 
-export default PoolTagHarvestList;
+export default LocalTagHarvestList;

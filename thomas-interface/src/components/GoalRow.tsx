@@ -42,13 +42,11 @@ const GoalRow: React.FC<{
   const [newTag, setNewTag] = useState('');
   const rowRef = useRef<HTMLDivElement>(null);
   const [showInfoPanel, setShowInfoPanel] = useState(false);
-  const [isPublic, setIsPublic] = useState(true);
+  const [newTagIsPublic, setNewTagIsPublic] = useState(true);
 
 
   const toggleInfoPanel = () => {
-    console.log("Toggling info panel"); // Debugging log
     setShowInfoPanel(!showInfoPanel);
-    console.log("showInfoPanel state after toggle:", !showInfoPanel); // Check the updated state
   };
 
   // Use Zustand store
@@ -133,8 +131,12 @@ const GoalRow: React.FC<{
     navigate(`/goal${id}`);
   };
 
-  const navigateToTag = (tag: string) => {
-    navigate(`/tag/${host}/${poolName}/${tag}`);
+  const navigateToPoolTag = (tag: string) => {
+    navigate(`/pool-tag/${host}/${poolName}/${tag}`);
+  };
+
+  const navigateToLocalTag = (tag: string) => {
+    navigate(`/local-tag/${tag}`);
   };
 
   const toggleActionable = async () => {
@@ -173,14 +175,14 @@ const GoalRow: React.FC<{
       // Logic to add the new tag to the goal
       // For example, update the tags array and send a request to the backend
       if (newTag.trim() !== '') {
-        await api.addGoalTag(id, newTag);
+        await api.addGoalTag(id, newTagIsPublic, newTag);
         setNewTag(''); // Reset input field
         await api.updateSetting('put', 'placeholder-tag', newTag);
         const fetchedTag = await api.getSetting("placeholder-tag");
         setPlaceholderTag(fetchedTag || 'today');
         refresh();
       } else {
-        await api.addGoalTag(id, placeholderTag);
+        await api.addGoalTag(id, newTagIsPublic, placeholderTag);
         const fetchedTag = await api.getSetting("placeholder-tag");
         setPlaceholderTag(fetchedTag || 'today');
         refresh();
@@ -200,19 +202,17 @@ const GoalRow: React.FC<{
     if (event.shiftKey) {
       // Shift+Click: Add placeholder tag directly
       addNewTag();
-    } else if (event.ctrlKey || event.metaKey) {
-      removeTag(placeholderTag);
     } else {
       // Regular Click: Toggle dropdown
       toggleTagDropdown();
     }
   };
 
-  const removeTag = async (tagToRemove: string) => {
+  const removeTag = async (tagToRemove: Tag) => {
     try {
       // Logic to remove the tag from the goal
       // For example, update the tags array and send a request to the backend
-      await api.delGoalTag(id, tagToRemove);
+      await api.delGoalTag(id, tagToRemove.isPublic, tagToRemove.tag);
       refresh();
     } catch (error) {
       console.error("Error removing tag: ", error);
@@ -279,14 +279,17 @@ const GoalRow: React.FC<{
                 <ul>
                   {tags.map((tag, index) => (
                     <li key={index} className="flex justify-between items-center p-1 hover:bg-gray-200">
-                      { false
+                      { tag.isPublic
                         ?  <FiEye className="mr-2"/>
                         : <FiEyeOff className="mr-2"/>
                       }
-                      <span onClick={() => navigateToTag(tag.tag)} className="cursor-pointer">
+                      <span
+                        onClick={() => tag.isPublic ? navigateToPoolTag(tag.tag) : navigateToLocalTag(tag.tag)}
+                        className="cursor-pointer"
+                      >
                         {tag.tag}
                       </span>
-                      <button onClick={() => removeTag(tag.tag)} className="text-xs p-1">
+                      <button onClick={() => removeTag(tag)} className="text-xs p-1">
                         <FiX />
                       </button>
                     </li>
@@ -294,11 +297,11 @@ const GoalRow: React.FC<{
                 </ul>
                 <div className="flex items-center">
                   <button
-                    onClick={() => setIsPublic(!isPublic)}
+                    onClick={() => setNewTagIsPublic(!newTagIsPublic)}
                     className="p-2 mr-2 border border-gray-300 rounded hover:bg-gray-200 flex items-center justify-center"
                     style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
                   >
-                    {isPublic ? <FiEye /> : <FiEyeOff />}
+                    {newTagIsPublic ? <FiEye /> : <FiEyeOff />}
                   </button>
                   <input
                     type="text"

@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-18:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-19:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -309,6 +309,18 @@
         %|  (~(dif in tags) p.p.axn)
       ==
     this(tags.local.store (~(put by tags.local.store) id.axn tags))
+    ::
+      %update-local-tag-property
+    ?>  =(src our):bowl
+    =/  properties  (~(gut by tag-properties.local.store) tag.axn ~)
+    =.  properties
+      ?-  -.p.axn
+        %&  (~(put by properties) p.p.axn)
+        %|  (~(del by properties) p.p.axn)
+      ==
+    =.  tag-properties.local.store
+      (~(put by tag-properties.local.store) tag.axn properties)
+    this
     ::
       %create-pool
     =+  axn

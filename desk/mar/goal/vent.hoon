@@ -72,6 +72,30 @@
           [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
       ==
       ::
+        %local-tag-goals
+      :-  %a
+      %+  turn  goals.vnt
+      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      %-  pairs
+      :~  [%id (enjs-id id)]
+          [%description s+desc]
+          [%complete b+complete]
+          [%actionable b+actionable]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
+      ==
+      ::
+        %local-tag-harvest
+      :-  %a
+      %+  turn  harvest.vnt
+      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      %-  pairs
+      :~  [%id (enjs-id id)]
+          [%description s+desc]
+          [%complete b+complete]
+          [%actionable b+actionable]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
+      ==
+      ::
         %pools-index
       :-  %a
       %+  turn  pools.vnt

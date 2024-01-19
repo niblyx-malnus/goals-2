@@ -29,7 +29,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editableTitle, setEditableTitle] = useState(poolTitle);
   const [tagIsPublic, setTagIsPublic] = useState(false);
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -194,9 +194,9 @@ function Pool({ host, name }: { host: any; name: any; }) {
             <div
               key={index}
               className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
-              onClick={() => navigateToTagPage(tag)}
+              onClick={() => navigateToTagPage(tag.tag)}
             >
-              {tag}
+              {tag.tag}
             </div>
           ))}
         </div>

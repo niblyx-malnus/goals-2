@@ -3,11 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
+type Tag = {
+  isPublic: boolean;
+  tag: string;
+};
+
 function TagSearchBar({ host, name }: { host: any; name: any; }) {
   const poolId = `/${host}/${name}`;
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredTags, setFilteredTags] = useState<string[]>([]);
+  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tagIsPublic, setTagIsPublic] = useState(false);
   
@@ -27,7 +32,7 @@ function TagSearchBar({ host, name }: { host: any; name: any; }) {
   }, [poolId, dropdownOpen]);
 
   useEffect(() => {
-    const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filtered = allTags.filter(tag => tag.tag.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredTags(filtered);
   }, [searchTerm, allTags]);
 
@@ -71,14 +76,14 @@ function TagSearchBar({ host, name }: { host: any; name: any; }) {
           <div
             key={index}
             className="tag-item flex items-center p-1 hover:bg-gray-200 cursor-pointer"
-            onClick={() => navigateToTagPage(tag)}
+            onClick={() => navigateToTagPage(tag.tag)}
             style={{ lineHeight: '1.5rem' }}
           >
-            { false
+            { tag.isPublic
               ?  <FiEye className="mr-2"/>
               : <FiEyeOff className="mr-2"/>
             }
-            {tag}
+            {tag.tag}
           </div>
         ))}
       </div>

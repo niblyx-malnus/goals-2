@@ -104,8 +104,7 @@
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
     =/  tag-goals=(list id:gol)
-      ?~  pd  ~
-      %+  murn  ~(tap by tags.u.pd)
+      %+  murn  ?~(pd ~ ~(tap by tags.u.pd))
       |=  [=id:gol tags=(set @t)]
       ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
         ~
@@ -132,8 +131,7 @@
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
     =/  tag-goals=(list id:gol)
-      ?~  pd  ~
-      %+  murn  ~(tap by tags.u.pd)
+      %+  murn  ~(tap by ?~(pd ~ tags.u.pd))
       |=  [=id:gol tags=(set @t)]
       ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
         ~
@@ -145,6 +143,65 @@
     :-  %pool-tag-goals
     %+  turn  harvest
     |=  =id:gol
+    =+  (~(got by goals.pool) id)
+    :*  id
+        summary
+        done.deadline
+        actionable
+        %+  weld
+          %+  turn
+            ~(tap in (~(gut by tags.local.store) id ~))
+          (lead |)
+        %+  turn
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        (lead &)
+    ==
+    ::
+      %local-tag-goals
+    =/  tag-goals=(list id:gol)
+      %+  murn  ~(tap by tags.local.store)
+      |=  [=id:gol tags=(set @t)]
+      =/  =pool:gol       (~(got by pools.store) pin.id)
+      ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
+        ~
+      `id
+    %-  pure:m  !>
+    :-  %local-tag-goals
+    %+  turn  tag-goals
+    |=  =id:gol
+    =/  =pool:gol       (~(got by pools.store) pin.id)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.id)
+    =+  (~(got by goals.pool) id)
+    :*  id
+        summary
+        done.deadline
+        actionable
+        %+  weld
+          %+  turn
+            ~(tap in (~(gut by tags.local.store) id ~))
+          (lead |)
+        %+  turn
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        (lead &)
+    ==
+    ::
+      %local-tag-harvest
+    =/  tag-goals=(list id:gol)
+      %+  murn  ~(tap by tags.local.store)
+      |=  [=id:gol tags=(set @t)]
+      =/  =pool:gol       (~(got by pools.store) pin.id)
+      ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
+        ~
+      `id
+    =/  harvest=(list id:gol)
+      =/  tv  ~(. gol-cli-traverse (all-goals store))
+      (custom-roots-ordered-goals-harvest:tv tag-goals goal-order.local.store)
+    %-  pure:m  !>
+    :-  %local-tag-goals
+    %+  turn  harvest
+    |=  =id:gol
+    =/  =pool:gol       (~(got by pools.store) pin.id)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.id)
     =+  (~(got by goals.pool) id)
     :*  id
         summary
@@ -178,6 +235,10 @@
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
     =/  properties      (~(gut by ?~(pd ~ tag-properties.u.pd)) tag.vyu ~)
+    (pure:m !>([%cord (~(gut by properties) 'note' '')]))
+    ::
+      %local-tag-note
+    =/  properties  (~(gut by tag-properties.local.store) tag.vyu ~)
     (pure:m !>([%cord (~(gut by properties) 'note' '')]))
     ::
       %goal-summary

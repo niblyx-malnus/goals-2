@@ -58,6 +58,7 @@
     --
   +$  local
     $%  [%update-local-goal-tags =id p=(each (set @t) (set @t))]
+        [%update-local-tag-property tag=@t p=(each [@t @t] @t)]
         [%update-setting p=(each [@t @t] @t)]
     ==
   --
@@ -107,10 +108,13 @@
       [%harvest type=harvest-type]
       [%pool-tag-goals =pin tag=@t]
       [%pool-tag-harvest =pin tag=@t]
+      [%pool-tag-note =pin tag=@t]
+      [%local-tag-goals tag=@t]
+      [%local-tag-harvest tag=@t]
+      [%local-tag-note tag=@t]
       [%pools-index ~]
       [%pool-title =pin]
       [%pool-note =pin]
-      [%pool-tag-note =pin tag=@t]
       [%goal-summary =id]
       [%goal-note =id]
       [%goal-tags =id]
@@ -132,6 +136,8 @@
       [%harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
       [%pool-tag-goals goals=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
       [%pool-tag-harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
+      [%local-tag-goals goals=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
+      [%local-tag-harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
       [%pools-index pools=(list [pin @t])]
       [%tags =tags]
       [%uid id=(unit id)]
