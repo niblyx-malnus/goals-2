@@ -89,7 +89,7 @@
       ?~  pd  ~
       %+  murn  ~(tap by tags.u.pd)
       |=  [=id:gol tags=(set @t)]
-      ?.  (~(has in tags) tag.vyu)
+      ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
         ~
       `id
     %-  pure:m  !>
@@ -111,7 +111,7 @@
       ?~  pd  ~
       %+  murn  ~(tap by tags.u.pd)
       |=  [=id:gol tags=(set @t)]
-      ?.  (~(has in tags) tag.vyu)
+      ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
         ~
       `id
     =/  harvest=(list id:gol)
