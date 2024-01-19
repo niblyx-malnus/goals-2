@@ -1,6 +1,11 @@
 import memoize from "lodash/memoize";
 import Urbit from "@urbit/http-api";
 
+type Tag = {
+  isPublic: boolean;
+  tag: string;
+};
+
 const live = process.env.REACT_APP_LIVE;
 const ship = "niblyx-malnus";
 const api = {
@@ -89,39 +94,21 @@ const api = {
       body: json, // the actual poke content
     }, 'goals');
   },
-  allPoolsHarvest: async (method: string, tags: string[]) => {
+  mainHarvest: async () => {
     const json = {
       harvest: { type: { main: null } }
     };
     return await api.goalView(json);
   },
-  mainHarvest: async (method: string, tags: string[]) => {
+  poolHarvest: async (poolId: string) => {
     const json = {
-      harvest: {
-        type: { main: null },
-        method: method,
-        tags: tags,
-      }
+      harvest: { type: { pool: poolId } }
     };
     return await api.goalView(json);
   },
-  poolHarvest: async (poolId: string, method: string, tags: string[]) => {
+  goalHarvest: async (goalId: string) => {
     const json = {
-      harvest: {
-        type: { pool: poolId },
-        method: method,
-        tags: tags,
-      }
-    };
-    return await api.goalView(json);
-  },
-  goalHarvest: async (goalId: string, method: string, tags: string[]) => {
-    const json = {
-      harvest: {
-        type: { goal: goalId },
-        method: method,
-        tags: tags,
-      }
+      harvest: { type: { goal: goalId } }
     };
     return await api.goalView(json);
   },

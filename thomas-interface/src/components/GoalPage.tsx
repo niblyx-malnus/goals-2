@@ -8,6 +8,11 @@ import '../global.css';
 import { useNavigate } from 'react-router-dom';
 import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
 
+type Tag = {
+  tag: string;
+  isPublic: boolean;
+};
+
 function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any; }) {
   const poolId = `/${host}/${name}`;
   const goalId = `/${host}/${name}/${goalKey}`;
@@ -21,12 +26,12 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const [goalId1, setGoalId1] = useState<string>('');
   const [goalId2, setGoalId2] = useState<string>('');
   const [activeTab, setActiveTab] = useState('Sub-goals');
-  const [harvestTags, setHarvestTags] = useState<string[]>([]);
+  const [harvestTags, setHarvestTags] = useState<Tag[]>([]);
   const [selectedOperation, setSelectedOperation] = useState('some');
-  const [goalTags, setGoalTags] = useState<string[]>([]);
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [goalTags, setGoalTags] = useState<Tag[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredTags, setFilteredTags] = useState<string[]>([]);
+  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isEditingSummary, setIsEditingSummary] = useState(false);
@@ -141,7 +146,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   }, [goalId]);
 
   useEffect(() => {
-    const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filtered = allTags.filter(tag => tag.tag.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredTags(filtered);
   }, [searchTerm, allTags]);
 
@@ -242,7 +247,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   // Function to handle adding tags
   const addHarvestTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-      setHarvestTags([...harvestTags, e.currentTarget.value.trim()]);
+      setHarvestTags([...harvestTags, { isPublic: false, tag: e.currentTarget.value.trim() }]);
       e.currentTarget.value = ''; // Clear the input
     }
   };
@@ -269,7 +274,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const removeGoalTag = async (index: number) => {
     const tagToRemove = goalTags[index];
     try {
-      await api.delGoalTag(goalId, tagToRemove); // Assuming such a function exists in your API
+      await api.delGoalTag(goalId, tagToRemove.tag); // Assuming such a function exists in your API
       const fetchedTags = await api.getGoalTags(goalId);
       setGoalTags(fetchedTags);
     } catch (error) {
@@ -370,13 +375,17 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
         <div className="flex flex-wrap justify-center mb-4">
           {goalTags.map((tag, index) => (
             <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-              { false
+              { tagIsPublic
                 ?  <FiEye className="mr-2"/>
                 : <FiEyeOff className="mr-2"/>
               }
-              <a href={`/tag/${host}/${name}/${tag}`} className="mr-2">
-                {tag}
-              </a>
+              <div
+                key={index}
+                className="flex items-center bg-gray-200 rounded cursor-pointer"
+                onClick={() => navigateToTagPage(tag.tag)}
+              >
+                {tag.tag}
+              </div>
               <button 
                 className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
                 onClick={(e) => {
@@ -529,7 +538,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
                       : <FiEyeOff className="mr-2"/>
                     }
                     <a href={`/tag/${host}/${name}/${tag}`} className="mr-2">
-                      {tag}
+                      {tag.tag}
                     </a>
                     <button 
                       className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"

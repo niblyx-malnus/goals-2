@@ -81,7 +81,7 @@
           [%title s+title]
       ==
       ::
-      %tags        a+(turn ~(tap in tags.vnt) (lead %s))
+      %tags        a+(turn tags.vnt |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))
       %uid         ?~(id.vnt ~ (enjs-id u.id.vnt))
       %cord        s+p.vnt
       %ucord       ?~(p.vnt ~ s+u.p.vnt)

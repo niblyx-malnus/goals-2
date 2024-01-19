@@ -4,6 +4,11 @@ import api from '../api';
 import { FiCopy, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu, FiInfo, FiEye, FiEyeOff } from 'react-icons/fi';
 import useStore from '../store';
 
+type Tag = {
+  isPublic: boolean;
+  tag: string;
+};
+
 const GoalRow: React.FC<{
     host: string,
     poolName: string,
@@ -12,7 +17,7 @@ const GoalRow: React.FC<{
     complete: boolean,
     actionable: boolean,
     showButtons: boolean,
-    tags: string[],
+    tags: Tag[],
     refresh: () => void,
     moveGoalUp: (id: string) => void,
     moveGoalDown: (id: string) => void
@@ -24,7 +29,7 @@ const GoalRow: React.FC<{
     complete,
     actionable,
     showButtons,
-    tags = [],
+    tags,
     moveGoalUp,
     moveGoalDown,
     refresh
@@ -278,10 +283,10 @@ const GoalRow: React.FC<{
                         ?  <FiEye className="mr-2"/>
                         : <FiEyeOff className="mr-2"/>
                       }
-                      <span onClick={() => navigateToTag(tag)} className="cursor-pointer">
-                        {tag}
+                      <span onClick={() => navigateToTag(tag.tag)} className="cursor-pointer">
+                        {tag.tag}
                       </span>
-                      <button onClick={() => removeTag(tag)} className="text-xs p-1">
+                      <button onClick={() => removeTag(tag.tag)} className="text-xs p-1">
                         <FiX />
                       </button>
                     </li>

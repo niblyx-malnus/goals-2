@@ -197,11 +197,22 @@
       %goal-tags
     =/  =pool:gol       (~(got by pools.store) pin.id.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.id.vyu)
-    =/  tags=(set @t)   (~(gut by ?~(pd ~ tags.u.pd)) id.vyu ~)
+    =/  tags=(list (pair ? @t))
+      %+  weld
+        %+  turn
+          ~(tap in (~(gut by tags.local.store) id.vyu ~))
+        (lead |)
+      %+  turn
+        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id.vyu ~)))
+      (lead &)
     (pure:m !>([%tags tags]))
     ::
       %local-goal-tags
-    (pure:m !>([%tags `(set @t)`(~(gut by tags.local.store) id.vyu ~)]))
+    =/  tags=(list (pair ? @t))
+      %+  turn
+        ~(tap in (~(gut by tags.local.store) id.vyu ~))
+      (lead |)
+    (pure:m !>([%tags tags]))
     ::
       %goal-parent
     =/  =pool:gol  (~(got by pools.store) pin.id.vyu)
@@ -225,7 +236,7 @@
     =|  tags=(set @t)
     |-
     ?~  vals
-      (pure:m !>([%tags tags]))
+      (pure:m !>([%tags (turn ~(tap in tags) (lead &))]))
     $(vals t.vals, tags (~(uni in tags) i.vals))
     ::
       %all-local-goal-tags
@@ -233,7 +244,7 @@
     =|  tags=(set @t)
     |-
     ?~  vals
-      (pure:m !>([%tags tags]))
+      (pure:m !>([%tags (turn ~(tap in tags) (lead |))]))
     $(vals t.vals, tags (~(uni in tags) i.vals))
   ==
 ==

@@ -4,9 +4,14 @@ import _ from 'lodash';
 import GoalRow from './GoalRow';
 import useStore from '../store';
 
+type Tag = {
+  isPublic: boolean;
+  tag: string;
+};
+
 type Goal = {
   id: string,
-  tags: string[],
+  tags: Tag[],
   description: string,
   complete: boolean,
   actionable: boolean

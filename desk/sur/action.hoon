@@ -133,7 +133,7 @@
       [%pool-tag-goals goals=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
       [%pool-tag-harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
       [%pools-index pools=(list [pin @t])]
-      [%tags tags=(set @t)]
+      [%tags =tags]
       [%uid id=(unit id)]
       [%cord p=@t]
       [%ucord p=(unit @t)]

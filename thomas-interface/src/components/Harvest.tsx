@@ -4,9 +4,14 @@ import _ from 'lodash';
 import GoalRow from './GoalRow';
 import useStore from '../store';
 
+type Tag = {
+  tag: string;
+  isPublic: boolean;
+};
+
 type Goal = {
   id: string,
-  tags: string[],
+  tags: Tag[],
   description: string,
   complete: boolean,
   actionable: boolean
@@ -24,7 +29,7 @@ function Harvest({
   name: any;
   goalKey: any;
   method: string;
-  tags: string[];
+  tags: Tag[];
   refresh: () => void;
 }) {
   const isPool = goalKey == null;
@@ -42,11 +47,11 @@ function Harvest({
         let fetchedGoals;
         const isMain = host === null && name === null && goalKey === null;
         if (isMain) {
-          fetchedGoals = await api.mainHarvest(method, tags);
+          fetchedGoals = await api.mainHarvest();
         } else if (host && name && goalKey != null) {
-          fetchedGoals = await api.goalHarvest(`/${host}/${name}/${goalKey}`, method, tags);
+          fetchedGoals = await api.goalHarvest(`/${host}/${name}/${goalKey}`);
         } else {
-          fetchedGoals = await api.poolHarvest(`/${host}/${name}`, method, tags);
+          fetchedGoals = await api.poolHarvest(`/${host}/${name}`);
         }
         setGoals(fetchedGoals);
       } catch (error) {
