@@ -9,8 +9,7 @@ import '../global.css';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 function LocalTagPage({ tag }: { tag: any; }) {
-  const poolId = '';
-  const [poolTagNote, setLocalTagNote] = useState<string>('');
+  const [localTagNote, setLocalTagNote] = useState<string>('');
   const [selectedOperation, setSelectedOperation] = useState('some');
   const [newDescription, setNewDescription] = useState<string>('');
   const [refreshGoals, setRefreshGoals] = useState(false);
@@ -29,19 +28,19 @@ function LocalTagPage({ tag }: { tag: any; }) {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const fetchedNote = await api.getLocalTagNote(poolId, tag);
+        const fetchedNote = await api.getLocalTagNote(tag);
         setLocalTagNote(fetchedNote);
       } catch (error) {
         console.error("Error fetching pool tag details: ", error);
       }
     };
     fetch();
-  }, [poolId, tag]);
+  }, [tag]);
 
   const saveMarkdown = async (markdown: string) => {
     try {
-      await api.editLocalTagNote(poolId, tag, markdown);
-      const fetchedNote = await api.getLocalTagNote(poolId, tag);
+      await api.editLocalTagNote(tag, markdown);
+      const fetchedNote = await api.getLocalTagNote(tag);
       setLocalTagNote(fetchedNote);
     } catch (error) {
       console.error(error);
@@ -113,7 +112,7 @@ function LocalTagPage({ tag }: { tag: any; }) {
         )}
         <div className="p-6 markdown-container all:unstyled overflow-y-auto">
           <MarkdownEditor
-            initialMarkdown={poolTagNote}
+            initialMarkdown={localTagNote}
             onSave={saveMarkdown}
           />
         </div>

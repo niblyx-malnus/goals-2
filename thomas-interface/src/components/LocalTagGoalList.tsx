@@ -36,7 +36,7 @@ function LocalTagGoalList({ host, name, tag, refresh }: { host: any; name: any; 
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const fetchedGoals = await api.getPoolTagGoals(`/${host}/${name}`, tag);
+        const fetchedGoals = await api.getLocalTagGoals(tag);
         setGoals(fetchedGoals);
       } catch (error) {
         console.error("Error fetching goals: ", error);

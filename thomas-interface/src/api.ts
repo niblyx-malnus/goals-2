@@ -229,10 +229,9 @@ const api = {
       };
     return await api.goalAction(json);
   },
-  editLocalTagNote: async (poolId: string, tag: string, note: string) => {
+  editLocalTagNote: async (tag: string, note: string) => {
     const json = {
         'update-local-tag-property': {
-          pin: poolId,
           tag: tag,
           method: 'put',
           property: 'note',
@@ -355,11 +354,11 @@ const api = {
   getPoolTagHarvest: async (pin: string, tag: string) => {
     return await api.goalView({ "pool-tag-harvest": { pin: pin, tag: tag } });
   },
-  getLocalTagGoals: async (pin: string, tag: string) => {
-    return await api.goalView({ "local-tag-goals": { pin: pin, tag: tag } });
+  getLocalTagGoals: async (tag: string) => {
+    return await api.goalView({ "local-tag-goals": { tag: tag } });
   },
-  getLocalTagHarvest: async (pin: string, tag: string) => {
-    return await api.goalView({ "local-tag-harvest": { pin: pin, tag: tag } });
+  getLocalTagHarvest: async (tag: string) => {
+    return await api.goalView({ "local-tag-harvest": { tag: tag } });
   },
   getPoolTitle: async (id: string) => {
     return await api.goalView({ "pool-title": { pin: id } });
@@ -370,8 +369,8 @@ const api = {
   getPoolTagNote: async (id: string, tag: string) => {
     return await api.goalView({ "pool-tag-note": { pin: id, tag: tag } });
   },
-  getLocalTagNote: async (id: string, tag: string) => {
-    return await api.goalView({ "local-tag-note": { pin: id, tag: tag } });
+  getLocalTagNote: async (tag: string) => {
+    return await api.goalView({ "local-tag-note": { tag: tag } });
   },
   getGoalSummary: async (id: string) => {
     return await api.goalView({ "goal-summary": { id: id } });

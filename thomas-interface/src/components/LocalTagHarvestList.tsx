@@ -28,7 +28,7 @@ function LocalTagHarvestList({ host, name, tag, refresh }: { host: any; name: an
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const fetchedGoals = await api.getLocalTagHarvest(`/${host}/${name}`, tag);
+        const fetchedGoals = await api.getLocalTagHarvest(tag);
         setGoals(fetchedGoals);
       } catch (error) {
         console.error("Error fetching goals: ", error);
