@@ -71,7 +71,10 @@
     =/  new=pool:gol
       abet:(create-goal:(apex:pl old) id upid summary mod)
     =.  goal-order.local.store  [id goal-order.local.store]
-    =.  tags.local.store  (~(put by tags.local.store) id (sy ~[tag]))
+    :: add the pool tag
+    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.id *pool-data:gol)
+    =.  tags.data           (~(put by tags.data) id (sy ~[tag]))
+    =.  pool-info.store     (~(put by pool-info.store) pin.id data)
     this(pools.store (~(put by pools.store) pin new))
     ::
       %archive-goal
