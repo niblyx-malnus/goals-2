@@ -100,6 +100,7 @@
         [%delete-pool (ot ~[pin+pin])]
         [%set-pool-title (ot ~[pin+pin title+so])]
         [%create-goal (ot ~[pin+pin upid+unit-id summary+so actionable+bo])]
+        [%create-goal-with-tag (ot ~[pin+pin upid+unit-id summary+so actionable+bo tag+so])]
         [%archive-goal (ot ~[id+id])]
         [%restore-goal (ot ~[id+id])]
         [%delete-goal (ot ~[id+id])]

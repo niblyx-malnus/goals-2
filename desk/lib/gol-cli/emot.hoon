@@ -62,6 +62,18 @@
     =.  goal-order.local.store  [id goal-order.local.store]
     this(pools.store (~(put by pools.store) pin new))
     ::
+      %create-goal-with-tag
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pin)
+    =/  =id:gol  (unique-id:gols pin now.bowl)
+    :: edit permissions implied in the success of spawn-goal
+    :: mark the goal started if possible
+    =/  new=pool:gol
+      abet:(create-goal:(apex:pl old) id upid summary mod)
+    =.  goal-order.local.store  [id goal-order.local.store]
+    =.  tags.local.store  (~(put by tags.local.store) id (sy ~[tag]))
+    this(pools.store (~(put by pools.store) pin new))
+    ::
       %archive-goal
     =+  axn
     =/  =pin:gol  pin.id

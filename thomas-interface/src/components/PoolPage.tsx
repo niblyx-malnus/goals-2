@@ -24,6 +24,19 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editableTitle, setEditableTitle] = useState(poolTitle);
   const [tagIsPublic, setTagIsPublic] = useState(false);
+  const [allTags, setAllTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const fetchedTags = await api.getPoolTags(poolId);
+        setAllTags(fetchedTags);
+      } catch (error) {
+        console.error("Error fetching tags: ", error);
+      }
+    };
+    fetchTags();
+  }, [poolId]);
 
   // Function to enable editing mode
   const handleTitleEdit = () => {
@@ -59,6 +72,10 @@ function Pool({ host, name }: { host: any; name: any; }) {
 
   const navigateToAllPools = () => {
     navigate(`/pools`);
+  };
+
+  const navigateToTagPage = (tag: string) => {
+    navigate(`/tag/${host}/${name}/${tag}`);
   };
 
   // Function to toggle refreshFlag
@@ -167,6 +184,17 @@ function Pool({ host, name }: { host: any; name: any; }) {
             </>
           )}
         </h1>
+        <div className="flex flex-wrap justify-center mb-4">
+          {allTags.map((tag, index) => (
+            <div
+              key={index}
+              className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
+              onClick={() => navigateToTagPage(tag)}
+            >
+              {tag}
+            </div>
+          ))}
+        </div>
         <div className="w-full px-1">
           <div 
             className="flex items-center justify-between cursor-pointer p-2 border-b"

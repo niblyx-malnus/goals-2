@@ -140,6 +140,18 @@ const api = {
       };
     return await api.goalAction(json);
   },
+  createGoalWithTag: async (poolId: string, parentId: string | null, summary: string, actionable: boolean, tag: string) => {
+    const json = {
+        'create-goal-with-tag': {
+          pin: poolId,
+          upid: parentId,
+          summary: summary,
+          actionable: actionable,
+          tag: tag
+        }
+      };
+    return await api.goalAction(json);
+  },
   addGoalTag: async (goalId: string, text: string) => {
     const json = {
         'update-goal-tags': {

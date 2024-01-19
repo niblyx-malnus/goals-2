@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MarkdownEditor from './MarkdownEditor';
-import TagGoalList from './TagGoalList';
+import PoolTagGoalList from './PoolTagGoalList';
+import PoolTagHarvestList from './PoolTagHarvestList';
 import Harvest from './Harvest'; // Assuming this is the correct import
 import api from '../api';
 import '../global.css';
@@ -11,6 +12,7 @@ function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
   const poolId = `/${host}/${name}`;
   const [poolTagNote, setPoolTagNote] = useState<string>('');
   const [selectedOperation, setSelectedOperation] = useState('some');
+  const [newDescription, setNewDescription] = useState<string>('');
   const [refreshGoals, setRefreshGoals] = useState(false);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -57,6 +59,17 @@ function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
     }
   };
 
+  const handleAddTitle = async () => {
+    if (newDescription.trim() !== '') {
+      try {
+        await api.createGoalWithTag(`/${host}/${name}`, null, newDescription, true, tag);
+      } catch (error) {
+        console.error(error);
+      }
+      setNewDescription('');
+    }
+  };
+
   const triggerRefreshRoots = () => {
     setRefreshGoals(!refreshGoals);
   };
@@ -85,12 +98,6 @@ function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
         <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">
           {tag}
         </h1>
-        <div className="p-6 markdown-container all:unstyled overflow-y-auto">
-          <MarkdownEditor
-            initialMarkdown={poolTagNote}
-            onSave={saveMarkdown}
-          />
-        </div>
         <div className="border-b">
           <ul className="flex justify-center -mb-px">
             <li className={`${activeTab === 'Goals' ? 'border-blue-500' : ''}`}>
@@ -115,16 +122,41 @@ function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
             </li>
           </ul>
         </div>
+        <div className="pt-6 flex items-center mb-4">
+          <input
+            type="text"
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddTitle();
+            }}
+            placeholder="Enter new title..."
+            className="p-2 flex-grow border box-border rounded mr-2 w-full" // <-- Notice the flex-grow and w-full here
+          />
+          <button 
+            onClick={handleAddTitle} 
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none"
+            style={{maxWidth: '100px'}} // This ensures button never grows beyond 100px.
+          >
+            Add
+          </button>
+        </div>
         {activeTab === 'Goals' && (
           <>
-            <TagGoalList host={host} name={name} tag={tag} refresh={triggerRefreshRoots}/>
+            <PoolTagGoalList host={host} name={name} tag={tag} refresh={triggerRefreshRoots}/>
           </>
         )}
         {activeTab === 'Harvest' && (
           <>
-            <Harvest host={host} name={name} goalKey={tag} method={selectedOperation} tags={tags} refresh={triggerRefreshHarvest}/>
+            <PoolTagHarvestList host={host} name={name} tag={tag} refresh={triggerRefreshHarvest}/>
           </>
         )}
+        <div className="p-6 markdown-container all:unstyled overflow-y-auto">
+          <MarkdownEditor
+            initialMarkdown={poolTagNote}
+            onSave={saveMarkdown}
+          />
+        </div>
       </div>
     </div>
   );

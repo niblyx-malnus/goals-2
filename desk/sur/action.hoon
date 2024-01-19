@@ -23,7 +23,10 @@
   =<  goal-action
   |%
   +$  goal-action  $%(create mutate local)
-  +$  create  [%create-goal =pin upid=(unit id) summary=@t actionable=?]
+  +$  create
+    $%  [%create-goal =pin upid=(unit id) summary=@t actionable=?]
+        [%create-goal-with-tag =pin upid=(unit id) summary=@t actionable=? tag=@t]
+    ==
   ++  mutate
     =<  mutate
     |%

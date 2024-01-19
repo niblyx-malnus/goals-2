@@ -12,7 +12,7 @@ type Goal = {
   actionable: boolean
 };
 
-function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
+function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
   const [goals, setGoals] = useState<Goal[]>([]);
 
   // Use Zustand store
@@ -115,4 +115,4 @@ function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: 
   );
 };
 
-export default TagGoalList;
+export default PoolTagGoalList;
