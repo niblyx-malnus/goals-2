@@ -20,7 +20,7 @@
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
       ==
       ::
         %goal-young
@@ -33,7 +33,7 @@
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
       ==
       ::
         %harvest
@@ -45,7 +45,7 @@
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
       ==
       ::
         %pool-tag-goals
@@ -57,7 +57,7 @@
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
       ==
       ::
         %pool-tag-harvest
@@ -69,7 +69,7 @@
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
       ==
       ::
         %pools-index
