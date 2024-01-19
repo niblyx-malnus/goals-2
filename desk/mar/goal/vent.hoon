@@ -14,62 +14,62 @@
         %pool-roots
       :-  %a
       %+  turn  roots.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
+      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
       :~  [%id (enjs-id id)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags (lead %s))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
       ==
       ::
         %goal-young
       :-  %a
       %+  turn  young.vnt
-      |=  [=id virtual=? desc=@t complete=? actionable=? tags=(list @t)]
+      |=  [=id virtual=? desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
       :~  [%id (enjs-id id)]
           [%virtual b+virtual]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags (lead %s))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
       ==
       ::
         %harvest
       :-  %a
       %+  turn  harvest.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
+      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
       :~  [%id (enjs-id id)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags (lead %s))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
       ==
       ::
         %pool-tag-goals
       :-  %a
       %+  turn  goals.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
+      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
       :~  [%id (enjs-id id)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags (lead %s))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
       ==
       ::
         %pool-tag-harvest
       :-  %a
       %+  turn  harvest.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list @t)]
+      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
       :~  [%id (enjs-id id)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
-          [%tags a+(turn tags (lead %s))]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[is-public+b/b tag+s/t])))]
       ==
       ::
         %pools-index
@@ -94,4 +94,3 @@
   --
 ++  grad  %noun
 --
-

@@ -123,13 +123,15 @@
       [%all-local-goal-tags ~]
   ==
 ::
++$  tags  (list (pair ? @t)) :: local/public tags
+::
 +$  goal-vent
   $@  ~
-  $%  [%pool-roots roots=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
-      [%goal-young young=(list [id ? @t ? ? (list @t)])] :: id, summary, cmp, axn, tags
-      [%harvest harvest=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
-      [%pool-tag-goals goals=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
-      [%pool-tag-harvest harvest=(list [id @t ? ? (list @t)])]   :: id, summary, cmp, axn, tags
+  $%  [%pool-roots roots=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
+      [%goal-young young=(list [id ? @t ? ? tags])] :: id, summary, cmp, axn, tags
+      [%harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
+      [%pool-tag-goals goals=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
+      [%pool-tag-harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
       [%pools-index pools=(list [pin @t])]
       [%tags tags=(set @t)]
       [%uid id=(unit id)]

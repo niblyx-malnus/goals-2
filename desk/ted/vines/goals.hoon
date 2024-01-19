@@ -30,7 +30,13 @@
         summary
         done.deadline
         actionable
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        %+  weld
+          %+  turn
+            ~(tap in (~(gut by tags.local.store) id ~))
+          (lead |)
+        %+  turn
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        (lead &)
     ==
     ::
       %goal-young
@@ -47,7 +53,13 @@
         summary
         done.deadline
         actionable
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        %+  weld
+          %+  turn
+            ~(tap in (~(gut by tags.local.store) id ~))
+          (lead |)
+        %+  turn
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        (lead &)
     ==
     ::
       %harvest
@@ -79,7 +91,13 @@
         summary
         done.deadline
         actionable
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        %+  weld
+          %+  turn
+            ~(tap in (~(gut by tags.local.store) id ~))
+          (lead |)
+        %+  turn
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        (lead &)
     ==
     ::
       %pool-tag-goals
@@ -101,7 +119,13 @@
         summary
         done.deadline
         actionable
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        %+  weld
+          %+  turn
+            ~(tap in (~(gut by tags.local.store) id ~))
+          (lead |)
+        %+  turn
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        (lead &)
     ==
     ::
       %pool-tag-harvest
@@ -126,7 +150,13 @@
         summary
         done.deadline
         actionable
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        %+  weld
+          %+  turn
+            ~(tap in (~(gut by tags.local.store) id ~))
+          (lead |)
+        %+  turn
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+        (lead &)
     ==
     ::
       %pools-index
