@@ -33,6 +33,7 @@
         [%goal-complete (ot ~[id+id])]
         [%setting (ot ~[setting+so])]
         [%pool-tags (ot ~[pin+pin])]
+        [%all-local-goal-tags ul]
     ==
     ++  type
       %-  of
