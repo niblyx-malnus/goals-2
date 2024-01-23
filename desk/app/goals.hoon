@@ -66,6 +66,7 @@
     ::
       %json-tree-transition
     =+  !<(tan=transition:jot vase)
+    ~&  "%goals app: receiving transition {(trip -.tan)}"
     ?-    -.tan
         %put
       =/  jons=(map @ta json)
