@@ -8,6 +8,7 @@
 /=  x  /mar/goal/view
 /=  x  /mar/goal/vent
 /=  x  /mar/json-tree-action
+/=  x  /mar/json-tree-transition
 /=  x  /mar/json-tree-vent
 /=  x  /mar/mimex
 /=  x  /ted/vines/goals

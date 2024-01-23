@@ -312,9 +312,19 @@
     %json-tree-action
   =+  !<(act=action:jot vase)
   ?-    -.act
-      %put  !!
-      %del  !!
-      %read  !!
+      %put
+    ;<  ~  bind:m  (poke [our dap]:gowl json-tree-transition+vase)
+    (pure:m !>(~))
+    ::
+      %del
+    ;<  ~  bind:m  (poke [our dap]:gowl json-tree-transition+vase)
+    (pure:m !>(~))
+    ::
+      %read
+    =/  jons=(map @ta json)
+      (fall (~(get of json-tree.store) (snip path.act)) ~)
+    (pure:m !>(json+(~(got by jons) (rear path.act))))
+    ::
       %tree
     %-  pure:m
     !>  :-  %tree
