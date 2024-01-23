@@ -315,11 +315,11 @@
   ~&  "%goals vine: receiving action {(trip -.act)}"
   ?-    -.act
       %put
-    ;<  ~  bind:m  (poke [our dap]:gowl json-tree-transition+vase)
+    ;<  ~  bind:m  (poke [our dap]:gowl json-tree-transition+!>(act))
     (pure:m !>(~))
     ::
       %del
-    ;<  ~  bind:m  (poke [our dap]:gowl json-tree-transition+vase)
+    ;<  ~  bind:m  (poke [our dap]:gowl json-tree-transition+!>(act))
     (pure:m !>(~))
     ::
       %read
