@@ -1,3 +1,4 @@
+/-  jot=json-tree
 |%
 +$  moment    (unit @da)
 +$  pin       [host=ship name=term]
@@ -71,6 +72,7 @@
   $:  =pools
       =local
       pool-info=(map pin pool-data)
+      =json-tree:jot
   ==
 ::
 +$  node-trace

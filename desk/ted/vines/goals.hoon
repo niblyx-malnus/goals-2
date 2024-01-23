@@ -1,4 +1,4 @@
-/-  gol=goals, axn=action, pyk=peek, spider
+/-  gol=goals, axn=action, pyk=peek, spider, jot=json-tree
 /+  *ventio, tree=filetree, gol-cli-traverse, gol-cli-node
 =,  strand=strand:spider
 ^-  thread:spider
@@ -13,10 +13,10 @@
 ?>  |(=(our src):gowl (moon:title [our src]:gowl))
 ~?  >>  (moon:title [our src]:gowl)
   "%goals: moon access from {(scow %p src.gowl)}"
+;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
     %goal-view
   =+  !<(vyu=goal-view:axn vase)
-  ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   ?-    -.vyu
       %pool-roots
     =/  =pool:gol       (~(got by pools.store) pin.vyu)
@@ -307,6 +307,22 @@
     ?~  vals
       (pure:m !>([%tags (turn ~(tap in tags) (lead |))]))
     $(vals t.vals, tags (~(uni in tags) i.vals))
+  ==
+  ::
+    %json-tree-action
+  =+  !<(act=action:jot vase)
+  ?-    -.act
+      %put  !!
+      %del  !!
+      %read  !!
+      %tree
+    %-  pure:m
+    !>  :-  %tree
+    %-  zing
+    %+  turn  ~(tap of json-tree.store) 
+    |=  [=path =(map @ta json)]
+    %+  turn  ~(tap in ~(key by map))
+    |=(=@ta (weld path ~[ta]))
   ==
 ==
 ::

@@ -62,6 +62,8 @@
       pool-order=(list pin) :: order of pools
       tags=(map id (set @t))
       fields=(map id (map @t @t))
+      tag-properties=(map @t (map @t @t))
+      field-properties=(map @t (map @t @t))
       settings=(map @t @t)
   ==
 ::

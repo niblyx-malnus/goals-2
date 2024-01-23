@@ -1,4 +1,4 @@
-/-  gol=goals, act=action
+/-  gol=goals, act=action, jot=json-tree
 /+  vent, bout, dbug, default-agent, verb,
     tree=filetree, gol-cli-emot, gs=gol-cli-state, gol-cli-node,
 :: import during development to force compilation
@@ -7,11 +7,14 @@
 /=  x  /mar/goal/action
 /=  x  /mar/goal/view
 /=  x  /mar/goal/vent
+/=  x  /mar/json-tree-action
+/=  x  /mar/json-tree-vent
+/=  x  /mar/mimex
 /=  x  /ted/vines/goals
 /=  x  /ted/test
 ::
 |%
-+$  inflated-state  [state-5-19:gs =trace:gol] 
++$  inflated-state  [state-5-20:gs =trace:gol] 
 +$  card     card:agent:gall
 ++  non-cab
   %+  cook
@@ -43,7 +46,7 @@
   ^-  (quip card _this)
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-19:gs   (convert-to-latest:gs old)
+  =/  new=state-5-20:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   [cards this(-.state new, trace *trace:gol)]
 ::
@@ -58,6 +61,28 @@
     =^  cards  state
       abet:(handle-action:emot axn)
     [cards this]
+    ::
+      %json-tree-action
+    =+  !<(tan=transition:jot vase)
+    ?-    -.tan
+        %put
+      =/  jons=(map @ta json)
+        (fall (~(get of json-tree.store) (snip path.tan)) ~)
+      =.  jons  (~(put by jons) (rear path.tan) json.tan)
+      =.  json-tree.store
+        (~(put of json-tree.store) (snip path.tan) jons)
+      `this
+      ::
+        %del
+      =/  jons=(map @ta json)
+        (fall (~(get of json-tree.store) (snip path.tan)) ~)
+      =.  jons  (~(del by jons) (rear path.tan))
+      =.  json-tree.store
+        ?~  jons
+          (~(del of json-tree.store) (snip path.tan))
+        (~(put of json-tree.store) (snip path.tan) jons)
+      `this
+    ==
   ==
 ::
 ++  on-peek
