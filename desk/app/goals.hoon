@@ -55,6 +55,7 @@
   |=  [=mark =vase]
   ^-  (quip card _this)
   ?>  =(src our):bowl
+  ~&  "%goals app: receiving mark {(trip mark)}"
   ?+    mark  (on-poke:def mark vase)
       %goal-action
     =/  axn=action:act  !<(action:act vase)

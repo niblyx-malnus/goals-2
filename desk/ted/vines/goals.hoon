@@ -13,6 +13,7 @@
 ?>  |(=(our src):gowl (moon:title [our src]:gowl))
 ~?  >>  (moon:title [our src]:gowl)
   "%goals: moon access from {(scow %p src.gowl)}"
+~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
     %goal-view
