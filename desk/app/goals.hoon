@@ -63,7 +63,7 @@
       abet:(handle-action:emot axn)
     [cards this]
     ::
-      %json-tree-action
+      %json-tree-transition
     =+  !<(tan=transition:jot vase)
     ?-    -.tan
         %put
