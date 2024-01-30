@@ -15,7 +15,7 @@
 /=  x  /ted/test
 ::
 |%
-+$  inflated-state  [state-5-20:gs =trace:gol] 
++$  inflated-state  [state-5-21:gs =trace:gol] 
 +$  card     card:agent:gall
 ++  non-cab
   %+  cook
@@ -47,7 +47,7 @@
   ^-  (quip card _this)
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-20:gs   (convert-to-latest:gs old)
+  =/  new=state-5-21:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   [cards this(-.state new, trace *trace:gol)]
 ::
@@ -69,22 +69,28 @@
     ~&  "%goals app: receiving transition {(trip -.tan)}"
     ?-    -.tan
         %put
+      |-
+      ?~  paths.tan
+        `this
       =/  jons=(map @ta json)
-        (fall (~(get of json-tree.store) (snip path.tan)) ~)
-      =.  jons  (~(put by jons) (rear path.tan) json.tan)
+        (fall (~(get of json-tree.store) (snip path.i.paths.tan)) ~)
+      =.  jons  (~(put by jons) (rear path.i.paths.tan) json.i.paths.tan)
       =.  json-tree.store
-        (~(put of json-tree.store) (snip path.tan) jons)
-      `this
+        (~(put of json-tree.store) (snip path.i.paths.tan) jons)
+      $(paths.tan t.paths.tan)
       ::
         %del
+      |-
+      ?~  paths.tan
+        `this
       =/  jons=(map @ta json)
-        (fall (~(get of json-tree.store) (snip path.tan)) ~)
-      =.  jons  (~(del by jons) (rear path.tan))
+        (fall (~(get of json-tree.store) (snip i.paths.tan)) ~)
+      =.  jons  (~(del by jons) (rear i.paths.tan))
       =.  json-tree.store
         ?~  jons
-          (~(del of json-tree.store) (snip path.tan))
-        (~(put of json-tree.store) (snip path.tan) jons)
-      `this
+          (~(del of json-tree.store) (snip i.paths.tan))
+        (~(put of json-tree.store) (snip i.paths.tan) jons)
+      $(paths.tan t.paths.tan)
     ==
   ==
 ::

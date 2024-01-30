@@ -1,20 +1,20 @@
 |%
 +$  json-tree  (axal (map @ta json))
 +$  transition
-  $%  [%put =path =json]
-      [%del =path]
+  $%  [%put paths=(list [=path =json])]
+      [%del paths=(list path)]
   ==
 ::
 +$  action
-  $%  [%put =path =json]
-      [%del =path]
-      [%read =path]
+  $%  [%put paths=(list [=path =json])]
+      [%del paths=(list path)]
+      [%read paths=(list path)]
       [%tree ~]
   ==
 ::
 +$  json-tree-vent
   $@  ~
-  $%  [%json =json]
+  $%  [%jsons jsons=(map path json)]
       [%tree paths=(list path)]
   ==
 --

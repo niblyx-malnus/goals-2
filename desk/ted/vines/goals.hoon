@@ -323,9 +323,14 @@
     (pure:m !>(~))
     ::
       %read
+    =|  jsons=(map path json)
+    |-
+    ?~  paths.act
+      (pure:m !>(jsons+jsons))
     =/  jons=(map @ta json)
-      (fall (~(get of json-tree.store) (snip path.act)) ~)
-    (pure:m !>(json+(~(got by jons) (rear path.act))))
+      (fall (~(get of json-tree.store) (snip i.paths.act)) ~)
+    =/  =json  (~(got by jons) (rear i.paths.act))
+    $(jsons (~(put by jsons) i.paths.act json))
     ::
       %tree
     %-  pure:m

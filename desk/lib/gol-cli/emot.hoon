@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-20:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-21:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -257,6 +257,12 @@
     ?~  idx=(find [dat]~ goal-order.local.store)  !!
     =.  goal-order.local.store  (into goal-order.local.store +(u.idx) dis)
     this
+    ::
+      %put-module
+    !!
+    ::
+      %del-module
+    !!
     ::
       %update-pool-perms
     =+  axn

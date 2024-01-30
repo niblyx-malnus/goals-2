@@ -18,6 +18,8 @@
       [%pools-slot-below dis=pin dat=pin]
       [%goals-slot-above dis=id dat=id]
       [%goals-slot-below dis=id dat=id]
+      [%put-module module=@t uuid=@t parent=(unit id) version=@ud body=json]
+      [%del-module module=@t uuid=@t]
   ==
 ++  goal-action
   =<  goal-action

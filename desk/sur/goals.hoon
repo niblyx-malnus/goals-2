@@ -48,12 +48,15 @@
       by-deadline=(list id)
   ==
 ::
++$  module  [parent=(unit id) version=@ud body=json]
+::
 +$  pool-data
   $:  properties=(map @t @t)
       tags=(map id (set @t))
       fields=(map id (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
+      modules=(map @t (map @t module))
   ==
 ::
 +$  pools  (map pin pool)

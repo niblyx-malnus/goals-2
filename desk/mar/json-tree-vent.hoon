@@ -10,8 +10,8 @@
     ^-  ^json
     ?~  vnt  ~
     ?-    -.vnt
-      %json  json.vnt
-      %tree  a+(turn paths.vnt |=(=^path s+(spat path)))
+      %jsons  o/(malt (turn ~(tap by jsons.vnt) |=([=^path =^json] [(spat path) json])))
+      %tree   a+(turn paths.vnt |=(=^path s+(spat path)))
     ==
   --
 ++  grab

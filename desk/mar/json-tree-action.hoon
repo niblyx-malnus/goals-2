@@ -11,9 +11,9 @@
     =,  dejs:format
     ^-  $-(json action:jot)
     %-  of
-    :~  [%put (ot ~[path+pa json+same])]
-        [%del (ot ~[path+pa])]
-        [%read (ot ~[path+pa])]
+    :~  [%put (ot ~[paths+(ar (ot ~[path+pa json+same]))])]
+        [%del (ot ~[paths+(ar pa)])]
+        [%read (ot ~[paths+(ar pa)])]
         [%tree ul]
     ==
   --
