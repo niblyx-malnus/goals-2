@@ -14,7 +14,7 @@
     :~  [%put (ot ~[paths+(ar (ot ~[path+pa json+same]))])]
         [%del (ot ~[paths+(ar pa)])]
         [%read (ot ~[paths+(ar pa)])]
-        [%tree pa]
+        [%tree (ot ~[path+pa])]
     ==
   --
 ++  grad  %noun
