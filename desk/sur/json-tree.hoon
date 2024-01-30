@@ -9,7 +9,7 @@
   $%  [%put paths=(list [=path =json])]
       [%del paths=(list path)]
       [%read paths=(list path)]
-      [%tree ~]
+      [%tree =path]
   ==
 ::
 +$  json-tree-vent

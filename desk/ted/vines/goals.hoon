@@ -339,7 +339,7 @@
     %-  pure:m
     !>  :-  %tree
     %-  zing
-    %+  turn  ~(tap of json-tree.store) 
+    %+  turn  ~(tap of (~(dip of json-tree.store) path.act))
     |=  [=path =(map @ta json)]
     %+  turn  ~(tap in ~(key by map))
     |=(=@ta (weld path ~[ta]))
