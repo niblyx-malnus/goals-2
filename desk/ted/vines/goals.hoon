@@ -330,7 +330,10 @@
     =/  jons=(map @ta json)
       (fall (~(get of json-tree.store) (snip i.paths.act)) ~)
     =/  =json  (~(got by jons) (rear i.paths.act))
-    $(jsons (~(put by jsons) i.paths.act json))
+    %=  $
+      paths.act  t.paths.act
+      jsons      (~(put by jsons) i.paths.act json)
+    ==
     ::
       %tree
     %-  pure:m
