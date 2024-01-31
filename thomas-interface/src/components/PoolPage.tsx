@@ -79,8 +79,8 @@ function Pool({ host, name }: { host: any; name: any; }) {
     navigate(`/pools`);
   };
 
-  const navigateToTagPage = (tag: string) => {
-    navigate(`/tag/${host}/${name}/${tag}`);
+  const navigateToPoolTagPage = (tag: string) => {
+    navigate(`/pool-tag/${host}/${name}/${tag}`);
   };
 
   // Function to toggle refreshFlag
@@ -194,7 +194,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
             <div
               key={index}
               className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
-              onClick={() => navigateToTagPage(tag.tag)}
+              onClick={() => navigateToPoolTagPage(tag.tag)}
             >
               {tag.tag}
             </div>

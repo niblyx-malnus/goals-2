@@ -38,7 +38,7 @@ function TagSearchBar({ host, name }: { host: any; name: any; }) {
 
   const navigateToTagPage = (tag: string) => {
     setDropdownOpen(false);
-    navigate(`/tag/${host}/${name}/${tag}`);
+    navigate(`/pool-tag/${host}/${name}/${tag}`);
   };
 
   const handleInputFocus = async () => {

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PoolList from './PoolList';
 import Harvest from './Harvest';
+import { useNavigate } from 'react-router-dom';
 import PoolTagSearch from './TagSearchBar';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import api from '../api';
@@ -18,6 +19,19 @@ function Pools() {
   const [selectedOperation, setSelectedOperation] = useState('some'); // For managing the Harvest operation
   const [activeTab, setActiveTab] = useState('Pools'); // New state for active tab
   const [tagIsPublic, setTagIsPublic] = useState(false);
+  const [allLocalTags, setAllLocalTags] = useState<Tag[]>([]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const fetchedTags = await api.getAllLocalGoalTags();
+        setAllLocalTags(fetchedTags);
+      } catch (error) {
+        console.error("Error fetching tags: ", error);
+      }
+    };
+    fetchTags();
+  }, []);
 
   // Function to toggle refreshFlag
   const triggerRefreshPools = () => {
@@ -27,6 +41,8 @@ function Pools() {
   const triggerRefreshHarvest = () => {
     setRefreshHarvest(!refreshHarvest);
   };
+
+  const navigate = useNavigate();
 
   const handleAddTitle = async () => {
     if (newTitle.trim() !== '') {
@@ -39,6 +55,10 @@ function Pools() {
       }
       setNewTitle('');
     }
+  };
+
+  const navigateToLocalTagPage = (tag: string) => {
+    navigate(`/local-tag/${tag}`);
   };
 
   // Function to add a tag for Harvest
@@ -61,6 +81,17 @@ function Pools() {
           <PoolTagSearch host={''} name={''}/>
         </div>
         <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">All Pools</h1>
+        <div className="flex flex-wrap justify-center mb-4">
+          {allLocalTags.map((tag, index) => (
+            <div
+              key={index}
+              className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
+              onClick={() => navigateToLocalTagPage(tag.tag)}
+            >
+              {tag.tag}
+            </div>
+          ))}
+        </div>
         <ul className="flex justify-center -mb-px">
           <li className={`${activeTab === 'Pools' ? 'border-blue-500' : ''}`}>
             <button 

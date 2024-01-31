@@ -4,6 +4,10 @@ import PoolPage from './components/PoolPage';
 import GoalPage from './components/GoalPage';
 import PoolTagPage from './components/PoolTagPage';
 import LocalTagPage from './components/LocalTagPage';
+import FileSystem from './components/FileSystem';
+import Mileage from './components/Mileage';
+import StateList from './components/States/StateList';
+import WeeklyGoalList from './components/WeeklyGoals/WeeklyGoalList';
 
 function PoolPageWrapper() {
   let { host, name } = useParams();
@@ -36,6 +40,10 @@ function App() {
           <Route path="/goal/:host/:name/:goalKey" element={<GoalPageWrapper />} />
           <Route path="/pool-tag/:host/:name/:tag" element={<PoolTagPageWrapper />} />
           <Route path="/local-tag/:tag" element={<LocalTagPageWrapper />} />
+          <Route path="/jsons" element={<FileSystem />} />
+          <Route path="/mileage" element={<Mileage />} />
+          <Route path="/states" element={<StateList />} />
+          <Route path="/weekly_goals" element={<WeeklyGoalList />} />
         </Routes>
       </div>
     </Router>

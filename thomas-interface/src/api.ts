@@ -94,6 +94,38 @@ const api = {
       body: json, // the actual poke content
     }, 'goals');
   },
+  jsonTreeAction: async (json: any) => {
+    return await api.vent({
+      ship: live ? (window as any).ship : ship,
+      dude: 'goals', // the agent to poke
+      inputDesk: 'goals', // where does the input mark live
+      inputMark: 'json-tree-action', // name of input mark
+      outputDesk: 'goals', // where does the output mark live
+      outputMark: 'json-tree-vent', // name of output mark
+      body: json, // the actual poke content
+    }, 'goals');
+  },
+  jsonTree: async (path: string) => {
+    const json = { tree: { path: path } };
+    return await api.jsonTreeAction(json);
+  },
+  jsonRead: async (path: string) => {
+    const json = { read: { paths: [path] } };
+    const map = await api.jsonTreeAction(json);
+    return map[path];
+  },
+  jsonReadMany: async (paths: string[]) => {
+    const json = { read: { paths: paths } };
+    return await api.jsonTreeAction(json);
+  },
+  jsonPut: async (path: string, body: any) => {
+    const json = { put: { paths: [{ path: path, json: body }] } };
+    return await api.jsonTreeAction(json);
+  },
+  jsonDel: async (path: string) => {
+    const json = { del: { paths: [path] } };
+    return await api.jsonTreeAction(json);
+  },
   mainHarvest: async () => {
     const json = {
       harvest: { type: { main: null } }
