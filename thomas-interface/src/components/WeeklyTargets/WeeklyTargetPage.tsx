@@ -201,7 +201,7 @@ const WeeklyTargetPage = ({ id }: { id: string }) => {
           Back to Weekly Targets
         </button>
       </div>
-      <h1 className="text-2xl font-bold">{weeklyTarget?.description}</h1>
+      <h1 className="text-2xl">{weeklyTarget?.description}</h1>
       { isLoading && (
         <div className="flex justify-center mt-20">
           <div className="animate-spin rounded-full h-16 w-16 border-b-8 border-t-transparent border-blue-500"></div>
@@ -216,7 +216,7 @@ const WeeklyTargetPage = ({ id }: { id: string }) => {
             >
               <span>&larr;</span>
             </button>
-            <h3 className="font-bold text-lg leading-6 text-gray-900">
+            <h3 className=" text-lg leading-6 text-gray-900">
               {activeWeek === currentWeek ? `Current Week: ${activeWeek}` : `Week of ${activeWeek}`}
             </h3>
             <button
@@ -227,7 +227,7 @@ const WeeklyTargetPage = ({ id }: { id: string }) => {
             </button>
           </div>
           <div className="flex items-center">
-            <div className="font-bold text-lg p-1">Target:</div>
+            <div className=" text-lg p-1">Target:</div>
             <input
               type="number"
               step="any"
@@ -236,7 +236,7 @@ const WeeklyTargetPage = ({ id }: { id: string }) => {
               onChange={handleTargetChange}
               className="mx-2 p-1 border border-gray-300 rounded w-1/4"
             />
-            <div className="font-bold text-lg p-1">Type:</div>
+            <div className=" text-lg p-1">Type:</div>
             <select
               value={comparisonType}
               onChange={handleTypeChange}
@@ -248,7 +248,7 @@ const WeeklyTargetPage = ({ id }: { id: string }) => {
             </select>
           </div>
           <div className="mt-4">
-            <div className="font-bold grid grid-cols-3 text-center mb-2">
+            <div className=" grid grid-cols-3 text-center mb-2">
               <div>Day</div>
               <div>Tally</div>
               <div>Cumulative</div>
