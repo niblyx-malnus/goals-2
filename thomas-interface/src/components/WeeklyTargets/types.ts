@@ -1,21 +1,21 @@
+export type Weekday = 'monday'    |
+                      'tuesday'   |
+                      'wednesday' |                
+                      'thursday'  |
+                      'friday'    |
+                      'saturday'  |
+                      'sunday';
+
 export interface Week {
-  goal: number | null;
-  entries: {
-    'monday': number | null;
-    'tuesday': number | null;
-    'wednesday': number | null;
-    'thursday': number | null;
-    'friday': number | null;
-    'saturday': number | null;
-    'sunday': number | null;
-  }
+  type: '==' | '<=' | '>=';
+  target: number | null;
+  entries: Record<Weekday, number>;
 }
 
-export interface WeeklyGoal {
+export interface WeeklyTarget {
   timestamp: number; // creation time
   description: string;
   weeks: Record<string, Week>;
-  type: 'max' | 'min';
   tags: string[];
 } 
 

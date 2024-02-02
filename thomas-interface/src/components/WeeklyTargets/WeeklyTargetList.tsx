@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { WeeklyGoal } from './types';
-import WeeklyGoalRow from './WeeklyGoalRow';
+import { WeeklyTarget } from './types';
+import WeeklyTargetRow from './WeeklyTargetRow';
 import api from '../../api';
 import useStore, { StoreState, StoreActions } from './store';
 import { v4 as uuidv4 } from 'uuid';
@@ -49,8 +49,8 @@ function TagSearchBar({ tags, onTagSelected }: { tags: string[], onTagSelected: 
   );
 }
 
-const WeeklyGoalList = () => {
-  const [newGoal, setNewGoal] = useState(0); // Placeholder for new goal value
+const WeeklyTargetList = () => {
+  const [newTarget, setNewTarget] = useState(0); // Placeholder for new goal value
   const inputRef = useRef<HTMLInputElement>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [uniqueTags, setUniqueTags] = useState<string[]>([]);
@@ -58,14 +58,12 @@ const WeeklyGoalList = () => {
   const [withTags, setWithTags] = useState(true);
   const [triggerRerender, setTriggerRerender] = useState(false);
   const [newDescription, setNewDescription] = useState('');
-  const [newType, setNewType] = useState<'max' | 'min'>('max');
-  const [newTags, setNewTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [displayList, setDisplayList] = useState<[key: string, weeklyGoal: WeeklyGoal][]>([]);
+  const [displayList, setDisplayList] = useState<[key: string, weeklyTarget: WeeklyTarget][]>([]);
 
   // Zustand store usage
-  const weeklyGoals = useStore((state: StoreState & StoreActions) => state.weeklyGoals);
-  const setWeeklyGoal = useStore((state: StoreState & StoreActions) => state.setWeeklyGoal);
+  const weeklyTargets = useStore((state: StoreState & StoreActions) => state.weeklyTargets);
+  const setWeeklyTarget = useStore((state: StoreState & StoreActions) => state.setWeeklyTarget);
   const getAllTags = useStore((state: StoreState & StoreActions) => state.getAllTags);
 
   // Function to trigger re-render
@@ -76,15 +74,15 @@ const WeeklyGoalList = () => {
   const serverFolderPath = '/weekly_goals';
 
   useEffect(() => {
-    const loadWeeklyGoalsFromServer = async () => {
+    const loadWeeklyTargetsFromServer = async () => {
       setIsLoading(true);
       try {
         const paths: string[] = await api.jsonTree(serverFolderPath);
         const fullPaths = paths.map(path => `${serverFolderPath}${path}`);
-        const weeklyGoalsData: Record<string, WeeklyGoal> = await api.jsonReadMany(fullPaths);
-        Object.entries(weeklyGoalsData).forEach(([path, weeklyGoal]) => {
+        const weeklyTargetsData: Record<string, WeeklyTarget> = await api.jsonReadMany(fullPaths);
+        Object.entries(weeklyTargetsData).forEach(([path, weeklyTarget]) => {
           const id = path.split('/').pop()?.split('.')[0]; // Assuming the filename is the ID
-          if (id) { setWeeklyGoal(id, weeklyGoal); }
+          if (id) { setWeeklyTarget(id, weeklyTarget); }
         });
         setUniqueTags(getAllTags());
         // Apply sorting logic here if needed
@@ -95,13 +93,13 @@ const WeeklyGoalList = () => {
         setIsLoading(false);
       }
     };
-    loadWeeklyGoalsFromServer();
-  }, [getAllTags, setWeeklyGoal]);
+    loadWeeklyTargetsFromServer();
+  }, [getAllTags, setWeeklyTarget]);
 
-  const filterWeeklyGoalsByTags = (states: Record<string, WeeklyGoal>, tags: string[], operation: string): Record<string, WeeklyGoal> => {
+  const filterWeeklyTargetsByTags = (states: Record<string, WeeklyTarget>, tags: string[], operation: string): Record<string, WeeklyTarget> => {
     if (tags.length === 0) return states; // No filtering if no tags are selected
   
-    const filteredStates: Record<string, WeeklyGoal> = {};
+    const filteredStates: Record<string, WeeklyTarget> = {};
   
     Object.entries(states).forEach(([key, state]) => {
       const tagSet = new Set(state.tags);
@@ -118,35 +116,37 @@ const WeeklyGoalList = () => {
   };
 
   useEffect(() => {
-    const sortedArray = Object.entries(filterWeeklyGoalsByTags(weeklyGoals, tags, selectedOperation))
+    const filteredTargets = filterWeeklyTargetsByTags(weeklyTargets, tags, selectedOperation);
+    const sortedArray = Object.entries(filteredTargets); // You might add sorting logic here if needed
     setDisplayList(sortedArray);
-  }, [weeklyGoals, triggerRerender]); // Listen to changes in states and triggerRerender
+  }, [weeklyTargets, tags, selectedOperation, triggerRerender]);
 
-  const addNewWeeklyGoal = async () => {
+  const addNewWeeklyTarget = async () => {
     if (newDescription.trim() !== '') {
       const id = uuidv4();
-      const newWeeklyGoal: WeeklyGoal = {
+      const newWeeklyTarget: WeeklyTarget = {
         timestamp: Date.now(),
         description: newDescription,
         weeks: {}, // Initialize with empty weeks
-        type: newType,
         tags: withTags ? tags : [],
       };
       setNewDescription('');
-      setWeeklyGoal(id, newWeeklyGoal);
-      await api.jsonPut(`${serverFolderPath}/${id}.json`, newWeeklyGoal);
-      setNewTags([]);
+      setWeeklyTarget(id, newWeeklyTarget);
+      await api.jsonPut(`${serverFolderPath}/${id}.json`, newWeeklyTarget);
       triggerRefresh();
     }
   };
 
   const handleTagSelected = (tag: string) => {
-    setNewTags(prevTags => [...prevTags, tag]);
+    setTags(prevTags => {
+      const cleanTag = tag.trim().toLowerCase();
+      return prevTags.includes(cleanTag) ? prevTags : [...prevTags, cleanTag];
+    });
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
-      addNewWeeklyGoal();
+      addNewWeeklyTarget();
     } else if (event.key === 'Escape') {
       setNewDescription(''); // Clear the input
     }
@@ -162,12 +162,12 @@ const WeeklyGoalList = () => {
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter Goal Description"
+              placeholder="Enter Target Description"
               className="p-2 border border-gray-300 rounded"
             />
 
             <button 
-              onClick={addNewWeeklyGoal}
+              onClick={addNewWeeklyTarget}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Add
@@ -198,12 +198,12 @@ const WeeklyGoalList = () => {
             </div>
           </div>
           <div className="flex flex-wrap justify-center mb-1">
-            {newTags.map((tag, index) => (
+            {tags.map((tag, index) => (
               <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
                 {tag}
                 <button 
                   className="ml-2"
-                  onClick={() => setNewTags(newTags.filter((_, i) => i !== index))}
+                  onClick={() => setTags(tags.filter((_, i) => i !== index))}
                 >
                   ×
                 </button>
@@ -224,11 +224,11 @@ const WeeklyGoalList = () => {
           )
         }
         { !isLoading && (
-            displayList.map(([key, weeklyGoal]) => (
-              <WeeklyGoalRow
+            displayList.map(([key, weeklyTarget]) => (
+              <WeeklyTargetRow
                 key={key}
                 id={key}
-                weeklyGoal={weeklyGoal}
+                weeklyTarget={weeklyTarget}
                 triggerRefresh={triggerRefresh}
               />
             ))
@@ -239,4 +239,4 @@ const WeeklyGoalList = () => {
   );
 };
 
-export default WeeklyGoalList;
+export default WeeklyTargetList;

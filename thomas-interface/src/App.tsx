@@ -4,10 +4,11 @@ import PoolPage from './components/PoolPage';
 import GoalPage from './components/GoalPage';
 import PoolTagPage from './components/PoolTagPage';
 import LocalTagPage from './components/LocalTagPage';
-import FileSystem from './components/FileSystem';
+import FileSystem from './components/FileSystem/FileSystem';
 import Mileage from './components/Mileage';
 import StateList from './components/States/StateList';
-import WeeklyGoalList from './components/WeeklyGoals/WeeklyGoalList';
+import WeeklyTargetList from './components/WeeklyTargets/WeeklyTargetList';
+import WeeklyTargetPage from './components/WeeklyTargets/WeeklyTargetPage';
 
 function PoolPageWrapper() {
   let { host, name } = useParams();
@@ -29,6 +30,11 @@ function LocalTagPageWrapper() {
   return <LocalTagPage tag={tag} />;
 }
 
+function WeeklyTargetPageWrapper() {
+  let { id } = useParams();
+  return <WeeklyTargetPage id={id as string} />;
+}
+
 function App() {
   return (
     <Router basename="/apps/goals">
@@ -43,7 +49,8 @@ function App() {
           <Route path="/jsons" element={<FileSystem />} />
           <Route path="/mileage" element={<Mileage />} />
           <Route path="/states" element={<StateList />} />
-          <Route path="/weekly_goals" element={<WeeklyGoalList />} />
+          <Route path="/weekly_targets" element={<WeeklyTargetList />} />
+          <Route path="/weekly_targets/:id" element={<WeeklyTargetPageWrapper />} />
         </Routes>
       </div>
     </Router>

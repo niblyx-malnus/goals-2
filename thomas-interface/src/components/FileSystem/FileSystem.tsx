@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FileModal from './FileModal';
 import { FiTrash } from 'react-icons/fi';
-import api from '../api';
+import api from '../../api';
 
 // Interfaces
 interface FileSystemNode {
