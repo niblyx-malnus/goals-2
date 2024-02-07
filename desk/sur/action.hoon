@@ -48,10 +48,6 @@
           [%mark-complete =id]
           [%unmark-complete =id]
           [%update-goal-perms =id chief=ship rec=_| =deputies]
-          [%roots-slot-above dis=id dat=id]
-          [%roots-slot-below dis=id dat=id]
-          [%young-slot-above pid=id dis=id dat=id]
-          [%young-slot-below pid=id dis=id dat=id]
       ==
     +$  hitch
       $%  [%update-goal-tags =id p=(each (set @t) (set @t))]

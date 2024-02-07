@@ -4,23 +4,19 @@
 +$  pin       [host=ship name=term]
 +$  id        [=pin key=@ta] :: globally unique, always references source pool
 +$  nid       [?(%k %d) =id]
-+$  stock     (list [=id chief=ship]) :: lineage; youngest to oldest
-+$  ranks     (map ship id) :: map of ship to highest ranking goal id
 +$  node
   $:  done=$~(%| ?) :: kickoff: goal started; deadline: goal completed
       =moment
       inflow=(set nid)
       outflow=(set nid)
   ==
-+$  edge      (pair nid nid)
-+$  edges     (set edge)
 +$  deputies  (map ship ?(%edit %create))
 +$  goal
-  $:  par=(unit id)
-      kids=(set id)
-      young=(list id) :: an order on kids and "virtual" subgoals
-      kickoff=node
-      deadline=node
+  $:  =id
+      par=(unit id)   :: parent=(unit id)
+      kids=(set id)   :: children=(set id)
+      kickoff=node    :: start=node
+      deadline=node   :: end=node
       actionable=?
       chief=ship
       =deputies
@@ -37,10 +33,14 @@
   $:  =pin
       =perms
       =goals
-      roots=(list id) :: an order on parentless goals
       =archive
       title=@t
   ==
+::
++$  stock     (list [=id chief=ship]) :: lineage; youngest to oldest
++$  ranks     (map ship id) :: map of ship to highest ranking goal id
++$  edge      (pair nid nid)
++$  edges     (set edge)
 ::
 +$  order-by
   $:  by-precedence=(list id)

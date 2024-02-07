@@ -24,7 +24,7 @@
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
     %-  pure:m  !>
     :-  %pool-roots
-    %+  turn  roots.pool
+    %+  turn  (~(root-goals gol-cli-node goals.pool))
     |=  =id:gol
     =+  (~(got by goals.pool) id)
     :*  id
@@ -46,7 +46,7 @@
     =/  =goal:gol       (~(got by goals.pool) id.vyu)
     %-  pure:m  !>
     :-  %goal-young
-    %+  turn  young.goal
+    %+  turn  ~(tap in (~(young gol-cli-node goals.pool) id.vyu))
     |=  =id:gol
     =+  (~(got by goals.pool) id)
     :*  id

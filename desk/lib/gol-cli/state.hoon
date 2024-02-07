@@ -5,15 +5,15 @@
 |%
 +$  card  card:agent:gall
 ::
-+$  state-5-21  [%'5-21' =store]
-+$  state-5-20  [%'5-20' =store:old-goals]
++$  state-5-22  [%'5-22' =store]
++$  state-5-21  [%'5-21' =store:old-goals]
 +$  versioned-state
-  $%  state-5-20
-      state-5-21
+  $%  state-5-21
+      state-5-22
   ==
 ::
 ++  upgrade-io
-  |=  [new=state-5-21 =bowl:gall]
+  |=  [new=state-5-22 =bowl:gall]
   |^  ^-  (list card)
   :: TODO: Follow all pools and prompt others to refollow?
   ;:  weld
@@ -35,10 +35,10 @@
 ::
 ++  convert-to-latest
   |=  old=versioned-state
-  ^-  state-5-21
+  ^-  state-5-22
   ?-  -.old
-    %'5-20'  (convert-5-20-to-5-21 old)
-      %'5-21'
+    %'5-21'  (convert-5-21-to-5-22 old)
+      %'5-22'
     %=    old
         pools.store
       %-  ~(gas by *pools)
@@ -70,26 +70,41 @@
   ==
 :: Development states
 ::
-++  convert-5-20-to-5-21
-  |=  =state-5-20
-  ^-  state-5-21
-  =/  pool-info
-    %-  ~(gas by *(map pin pool-data))
-    %+  turn  ~(tap by pool-info.store.state-5-20)
-    |=  [=pin =pool-data:old-goals]
-    ^-  [^pin ^pool-data]
+++  convert-5-21-to-5-22
+  |=  =state-5-21
+  ^-  state-5-22
+  =/  pools
+    %-  ~(gas by *pools)
+    %+  turn  ~(tap by pools.store.state-5-21)
+    |=  [=pin =pool:old-goals]
+    ^-  [^pin ^pool]
+    =/  =goals
+      %-  ~(gas by *goals)
+      %+  turn  ~(tap by goals.pool)
+      |=  [=id =goal:old-goals]
+      ^-  [^id ^goal]
+      :-  id
+      :*  id
+          par.goal
+          kids.goal
+          kickoff.goal
+          deadline.goal
+          actionable.goal
+          chief.goal
+          deputies.goal
+          summary.goal
+      ==
     :-  pin
-    :*  properties.pool-data
-        tags.pool-data
-        fields.pool-data
-        tag-properties.pool-data
-        field-properties.pool-data
+    :*  pin
+        perms.pool
+        goals
         ~
+        title.pool
     ==
-  :*  %'5-21'
-      pools.store.state-5-20
-      local.store.state-5-20
-      pool-info
-      json-tree.store.state-5-20
+  :*  %'5-22'
+      pools
+      local.store.state-5-21
+      pool-info.store.state-5-21
+      json-tree.store.state-5-21
   ==
 --

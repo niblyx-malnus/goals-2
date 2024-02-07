@@ -20,6 +20,7 @@
   ?.  (lte (met 3 summary) 140)
     ~|("Summary exceeds 140 characters." !!)
   =|  =goal:gol
+  =.  id.goal       id
   =.  chief.goal    chief
   =.  summary.goal  summary
   :: =.  author.goal  author
@@ -37,7 +38,6 @@
       (check-goal-create-perm u.upid mod)
   =/  goal  (init-goal id summary mod mod)
   =.  goals.p  (~(put by goals.p) id goal)
-  =.  this  (put-roots id)
   =.  this  (move id upid host.pin.p) :: divine intervention (owner)
   :: mark the goal started if possible
   ::
@@ -64,9 +64,6 @@
   :: Update goals to remaining
   ::
   =.  goals.p  (gus-by goals.p.pore ~(tap in prog))
-  :: Delete from roots
-  ::
-  =.  pore  (del-roots id) :: delete from roots
   :: both of these should get validated here (validate-goals:vd goals)
   :: return extracted goals and remaining goals
   ::
@@ -303,112 +300,6 @@
 :: YOKES/RENDS
 ::
 :: ============================================================================
-++  put-young
-  |=  [pid=id:gol yid=id:gol]
-  ^-  _this
-  =/  =goal:gol  (~(got by goals.p) pid)
-  ?>  (~(has in inflow.deadline.goal) d+yid)
-  =.  young.goal  [yid young.goal]
-  this(goals.p (~(put by goals.p) pid goal))
-::
-++  del-young
-  |=  [pid=id:gol yid=id:gol]
-  ^-  _this
-  =/  =goal:gol  (~(got by goals.p) pid)
-  ?<  (~(has in inflow.deadline.goal) d+yid)
-  =/  idx=(unit @)  (find ~[yid] young.goal)
-  ?~  idx
-    ~|("couldn't find young..." this)
-  =.  young.goal  (oust [u.idx 1] young.goal)
-  this(goals.p (~(put by goals.p) pid goal))
-::
-++  put-roots
-  |=  =id:gol
-  ^-  _this
-  =/  =goal:gol  (~(got by goals.p) id)
-  ?>  ?=(~ par.goal)
-  this(roots.p [id roots.p])
-::
-++  del-roots
-  |=  =id:gol
-  ^-  _this
-  =/  goal=(unit goal:gol)  (~(get by goals.p) id)
-  ?>  |(?=(~ goal) ?=(^ par.u.goal))
-  =/  idx=(unit @)  (find ~[id] roots.p)
-  ?~  idx
-    ~|("couldn't find root..." this)
-  this(roots.p (oust [u.idx 1] roots.p))
-::
-++  manage-orders
-  |=  [type=?(%yoke %rend) n1=nid:gol n2=nid:gol]
-  ^-  _this
-  ?.  &(?=(%d -.n1) ?=(%d -.n2))  this
-  ?-    type
-      %yoke
-    =.  this
-      =/  =goal:gol  (~(got by goals.p) id.n1)
-      ?.  ?&  ?=(^ par.goal)
-              (~(has in (sy roots.p)) id.n1)
-          ==
-         this
-       (del-roots id.n1)
-    (put-young id.n2 id.n1)
-    ::
-      %rend
-    =.  this
-      =/  =goal:gol  (~(got by goals.p) id.n1)
-      ?.  ?&  ?=(~ par.goal)
-              !(~(has in (sy roots.p)) id.n1)
-          ==
-         this
-       (put-roots id.n1)
-    (del-young id.n2 id.n1)
-  ==
-:: slot dis above dat in pid's young
-::
-++  young-slot-above
-  |=  [pid=id:gol dis=id:gol dat=id:gol mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm pid mod)
-  =/  goal  (~(got by goals.p) pid)
-  ?~  idx=(find [dis]~ young.goal)  !!
-  =.  young.goal  (oust [u.idx 1] young.goal)
-  ?~  idx=(find [dat]~ young.goal)  !!
-  =.  young.goal  (into young.goal u.idx dis)
-  this(goals.p (~(put by goals.p) pid goal))
-:: slot dis below dat in pid's young
-::
-++  young-slot-below
-  |=  [pid=id:gol dis=id:gol dat=id:gol mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm pid mod)
-  =/  goal  (~(got by goals.p) pid)
-  ?~  idx=(find [dis]~ young.goal)  !!
-  =.  young.goal  (oust [u.idx 1] young.goal)
-  ?~  idx=(find [dat]~ young.goal)  !!
-  =.  young.goal  (into young.goal +(u.idx) dis)
-  this(goals.p (~(put by goals.p) pid goal))
-:: slot dis above dat in roots
-::
-++  roots-slot-above
-  |=  [dis=id:gol dat=id:gol mod=ship]
-  ^-  _this
-  ?>  (check-pool-edit-perm mod)
-  ?~  idx=(find [dis]~ roots.p)  !!
-  =.  roots.p  (oust [u.idx 1] roots.p)
-  ?~  idx=(find [dat]~ roots.p)  !!
-  this(roots.p (into roots.p u.idx dis))
-:: slot dis below dat in roots
-::
-++  roots-slot-below
-  |=  [dis=id:gol dat=id:gol mod=ship]
-  ^-  _this
-  ?>  (check-pool-edit-perm mod)
-  ?~  idx=(find [dis]~ roots.p)  !!
-  =.  roots.p  (oust [u.idx 1] roots.p)
-  ?~  idx=(find [dat]~ roots.p)  !!
-  this(roots.p (into roots.p +(u.idx) dis))
-::
 ++  dag-yoke
   |=  [n1=nid:gol n2=nid:gol mod=ship]
   ^-  _this
@@ -452,8 +343,7 @@
   =.  inflow.node2  (~(put in inflow.node2) n1)
   =.  goals.p  (update-node:nd n1 node1)
   =.  goals.p  (update-node:nd n2 node2)
-  ::
-  (manage-orders %yoke n1 n2)
+  this
 ::
 ++  dag-rend
   |=  [n1=nid:gol n2=nid:gol mod=ship]
@@ -484,8 +374,7 @@
   =.  inflow.node2  (~(del in inflow.node2) n1)
   =.  goals.p  (update-node:nd n1 node1)
   =.  goals.p  (update-node:nd n2 node2)
-  ::
-  (manage-orders %rend n1 n2)
+  this
 ::
 ++  yoke
   |=  [yok=exposed-yoke:act mod=ship]

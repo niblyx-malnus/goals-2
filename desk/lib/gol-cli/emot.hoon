@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-21:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-22:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -30,7 +30,7 @@
   ^-  pool:gol
   :*  (unique-pin own now)
       (~(put by *perms:gol) own `%owner)
-      ~  ~  ~  title
+      ~  ~  title
   ==
 ::
 ++  clone-pool
@@ -191,38 +191,6 @@
     =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(set-deadline:(apex:pl old) id deadline mod)
-    =.  pools.store  (~(put by pools.store) pin new)
-    this
-    ::
-      %roots-slot-above
-    =+  axn
-    =/  =pin:gol  pin.dis
-    =/  old=pool:gol  (~(got by pools.store) pin)
-    =/  new=pool:gol  abet:(roots-slot-above:(apex:pl old) dis dat mod)
-    =.  pools.store  (~(put by pools.store) pin new)
-    this
-    ::
-      %roots-slot-below
-    =+  axn
-    =/  =pin:gol  pin.dis
-    =/  old=pool:gol  (~(got by pools.store) pin)
-    =/  new=pool:gol  abet:(roots-slot-below:(apex:pl old) dis dat mod)
-    =.  pools.store  (~(put by pools.store) pin new)
-    this
-    ::
-      %young-slot-above
-    =+  axn
-    =/  =pin:gol  pin.pid
-    =/  old=pool:gol  (~(got by pools.store) pin)
-    =/  new=pool:gol  abet:(young-slot-above:(apex:pl old) pid dis dat mod)
-    =.  pools.store  (~(put by pools.store) pin new)
-    this
-    ::
-      %young-slot-below
-    =+  axn
-    =/  =pin:gol  pin.pid
-    =/  old=pool:gol  (~(got by pools.store) pin)
-    =/  new=pool:gol  abet:(young-slot-below:(apex:pl old) pid dis dat mod)
     =.  pools.store  (~(put by pools.store) pin new)
     this
     ::
