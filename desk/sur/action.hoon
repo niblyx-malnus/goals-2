@@ -1,9 +1,11 @@
 /-  *goals
 |%
-+$  action  $%(pool-action goal-action local-action)
-+$  local-action
-  $%  [%slot-above dis=id dat=id]  :: slot dis above dat
-      [%slot-below dis=id dat=id]  :: slot dis below dat
++$  action  $%(local-action pool-action goal-action)
+++  local-action
+  $%  [%pools-slot-above dis=pin dat=pin]
+      [%pools-slot-below dis=pin dat=pin]
+      [%goals-slot-above dis=key dat=key]
+      [%goals-slot-below dis=key dat=key]
   ==
 ++  pool-action
   $%  [%create-pool title=@t]
@@ -14,12 +16,8 @@
       [%update-pool-property =pin p=(each [@t @t] @t)]
       [%update-pool-tag-property =pin tag=@t p=(each [@t @t] @t)]
       [%update-pool-field-property =pin field=@t p=(each [@t @t] @t)]
-      [%pools-slot-above dis=pin dat=pin]
-      [%pools-slot-below dis=pin dat=pin]
-      [%goals-slot-above dis=id dat=id]
-      [%goals-slot-below dis=id dat=id]
-      [%put-module module=@t uuid=@t parent=(unit id) version=@ud body=json]
-      [%del-module module=@t uuid=@t]
+      [%put-module =pin module=@t uuid=@t parent=(unit id) version=@ud body=json]
+      [%del-module =pin module=@t uuid=@t]
   ==
 ++  goal-action
   =<  goal-action
@@ -34,28 +32,28 @@
     |%
     +$  mutate  $%(life-cycle nexus hitch)
     +$  life-cycle
-      $%  [%archive-goal =id]
-          [%restore-goal =id]
-          [%delete-goal =id]
+      $%  [%archive-goal =pin =id]
+          [%restore-goal =pin =id]
+          [%delete-goal =pin =id]
       ==
     +$  nexus
-      $%  [%move cid=id upid=(unit id)] :: should probably be in nexus:pool-action
-          [%set-kickoff =id kickoff=(unit @da)]
-          [%set-deadline =id deadline=(unit @da)]
-          [%set-summary =id summary=@t]
-          [%mark-actionable =id]
-          [%unmark-actionable =id]
-          [%mark-complete =id]
-          [%unmark-complete =id]
-          [%update-goal-perms =id chief=ship rec=_| =deputies]
+      $%  [%move =pin cid=id upid=(unit id)] :: should probably be in nexus:pool-action
+          [%set-kickoff =pin =id kickoff=(unit @da)]
+          [%set-deadline =pin =id deadline=(unit @da)]
+          [%set-summary =pin =id summary=@t]
+          [%mark-actionable =pin =id]
+          [%unmark-actionable =pin =id]
+          [%mark-complete =pin =id]
+          [%unmark-complete =pin =id]
+          [%update-goal-perms =pin =id chief=ship rec=_| =deputies]
       ==
     +$  hitch
-      $%  [%update-goal-tags =id p=(each (set @t) (set @t))]
-          [%update-goal-field =id p=(each [@t @t] @t)]
+      $%  [%update-goal-tags =pin =id p=(each (set @t) (set @t))]
+          [%update-goal-field =pin =id p=(each [@t @t] @t)]
       ==
     --
   +$  local
-    $%  [%update-local-goal-tags =id p=(each (set @t) (set @t))]
+    $%  [%update-local-goal-tags =key p=(each (set @t) (set @t))]
         [%update-local-tag-property tag=@t p=(each [@t @t] @t)]
         [%update-setting p=(each [@t @t] @t)]
     ==
@@ -97,12 +95,12 @@
 +$  harvest-type
   $%  [%main ~]
       [%pool =pin]
-      [%goal =id]
+      [%goal =pin =id]
   ==
 ::
 +$  goal-view
   $%  [%pool-roots =pin]   :: id, summary, cmp, axn
-      [%goal-young =id] :: id, summary, cmp, axn
+      [%goal-young =pin =id] :: id, summary, cmp, axn
       [%harvest type=harvest-type]
       [%pool-tag-goals =pin tag=@t]
       [%pool-tag-harvest =pin tag=@t]
@@ -113,13 +111,13 @@
       [%pools-index ~]
       [%pool-title =pin]
       [%pool-note =pin]
-      [%goal-summary =id]
-      [%goal-note =id]
-      [%goal-tags =id]
-      [%local-goal-tags =id]
-      [%goal-parent =id]
-      [%goal-actionable =id]
-      [%goal-complete =id]
+      [%goal-summary =pin =id]
+      [%goal-note =pin =id]
+      [%goal-tags =pin =id]
+      [%local-goal-tags =pin =id]
+      [%goal-parent =pin =id]
+      [%goal-actionable =pin =id]
+      [%goal-complete =pin =id]
       [%setting setting=@t]
       [%pool-tags =pin]
       [%all-local-goal-tags ~]

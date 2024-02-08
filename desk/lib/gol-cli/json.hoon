@@ -47,8 +47,9 @@
   ++  pd-goal-field
     |=  jon=json
     ?>  ?=(%o -.jon)
+    :-  (pin (~(got by p.jon) 'pin'))
     :-  (id (~(got by p.jon) 'id'))
-    %.  o+(~(del by p.jon) 'id')
+    %.  o+(~(del by (~(del by p.jon) 'pin')) 'id')
     %+  (pd ,[@t @t] [@t])
       (ot ~[field+so data+so])
     (ot ~[field+so])
@@ -103,8 +104,18 @@
   ++  ud-goal-tags
     |=  jon=json
     ?>  ?=(%o -.jon)
+    :-  (pin (~(got by p.jon) 'pin'))
     :-  (id (~(got by p.jon) 'id'))
-    %.  o+(~(del by p.jon) 'id')
+    %.  o+(~(del by (~(del by p.jon) 'pin')) 'id')
+    %+  (ud (set @t) (set @t))
+      (ot ~[tags+(as so)])
+    (ot ~[tags+(as so)])
+  ::
+  ++  ud-local-goal-tags
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (key (~(got by p.jon) 'key'))
+    %.  o+(~(del by p.jon) 'key')
     %+  (ud (set @t) (set @t))
       (ot ~[tags+(as so)])
     (ot ~[tags+(as so)])
@@ -119,29 +130,29 @@
         [%set-pool-title (ot ~[pin+pin title+so])]
         [%create-goal (ot ~[pin+pin upid+unit-id summary+so actionable+bo])]
         [%create-goal-with-tag (ot ~[pin+pin upid+unit-id summary+so actionable+bo tag+so])]
-        [%archive-goal (ot ~[id+id])]
-        [%restore-goal (ot ~[id+id])]
-        [%delete-goal (ot ~[id+id])]
+        [%archive-goal (ot ~[pin+pin id+id])]
+        [%restore-goal (ot ~[pin+pin id+id])]
+        [%delete-goal (ot ~[pin+pin id+id])]
         [%yoke (ot ~[pin+pin yoks+yoke-seq])]
-        [%move (ot ~[cid+id upid+unit-id])]
-        [%set-summary (ot ~[id+id summary+so])]
-        [%set-kickoff (ot ~[id+id kickoff+unit-di])]
-        [%set-deadline (ot ~[id+id deadline+unit-di])]
-        [%mark-actionable (ot ~[id+id])]
-        [%unmark-actionable (ot ~[id+id])]
-        [%mark-complete (ot ~[id+id])]
-        [%unmark-complete (ot ~[id+id])]
+        [%move (ot ~[pin+pin cid+id upid+unit-id])]
+        [%set-summary (ot ~[pin+pin id+id summary+so])]
+        [%set-kickoff (ot ~[pin+pin id+id kickoff+unit-di])]
+        [%set-deadline (ot ~[pin+pin id+id deadline+unit-di])]
+        [%mark-actionable (ot ~[pin+pin id+id])]
+        [%unmark-actionable (ot ~[pin+pin id+id])]
+        [%mark-complete (ot ~[pin+pin id+id])]
+        [%unmark-complete (ot ~[pin+pin id+id])]
         [%pools-slot-above (ot ~[dis+pin dat+pin])]
         [%pools-slot-below (ot ~[dis+pin dat+pin])]
-        [%goals-slot-above (ot ~[dis+id dat+id])]
-        [%goals-slot-below (ot ~[dis+id dat+id])]
+        [%goals-slot-above (ot ~[dis+key dat+key])]
+        [%goals-slot-below (ot ~[dis+key dat+key])]
         [%update-pool-perms (ot ~[pin+pin new+perms])]
         [%update-pool-property pd-pool-property]
         [%update-pool-tag-property pd-pool-tag-property]
         [%update-pool-field-property pd-pool-field-property]
         [%update-goal-tags ud-goal-tags]
         [%update-goal-field pd-goal-field]
-        [%update-local-goal-tags ud-goal-tags]
+        [%update-local-goal-tags ud-local-goal-tags]
         [%update-local-tag-property pd-local-tag-property]
         [%update-setting pd-setting]
     ==
@@ -187,11 +198,16 @@
   ++  unit-di  |=(jon=json ?~(jon ~ (some (di jon))))
   ++  unit-date  |=(jon=json ?~(jon ~ (some (date jon))))
   ++  unit-id  |=(jon=json ?~(jon ~ (some (id jon))))
+  ++  key
+    %+  cu
+      |=  (pole knot)
+      ?>  ?=([host=@ta name=@ta id=@ta ~] +<)
+      [[(slav %p host) name] id]
+    pa
   ++  id
     %+  cu
       |=  (pole knot)
-      ?>  ?=([host=@ta name=@ta key=@ta ~] +<)
-      [[(slav %p host) name] key]
+      ?>(?=([id=@ta ~] +<) id)
     pa
   ++  pin
     %+  cu
@@ -251,7 +267,7 @@
   ^-  json
   %-  pairs
   :~  [%pools (enjs-pools pools.store)]
-      [%local a+(turn goal-order.local.store enjs-id)]
+      [%local a+(turn goal-order.local.store enjs-key)]
   ==
   
 ++  enjs-pools
@@ -287,7 +303,7 @@
 ::   ==
 ++  enjs-goal-order
   =,  enjs:format
-  |=  order=(list id)
+  |=  order=(list key)
   ^-  json
   s+'Hello! I am your goal order!'
 ::
@@ -512,12 +528,12 @@
   |=  =nid
   ^-  json
   %-  pairs
-  :: change %edge -> %node when confirmed no frontend effects
-  :~  [%edge s+-.nid]
+  :~  [%node s+-.nid]
       [%id (enjs-id +.nid)]
   ==
 ::
-++  pool-id  |=(=pin (rap 3 '/' (scot %p host.pin) '/' name.pin ~))
-++  enjs-id  |=(=id s+(rap 3 (pool-id pin.id) '/' key.id ~))
+++  pool-id    |=(=pin (rap 3 '/' (scot %p host.pin) '/' name.pin ~))
+++  enjs-id    |=(=id s+(cat 3 '/' id))
+++  enjs-key   |=(=key s+(rap 3 (pool-id pin.key) '/' id.key ~))
 ++  enjs-tang  |=(=tang a+(turn tang tank:enjs:format))
 --

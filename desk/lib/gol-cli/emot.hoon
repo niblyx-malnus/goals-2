@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-22:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-23:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -59,7 +59,7 @@
     :: mark the goal started if possible
     =/  new=pool:gol
       abet:(create-goal:(apex:pl old) id upid summary mod)
-    =.  goal-order.local.store  [id goal-order.local.store]
+    =.  goal-order.local.store  [[pin id] goal-order.local.store]
     this(pools.store (~(put by pools.store) pin new))
     ::
       %create-goal-with-tag
@@ -70,16 +70,15 @@
     :: mark the goal started if possible
     =/  new=pool:gol
       abet:(create-goal:(apex:pl old) id upid summary mod)
-    =.  goal-order.local.store  [id goal-order.local.store]
+    =.  goal-order.local.store  [[pin id] goal-order.local.store]
     :: add the pool tag
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.id *pool-data:gol)
+    =/  data=pool-data:gol  (~(gut by pool-info.store) pin *pool-data:gol)
     =.  tags.data           (~(put by tags.data) id (sy ~[tag]))
-    =.  pool-info.store     (~(put by pool-info.store) pin.id data)
+    =.  pool-info.store     (~(put by pool-info.store) pin data)
     this(pools.store (~(put by pools.store) pin new))
     ::
       %archive-goal
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(archive-goal:(apex:pl old) id mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -87,7 +86,6 @@
     ::
       %restore-goal
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(restore-goal:(apex:pl old) id mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -95,7 +93,6 @@
     ::
       %delete-goal
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     ?:  (~(has by goals.old) id)
       =/  new=pool:gol  abet:(delete-goal:(apex:pl old) id mod)
@@ -111,7 +108,6 @@
     ::
       %move
     =+  axn
-    =/  =pin:gol  pin.cid
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(move:(apex:pl old) cid upid mod)
     =.  pools.store        (~(put by pools.store) pin new)
@@ -126,7 +122,6 @@
     ::
       %mark-actionable
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(mark-actionable:(apex:pl old) id mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -134,7 +129,6 @@
     ::
       %mark-complete
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(mark-complete:(apex:pl old) id mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -145,11 +139,10 @@
       this
     :: owner responsible for resulting completions
     =.  src.bowl  our.bowl
-    (handle-action:this [%mark-complete u.par])
+    (handle-action:this [%mark-complete pin u.par])
     ::
       %unmark-actionable
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(unmark-actionable:(apex:pl old) id mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -157,7 +150,6 @@
     ::
       %unmark-complete
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(unmark-complete:(apex:pl old) id mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -165,7 +157,6 @@
     ::
       %set-summary
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(set-summary:(apex:pl old) id summary mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -180,7 +171,6 @@
     ::
       %set-kickoff
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(set-kickoff:(apex:pl old) id kickoff mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -188,7 +178,6 @@
     ::
       %set-deadline
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol  abet:(set-deadline:(apex:pl old) id deadline mod)
     =.  pools.store  (~(put by pools.store) pin new)
@@ -264,7 +253,6 @@
     ::
       %update-goal-perms
     =+  axn
-    =/  =pin:gol  pin.id
     =/  old=pool:gol  (~(got by pools.store) pin)
     =/  new=pool:gol
       =/  pore  (set-chief:(apex:pl old) id chief rec mod)
@@ -274,15 +262,14 @@
     ::
       %update-local-goal-tags
     =+  axn
-    =/  =pin:gol  pin.id
     ?>  =(src our):bowl
-    =/  tags=(set @t)  (~(gut by tags.local.store) id.axn ~)
+    =/  tags=(set @t)  (~(gut by tags.local.store) key.axn ~)
     =.  tags
       ?-  -.p.axn
         %&  (~(uni in tags) p.p.axn)
         %|  (~(dif in tags) p.p.axn)
       ==
-    this(tags.local.store (~(put by tags.local.store) id.axn tags))
+    this(tags.local.store (~(put by tags.local.store) key.axn tags))
     ::
       %update-local-tag-property
     ?>  =(src our):bowl
@@ -312,22 +299,6 @@
     =.  pools.store  (~(del by pools.store) pin)
     ?~  idx=(find [pin]~ pool-order.local.store)  this
     =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
-    this
-    ::
-      %slot-above
-    =+  axn
-    ?~  idx=(find [dis]~ goal-order.local.store)  !!
-    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
-    ?~  idx=(find [dat]~ goal-order.local.store)  !!
-    =.  goal-order.local.store  (into goal-order.local.store u.idx dis)
-    this
-    ::
-      %slot-below
-    =+  axn
-    ?~  idx=(find [dis]~ goal-order.local.store)  !!
-    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
-    ?~  idx=(find [dat]~ goal-order.local.store)  !!
-    =.  goal-order.local.store  (into goal-order.local.store +(u.idx) dis)
     this
     ::
       %update-pool-property
@@ -370,9 +341,9 @@
     this(pool-info.store (~(put by pool-info.store) pin.axn data))
     ::
       %update-goal-field
-    =/  old=pool:gol  (~(got by pools.store) pin.id.axn)
+    =/  old=pool:gol  (~(got by pools.store) pin.axn)
     ?>  (check-goal-edit-perm:(apex:pl old) id.axn mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.id.axn *pool-data:gol)
+    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.axn *pool-data:gol)
     =/  fields=(map @t @t)  (~(gut by fields.data) id.axn ~)
     =.  fields
       ?-  -.p.axn
@@ -380,12 +351,12 @@
         %|  (~(del by fields) p.p.axn)
       ==
     =.  fields.data         (~(put by fields.data) id.axn fields)
-    this(pool-info.store (~(put by pool-info.store) pin.id.axn data))
+    this(pool-info.store (~(put by pool-info.store) pin.axn data))
     ::
       %update-goal-tags
-    =/  old=pool:gol  (~(got by pools.store) pin.id.axn)
+    =/  old=pool:gol  (~(got by pools.store) pin.axn)
     ?>  (check-goal-edit-perm:(apex:pl old) id.axn mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.id.axn *pool-data:gol)
+    =/  data=pool-data:gol  (~(gut by pool-info.store) pin.axn *pool-data:gol)
     =/  tags=(set @t)       (~(gut by tags.data) id.axn ~)
     =.  tags
       ?-  -.p.axn
@@ -393,7 +364,7 @@
         %|  (~(dif in tags) p.p.axn)
       ==
     =.  tags.data           (~(put by tags.data) id.axn tags)
-    this(pool-info.store (~(put by pool-info.store) pin.id.axn data))
+    this(pool-info.store (~(put by pool-info.store) pin.axn data))
     ::
       %update-setting
     =,  local.store

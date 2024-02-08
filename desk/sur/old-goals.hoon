@@ -12,9 +12,9 @@
   ==
 +$  deputies  (map ship ?(%edit %create))
 +$  goal
-  $:  par=(unit id)   :: parent=(unit id)
+  $:  =id
+      par=(unit id)   :: parent=(unit id)
       kids=(set id)   :: children=(set id)
-      young=(list id) :: an order on kids and "virtual" subgoals
       kickoff=node    :: start=node
       deadline=node   :: end=node
       actionable=?
@@ -33,7 +33,6 @@
   $:  =pin
       =perms
       =goals
-      roots=(list id) :: an order on parentless goals
       =archive
       title=@t
   ==

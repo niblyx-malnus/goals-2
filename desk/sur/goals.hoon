@@ -2,7 +2,8 @@
 |%
 +$  moment    (unit @da)
 +$  pin       [host=ship name=term]
-+$  id        [=pin key=@ta] :: globally unique, always references source pool
++$  id        @ta
++$  key       [=pin =id]
 +$  nid       [?(%k %d) =id]
 +$  node
   $:  done=$~(%| ?) :: kickoff: goal started; deadline: goal completed
@@ -17,9 +18,9 @@
       kids=(set id)   :: children=(set id)
       kickoff=node    :: start=node
       deadline=node   :: end=node
-      actionable=?
-      chief=ship
-      =deputies
+      actionable=?    :: 
+      chief=ship      :: sole person responsible
+      =deputies       :: %edit can edit but not move
       summary=@t      :: (140 character summary of a goal)
   ==
 +$  goals    (map id goal)
@@ -62,10 +63,10 @@
 +$  pools  (map pin pool)
 ::
 +$  local
-  $:  goal-order=(list id)
+  $:  goal-order=(list key)
       pool-order=(list pin) :: order of pools
-      tags=(map id (set @t))
-      fields=(map id (map @t @t))
+      tags=(map key (set @t))
+      fields=(map key (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
       settings=(map @t @t)

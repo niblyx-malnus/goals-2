@@ -6,7 +6,7 @@
   |=  [=pin:gol now=@da]
   ^-  id:gol
   =/  =goals:gol  goals:(~(got by pools) pin)
-  =/  =id:gol  [pin (scot %da now)]
+  =/  =id:gol  (scot %da now)
   ?.  (~(has by goals) id)
     id
   $(now (add now ~s0..0001))
