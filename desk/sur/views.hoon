@@ -32,12 +32,12 @@
 ++  tree
   |%
   +$  parm  $:(=type)
-  +$  type  $%([%main ~] [%pool =pin] [%goal =id])
+  +$  type  $%([%main ~] [%pool =pid] [%goal =gid])
   +$  data  $:(pools=tree-pools cache=tree-pools)
   :: trying to slowly sever this from underlying DS
   ::
   +$  tree-pool   pool
-  +$  tree-pools  (map pin tree-pool)
+  +$  tree-pools  (map pid tree-pool)
   --
 ++  harvest
   |%
@@ -46,13 +46,13 @@
         method=?(%any %all)
         tags=(set @t)
     ==
-  +$  type  $%([%main ~] [%pool =pin] [%goal =id])
-  +$  data  $:(goals=(list [id pack]))
+  +$  type  $%([%main ~] [%pool =pid] [%goal =gid])
+  +$  data  $:(goals=(list [gid pack]))
   +$  pack
-    $:  =pin
+    $:  =pid
         pool-role=(unit role)
-        par=(unit id)
-        kids=(set id)
+        par=(unit gid)
+        kids=(set gid)
         kickoff=node
         deadline=node
         complete=_|
@@ -63,17 +63,17 @@
         fields=(map @t @t)
         =stock
         =ranks
-        young=(list [id virtual=?])
-        young-by-precedence=(list [id virtual=?])
-        young-by-kickoff=(list [id virtual=?])
-        young-by-deadline=(list [id virtual=?])
+        young=(list [gid virtual=?])
+        young-by-precedence=(list [gid virtual=?])
+        young-by-kickoff=(list [gid virtual=?])
+        young-by-deadline=(list [gid virtual=?])
         progress=[complete=@ total=@]
-        prio-left=(set id)
-        prio-ryte=(set id)
-        prec-left=(set id)
-        prec-ryte=(set id)
-        nest-left=(set id)
-        nest-ryte=(set id)
+        prio-left=(set gid)
+        prio-ryte=(set gid)
+        prec-left=(set gid)
+        prec-ryte=(set gid)
+        nest-left=(set gid)
+        nest-ryte=(set gid)
     ==
   --
 ++  list-view
@@ -87,15 +87,15 @@
     ==
   +$  type
     $%  [%main ~]
-        [%pool =pin]
-        [%goal =id ignore-virtual=_|]
+        [%pool =pid]
+        [%goal =gid ignore-virtual=_|]
     ==
-  +$  data  $:(goals=(list [id pack]))
+  +$  data  $:(goals=(list [gid pack]))
   +$  pack
-    $:  =pin
+    $:  =pid
         pool-role=(unit role)
-        par=(unit id)
-        kids=(set id)
+        par=(unit gid)
+        kids=(set gid)
         kickoff=node
         deadline=node
         complete=_|
@@ -106,23 +106,23 @@
         fields=(map @t @t)
         =stock
         =ranks
-        young=(list [id virtual=?])
-        young-by-precedence=(list [id virtual=?])
-        young-by-kickoff=(list [id virtual=?])
-        young-by-deadline=(list [id virtual=?])
+        young=(list [gid virtual=?])
+        young-by-precedence=(list [gid virtual=?])
+        young-by-kickoff=(list [gid virtual=?])
+        young-by-deadline=(list [gid virtual=?])
         progress=[complete=@ total=@]
-        prio-left=(set id)
-        prio-ryte=(set id)
-        prec-left=(set id)
-        prec-ryte=(set id)
-        nest-left=(set id)
-        nest-ryte=(set id)
+        prio-left=(set gid)
+        prio-ryte=(set gid)
+        prec-left=(set gid)
+        prec-ryte=(set gid)
+        nest-left=(set gid)
+        nest-ryte=(set gid)
     ==
   --
 ++  page
   |%
   +$  parm  $:(=type)
-  +$  type  $%([%main ~] [%pool =pin] [%goal =id])
+  +$  type  $%([%main ~] [%pool =pid] [%goal =gid])
   +$  data  pack
   +$  pack
     $%  [%main ~]
@@ -131,8 +131,8 @@
             note=@t
         ==
         $:  %goal
-            par-pool=pin
-            par-goal=(unit id)
+            par-pool=pid
+            par-goal=(unit gid)
             desc=@t
             note=@t
             tags=(set @t)

@@ -20,46 +20,46 @@
   =+  !<(vyu=goal-view:axn vase)
   ?-    -.vyu
       %pool-roots
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     %-  pure:m  !>
     :-  %pool-roots
     %+  turn  (~(root-goals gol-cli-node goals.pool))
-    |=  =id:gol
-    =+  (~(got by goals.pool) id)
-    :*  id
+    |=  =gid:gol
+    =+  (~(got by goals.pool) gid)
+    :*  gid
         summary
-        done.deadline
+        done.i.status.end
         actionable
         %+  weld
           %+  turn
-            ~(tap in (~(gut by tags.local.store) [pin.vyu id] ~))
+            ~(tap in (~(gut by tags.local.store) [pid.vyu gid] ~))
           (lead |)
         %+  turn
-          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
         (lead &)
     ==
     ::
       %goal-young
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
-    =/  =goal:gol       (~(got by goals.pool) id.vyu)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
+    =/  =goal:gol       (~(got by goals.pool) gid.vyu)
     %-  pure:m  !>
     :-  %goal-young
-    %+  turn  ~(tap in (~(young gol-cli-node goals.pool) id.vyu))
-    |=  =id:gol
-    =+  (~(got by goals.pool) id)
-    :*  id
-        virtual=(~(has in kids.goal) id)
+    %+  turn  ~(tap in (~(young gol-cli-node goals.pool) gid.vyu))
+    |=  =gid:gol
+    =+  (~(got by goals.pool) gid)
+    :*  gid
+        virtual=(~(has in children.goal) gid)
         summary
-        done.deadline
+        done.i.status.end
         actionable
         %+  weld
           %+  turn
-            ~(tap in (~(gut by tags.local.store) [pin.vyu id] ~))
+            ~(tap in (~(gut by tags.local.store) [pid.vyu gid] ~))
           (lead |)
         %+  turn
-          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
         (lead &)
     ==
     ::
@@ -69,136 +69,136 @@
           %main
         =/  all-goals=goals:gol  (all-goals store)
         =/  tv  ~(. gol-cli-traverse all-goals)
-        :: TODO: make all-goals flatten pin into goal ids
+        :: TODO: make all-goals flatten pid into goal ids
         !!
         :: (ordered-goals-harvest:tv goal-order.local.store)
         ::
           %pool
-        =/  =pool:gol       (~(got by pools.store) pin.type.vyu)
+        =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
         =/  tv  ~(. gol-cli-traverse goals.pool)
         !!
         :: (ordered-goals-harvest:tv goal-order.local.store)
         ::
           %goal
-        =/  =pool:gol       (~(got by pools.store) pin.type.vyu)
+        =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
         =/  tv  ~(. gol-cli-traverse goals.pool)
         !!
-        :: (ordered-harvest:tv id.type.vyu goal-order.local.store)
+        :: (ordered-harvest:tv gid.type.vyu goal-order.local.store)
       ==
     %-  pure:m  !>
     :-  %harvest
     %+  turn  harvest
-    |=  [=pin:gol =id:gol]
-    =/  =pool:gol           ~+((~(got by pools.store) pin))
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin)
-    =+  (~(got by goals.pool) id)
-    :*  id
+    |=  [=pid:gol =gid:gol]
+    =/  =pool:gol           ~+((~(got by pools.store) pid))
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid)
+    =+  (~(got by goals.pool) gid)
+    :*  gid
         summary
-        done.deadline
+        done.i.status.end
         actionable
         %+  weld
           %+  turn
-            ~(tap in (~(gut by tags.local.store) [pin id] ~))
+            ~(tap in (~(gut by tags.local.store) [pid gid] ~))
           (lead |)
         %+  turn
-          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
         (lead &)
     ==
     ::
       %pool-tag-goals
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
-    =/  tag-goals=(list id:gol)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
+    =/  tag-goals=(list gid:gol)
       %+  murn  ?~(pd ~ ~(tap by tags.u.pd))
-      |=  [=id:gol tags=(set @t)]
-      ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
+      |=  [=gid:gol tags=(set @t)]
+      ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
         ~
-      `id
+      `gid
     %-  pure:m  !>
     :-  %pool-tag-goals
     %+  turn  tag-goals
-    |=  =id:gol
-    =+  (~(got by goals.pool) id)
-    :*  id
+    |=  =gid:gol
+    =+  (~(got by goals.pool) gid)
+    :*  gid
         summary
-        done.deadline
+        done.i.status.end
         actionable
         %+  weld
           %+  turn
-            ~(tap in (~(gut by tags.local.store) [pin.vyu id] ~))
+            ~(tap in (~(gut by tags.local.store) [pid.vyu gid] ~))
           (lead |)
         %+  turn
-          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
         (lead &)
     ==
     ::
       %pool-tag-harvest
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
-    =/  tag-goals=(list id:gol)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
+    =/  tag-goals=(list gid:gol)
       %+  murn  ~(tap by ?~(pd ~ tags.u.pd))
-      |=  [=id:gol tags=(set @t)]
-      ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
+      |=  [=gid:gol tags=(set @t)]
+      ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
         ~
-      `id
-    =/  harvest=(list id:gol)
+      `gid
+    =/  harvest=(list gid:gol)
       !!
       :: =/  tv  ~(. gol-cli-traverse goals.pool)
       :: (custom-roots-ordered-goals-harvest:tv tag-goals goal-order.local.store)
     %-  pure:m  !>
     :-  %pool-tag-goals
     %+  turn  harvest
-    |=  =id:gol
-    =+  (~(got by goals.pool) id)
-    :*  id
+    |=  =gid:gol
+    =+  (~(got by goals.pool) gid)
+    :*  gid
         summary
-        done.deadline
+        done.i.status.end
         actionable
         %+  weld
           %+  turn
-            ~(tap in (~(gut by tags.local.store) [pin.vyu id] ~))
+            ~(tap in (~(gut by tags.local.store) [pid.vyu gid] ~))
           (lead |)
         %+  turn
-          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
         (lead &)
     ==
     ::
       %local-tag-goals
     =/  tag-goals=(list key:gol)
       %+  murn  ~(tap by tags.local.store)
-      |=  [[=pin:gol =id:gol] tags=(set @t)]
-      =/  =pool:gol       (~(got by pools.store) pin)
-      ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
+      |=  [[=pid:gol =gid:gol] tags=(set @t)]
+      =/  =pool:gol       (~(got by pools.store) pid)
+      ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
         ~
-      `[pin id]
+      `[pid gid]
     %-  pure:m  !>
     :-  %local-tag-goals
     %+  turn  tag-goals
-    |=  [=pin:gol =id:gol]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin)
-    =+  (~(got by goals.pool) id)
-    :*  id
+    |=  [=pid:gol =gid:gol]
+    =/  =pool:gol       (~(got by pools.store) pid)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid)
+    =+  (~(got by goals.pool) gid)
+    :*  gid
         summary
-        done.deadline
+        done.i.status.end
         actionable
         %+  weld
           %+  turn
-            ~(tap in (~(gut by tags.local.store) [pin id] ~))
+            ~(tap in (~(gut by tags.local.store) [pid gid] ~))
           (lead |)
         %+  turn
-          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
         (lead &)
     ==
     ::
       %local-tag-harvest
     =/  tag-goals=(list key:gol)
       %+  murn  ~(tap by tags.local.store)
-      |=  [[=pin:gol =id:gol] tags=(set @t)]
-      =/  =pool:gol       (~(got by pools.store) pin)
-      ?.  &((~(has by goals.pool) id) (~(has in tags) tag.vyu))
+      |=  [[=pid:gol =gid:gol] tags=(set @t)]
+      =/  =pool:gol       (~(got by pools.store) pid)
+      ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
         ~
-      `[pin id]
+      `[pid gid]
     =/  harvest=(list key:gol)
       !!
       :: =/  tv  ~(. gol-cli-traverse (all-goals store))
@@ -206,20 +206,20 @@
     %-  pure:m  !>
     :-  %local-tag-goals
     %+  turn  harvest
-    |=  [=pin:gol =id:gol]
-    =/  =pool:gol       (~(got by pools.store) pin)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin)
-    =+  (~(got by goals.pool) id)
-    :*  id
+    |=  [=pid:gol =gid:gol]
+    =/  =pool:gol       (~(got by pools.store) pid)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid)
+    =+  (~(got by goals.pool) gid)
+    :*  gid
         summary
-        done.deadline
+        done.i.status.end
         actionable
         %+  weld
           %+  turn
-            ~(tap in (~(gut by tags.local.store) [pin id] ~))
+            ~(tap in (~(gut by tags.local.store) [pid gid] ~))
           (lead |)
         %+  turn
-          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id ~)))
+          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
         (lead &)
     ==
     ::
@@ -227,20 +227,20 @@
     %-  pure:m  !>
     :-  %pools-index
     %+  turn  pool-order.local.store
-    |=(=pin:gol [pin title:(~(got by pools.store) pin)])
+    |=(=pid:gol [pid title:(~(got by pools.store) pid)])
     ::
       %pool-title
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
     (pure:m !>([%cord title.pool]))
     ::
       %pool-note
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     (pure:m !>([%cord (~(gut by ?~(pd ~ properties.u.pd)) 'note' '')]))
     ::
       %pool-tag-note
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     =/  properties      (~(gut by ?~(pd ~ tag-properties.u.pd)) tag.vyu ~)
     (pure:m !>([%cord (~(gut by properties) 'note' '')]))
     ::
@@ -249,57 +249,57 @@
     (pure:m !>([%cord (~(gut by properties) 'note' '')]))
     ::
       %goal-summary
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  =goal:gol       (~(got by goals.pool) id.vyu)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  =goal:gol       (~(got by goals.pool) gid.vyu)
     (pure:m !>([%cord summary.goal]))
     ::
       %goal-note
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
-    =/  fields=(map @t @t)  (~(gut by ?~(pd ~ fields.u.pd)) id.vyu ~)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
+    =/  fields=(map @t @t)  (~(gut by ?~(pd ~ fields.u.pd)) gid.vyu ~)
     (pure:m !>([%cord (~(gut by fields) 'note' '')]))
     ::
       %setting
     (pure:m !>([%ucord (~(get by settings.local.store) setting.vyu)]))
     ::
       %goal-tags
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     =/  tags=(list (pair ? @t))
       %+  weld
         %+  turn
-          ~(tap in (~(gut by tags.local.store) [pin.vyu id.vyu] ~))
+          ~(tap in (~(gut by tags.local.store) [pid.vyu gid.vyu] ~))
         (lead |)
       %+  turn
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) id.vyu ~)))
+        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid.vyu ~)))
       (lead &)
     (pure:m !>([%tags tags]))
     ::
       %local-goal-tags
     =/  tags=(list (pair ? @t))
       %+  turn
-        ~(tap in (~(gut by tags.local.store) [pin.vyu id.vyu] ~))
+        ~(tap in (~(gut by tags.local.store) [pid.vyu gid.vyu] ~))
       (lead |)
     (pure:m !>([%tags tags]))
     ::
       %goal-parent
-    =/  =pool:gol  (~(got by pools.store) pin.vyu)
-    =/  =goal:gol  (~(got by goals.pool) id.vyu)
-    (pure:m !>([%uid par.goal]))
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
+    (pure:m !>([%uid parent.goal]))
     ::
       %goal-actionable
-    =/  =pool:gol  (~(got by pools.store) pin.vyu)
-    =/  =goal:gol  (~(got by goals.pool) id.vyu)
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
     (pure:m !>([%loob actionable.goal]))
     ::
       %goal-complete
-    =/  =pool:gol  (~(got by pools.store) pin.vyu)
-    =/  =goal:gol  (~(got by goals.pool) id.vyu)
-    (pure:m !>([%loob actionable.goal]))
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
+    (pure:m !>([%loob done.i.status.end.goal]))
     ::
       %pool-tags
-    =/  =pool:gol       (~(got by pools.store) pin.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pin.vyu)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     =/  vals  ~(val by ?~(pd ~ tags.u.pd))
     =|  tags=(set @t)
     |-

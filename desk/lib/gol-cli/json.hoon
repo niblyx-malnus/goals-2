@@ -47,9 +47,9 @@
   ++  pd-goal-field
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (pin (~(got by p.jon) 'pin'))
-    :-  (id (~(got by p.jon) 'id'))
-    %.  o+(~(del by (~(del by p.jon) 'pin')) 'id')
+    :-  (pid (~(got by p.jon) 'pid'))
+    :-  (gid (~(got by p.jon) 'gid'))
+    %.  o+(~(del by (~(del by p.jon) 'pid')) 'gid')
     %+  (pd ,[@t @t] [@t])
       (ot ~[field+so data+so])
     (ot ~[field+so])
@@ -57,8 +57,8 @@
   ++  pd-pool-property
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (pin (~(got by p.jon) 'pin'))
-    %.  o+(~(del by p.jon) 'pin')
+    :-  (pid (~(got by p.jon) 'pid'))
+    %.  o+(~(del by p.jon) 'pid')
     %+  (pd ,[@t @t] [@t])
       (ot ~[property+so data+so])
     (ot ~[property+so])
@@ -66,9 +66,9 @@
   ++  pd-pool-tag-property
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (pin (~(got by p.jon) 'pin'))
+    :-  (pid (~(got by p.jon) 'pid'))
     :-  (so (~(got by p.jon) 'tag'))
-    %.  o+(~(del by (~(del by p.jon) 'pin')) 'tag')
+    %.  o+(~(del by (~(del by p.jon) 'pid')) 'tag')
     %+  (pd ,[@t @t] [@t])
       (ot ~[property+so data+so])
     (ot ~[property+so])
@@ -76,9 +76,9 @@
   ++  pd-pool-field-property
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (pin (~(got by p.jon) 'pin'))
+    :-  (pid (~(got by p.jon) 'pid'))
     :-  (so (~(got by p.jon) 'field'))
-    %.  o+(~(del by (~(del by p.jon) 'pin')) 'field')
+    %.  o+(~(del by (~(del by p.jon) 'pid')) 'field')
     %+  (pd ,[@t @t] [@t])
       (ot ~[property+so data+so])
     (ot ~[property+so])
@@ -104,9 +104,9 @@
   ++  ud-goal-tags
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (pin (~(got by p.jon) 'pin'))
-    :-  (id (~(got by p.jon) 'id'))
-    %.  o+(~(del by (~(del by p.jon) 'pin')) 'id')
+    :-  (pid (~(got by p.jon) 'pid'))
+    :-  (gid (~(got by p.jon) 'gid'))
+    %.  o+(~(del by (~(del by p.jon) 'pid')) 'gid')
     %+  (ud (set @t) (set @t))
       (ot ~[tags+(as so)])
     (ot ~[tags+(as so)])
@@ -126,27 +126,27 @@
     %.  jon
     %-  of
     :~  [%create-pool (ot ~[title+so])]
-        [%delete-pool (ot ~[pin+pin])]
-        [%set-pool-title (ot ~[pin+pin title+so])]
-        [%create-goal (ot ~[pin+pin upid+unit-id summary+so actionable+bo])]
-        [%create-goal-with-tag (ot ~[pin+pin upid+unit-id summary+so actionable+bo tag+so])]
-        [%archive-goal (ot ~[pin+pin id+id])]
-        [%restore-goal (ot ~[pin+pin id+id])]
-        [%delete-goal (ot ~[pin+pin id+id])]
-        [%yoke (ot ~[pin+pin yoks+yoke-seq])]
-        [%move (ot ~[pin+pin cid+id upid+unit-id])]
-        [%set-summary (ot ~[pin+pin id+id summary+so])]
-        [%set-kickoff (ot ~[pin+pin id+id kickoff+unit-di])]
-        [%set-deadline (ot ~[pin+pin id+id deadline+unit-di])]
-        [%mark-actionable (ot ~[pin+pin id+id])]
-        [%unmark-actionable (ot ~[pin+pin id+id])]
-        [%mark-complete (ot ~[pin+pin id+id])]
-        [%unmark-complete (ot ~[pin+pin id+id])]
-        [%pools-slot-above (ot ~[dis+pin dat+pin])]
-        [%pools-slot-below (ot ~[dis+pin dat+pin])]
+        [%delete-pool (ot ~[pid+pid])]
+        [%set-pool-title (ot ~[pid+pid title+so])]
+        [%create-goal (ot ~[pid+pid upid+unit-id summary+so actionable+bo])]
+        [%create-goal-with-tag (ot ~[pid+pid upid+unit-id summary+so actionable+bo tag+so])]
+        [%archive-goal (ot ~[pid+pid gid+gid])]
+        [%restore-goal (ot ~[pid+pid gid+gid])]
+        [%delete-goal (ot ~[pid+pid gid+gid])]
+        [%yoke (ot ~[pid+pid yoks+yoke-seq])]
+        [%move (ot ~[pid+pid cid+gid upid+unit-id])]
+        [%set-summary (ot ~[pid+pid gid+gid summary+so])]
+        [%set-start (ot ~[pid+pid gid+gid start+unit-di])]
+        [%set-end (ot ~[pid+pid gid+gid end+unit-di])]
+        [%mark-actionable (ot ~[pid+pid gid+gid])]
+        [%unmark-actionable (ot ~[pid+pid gid+gid])]
+        [%mark-complete (ot ~[pid+pid gid+gid])]
+        [%unmark-complete (ot ~[pid+pid gid+gid])]
+        [%pools-slot-above (ot ~[dis+pid dat+pid])]
+        [%pools-slot-below (ot ~[dis+pid dat+pid])]
         [%goals-slot-above (ot ~[dis+key dat+key])]
         [%goals-slot-below (ot ~[dis+key dat+key])]
-        [%update-pool-perms (ot ~[pin+pin new+perms])]
+        [%update-pool-perms (ot ~[pid+pid new+perms])]
         [%update-pool-property pd-pool-property]
         [%update-pool-tag-property pd-pool-tag-property]
         [%update-pool-field-property pd-pool-field-property]
@@ -197,19 +197,19 @@
     ==
   ++  unit-di  |=(jon=json ?~(jon ~ (some (di jon))))
   ++  unit-date  |=(jon=json ?~(jon ~ (some (date jon))))
-  ++  unit-id  |=(jon=json ?~(jon ~ (some (id jon))))
+  ++  unit-id  |=(jon=json ?~(jon ~ (some (gid jon))))
   ++  key
     %+  cu
       |=  (pole knot)
-      ?>  ?=([host=@ta name=@ta id=@ta ~] +<)
-      [[(slav %p host) name] id]
+      ?>  ?=([host=@ta name=@ta gid=@ta ~] +<)
+      [[(slav %p host) name] gid]
     pa
-  ++  id
+  ++  gid
     %+  cu
       |=  (pole knot)
-      ?>(?=([id=@ta ~] +<) id)
+      ?>(?=([gid=@ta ~] +<) gid)
     pa
-  ++  pin
+  ++  pid
     %+  cu
       |=  (pole knot)
       ?>  ?=([host=@ta name=@ta ~] +<)
@@ -224,7 +224,7 @@
     |=  jon=json
     =/  out
       %.  jon
-      (ot ~[yoke+yoke-tag lid+id rid+id])
+      (ot ~[yoke+yoke-tag lid+gid rid+gid])
     ^-  exposed-yoke:act
     ?-  -.out
       %prio-rend   [%prio-rend +<.out +>.out]
@@ -274,9 +274,9 @@
   =,  enjs:format
   |=  =pools
   :-  %a  %+  turn  ~(tap by pools) 
-  |=  [=pin =pool] 
+  |=  [=pid =pool] 
   %-  pairs
-  :~  [%pin s+(pool-id pin)]
+  :~  [%pid s+(pool-id pid)]
       [%pool (enjs-pool pool)]
   ==
 ::
@@ -309,7 +309,7 @@
 ::
 ++  enjs-pool-order
   =,  enjs:format
-  |=  order=(list pin)
+  |=  order=(list pid)
   ^-  json
   s+'Hello! I am your pool order!'
 ::
@@ -378,9 +378,9 @@
   =,  enjs:format
   |=  =goals
   :-  %a  %+  turn  ~(tap by goals) 
-  |=  [=id =goal] 
+  |=  [=gid =goal] 
   %-  pairs
-  :~  [%id (enjs-id id)]
+  :~  [%gid (enjs-id gid)]
       [%goal (enjs-goal goal)]
   ==
 ::
@@ -393,12 +393,12 @@
 ::   %-  pairs
 ::   :~  [%roots a+(turn roots.trace enjs-id)]
 ::       [%roots-by-precedence a+(turn roots-by-precedence.trace enjs-id)]
-::       [%roots-by-kickoff a+(turn roots-by-kickoff.trace enjs-id)]
-::       [%roots-by-deadline a+(turn roots-by-deadline.trace enjs-id)]
+::       [%roots-by-start a+(turn roots-by-start.trace enjs-id)]
+::       [%roots-by-end a+(turn roots-by-end.trace enjs-id)]
 ::       [%cache-roots a+(turn cache-roots.trace enjs-id)]
 ::       [%cache-roots-by-precedence a+(turn cache-roots-by-precedence.trace enjs-id)]
-::       [%cache-roots-by-kickoff a+(turn cache-roots-by-kickoff.trace enjs-id)]
-::       [%cache-roots-by-deadline a+(turn cache-roots-by-deadline.trace enjs-id)]
+::       [%cache-roots-by-start a+(turn cache-roots-by-start.trace enjs-id)]
+::       [%cache-roots-by-end a+(turn cache-roots-by-end.trace enjs-id)]
 ::   ==
 ::
 :: ++  enjs-nex
@@ -406,18 +406,18 @@
 ::   |=  =nex
 ::   ^-  json
 ::   :-  %a  %+  turn  ~(tap by nex) 
-::   |=  [=id nexus=goal-nexus trace=goal-trace] 
+::   |=  [=gid nexus=goal-nexus trace=goal-trace] 
 ::   %-  pairs
-::   :~  [%id (enjs-id id)]
+::   :~  [%gid (enjs-id gid)]
 ::       [%goal (enjs-goal-nexus-trace nexus trace)]
 ::   ==
 ::
 ++  enjs-id-v
   =,  enjs:format
-  |=  [=id v=?]
+  |=  [=gid v=?]
   ^-  json
   %-  pairs
-  :~  [%id (enjs-id id)]
+  :~  [%gid (enjs-id gid)]
       [%virtual b+v]
   ==
 ::
@@ -428,8 +428,8 @@
 ::   %-  pairs
 ::   :~  [%par ?~(par.nexus ~ (enjs-id u.par.nexus))]
 ::       [%kids a+(turn ~(tap in kids.nexus) enjs-id)]
-::       [%kickoff (enjs-node kickoff.nexus)]
-::       [%deadline (enjs-node deadline.nexus)]
+::       [%start (enjs-node start.nexus)]
+::       [%end (enjs-node end.nexus)]
 ::       [%complete b+complete.nexus]
 ::       [%actionable b+actionable.nexus]
 ::       [%chief (ship chief.nexus)]
@@ -440,8 +440,8 @@
 ::       [%ranks (enjs-ranks ranks.nexus)]
 ::       [%young a+(turn young.nexus enjs-id-v)]
 ::       [%young-by-precedence a+(turn young-by-precedence.nexus enjs-id-v)]
-::       [%young-by-kickoff a+(turn young-by-kickoff.nexus enjs-id-v)]
-::       [%young-by-deadline a+(turn young-by-deadline.nexus enjs-id-v)]
+::       [%young-by-start a+(turn young-by-start.nexus enjs-id-v)]
+::       [%young-by-end a+(turn young-by-end.nexus enjs-id-v)]
 ::       [%progress (enjs-progress progress.nexus)]
 ::       [%prio-left a+(turn ~(tap in prio-left.nexus) enjs-id)]
 ::       [%prio-ryte a+(turn ~(tap in prio-ryte.nexus) enjs-id)]
@@ -456,9 +456,9 @@
   |=  =stock
   ^-  json
   :-  %a  %+  turn  stock
-  |=  [=id chief=@p]
+  |=  [=gid chief=@p]
   %-  pairs
-  :~  [%id (enjs-id id)]
+  :~  [%gid (enjs-id gid)]
       [%chief (ship chief)]
   ==
 ::
@@ -468,10 +468,10 @@
   ^-  json
   :-  %a
   %+  turn  ~(tap by ranks)
-  |=  [chip=@p =id]
+  |=  [chip=@p =gid]
   %-  pairs
   :~  [%ship (ship chip)]
-      [%id (enjs-id id)]
+      [%gid (enjs-id gid)]
   ==
 ::
 ++  enjs-progress
@@ -529,11 +529,11 @@
   ^-  json
   %-  pairs
   :~  [%node s+-.nid]
-      [%id (enjs-id +.nid)]
+      [%gid (enjs-id +.nid)]
   ==
 ::
-++  pool-id    |=(=pin (rap 3 '/' (scot %p host.pin) '/' name.pin ~))
-++  enjs-id    |=(=id s+(cat 3 '/' id))
-++  enjs-key   |=(=key s+(rap 3 (pool-id pin.key) '/' id.key ~))
+++  pool-id    |=(=pid (rap 3 '/' (scot %p host.pid) '/' name.pid ~))
+++  enjs-id    |=(=gid s+(cat 3 '/' gid))
+++  enjs-key   |=(=key s+(rap 3 (pool-id pid.key) '/' gid.key ~))
 ++  enjs-tang  |=(=tang a+(turn tang tank:enjs:format))
 --

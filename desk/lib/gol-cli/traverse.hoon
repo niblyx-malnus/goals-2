@@ -28,8 +28,8 @@
   gine(exit |~([=nod vis=(map nod med)] (~(got by vis) nod)))
 ::
 :: print nodes for debugging cycles
-:: ++  print-id  |=(=id:gol (trip (~(got by fields:(~(got by goals) id)) 'description')))
-:: ++  print-nid  |=(=nid:gol `tape`(weld (trip `@t`-.nid) (print-id id.nid)))
+:: ++  print-id  |=(=gid:gol (trip (~(got by fields:(~(got by goals) gid)) 'description')))
+:: ++  print-nid  |=(=nid:gol `tape`(weld (trip `@t`-.nid) (print-id gid.nid)))
 ::
 :: traverse the underlying DAG (directed acyclic graph)
 ++  traverse
@@ -41,7 +41,7 @@
   :: initialize path to catch cycles
   =|  pat=(list nod)
   ::
-  :: accept single node id
+  :: accept single node gid
   |=  =nod
   ::
   :: final transformation
@@ -224,18 +224,18 @@
     ==
   (((traverse nid:gol ? (set nid:gol)) gine ~) src)
 ::
-++  plyt  |=(=id:gol done:(got-node:nd d+id))
-++  nolp  |=(=id:gol !done:(got-node:nd d+id))
+++  plyt  |=(=gid:gol done.i.status:(got-node:nd e+gid))
+++  nolp  |=(=gid:gol !done.i.status:(got-node:nd e+gid))
 ::
-++  done  |=(=nid:gol done:(got-node:nd nid))
-++  nond  |=(=nid:gol !done:(got-node:nd nid))
+++  done  |=(=nid:gol done.i.status:(got-node:nd nid))
+++  nond  |=(=nid:gol !done.i.status:(got-node:nd nid))
 ::
 :: for use with %[un]mark-complete
 :: check if there are any uncompleted goals to the left OR
 :: check if there are any completed goals to the right
 ++  get-plete
   |=  dir=?(%l %r)
-  |=  =id:gol
+  |=  =gid:gol
   ^-  ?
   =/  flo  ?-(dir %l iflo, %r oflo)
   =/  pyt  ?-(dir %l nolp, %r plyt)
@@ -244,12 +244,12 @@
     %=  ginn
       flow  |=(=nid:gol ~(tap in (flo nid)))
       ::
-      :: check deadline completion in the flo
-      init  |=(=nid:gol &(=(-.nid %d) !=(id id.nid) (pyt id.nid)))
+      :: check end completion in the flo
+      init  |=(=nid:gol &(=(-.nid %e) !=(gid gid.nid) (pyt gid.nid)))
       stop  |=([nid:gol out=?] out)  :: stop on true
       meld  |=([nid:gol nid:gol a=? b=?] |(a b))
     ==
-  (((traverse nid:gol ? ?) ginn ~) [%d id]) :: start at deadline
+  (((traverse nid:gol ? ?) ginn ~) [%e gid]) :: start at end
 ::
 ++  ryte-completed    (get-plete %r)
 ++  left-uncompleted  (get-plete %l)
@@ -298,9 +298,9 @@
       land
         |=  [=nid:gol out=(unit ?) ?]
         ?~  out  ~
-        ?:  =(%k -.nid)
+        ?:  =(%s -.nid)
           out
-        ?:  (pyt id.nid) :: %l: if I am incomplete
+        ?:  (pyt gid.nid) :: %l: if I am incomplete
           (some %.y)     :: %l: return that there is left-incomplete
         ?:  u.out  ~     :: %l: if I am complete and there is left-incomplete
         (some %.n)       :: %l: else return that there is no left-incomplete
@@ -335,146 +335,146 @@
       exit  |=([=nid:gol vis=(map nid:gol (unit ?))] vis)
     ==
   (((traverse nid:gol (unit ?) (map nid:gol (unit ?))) gine vis) nid)
-:: get set of all ids whose kickoff/deadline precedes a given node
+:: get set of all ids whose start/end precedes a given node
 ::
 ++  precedents
-  |=  kd=?(%k %d)
-  |=  [=nid:gol vis=(map nid:gol (set id:gol))]
-  ^-  (map nid:gol (set id:gol))
-  =/  gine  (gine nid:gol (set id:gol) (map nid:gol (set id:gol)))
+  |=  kd=?(%s %e)
+  |=  [=nid:gol vis=(map nid:gol (set gid:gol))]
+  ^-  (map nid:gol (set gid:gol))
+  =/  gine  (gine nid:gol (set gid:gol) (map nid:gol (set gid:gol)))
   =.  gine
     %=  gine
       init
         |=  =nid:gol
-        %-  ~(gas in *(set id:gol))
+        %-  ~(gas in *(set gid:gol))
         %+  murn  ~(tap in (iflo nid))
         |=  =nid:gol
         ?.  =(kd -.nid)
           ~
-        (some id.nid)
+        (some gid.nid)
       flow  |=(=nid:gol ~(tap in (iflo nid)))
-      meld  |=([nid:gol nid:gol a=(set id:gol) b=(set id:gol)] (~(uni in a) b))
-      land  |=([=nid:gol out=(set id:gol) ?] out)
-      exit  |=([=nid:gol vis=(map nid:gol (set id:gol))] vis)
+      meld  |=([nid:gol nid:gol a=(set gid:gol) b=(set gid:gol)] (~(uni in a) b))
+      land  |=([=nid:gol out=(set gid:gol) ?] out)
+      exit  |=([=nid:gol vis=(map nid:gol (set gid:gol))] vis)
     ==
-  (((traverse nid:gol (set id:gol) (map nid:gol (set id:gol))) gine vis) nid)
-:: Get ids whose bef comes before an id aft
-:: (ie all ids whose deadlines precede an ids kickoff)
+  (((traverse nid:gol (set gid:gol) (map nid:gol (set gid:gol))) gine vis) nid)
+:: Get ids whose bef comes before an gid aft
+:: (ie all ids whose ends precede an ids start)
 ::
 ++  precedents-map
-  |=  [bef=?(%k %d) aft=?(%k %d)]
-  ^-  (map id:gol (set id:gol))
-  %-  ~(gas by *(map id:gol (set id:gol)))
+  |=  [bef=?(%s %e) aft=?(%s %e)]
+  ^-  (map gid:gol (set gid:gol))
+  %-  ~(gas by *(map gid:gol (set gid:gol)))
   %+  murn
     %~  tap  by
-    ((chain nid:gol (set id:gol)) (precedents bef) (root-nodes:nd) ~)
-  |=  [=nid:gol precs=(set id:gol)]
+    ((chain nid:gol (set gid:gol)) (precedents bef) (root-nodes:nd) ~)
+  |=  [=nid:gol precs=(set gid:gol)]
   ?.  =(aft -.nid)  ~
-  (some [id.nid precs])
+  (some [gid.nid precs])
 :: force a list of ids to be topologically sorted
 ::
 ++  topological-sort
-  |=  $:  typ=?(%p %k %d)
-          precs=(map id:gol (set id:gol))
-          ids=(list id:gol)
+  |=  $:  typ=?(%p %s %e)
+          precs=(map gid:gol (set gid:gol))
+          ids=(list gid:gol)
       ==
-  ^-  (list id:gol)
+  ^-  (list gid:gol)
   |^
   =.  precs  purge :: only keep ids in list
-  |-  ^-  (list id:gol)
+  |-  ^-  (list gid:gol)
   ?:  =(~ precs)  ~
   :-  first
   $(precs (evict first))
   ++  ranks
-    ^-  (map id:gol @)
+    ^-  (map gid:gol @)
     =|  idx=@
-    %-  ~(gas by *(map id:gol @))
-    |-  ^-  (list [id:gol @])
+    %-  ~(gas by *(map gid:gol @))
+    |-  ^-  (list [gid:gol @])
     ?~  ids  ~
     :-  [i.ids idx]
     $(idx +(idx), ids t.ids)
   ++  evict
-    |=  =id:gol
-    ^-  (map id:gol (set id:gol))
-    %-  ~(gas by *(map id:gol (set id:gol)))
+    |=  =gid:gol
+    ^-  (map gid:gol (set gid:gol))
+    %-  ~(gas by *(map gid:gol (set gid:gol)))
     %+  murn  ~(tap by precs)
-    |=  [=id:gol =(set id:gol)]
-    ?:  =(id ^id)  ~
-    (some [id (~(del in set) ^id)])
+    |=  [=gid:gol =(set gid:gol)]
+    ?:  =(gid ^gid)  ~
+    (some [gid (~(del in set) ^gid)])
   ++  purge
-    =/  del=(list id:gol)
+    =/  del=(list gid:gol)
       ~(tap in (~(dif in ~(key by goals)) (sy ids)))
     |-  ?~  del  precs
     $(del t.del, precs (evict i.del))
   ++  outer
-    ^-  (list id:gol)
+    ^-  (list gid:gol)
     %+  murn  ~(tap by precs)
-    |=  [=id:gol =(set id:gol)]
-    ?.(=(~ set) ~ (some id))
+    |=  [=gid:gol =(set gid:gol)]
+    ?.(=(~ set) ~ (some gid))
   ++  ranks-lth
-    |=  [=id:gol ac=id:gol]
-    ^-  id:gol
-    =/  i=@  (~(got by ranks) id)
+    |=  [=gid:gol ac=gid:gol]
+    ^-  gid:gol
+    =/  i=@  (~(got by ranks) gid)
     =/  a=@  (~(got by ranks) ac)
-    ?:((lth i a) id ac)
+    ?:((lth i a) gid ac)
   ++  k-lth
-    |=  [=id:gol ac=id:gol]
-    ^-  id:gol
-    =/  im  moment.kickoff:(~(got by goals) id)
-    =/  am  moment.kickoff:(~(got by goals) ac)
-    ?:  =(im am)  (ranks-lth id ac)
-    ?~(im id ?~(am ac ?:((lth u.im u.am) id ac)))
+    |=  [=gid:gol ac=gid:gol]
+    ^-  gid:gol
+    =/  im  moment.start:(~(got by goals) gid)
+    =/  am  moment.start:(~(got by goals) ac)
+    ?:  =(im am)  (ranks-lth gid ac)
+    ?~(im gid ?~(am ac ?:((lth u.im u.am) gid ac)))
   ++  d-lth
-    |=  [=id:gol ac=id:gol]
-    ^-  id:gol
-    =/  im  moment.deadline:(~(got by goals) id)
-    =/  am  moment.deadline:(~(got by goals) ac)
-    ?:  =(im am)  (ranks-lth id ac)
-    ?~(am id ?~(im ac ?:((lth u.im u.am) id ac)))
+    |=  [=gid:gol ac=gid:gol]
+    ^-  gid:gol
+    =/  im  moment.end:(~(got by goals) gid)
+    =/  am  moment.end:(~(got by goals) ac)
+    ?:  =(im am)  (ranks-lth gid ac)
+    ?~(am gid ?~(im ac ?:((lth u.im u.am) gid ac)))
   ++  first
-    ^-  id:gol
-    =/  outer=(list id:gol)  outer
+    ^-  gid:gol
+    =/  outer=(list gid:gol)  outer
     ?>  ?=(^ outer)
     %+  roll  t.outer
-    |:  [id=`id:gol`i.outer ac=`id:gol`i.outer]
+    |:  [gid=`gid:gol`i.outer ac=`gid:gol`i.outer]
     ?-  typ
-      %p  (ranks-lth id ac)
-      %k  (k-lth id ac)
-      %d  (d-lth id ac)
+      %p  (ranks-lth gid ac)
+      %s  (k-lth gid ac)
+      %e  (d-lth gid ac)
     ==
   --
 ::
 ++  fix-list
-  |=  [old=(list id:gol) new=(set id:gol)]
-  ^-  (list id:gol)
+  |=  [old=(list gid:gol) new=(set gid:gol)]
+  ^-  (list gid:gol)
   %+  weld
     :: add fresh ids to front
     ~(tap in (~(dif in new) (sy old)))
   :: remove stale ids
-  |-  ^-  (list id:gol)
+  |-  ^-  (list gid:gol)
   ?~  old  ~
   ?.  (~(has in new) i.old)
     $(old t.old)
   [i.old $(old t.old)]
 ::
 ++  fix-list-and-sort
-  |=  $:  typ=?(%p %k %d)
-          precs=(map id:gol (set id:gol))
-          old=(list id:gol)
-          new=(set id:gol)
+  |=  $:  typ=?(%p %s %e)
+          precs=(map gid:gol (set gid:gol))
+          old=(list gid:gol)
+          new=(set gid:gol)
       ==
-  ^-  (list id:gol)
+  ^-  (list gid:gol)
   ::  add fresh ids to front and sort
   %^    topological-sort
       typ
     precs
   (fix-list old new)
 ::
-:: get uncompleted leaf goals whose deadlines are left of nid
+:: get uncompleted leaf goals whose ends are left of nid
 ++  harvests
-  |=  [=nid:gol vis=(map nid:gol (set id:gol))]
-  ^-  (map nid:gol (set id:gol))
-  =/  gine  (gine nid:gol (set id:gol) (map nid:gol (set id:gol)))
+  |=  [=nid:gol vis=(map nid:gol (set gid:gol))]
+  ^-  (map nid:gol (set gid:gol))
+  =/  gine  (gine nid:gol (set gid:gol) (map nid:gol (set gid:gol)))
   =.  gine
     %=  gine
       ::
@@ -484,42 +484,42 @@
         %+  murn
           ~(tap in (iflo nid))
         |=  =nid:gol
-        ?:  done:(got-node:nd d+id.nid)
+        ?:  (plyt gid.nid)
           ~
         (some nid)
       ::
-      meld  |=([nid:gol nid:gol a=(set id:gol) b=(set id:gol)] (~(uni in a) b))
+      meld  |=([nid:gol nid:gol a=(set gid:gol) b=(set gid:gol)] (~(uni in a) b))
       ::
       :: harvest
       land
-        |=  [=nid:gol out=(set id:gol) ?]
+        |=  [=nid:gol out=(set gid:gol) ?]
         ::
         :: a completed goal has no harvest
-        ?:  done:(got-node:nd d+id.nid)
+        ?:  (plyt gid.nid)
           ~
         ::
         :: in general, the harvest of a node is the union of the
         ::   harvests of its immediate inflow
-        :: a deadline with an otherwise empty harvest
+        :: a end with an otherwise empty harvest
         ::   returns itself as its own harvest if it is actionable
-        ?.  &(=(~ out) =(%d -.nid) actionable:(~(got by goals) id.nid))
+        ?.  &(=(~ out) =(%e -.nid) actionable:(~(got by goals) gid.nid))
           out
-        (~(put in *(set id:gol)) id.nid)
-      exit  |=([=nid:gol vis=(map nid:gol (set id:gol))] vis)
+        (~(put in *(set gid:gol)) gid.nid)
+      exit  |=([=nid:gol vis=(map nid:gol (set gid:gol))] vis)
     ==
   ::
-  :: work backwards from deadline
-  (((traverse nid:gol (set id:gol) (map nid:gol (set id:gol))) gine vis) nid)
+  :: work backwards from end
+  (((traverse nid:gol (set gid:gol) (map nid:gol (set gid:gol))) gine vis) nid)
 ::
 ++  harvest
-  |=(=id:gol `(set id:gol)`(~(got by (harvests [%d id] ~)) [%d id]))
+  |=(=gid:gol `(set gid:gol)`(~(got by (harvests [%e gid] ~)) [%e gid]))
 ::
 ++  goals-harvest
   |=  root-nodes=(list nid:gol)
-  ^-  (set id:gol)
-  =/  vis=(map nid:gol (set id:gol))
-    ((chain nid:gol (set id:gol)) harvests root-nodes ~)
-  =|  harvest=(set id:gol)
+  ^-  (set gid:gol)
+  =/  vis=(map nid:gol (set gid:gol))
+    ((chain nid:gol (set gid:gol)) harvests root-nodes ~)
+  =|  harvest=(set gid:gol)
   |-  ?~  root-nodes  harvest
   %=  $
     root-nodes  t.root-nodes
@@ -527,33 +527,33 @@
   ==
 ::
 ++  ordered-harvest
-  |=  [=id:gol order=(list id:gol)]
-  ^-  (list id:gol)
-  (fix-list-and-sort %p (precedents-map %d %k) order (harvest id))
+  |=  [=gid:gol order=(list gid:gol)]
+  ^-  (list gid:gol)
+  (fix-list-and-sort %p (precedents-map %e %s) order (harvest gid))
 ::
 ++  ordered-goals-harvest
-  |=  order=(list id:gol)
-  ^-  (list id:gol)
+  |=  order=(list gid:gol)
+  ^-  (list gid:gol)
   %:  fix-list-and-sort
-      %p     (precedents-map %d %k)
+      %p     (precedents-map %e %s)
       order  (goals-harvest (root-nodes:nd))
   ==
 ::
 ++  custom-roots-ordered-goals-harvest
-  |=  [roots=(list id:gol) order=(list id:gol)]
-  ^-  (list id:gol)
+  |=  [roots=(list gid:gol) order=(list gid:gol)]
+  ^-  (list gid:gol)
   %:  fix-list-and-sort
-      %p     (precedents-map %d %k)
-      order  (goals-harvest (turn roots (lead %d)))
+      %p     (precedents-map %e %s)
+      order  (goals-harvest (turn roots (lead %e)))
   ==
 ::
 :: get priority of a given goal - highest priority is 0
 :: priority is the number of unique goals which must be started
 :: before the given goal is started
 ++  priority
-  |=  =id:gol
+  |=  =gid:gol
   ^-  @
-  =/  gine  (gine nid:gol (set id:gol) @)
+  =/  gine  (gine nid:gol (set gid:gol) @)
   =.  gine
     %=  gine
       flow  |=(=nid:gol ~(tap in (iflo nid)))  :: inflow
@@ -561,25 +561,25 @@
       :: all inflows
       init
         |=  =nid:gol
-        %-  ~(gas in *(set id:gol))
+        %-  ~(gas in *(set gid:gol))
         %+  turn
           ~(tap in (iflo nid))
-        |=(=nid:gol id.nid)
+        |=(=nid:gol gid.nid)
       ::
-      meld  |=([nid:gol nid:gol a=(set id:gol) b=(set id:gol)] (~(uni in a) b))
+      meld  |=([nid:gol nid:gol a=(set gid:gol) b=(set gid:gol)] (~(uni in a) b))
       exit
-        |=  [=nid:gol vis=(map nid:gol (set id:gol))]
+        |=  [=nid:gol vis=(map nid:gol (set gid:gol))]
         ~(wyt in (~(got by vis) nid))  :: get count of priors
     ==
   ::
-  :: work backwards from kickoff
-  (((traverse nid:gol (set id:gol) @) gine ~) [%k id])
+  :: work backwards from start
+  (((traverse nid:gol (set gid:gol) @) gine ~) [%s gid])
 ::
 :: highest to lowest priority (highest being smallest number)
 ++  hi-to-lo
-  |=  lst=(list id:gol)
+  |=  lst=(list gid:gol)
   %+  sort  lst
-  |=  [a=id:gol b=id:gol]
+  |=  [a=gid:gol b=gid:gol]
   (lth (priority a) (priority b))
 ::
 ++  get-bounds
@@ -672,7 +672,7 @@
 :: get depth of a given goal (lowest level is depth of 1)
 :: this is mostly for printing accurate level information in the CLI
 ++  plumb
-  |=  =id:gol
+  |=  =gid:gol
   ^-  @
   =/  ginn  (ginn nid:gol @)
   =.  ginn
@@ -681,21 +681,21 @@
       meld  |=([nid:gol nid:gol a=@ b=@] (max a b))
       land  |=([nid:gol out=@ ?] +(out))
     ==
-  (((traverse nid:gol @ @) ginn ~) [%d id])
+  (((traverse nid:gol @ @) ginn ~) [%e gid])
 ::
 ++  get-stocks
-  |=  [=id:gol vis=(map id:gol stock:gol)]
-  ^-  (map id:gol stock:gol)
-  =/  gaso  [id:gol stock:gol (map id:gol stock:gol)]
+  |=  [=gid:gol vis=(map gid:gol stock:gol)]
+  ^-  (map gid:gol stock:gol)
+  =/  gaso  [gid:gol stock:gol (map gid:gol stock:gol)]
   =/  gine  (gine gaso)
   =.  gine
     %=  gine
-      flow  |=(=id:gol =/(par par:(~(got by goals) id) ?~(par ~ [u.par]~)))
-      land  |=([=id:gol =stock:gol ?] [[id chief:(~(got by goals) id)] stock])
-      exit  |=([=id:gol vis=(map id:gol stock:gol)] vis)
+      flow  |=(=gid:gol =/(parent parent:(~(got by goals) gid) ?~(parent ~ [u.parent]~)))
+      land  |=([=gid:gol =stock:gol ?] [[gid chief:(~(got by goals) gid)] stock])
+      exit  |=([=gid:gol vis=(map gid:gol stock:gol)] vis)
       :: prnt  print-id
     ==
-  (((traverse gaso) gine vis) id)
+  (((traverse gaso) gine vis) gid)
 ::
 :: all nodes left or right of a given node including self
 ++  to-ends
@@ -713,45 +713,45 @@
 ::
 :: all descendents including self
 ++  progeny
-  |=  =id:gol
-  ^-  (set id:gol)
-  =/  ginn  (ginn id:gol (set id:gol))
+  |=  =gid:gol
+  ^-  (set gid:gol)
+  =/  ginn  (ginn gid:gol (set gid:gol))
   =.  ginn
     %=  ginn
-      flow  |=(=id:gol ~(tap in kids:(~(got by goals) id)))
-      init  |=(=id:gol (~(put in *(set id:gol)) id))
-      meld  |=([id:gol id:gol a=(set id:gol) b=(set id:gol)] (~(uni in a) b))
+      flow  |=(=gid:gol ~(tap in children:(~(got by goals) gid)))
+      init  |=(=gid:gol (~(put in *(set gid:gol)) gid))
+      meld  |=([gid:gol gid:gol a=(set gid:gol) b=(set gid:gol)] (~(uni in a) b))
     ==
-  (((traverse id:gol (set id:gol) (set id:gol)) ginn ~) id)
+  (((traverse gid:gol (set gid:gol) (set gid:gol)) ginn ~) gid)
 ::
 :: all descendents including self
 ++  virtual-progeny
-  |=  =id:gol
-  ^-  (set id:gol)
-  =/  ginn  (ginn id:gol (set id:gol))
+  |=  =gid:gol
+  ^-  (set gid:gol)
+  =/  ginn  (ginn gid:gol (set gid:gol))
   =.  ginn
     %=  ginn
-      flow  |=(=id:gol ~(tap in (young:nd id)))
-      init  |=(=id:gol (~(put in *(set id:gol)) id))
-      meld  |=([id:gol id:gol a=(set id:gol) b=(set id:gol)] (~(uni in a) b))
+      flow  |=(=gid:gol ~(tap in (young:nd gid)))
+      init  |=(=gid:gol (~(put in *(set gid:gol)) gid))
+      meld  |=([gid:gol gid:gol a=(set gid:gol) b=(set gid:gol)] (~(uni in a) b))
     ==
-  (((traverse id:gol (set id:gol) (set id:gol)) ginn ~) id)
+  (((traverse gid:gol (set gid:gol) (set gid:gol)) ginn ~) gid)
 ::
 ++  replace-chief
   |=  [kick=(set ship) owner=ship]
-  |=  [=id:gol vis=(map id:gol ship)]
-  ^-  (map id:gol ship)
-  =/  gaso  [id:gol ship (map id:gol ship)]
+  |=  [=gid:gol vis=(map gid:gol ship)]
+  ^-  (map gid:gol ship)
+  =/  gaso  [gid:gol ship (map gid:gol ship)]
   =/  gine  (gine gaso)
   =.  gine
     %=  gine
-      flow  |=(=id:gol =/(par par:(~(got by goals) id) ?~(par ~ [u.par]~)))
-      init  |=(=id:gol chief:(~(got by goals) id))
-      stop  |=([id:gol =ship] !(~(has in kick) ship)) :: stop if not in kick set
-      meld  |=([id:gol id:gol a=ship b=ship] b)
-      land  |=([=id:gol =ship cnd=?] ?:(cnd ship owner)) :: if not in kick set
+      flow  |=(=gid:gol =/(parent parent:(~(got by goals) gid) ?~(parent ~ [u.parent]~)))
+      init  |=(=gid:gol chief:(~(got by goals) gid))
+      stop  |=([gid:gol =ship] !(~(has in kick) ship)) :: stop if not in kick set
+      meld  |=([gid:gol gid:gol a=ship b=ship] b)
+      land  |=([=gid:gol =ship cnd=?] ?:(cnd ship owner)) :: if not in kick set
     ==
-  (((traverse gaso) gine vis) id)
+  (((traverse gaso) gine vis) gid)
 ::
 :: smol helpers
 ++  anchor  |.(+((roll (turn (root-goals:nd) plumb) max)))
@@ -760,7 +760,7 @@
 ++  ryte-bound  |=(=nid:gol (~(got by ((get-bounds %r) nid ~)) nid))
 ++  left-plumb  |=(=nid:gol (~(got by ((plomb %l) nid ~)) nid))
 ++  ryte-plumb  |=(=nid:gol (~(got by ((plomb %r) nid ~)) nid))
-++  get-stock   |=(=id:gol (~(got by (get-stocks id ~)) id))
+++  get-stock   |=(=gid:gol (~(got by (get-stocks gid ~)) gid))
 ::
 ++  get-ranks
   |=  =stock:gol
@@ -771,11 +771,11 @@
     ranks
   %=  $
     stock  t.stock
-    ranks  (~(put by ranks) [chief id]:i.stock)
+    ranks  (~(put by ranks) [chief gid]:i.stock)
   ==
 ::
 ++  get-rank
-  |=  [mod=ship =id:gol]
-  ^-  (unit id:gol)
-  (~(get by (get-ranks (get-stock id))) mod)
+  |=  [mod=ship =gid:gol]
+  ^-  (unit gid:gol)
+  (~(get by (get-ranks (get-stock gid))) mod)
 --

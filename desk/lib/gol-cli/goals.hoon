@@ -1,54 +1,54 @@
 /-  gol=goals
 |_  store:gol
 ::
-:: create unique goal id based on source ship and creation time
+:: create unique goal gid based on source ship and creation time
 ++  unique-id
-  |=  [=pin:gol now=@da]
-  ^-  id:gol
-  =/  =goals:gol  goals:(~(got by pools) pin)
-  =/  =id:gol  (scot %da now)
-  ?.  (~(has by goals) id)
-    id
+  |=  [=pid:gol now=@da]
+  ^-  gid:gol
+  =/  =goals:gol  goals:(~(got by pools) pid)
+  =/  =gid:gol  (scot %da now)
+  ?.  (~(has by goals) gid)
+    gid
   $(now (add now ~s0..0001))
 ::
 :: creating a mapping from old ids to new ids
 :: to be used in the process of copying goals
 ++  new-ids
-  |=  [=(list id:gol) =pin:gol now=@da]
-  ^-  (map id:gol id:gol)
+  |=  [=(list gid:gol) =pid:gol now=@da]
+  ^-  (map gid:gol gid:gol)
   =/  idx  0
-  =|  =(map id:gol id:gol)
+  =|  =(map gid:gol gid:gol)
   |-
   ?:  =(idx (lent list))
     map
-  =/  new-id  (unique-id pin now)
+  =/  new-id  (unique-id pid now)
   %=  $
     idx  +(idx)
     map  (~(put by map) (snag idx list) new-id)
   ==
 ::
 ++  clone-goals
-  |=  [=goals:gol =pin:gol now=@da]
-  ^-  [id-map=(map id:gol id:gol) =goals:gol]
-  =/  id-map  (new-ids ~(tap in ~(key by goals)) pin now)
+  |=  [=goals:gol =pid:gol now=@da]
+  ^-  [id-map=(map gid:gol gid:gol) =goals:gol]
+  =/  id-map  (new-ids ~(tap in ~(key by goals)) pid now)
   :-  id-map
   |^
   %-  ~(gas by *goals:gol)
   %+  turn  ~(tap by goals)
-  |=  [=id:gol =goal:gol]
-  :-  (~(got by id-map) id)
+  |=  [=gid:gol =goal:gol]
+  :-  (~(got by id-map) gid)
   %=  goal
-    par  ?~(par.goal ~ (some (new-id u.par.goal)))
-    kids  (new-set-id kids.goal)
+    parent  ?~(parent.goal ~ (some (new-id u.parent.goal)))
+    children  (new-set-id children.goal)
     ::
-    inflow.kickoff  (new-set-nid inflow.kickoff.goal)
-    outflow.kickoff  (new-set-nid outflow.kickoff.goal)
-    inflow.deadline  (new-set-nid inflow.deadline.goal)
-    outflow.deadline  (new-set-nid outflow.deadline.goal)
+    inflow.start  (new-set-nid inflow.start.goal)
+    outflow.start  (new-set-nid outflow.start.goal)
+    inflow.end  (new-set-nid inflow.end.goal)
+    outflow.end  (new-set-nid outflow.end.goal)
   ==
-  ++  new-id  |=(=id:gol (~(got by id-map) id))
-  ++  new-nid  |=(=nid:gol [-.nid (new-id id.nid)])
-  ++  new-set-id  |=(=(set id:gol) (~(run in set) new-id))
+  ++  new-id  |=(=gid:gol (~(got by id-map) gid))
+  ++  new-nid  |=(=nid:gol [-.nid (new-id gid.nid)])
+  ++  new-set-id  |=(=(set gid:gol) (~(run in set) new-id))
   ++  new-set-nid  |=(=(set nid:gol) (~(run in set) new-nid))
   --
 --

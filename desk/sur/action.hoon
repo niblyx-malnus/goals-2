@@ -2,54 +2,54 @@
 |%
 +$  action  $%(local-action pool-action goal-action)
 ++  local-action
-  $%  [%pools-slot-above dis=pin dat=pin]
-      [%pools-slot-below dis=pin dat=pin]
+  $%  [%pools-slot-above dis=pid dat=pid]
+      [%pools-slot-below dis=pid dat=pid]
       [%goals-slot-above dis=key dat=key]
       [%goals-slot-below dis=key dat=key]
   ==
 ++  pool-action
   $%  [%create-pool title=@t]
-      [%delete-pool =pin]
-      [%yoke =pin yoks=(list plex)]
-      [%set-pool-title =pin title=@t]
-      [%update-pool-perms =pin new=perms]
-      [%update-pool-property =pin p=(each [@t @t] @t)]
-      [%update-pool-tag-property =pin tag=@t p=(each [@t @t] @t)]
-      [%update-pool-field-property =pin field=@t p=(each [@t @t] @t)]
-      [%put-module =pin module=@t uuid=@t parent=(unit id) version=@ud body=json]
-      [%del-module =pin module=@t uuid=@t]
+      [%delete-pool =pid]
+      [%yoke =pid yoks=(list plex)]
+      [%set-pool-title =pid title=@t]
+      [%update-pool-perms =pid new=perms]
+      [%update-pool-property =pid p=(each [@t @t] @t)]
+      [%update-pool-tag-property =pid tag=@t p=(each [@t @t] @t)]
+      [%update-pool-field-property =pid field=@t p=(each [@t @t] @t)]
+      [%put-module =pid module=@t uuid=@t parent=(unit gid) version=@ud body=json]
+      [%del-module =pid module=@t uuid=@t]
   ==
 ++  goal-action
   =<  goal-action
   |%
   +$  goal-action  $%(create mutate local)
   +$  create
-    $%  [%create-goal =pin upid=(unit id) summary=@t actionable=?]
-        [%create-goal-with-tag =pin upid=(unit id) summary=@t actionable=? tag=@t]
+    $%  [%create-goal =pid upid=(unit gid) summary=@t actionable=?]
+        [%create-goal-with-tag =pid upid=(unit gid) summary=@t actionable=? tag=@t]
     ==
   ++  mutate
     =<  mutate
     |%
     +$  mutate  $%(life-cycle nexus hitch)
     +$  life-cycle
-      $%  [%archive-goal =pin =id]
-          [%restore-goal =pin =id]
-          [%delete-goal =pin =id]
+      $%  [%archive-goal =pid =gid]
+          [%restore-goal =pid =gid]
+          [%delete-goal =pid =gid]
       ==
     +$  nexus
-      $%  [%move =pin cid=id upid=(unit id)] :: should probably be in nexus:pool-action
-          [%set-kickoff =pin =id kickoff=(unit @da)]
-          [%set-deadline =pin =id deadline=(unit @da)]
-          [%set-summary =pin =id summary=@t]
-          [%mark-actionable =pin =id]
-          [%unmark-actionable =pin =id]
-          [%mark-complete =pin =id]
-          [%unmark-complete =pin =id]
-          [%update-goal-perms =pin =id chief=ship rec=_| =deputies]
+      $%  [%move =pid cid=gid upid=(unit gid)] :: should probably be in nexus:pool-action
+          [%set-start =pid =gid start=(unit @da)]
+          [%set-end =pid =gid end=(unit @da)]
+          [%set-summary =pid =gid summary=@t]
+          [%mark-actionable =pid =gid]
+          [%unmark-actionable =pid =gid]
+          [%mark-complete =pid =gid]
+          [%unmark-complete =pid =gid]
+          [%update-goal-perms =pid =gid chief=ship rec=_| =deputies]
       ==
     +$  hitch
-      $%  [%update-goal-tags =pin =id p=(each (set @t) (set @t))]
-          [%update-goal-field =pin =id p=(each [@t @t] @t)]
+      $%  [%update-goal-tags =pid =gid p=(each (set @t) (set @t))]
+          [%update-goal-field =pid =gid p=(each [@t @t] @t)]
       ==
     --
   +$  local
@@ -67,59 +67,59 @@
 +$  plex  $%(exposed-yoke nuke)
 ::
 +$  exposed-yoke  
-  $%  [%prio-rend lid=id rid=id]
-      [%prio-yoke lid=id rid=id]
-      [%prec-rend lid=id rid=id]
-      [%prec-yoke lid=id rid=id]
-      [%nest-rend lid=id rid=id]
-      [%nest-yoke lid=id rid=id]
-      [%hook-rend lid=id rid=id]
-      [%hook-yoke lid=id rid=id]
-      [%held-rend lid=id rid=id]
-      [%held-yoke lid=id rid=id]
+  $%  [%prio-rend lid=gid rid=gid]
+      [%prio-yoke lid=gid rid=gid]
+      [%prec-rend lid=gid rid=gid]
+      [%prec-yoke lid=gid rid=gid]
+      [%nest-rend lid=gid rid=gid]
+      [%nest-yoke lid=gid rid=gid]
+      [%hook-rend lid=gid rid=gid]
+      [%hook-yoke lid=gid rid=gid]
+      [%held-rend lid=gid rid=gid]
+      [%held-yoke lid=gid rid=gid]
   ==
 ::
 +$  nuke
-  $%  [%nuke-prio-left =id]
-      [%nuke-prio-ryte =id]
-      [%nuke-prio =id]
-      [%nuke-prec-left =id]
-      [%nuke-prec-ryte =id]
-      [%nuke-prec =id]
-      [%nuke-prio-prec =id]
-      [%nuke-nest-left =id]
-      [%nuke-nest-ryte =id]
-      [%nuke-nest =id]
+  $%  [%nuke-prio-left =gid]
+      [%nuke-prio-ryte =gid]
+      [%nuke-prio =gid]
+      [%nuke-prec-left =gid]
+      [%nuke-prec-ryte =gid]
+      [%nuke-prec =gid]
+      [%nuke-prio-prec =gid]
+      [%nuke-nest-left =gid]
+      [%nuke-nest-ryte =gid]
+      [%nuke-nest =gid]
   ==
 ::
 +$  harvest-type
   $%  [%main ~]
-      [%pool =pin]
-      [%goal =pin =id]
+      [%pool =pid]
+      [%goal =pid =gid]
   ==
 ::
 +$  goal-view
-  $%  [%pool-roots =pin]   :: id, summary, cmp, axn
-      [%goal-young =pin =id] :: id, summary, cmp, axn
+  $%  [%pool-roots =pid]   :: gid, summary, cmp, axn
+      [%goal-young =pid =gid] :: gid, summary, cmp, axn
       [%harvest type=harvest-type]
-      [%pool-tag-goals =pin tag=@t]
-      [%pool-tag-harvest =pin tag=@t]
-      [%pool-tag-note =pin tag=@t]
+      [%pool-tag-goals =pid tag=@t]
+      [%pool-tag-harvest =pid tag=@t]
+      [%pool-tag-note =pid tag=@t]
       [%local-tag-goals tag=@t]
       [%local-tag-harvest tag=@t]
       [%local-tag-note tag=@t]
       [%pools-index ~]
-      [%pool-title =pin]
-      [%pool-note =pin]
-      [%goal-summary =pin =id]
-      [%goal-note =pin =id]
-      [%goal-tags =pin =id]
-      [%local-goal-tags =pin =id]
-      [%goal-parent =pin =id]
-      [%goal-actionable =pin =id]
-      [%goal-complete =pin =id]
+      [%pool-title =pid]
+      [%pool-note =pid]
+      [%goal-summary =pid =gid]
+      [%goal-note =pid =gid]
+      [%goal-tags =pid =gid]
+      [%local-goal-tags =pid =gid]
+      [%goal-parent =pid =gid]
+      [%goal-actionable =pid =gid]
+      [%goal-complete =pid =gid]
       [%setting setting=@t]
-      [%pool-tags =pin]
+      [%pool-tags =pid]
       [%all-local-goal-tags ~]
   ==
 ::
@@ -127,16 +127,16 @@
 ::
 +$  goal-vent
   $@  ~
-  $%  [%pool-roots roots=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
-      [%goal-young young=(list [id ? @t ? ? tags])] :: id, summary, cmp, axn, tags
-      [%harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
-      [%pool-tag-goals goals=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
-      [%pool-tag-harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
-      [%local-tag-goals goals=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
-      [%local-tag-harvest harvest=(list [id @t ? ? tags])]   :: id, summary, cmp, axn, tags
-      [%pools-index pools=(list [pin @t])]
+  $%  [%pool-roots roots=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
+      [%goal-young young=(list [gid ? @t ? ? tags])] :: gid, summary, cmp, axn, tags
+      [%harvest harvest=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
+      [%pool-tag-goals goals=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
+      [%pool-tag-harvest harvest=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
+      [%local-tag-goals goals=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
+      [%local-tag-harvest harvest=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
+      [%pools-index pools=(list [pid @t])]
       [%tags =tags]
-      [%uid id=(unit id)]
+      [%uid gid=(unit gid)]
       [%cord p=@t]
       [%ucord p=(unit @t)]
       [%loob p=?]

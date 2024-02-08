@@ -1,33 +1,34 @@
 /-  gol=goals
 /+  *gol-cli-util, gol-cli-node, gol-cli-traverse
+:: TODO: confirm start and end status timestamps alternate in order
 |%
 ::
 ++  all-own-edges
   |=  =goals:gol
-  ^-  [kids=(set (pair id:gol id:gol)) pars=(set (pair id:gol id:gol))]
+  ^-  [children=(set (pair gid:gol gid:gol)) parents=(set (pair gid:gol gid:gol))]
   =/  g  ~(tap in goals)
-  =|  kids=(set (pair id:gol id:gol))
-  =|  pars=(set (pair id:gol id:gol))
+  =|  children=(set (pair gid:gol gid:gol))
+  =|  parents=(set (pair gid:gol gid:gol))
   |-
   ?~  g
-    [kids pars]
-  =/  [=id:gol =goal:gol]  i.g
+    [children parents]
+  =/  [=gid:gol =goal:gol]  i.g
   %=  $
     g  t.g
-    kids  
-      %-  ~(uni in kids)
-      ^-  (set (pair id:gol id:gol))
-      %-  ~(run in kids.goal)
-      |=(kid=id:gol [kid id])
-    pars  
-      ?~  par.goal
-        pars
-      %-  ~(put in pars)
-      [id u.par.goal]
+    children  
+      %-  ~(uni in children)
+      ^-  (set (pair gid:gol gid:gol))
+      %-  ~(run in children.goal)
+      |=(kid=gid:gol [kid gid])
+    parents  
+      ?~  parent.goal
+        parents
+      %-  ~(put in parents)
+      [gid u.parent.goal]
   ==
 ::
-:: assert kids/par doubly-linked
-++  doubly-own-linked  |=(=goals:gol `?`=(kids pars):(all-own-edges goals))
+:: assert children/parent doubly-linked
+++  doubly-own-linked  |=(=goals:gol `?`=(children parents):(all-own-edges goals))
 ::
 ++  all-dag-edges
   |=  =goals:gol
@@ -38,29 +39,29 @@
   |-
   ?~  g
     [inflows outflows]
-  =/  [=id:gol =goal:gol]  i.g
+  =/  [=gid:gol =goal:gol]  i.g
   =.  inflows
     %-  ~(uni in inflows)
     ^-  (set edge:gol)
-    %-  ~(run in inflow.kickoff.goal)
-    |=(=nid:gol [nid [%k id]])
+    %-  ~(run in inflow.start.goal)
+    |=(=nid:gol [nid [%s gid]])
   =.  outflows
     %-  ~(uni in outflows)
     ^-  (set edge:gol)
-    %-  ~(run in outflow.kickoff.goal)
-    |=(=nid:gol [[%k id] nid])
+    %-  ~(run in outflow.start.goal)
+    |=(=nid:gol [[%s gid] nid])
   %=  $
     g  t.g
     inflows  
       %-  ~(uni in inflows)
       ^-  (set edge:gol)
-      %-  ~(run in inflow.deadline.goal)
-      |=(=nid:gol [nid [%d id]])
+      %-  ~(run in inflow.end.goal)
+      |=(=nid:gol [nid [%e gid]])
     outflows  
       %-  ~(uni in outflows)
       ^-  (set edge:gol)
-      %-  ~(run in outflow.deadline.goal)
-      |=(=nid:gol [[%d id] nid])
+      %-  ~(run in outflow.end.goal)
+      |=(=nid:gol [[%e gid] nid])
   ==
 ::
 :: assert nodes doubly-linked
@@ -72,22 +73,22 @@
   |=  =goals:gol
   ^-  ?
   %-  ~(rep by goals)
-  |=  [[=id:gol =goal:gol] all=?]
-  ?&  (~(has in outflow.kickoff.goal) [%d id])
-      (~(has in inflow.deadline.goal) [%k id])
+  |=  [[=gid:gol =goal:gol] all=?]
+  ?&  (~(has in outflow.start.goal) [%e gid])
+      (~(has in inflow.end.goal) [%s gid])
   ==
 ::
 :: assumes doubly-own-linked and doubly-dag-linked
 ++  ownership-containment
   |=  =goals:gol
   ^-  ?
-  =/  branches  kids:(all-own-edges goals)
+  =/  branches  children:(all-own-edges goals)
   %-  ~(all in branches)
-  |=  [kid=id:gol pid=id:gol]
+  |=  [kid=gid:gol pid=gid:gol]
   ^-  ?
   =/  goal  (~(got by goals) kid)
-  ?&  (~(has in inflow.kickoff.goal) [%k pid])
-      (~(has in outflow.deadline.goal) [%d pid])
+  ?&  (~(has in inflow.start.goal) [%s pid])
+      (~(has in outflow.end.goal) [%e pid])
   ==
 ::
 :: no actionable goal has goals nested below it
@@ -99,9 +100,9 @@
   ^-  ?
   ?.  actionable.goal
     %.y
-  =;  kd=(set ?(%k %d))  
-    !(~(has in kd) %d)
-  %-  ~(run in inflow.deadline.goal)
+  =;  kd=(set ?(%s %e))  
+    !(~(has in kd) %e)
+  %-  ~(run in inflow.end.goal)
   |=(=nid:gol -.nid)
 ::
 ++  check-bound-mismatch
@@ -114,7 +115,7 @@
       rn
       ~
     ==
-  =/  ids=(set id:gol)  (~(run in ~(key by vis)) |=(=nid:gol id.nid))
+  =/  ids=(set gid:gol)  (~(run in ~(key by vis)) |=(=nid:gol gid.nid))
   ?.  =(0 ~(wyt in (~(dif in ids) ~(key by goals))))
     ~|("all ids not visited" !!)
   =/  vos=(map nid:gol (unit moment:gol))  (gat-by vis rn)
@@ -130,7 +131,7 @@
       rn
       ~
     ==
-  =/  ids=(set id:gol)  (~(run in ~(key by vis)) |=(=nid:gol id.nid))
+  =/  ids=(set gid:gol)  (~(run in ~(key by vis)) |=(=nid:gol gid.nid))
   ?.  =(0 ~(wyt in (~(dif in ids) ~(key by goals))))
     ~|("all ids not visited" !!)
   =/  vos=(map nid:gol (unit ?))  (gat-by vis rn)
@@ -139,25 +140,25 @@
 ++  validate-goals
   |=  =goals:gol
   ^-  goals:gol
-  :: assert par/kids doubly-linked
+  :: assert parent/children doubly-linked
   ?.  (doubly-own-linked goals)
     ~|("ownership not doubly linked" !!)
   :: assert nodes doubly-linked
   ?.  (doubly-dag-linked goals)
     ~|("DAG not doubly linked" !!)
-  :: assert corresponding kickoffs and deadlines are linked
+  :: assert corresponding starts and ends are linked
   ?.  (kd-pairs goals)
-    ~|("kickoffs not linked to deadlines" !!)
-  :: assert all par/kids relationships reflects containment (held-yoke)
+    ~|("starts not linked to ends" !!)
+  :: assert all parent/children relationships reflects containment (held-yoke)
   ?.  (ownership-containment goals)
     ~|("some goals owned but not contained" !!)
-  :: assert actionable goals have no kids or nested goals
+  :: assert actionable goals have no children or nested goals
   ?.  (bare-actionable goals)
     ~|("actionable has nested" !!)
   :: assert traversal from roots produces correctly ordered moments
   ?.  (check-bound-mismatch goals)
     ~|("bound-mismatch-fail" !!)
-  :: assert no completed deadline is right of any incomplete deadline
+  :: assert no completed end is right of any incomplete end
   ?.  (check-plete-mismatch goals)
     ~|("plete-mismatch-fail" !!)
   goals

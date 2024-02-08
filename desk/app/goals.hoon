@@ -15,7 +15,7 @@
 /=  x  /ted/test
 ::
 |%
-+$  inflated-state  [state-5-23:gs =trace:gol] 
++$  inflated-state  [state-5-24:gs =trace:gol] 
 +$  card     card:agent:gall
 ++  non-cab
   %+  cook
@@ -47,7 +47,7 @@
   ^-  (quip card _this)
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-23:gs   (convert-to-latest:gs old)
+  =/  new=state-5-24:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   [cards this(-.state new, trace *trace:gol)]
 ::
@@ -118,14 +118,14 @@
       [%pools ~]
     :-  %|  :_  ~
     %+  turn  ~(tap in ~(key by pools.store))
-    |=  =pin:gol
+    |=  =pid:gol
     :_  %json
-    (rap 3 (scot %p host.pin) '_' name.pin ~)
+    (rap 3 (scot %p host.pid) '_' name.pid ~)
     ::
-      [%pools pin=@ta %json ~]
-    =+  ;;  pin=[host=@t name=@t ~]  (rash pin.pole cab-split)
-    =/  host=@p  (slav %p host.pin)
-    [%& json+!>((enjs-pool:gol-cli-json (~(got by pools.store) [host name.pin])))]
+      [%pools pid=@ta %json ~]
+    =+  ;;  pid=[host=@t name=@t ~]  (rash pid.pole cab-split)
+    =/  host=@p  (slav %p host.pid)
+    [%& json+!>((enjs-pool:gol-cli-json (~(got by pools.store) [host name.pid])))]
     ::
       [%local ~]
     :+  %|
@@ -148,27 +148,27 @@
     !!
     :: :-  %|  :_  ~
     :: %+  turn  ~(tap in ~(key by goals.local.store))
-    :: |=  =id:gol
+    :: |=  =gid:gol
     :: :_  %json
-    :: (rap 3 (scot %p host.pin.id) '_' name.pin.id '_' key.id ~)
+    :: (rap 3 (scot %p host.pid.gid) '_' name.pid.gid '_' key.gid ~)
     ::
-      [%local %goals id=@ta %json ~]
+      [%local %goals gid=@ta %json ~]
     !!
-    :: =+  ;;  id=[host=@t name=@t key=@t ~]  (rash id.pole cab-split)
-    :: =/  host=@p  (slav %p host.id)
-    :: [%& json+!>((enjs-goal-local:gol-cli-json (~(got by goals.local.store) [[host name.id] key.id])))]
+    :: =+  ;;  gid=[host=@t name=@t key=@t ~]  (rash gid.pole cab-split)
+    :: =/  host=@p  (slav %p host.gid)
+    :: [%& json+!>((enjs-goal-local:gol-cli-json (~(got by goals.local.store) [[host name.gid] key.gid])))]
     ::
       [%'pool_info' ~]
     :-  %|  :_  ~
     %+  turn  ~(tap in ~(key by pool-info.store))
-    |=  =pin:gol
+    |=  =pid:gol
     :_  %json
-    (rap 3 (scot %p host.pin) '_' name.pin ~)
+    (rap 3 (scot %p host.pid) '_' name.pid ~)
     ::
-      [%'pool_info' pin=@ta %json ~]
-    =+  ;;  pin=[host=@t name=@t ~]  (rash pin.pole cab-split)
-    =/  host=@p  (slav %p host.pin)
-    [%& json+!>((enjs-pool-data:gol-cli-json (~(got by pool-info.store) [host name.pin])))]
+      [%'pool_info' pid=@ta %json ~]
+    =+  ;;  pid=[host=@t name=@t ~]  (rash pid.pole cab-split)
+    =/  host=@p  (slav %p host.pid)
+    [%& json+!>((enjs-pool-data:gol-cli-json (~(got by pool-info.store) [host name.pid])))]
   ==
 ::
 ++  on-leave  on-leave:def

@@ -14,9 +14,9 @@
         %pool-roots
       :-  %a
       %+  turn  roots.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%id (enjs-id id)]
+      :~  [%gid (enjs-id gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -26,9 +26,9 @@
         %goal-young
       :-  %a
       %+  turn  young.vnt
-      |=  [=id virtual=? desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      |=  [=gid virtual=? desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%id (enjs-id id)]
+      :~  [%gid (enjs-id gid)]
           [%virtual b+virtual]
           [%description s+desc]
           [%complete b+complete]
@@ -39,9 +39,9 @@
         %harvest
       :-  %a
       %+  turn  harvest.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%id (enjs-id id)]
+      :~  [%gid (enjs-id gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -51,9 +51,9 @@
         %pool-tag-goals
       :-  %a
       %+  turn  goals.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%id (enjs-id id)]
+      :~  [%gid (enjs-id gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -63,9 +63,9 @@
         %pool-tag-harvest
       :-  %a
       %+  turn  harvest.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%id (enjs-id id)]
+      :~  [%gid (enjs-id gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -75,9 +75,9 @@
         %local-tag-goals
       :-  %a
       %+  turn  goals.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%id (enjs-id id)]
+      :~  [%gid (enjs-id gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -87,9 +87,9 @@
         %local-tag-harvest
       :-  %a
       %+  turn  harvest.vnt
-      |=  [=id desc=@t complete=? actionable=? tags=(list (pair ? @t))]
+      |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%id (enjs-id id)]
+      :~  [%gid (enjs-id gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -99,14 +99,14 @@
         %pools-index
       :-  %a
       %+  turn  pools.vnt
-      |=  [=pin title=@t] 
+      |=  [=pid title=@t] 
       %-  pairs
-      :~  [%pin s+(pool-id pin)]
+      :~  [%pid s+(pool-id pid)]
           [%title s+title]
       ==
       ::
       %tags        a+(turn tags.vnt |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))
-      %uid         ?~(id.vnt ~ (enjs-id u.id.vnt))
+      %uid         ?~(gid.vnt ~ (enjs-id u.gid.vnt))
       %cord        s+p.vnt
       %ucord       ?~(p.vnt ~ s+u.p.vnt)
       %loob        b+p.vnt
