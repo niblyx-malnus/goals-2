@@ -273,12 +273,13 @@
 ++  enjs-pools
   =,  enjs:format
   |=  =pools
-  :-  %a  %+  turn  ~(tap by pools) 
-  |=  [=pid =pool] 
+  ^-  json
   %-  pairs
-  :~  [%pid s+(enjs-pid pid)]
-      [%pool (enjs-pool pool)]
-  ==
+  %+  turn  ~(tap by pools) 
+  |=  [=pid =pool] 
+  ^-  [@t json]
+  :-  (enjs-pid pid)
+  (enjs-pool pool)
 ::
 ++  enjs-pool
   =,  enjs:format
