@@ -384,12 +384,12 @@
 ++  enjs-goals
   =,  enjs:format
   |=  =goals
-  :-  %a  %+  turn  ~(tap by goals) 
-  |=  [=gid =goal] 
+  ^-  json
   %-  pairs
-  :~  [%gid (enjs-gid gid)]
-      [%goal (enjs-goal goal)]
-  ==
+  %+  turn  ~(tap by goals) 
+  |=  [=gid =goal] 
+  ^-  [@t json]
+  [gid (enjs-goal goal)]
 ::
 :: ++  enjs-pex  enjs-pool-trace
 :: ::
