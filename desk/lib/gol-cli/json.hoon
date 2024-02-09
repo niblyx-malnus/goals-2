@@ -548,7 +548,7 @@
   %+  turn  status
   |=  [timestamp=@da done=?]
   %-  pairs
-  :~  [%timestamp n+(unm:chrono:userlib timestamp)]
+  :~  [%timestamp (numb (unm:chrono:userlib timestamp))]
       [%done b+done]
   ==
 
