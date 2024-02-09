@@ -47,11 +47,12 @@
 ++  is-unnested
   |=  =gid:gol
   ^-  ?
-  =;  d-outflow  =(~ d-outflow)
+  =;  e-outflow
+    =(~ e-outflow)
   %+  murn
     ~(tap in (oflo [%e gid]))
   |=  =nid:gol
-  ?.  ?=(%s -.nid)
+  ?:  ?=(%e -.nid)
     ~
   (some nid)
 ::

@@ -46,6 +46,7 @@
   =/  m  (strand ,page)
   ^-  form:m
   ;<  =tube:clay  bind:m  (build-our-tube desk %json mark)
+  ~&  body+body
   (pure:m [mark q:(tube !>(body))])
 ::
 ++  unpage

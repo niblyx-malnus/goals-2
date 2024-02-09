@@ -24,7 +24,7 @@
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     %-  pure:m  !>
     :-  %pool-roots
-    %+  turn  (~(root-goals gol-cli-node goals.pool))
+    %+  turn  (~(waif-goals gol-cli-node goals.pool))
     |=  =gid:gol
     =+  (~(got by goals.pool) gid)
     :*  gid
