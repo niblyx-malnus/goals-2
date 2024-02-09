@@ -15,6 +15,7 @@
 +$  deputies  (map ship ?(%edit %create))
 +$  goal
   $:  =gid
+      summary=@t      :: (140 character summary of a goal)
       parent=(unit gid)
       children=(set gid)
       start=node
@@ -22,21 +23,20 @@
       actionable=?    :: 
       chief=ship      :: sole person responsible
       =deputies       :: %edit can edit but not move
-      summary=@t      :: (140 character summary of a goal)
   ==
 +$  goals    (map gid goal)
 ::
-+$  role     ?(%owner %admin %creator)
-+$  perms    (map ship (unit role))
++$  role     ?(%owner %admin %creator %viewer)
++$  perms    (map ship role)
 ::
 +$  archive  (map gid [par=(unit gid) =goals])
 ::
 +$  pool
   $:  =pid
+      title=@t
       =perms
       =goals
       =archive
-      title=@t
   ==
 ::
 +$  stock     (list [=gid chief=ship]) :: lineage; youngest to oldest

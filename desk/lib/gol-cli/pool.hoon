@@ -658,7 +658,7 @@
 :: If role is [~ u=~], make ship basic viewer.
 :: If role is [~ u=[~ u=?(%admin %creator)]], make ship ?(%admin %creator).
 ++  set-pool-role
-  |=  [=ship role=(unit (unit role:gol)) mod=ship]
+  |=  [=ship role=(unit role:gol) mod=ship]
   ^-  _this
   ?>  (check-pool-role-mod ship mod)
   ?~  role

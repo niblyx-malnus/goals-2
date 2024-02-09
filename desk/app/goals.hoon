@@ -99,6 +99,7 @@
   ^-  (unit (unit cage))
   ?+    pole  (on-peek:def pole)
     [%x %store ~]  ``noun+!>(store)
+    [%x %pools ~]  ``json+!>((enjs-pools:gol-cli-json pools.store))
   ==
 ::
 ++  on-watch

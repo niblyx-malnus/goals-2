@@ -183,17 +183,17 @@
   ::
   ++  perms
     |=  jon=json
-    ^-  (map ^ship (unit ^role))
-    %-  ~(gas by *(map ^ship (unit ^role)))
-    %.(jon (ar (ot ~[ship+ship role+unit-role])))
+    ^-  (map ^ship ^role)
+    %-  ~(gas by *(map ^ship ^role))
+    %.(jon (ar (ot ~[ship+ship role+role])))
 
-  ++  unit-role  |=(jon=json ?~(jon ~ (some (role jon))))
   ++  role
     %-  su
     ;~  pose
       (cold %owner (jest 'owner'))
       (cold %admin (jest 'admin'))
       (cold %creator (jest 'creator'))
+      (cold %viewer (jest 'viewer'))
     ==
   ++  unit-di  |=(jon=json ?~(jon ~ (some (di jon))))
   ++  unit-date  |=(jon=json ?~(jon ~ (some (date jon))))
@@ -276,7 +276,7 @@
   :-  %a  %+  turn  ~(tap by pools) 
   |=  [=pid =pool] 
   %-  pairs
-  :~  [%pid s+(pool-id pid)]
+  :~  [%pid s+(enjs-pid pid)]
       [%pool (enjs-pool pool)]
   ==
 ::
@@ -284,7 +284,13 @@
   =,  enjs:format
   |=  =pool
   ^-  json
-  s+'Hello! I am a pool!'
+  %-  pairs
+  :~  [%pid s+(enjs-pid pid.pool)]
+      [%title s+title.pool]
+      [%perms (enjs-perms perms.pool)]
+      [%goals (enjs-goals goals.pool)]
+      [%archive (enjs-archive archive.pool)]
+  ==
   :: |=  =npool
   :: %-  pairs
   :: :~  [%perms (enjs-pool-perms perms.nexus.npool)]
@@ -330,10 +336,10 @@
   |=  =perms
   ^-  json
   :-  %a  %+  turn  ~(tap by perms) 
-  |=  [chip=@p role=(unit role)] 
+  |=  [=@p =role] 
   %-  pairs
-  :~  [%ship (ship chip)]
-      [%role ?~(role ~ s+u.role)]
+  :~  [%ship s+(scot %p p)]
+      [%role s+role]
   ==
 ::
 :: ++  enjs-pool-nexus
@@ -370,8 +376,8 @@
   |=  yok=exposed-yoke:act
   %-  pairs
   :~  [%yoke s+-.yok]
-      [%lid (enjs-id lid.yok)]
-      [%rid (enjs-id rid.yok)]
+      [%lid (enjs-gid lid.yok)]
+      [%rid (enjs-gid rid.yok)]
   ==
 ::
 ++  enjs-goals
@@ -380,7 +386,7 @@
   :-  %a  %+  turn  ~(tap by goals) 
   |=  [=gid =goal] 
   %-  pairs
-  :~  [%gid (enjs-id gid)]
+  :~  [%gid (enjs-gid gid)]
       [%goal (enjs-goal goal)]
   ==
 ::
@@ -391,14 +397,14 @@
 ::   |=  trace=pool-trace
 ::   ^-  json
 ::   %-  pairs
-::   :~  [%roots a+(turn roots.trace enjs-id)]
-::       [%roots-by-precedence a+(turn roots-by-precedence.trace enjs-id)]
-::       [%roots-by-start a+(turn roots-by-start.trace enjs-id)]
-::       [%roots-by-end a+(turn roots-by-end.trace enjs-id)]
-::       [%cache-roots a+(turn cache-roots.trace enjs-id)]
-::       [%cache-roots-by-precedence a+(turn cache-roots-by-precedence.trace enjs-id)]
-::       [%cache-roots-by-start a+(turn cache-roots-by-start.trace enjs-id)]
-::       [%cache-roots-by-end a+(turn cache-roots-by-end.trace enjs-id)]
+::   :~  [%roots a+(turn roots.trace enjs-gid)]
+::       [%roots-by-precedence a+(turn roots-by-precedence.trace enjs-gid)]
+::       [%roots-by-start a+(turn roots-by-start.trace enjs-gid)]
+::       [%roots-by-end a+(turn roots-by-end.trace enjs-gid)]
+::       [%cache-roots a+(turn cache-roots.trace enjs-gid)]
+::       [%cache-roots-by-precedence a+(turn cache-roots-by-precedence.trace enjs-gid)]
+::       [%cache-roots-by-start a+(turn cache-roots-by-start.trace enjs-gid)]
+::       [%cache-roots-by-end a+(turn cache-roots-by-end.trace enjs-gid)]
 ::   ==
 ::
 :: ++  enjs-nex
@@ -408,16 +414,16 @@
 ::   :-  %a  %+  turn  ~(tap by nex) 
 ::   |=  [=gid nexus=goal-nexus trace=goal-trace] 
 ::   %-  pairs
-::   :~  [%gid (enjs-id gid)]
+::   :~  [%gid (enjs-gid gid)]
 ::       [%goal (enjs-goal-nexus-trace nexus trace)]
 ::   ==
 ::
-++  enjs-id-v
+++  enjs-gid-v
   =,  enjs:format
   |=  [=gid v=?]
   ^-  json
   %-  pairs
-  :~  [%gid (enjs-id gid)]
+  :~  [%gid (enjs-gid gid)]
       [%virtual b+v]
   ==
 ::
@@ -426,8 +432,8 @@
 ::   |=  nexus=[goal-nexus goal-trace]
 ::   ^-  json
 ::   %-  pairs
-::   :~  [%par ?~(par.nexus ~ (enjs-id u.par.nexus))]
-::       [%kids a+(turn ~(tap in kids.nexus) enjs-id)]
+::   :~  [%par ?~(par.nexus ~ (enjs-gid u.par.nexus))]
+::       [%kids a+(turn ~(tap in kids.nexus) enjs-gid)]
 ::       [%start (enjs-node start.nexus)]
 ::       [%end (enjs-node end.nexus)]
 ::       [%complete b+complete.nexus]
@@ -438,17 +444,17 @@
 ::       [%fields (enjs-fields fields.nexus)]
 ::       [%stock (enjs-stock stock.nexus)]
 ::       [%ranks (enjs-ranks ranks.nexus)]
-::       [%young a+(turn young.nexus enjs-id-v)]
-::       [%young-by-precedence a+(turn young-by-precedence.nexus enjs-id-v)]
-::       [%young-by-start a+(turn young-by-start.nexus enjs-id-v)]
-::       [%young-by-end a+(turn young-by-end.nexus enjs-id-v)]
+::       [%young a+(turn young.nexus enjs-gid-v)]
+::       [%young-by-precedence a+(turn young-by-precedence.nexus enjs-gid-v)]
+::       [%young-by-start a+(turn young-by-start.nexus enjs-gid-v)]
+::       [%young-by-end a+(turn young-by-end.nexus enjs-gid-v)]
 ::       [%progress (enjs-progress progress.nexus)]
-::       [%prio-left a+(turn ~(tap in prio-left.nexus) enjs-id)]
-::       [%prio-ryte a+(turn ~(tap in prio-ryte.nexus) enjs-id)]
-::       [%prec-left a+(turn ~(tap in prec-left.nexus) enjs-id)]
-::       [%prec-ryte a+(turn ~(tap in prec-ryte.nexus) enjs-id)]
-::       [%nest-left a+(turn ~(tap in nest-left.nexus) enjs-id)]
-::       [%nest-ryte a+(turn ~(tap in nest-ryte.nexus) enjs-id)]
+::       [%prio-left a+(turn ~(tap in prio-left.nexus) enjs-gid)]
+::       [%prio-ryte a+(turn ~(tap in prio-ryte.nexus) enjs-gid)]
+::       [%prec-left a+(turn ~(tap in prec-left.nexus) enjs-gid)]
+::       [%prec-ryte a+(turn ~(tap in prec-ryte.nexus) enjs-gid)]
+::       [%nest-left a+(turn ~(tap in nest-left.nexus) enjs-gid)]
+::       [%nest-ryte a+(turn ~(tap in nest-ryte.nexus) enjs-gid)]
 ::   ==
 ::
 ++  enjs-stock
@@ -458,7 +464,7 @@
   :-  %a  %+  turn  stock
   |=  [=gid chief=@p]
   %-  pairs
-  :~  [%gid (enjs-id gid)]
+  :~  [%gid (enjs-gid gid)]
       [%chief (ship chief)]
   ==
 ::
@@ -471,7 +477,7 @@
   |=  [chip=@p =gid]
   %-  pairs
   :~  [%ship (ship chip)]
-      [%gid (enjs-id gid)]
+      [%gid (enjs-gid gid)]
   ==
 ::
 ++  enjs-progress
@@ -486,10 +492,31 @@
   =,  enjs:format
   |=  =goal
   ^-  json
-  !!
-  :: %-  pairs
-  :: :~  [%nexus (enjs-goal-nexus-trace [nexus trace]:`ngoal`goal)]
-  :: ==
+  %-  pairs
+  :~  [%gid (enjs-gid gid.goal)]
+      [%summary s+summary.goal]
+      [%parent ?~(parent.goal ~ (enjs-gid u.parent.goal))]
+      [%children a+(turn ~(tap in children.goal) enjs-gid)]
+      [%start (enjs-node start.goal)]
+      [%end (enjs-node end.goal)]
+      [%actionable b+actionable.goal]
+      [%chief s+(scot %p chief.goal)]
+      [%deputies (pairs (turn ~(tap by deputies.goal) |=([=@p =@t] [(scot %p p) s+t])))]
+  ==
+::
+++  enjs-archive
+  =,  enjs:format
+  |=  =archive
+  ^-  json
+  %-  pairs
+  %+  turn  ~(tap by archive)
+  |=  [=gid par=(unit gid) =goals]
+  ^-  [@t json]
+  :-  gid
+  %-  pairs
+  :~  [%par ?~(par ~ s+u.par)]
+      [%goals (enjs-goals goals)]
+  ==
 ::
 ++  enjs-fields
   =,  enjs:format
@@ -502,18 +529,28 @@
   [field s+data]
 ::
 ++  enjs-node
-   =,  enjs:format
-   |=  =node:goal
-   ^-  json
-   %-  pairs
-   :~  [%moment (enjs-moment moment.node)]
-       [%inflow a+(turn ~(tap in inflow.node) enjs-nid)]
-       [%outflow a+(turn ~(tap in outflow.node) enjs-nid)]
-       :: [%left-bound (frond %moment (enjs-moment left-bound.node))]
-       :: [%ryte-bound (frond %moment (enjs-moment ryte-bound.node))]
-       :: [%left-plumb (numb left-plumb.node)]
-       :: [%ryte-plumb (numb ryte-plumb.node)]
-   ==
+  =,  enjs:format
+  |=  =node:goal
+  ^-  json
+  %-  pairs
+  :~  [%status (enjs-status status.node)]
+      [%moment (enjs-moment moment.node)]
+      [%inflow a+(turn ~(tap in inflow.node) enjs-nid)]
+      [%outflow a+(turn ~(tap in outflow.node) enjs-nid)]
+  ==
+::
+++  enjs-status
+  =,  enjs:format
+  |=  =status
+  ^-  json
+  :-  %a
+  %+  turn  status
+  |=  [timestamp=@da done=?]
+  %-  pairs
+  :~  [%timestamp n+(unm:chrono:userlib timestamp)]
+      [%done b+done]
+  ==
+
 ::
 ++  enjs-moment
   =,  enjs:format
@@ -529,11 +566,11 @@
   ^-  json
   %-  pairs
   :~  [%node s+-.nid]
-      [%gid (enjs-id +.nid)]
+      [%gid (enjs-gid +.nid)]
   ==
 ::
-++  pool-id    |=(=pid (rap 3 '/' (scot %p host.pid) '/' name.pid ~))
-++  enjs-id    |=(=gid s+(cat 3 '/' gid))
-++  enjs-key   |=(=key s+(rap 3 (pool-id pid.key) '/' gid.key ~))
+++  enjs-pid   |=(=pid (rap 3 '/' (scot %p host.pid) '/' name.pid ~))
+++  enjs-gid   |=(=gid s+(cat 3 '/' gid))
+++  enjs-key   |=(=key s+(rap 3 (enjs-pid pid.key) '/' gid.key ~))
 ++  enjs-tang  |=(=tang a+(turn tang tank:enjs:format))
 --

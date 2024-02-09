@@ -16,7 +16,7 @@
       %+  turn  roots.vnt
       |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%gid (enjs-id gid)]
+      :~  [%gid (enjs-gid gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -28,7 +28,7 @@
       %+  turn  young.vnt
       |=  [=gid virtual=? desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%gid (enjs-id gid)]
+      :~  [%gid (enjs-gid gid)]
           [%virtual b+virtual]
           [%description s+desc]
           [%complete b+complete]
@@ -41,7 +41,7 @@
       %+  turn  harvest.vnt
       |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%gid (enjs-id gid)]
+      :~  [%gid (enjs-gid gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -53,7 +53,7 @@
       %+  turn  goals.vnt
       |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%gid (enjs-id gid)]
+      :~  [%gid (enjs-gid gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -65,7 +65,7 @@
       %+  turn  harvest.vnt
       |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%gid (enjs-id gid)]
+      :~  [%gid (enjs-gid gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -77,7 +77,7 @@
       %+  turn  goals.vnt
       |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%gid (enjs-id gid)]
+      :~  [%gid (enjs-gid gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -89,7 +89,7 @@
       %+  turn  harvest.vnt
       |=  [=gid desc=@t complete=? actionable=? tags=(list (pair ? @t))]
       %-  pairs
-      :~  [%gid (enjs-id gid)]
+      :~  [%gid (enjs-gid gid)]
           [%description s+desc]
           [%complete b+complete]
           [%actionable b+actionable]
@@ -101,12 +101,12 @@
       %+  turn  pools.vnt
       |=  [=pid title=@t] 
       %-  pairs
-      :~  [%pid s+(pool-id pid)]
+      :~  [%pid s+(enjs-pid pid)]
           [%title s+title]
       ==
       ::
       %tags        a+(turn tags.vnt |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))
-      %uid         ?~(gid.vnt ~ (enjs-id u.gid.vnt))
+      %uid         ?~(gid.vnt ~ (enjs-gid u.gid.vnt))
       %cord        s+p.vnt
       %ucord       ?~(p.vnt ~ s+u.p.vnt)
       %loob        b+p.vnt

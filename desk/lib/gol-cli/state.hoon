@@ -74,7 +74,7 @@
 ++  convert-5-23-to-5-24
   |=  =state-5-23
   ^-  state-5-24
-  *state-5-24
+  !!
   :: TODO: rename par/kids to parent/children
   :: TODO: change done to a status=(list [timestamp=@da done=?])
 --

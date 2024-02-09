@@ -29,8 +29,9 @@
   |=  [own=ship now=@da title=@t]
   ^-  pool:gol
   :*  (unique-pin own now)
-      (~(put by *perms:gol) own `%owner)
-      ~  ~  title
+      title
+      (~(put by *perms:gol) own %owner)
+      ~  ~
   ==
 ::
 ++  clone-pool
@@ -237,15 +238,15 @@
     this
     ++  perms-to-upds
       |=  new=perms:gol
-      ^-  (list [=ship role=(unit (unit role:gol))])
+      ^-  (list [=ship role=(unit role:gol)])
       =/  upds  
         %+  turn
           ~(tap by new)
-        |=  [=ship role=(unit role:gol)]
+        |=  [=ship =role:gol]
         [ship (some role)]
       %+  weld
         upds
-      ^-  (list [=ship role=(unit (unit role:gol))])
+      ^-  (list [=ship role=(unit role:gol)])
       %+  turn
         ~(tap in (~(dif in ~(key by perms.old)) ~(key by new)))
       |=(=ship [ship ~])
