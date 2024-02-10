@@ -95,15 +95,9 @@
       %delete-goal
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
-    ?:  (~(has by goals.old) gid)
-      =/  pore               (archive-goal:(apex:pl old) gid mod)
-      =/  new=pool:gol  abet:(delete-goal:pore gid mod)
-      =.  pools.store        (~(put by pools.store) pid new)
-      ?~  idx=(find [gid]~ goal-order.local.store)  this
-      =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
-      this
     =/  new=pool:gol  abet:(delete-goal:(apex:pl old) gid mod)
-    =.  pools.store        (~(put by pools.store) pid new)
+    ~&  checking-goal+(~(has by goals.new) gid)
+    =.  pools.store   (~(put by pools.store) pid new)
     ?~  idx=(find [gid]~ goal-order.local.store)  this
     =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
     this
