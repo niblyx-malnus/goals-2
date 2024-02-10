@@ -128,13 +128,13 @@
 ::
 +$  goal-vent
   $@  ~
-  $%  [%pool-roots roots=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
-      [%goal-young young=(list [gid ? @t ? ? tags])] :: gid, summary, cmp, axn, tags
-      [%harvest harvest=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
-      [%pool-tag-goals goals=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
-      [%pool-tag-harvest harvest=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
-      [%local-tag-goals goals=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
-      [%local-tag-harvest harvest=(list [gid @t ? ? tags])]   :: gid, summary, cmp, axn, tags
+  $%  [%pool-roots roots=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
+      [%goal-young young=(list [gid ? @t ? ? ? tags])] :: gid, summary, atv, cmp, axn, tags
+      [%harvest harvest=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
+      [%pool-tag-goals goals=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
+      [%pool-tag-harvest harvest=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
+      [%local-tag-goals goals=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
+      [%local-tag-harvest harvest=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
       [%pools-index pools=(list [pid @t])]
       [%tags =tags]
       [%uid gid=(unit gid)]

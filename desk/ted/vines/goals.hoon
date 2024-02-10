@@ -43,6 +43,7 @@
     =+  (~(got by goals.pool) gid)
     :*  gid
         summary
+        done.i.status.start
         done.i.status.end
         actionable
         %+  weld
@@ -108,6 +109,7 @@
     =+  (~(got by goals.pool) gid)
     :*  gid
         summary
+        done.i.status.start
         done.i.status.end
         actionable
         %+  weld
@@ -135,6 +137,7 @@
     =+  (~(got by goals.pool) gid)
     :*  gid
         summary
+        done.i.status.start
         done.i.status.end
         actionable
         %+  weld
@@ -166,6 +169,7 @@
     =+  (~(got by goals.pool) gid)
     :*  gid
         summary
+        done.i.status.start
         done.i.status.end
         actionable
         %+  weld
@@ -194,6 +198,7 @@
     =+  (~(got by goals.pool) gid)
     :*  gid
         summary
+        done.i.status.start
         done.i.status.end
         actionable
         %+  weld
@@ -226,6 +231,7 @@
     =+  (~(got by goals.pool) gid)
     :*  gid
         summary
+        done.i.status.start
         done.i.status.end
         actionable
         %+  weld
