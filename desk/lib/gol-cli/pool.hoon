@@ -67,7 +67,7 @@
   ~&  trac+trac
   :: Update goals to remaining
   ::
-  =.  goals.p  (gus-by goals.p.pore ~(tap in prog))
+  =.  goals.p.pore  (gus-by goals.p.pore ~(tap in prog))
   ~&  checking-within+(~(has by goals.p.pore) gid)
   :: both of these should get validated here (validate-goals:vd goals)
   :: return extracted goals and remaining goals
