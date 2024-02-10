@@ -39,17 +39,6 @@
       =archive
   ==
 ::
-+$  stock     (list [=gid chief=ship]) :: lineage; youngest to oldest
-+$  ranks     (map ship gid) :: map of ship to highest ranking goal gid
-+$  edge      (pair nid nid)
-+$  edges     (set edge)
-::
-+$  order-by
-  $:  by-precedence=(list gid)
-      by-kickoff=(list gid)
-      by-deadline=(list gid)
-  ==
-::
 +$  module  [parent=(unit gid) version=@ud body=json]
 ::
 +$  pool-data
@@ -78,6 +67,17 @@
       =local
       pool-info=(map pid pool-data)
       =json-tree:jot
+  ==
+::
++$  stock     (list [=gid chief=ship]) :: lineage; youngest to oldest
++$  ranks     (map ship gid) :: map of ship to highest ranking goal gid
++$  edge      (pair nid nid)
++$  edges     (set edge)
+::
++$  order-by
+  $:  by-precedence=(list gid)
+      by-kickoff=(list gid)
+      by-deadline=(list gid)
   ==
 ::
 +$  node-trace

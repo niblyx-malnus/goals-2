@@ -16,6 +16,20 @@
 ~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
+    %goal-action
+  =+  !<(act=action:axn vase)
+  ?+    -.act  (just-poke [our dap]:gowl mark vase)
+      %create-goal
+    =/  old=(set gid:gol)  ~(key by goals:(~(got by pools.store) pid.act))
+    ;<  ~  bind:m  (poke [our dap]:gowl mark vase)
+    ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+    =/  new=(set gid:gol)  ~(key by goals:(~(got by pools.store) pid.act))
+    =/  gid-list=(list gid:gol)  ~(tap in (~(dif in new) old))
+    ?>  ?=(^ gid-list)
+    ?>  =(1 (lent gid-list))
+    (pure:m !>([%uid `i.gid-list]))
+  ==
+  ::
     %goal-view
   =+  !<(vyu=goal-view:axn vase)
   ?-    -.vyu
