@@ -59,7 +59,7 @@
   =/  pore  (move gid ~ host.pid.p) :: divine intervention (owner)
   :: Partition subgoals of goal from rest of goals
   ::
-  =.  pore  (parenttition:pore prog mod)
+  =.  pore  (partition:pore prog mod)
   :: Get extracted goals
   ::
   =/  trac=goals:gol  (gat-by goals.p.pore ~(tap in prog))
@@ -110,7 +110,7 @@
   =.  archive.p  (~(del by archive.p) gid)
   ?^  mol=(mole |.((move gid parent mod)))
     u.mol
-  ~&(%failed-to-restore-under-old-parentent this)
+  ~&(%failed-to-restore-under-old-parent this)
 ::
 :: Permanently delete goal and subgoals from archive
 ++  delete-goal
@@ -122,7 +122,7 @@
   this(archive.p (~(del by archive.p) gid))
 ::
 :: Partition the set of goals q from its complement q- in goals.p
-++  parenttition
+++  partition
   |=  [q=(set gid:gol) mod=ship]
   ^-  _this
   ::

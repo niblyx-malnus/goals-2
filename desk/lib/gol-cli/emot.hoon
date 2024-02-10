@@ -96,6 +96,7 @@
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
     ?:  (~(has by goals.old) gid)
+      =/  pore               (archive-goal:(apex:pl old) gid mod)
       =/  new=pool:gol  abet:(delete-goal:(apex:pl old) gid mod)
       =.  pools.store        (~(put by pools.store) pid new)
       ?~  idx=(find [gid]~ goal-order.local.store)  this
