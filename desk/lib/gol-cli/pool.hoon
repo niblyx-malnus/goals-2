@@ -54,6 +54,7 @@
   :: Get subgoals of goal including self
   ::
   =/  prog  (progeny:tv gid)
+  ~&  prog+prog
   :: Move goal to root
   ::
   =/  pore  (move gid ~ host.pid.p) :: divine intervention (owner)
@@ -63,9 +64,11 @@
   :: Get extracted goals
   ::
   =/  trac=goals:gol  (gat-by goals.p.pore ~(tap in prog))
+  ~&  trac+trac
   :: Update goals to remaining
   ::
   =.  goals.p  (gus-by goals.p.pore ~(tap in prog))
+  ~&  checking-within+(~(has by goals.p.pore) gid)
   :: both of these should get validated here (validate-goals:vd goals)
   :: return extracted goals and remaining goals
   ::
