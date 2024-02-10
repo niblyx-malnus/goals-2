@@ -118,6 +118,7 @@
       [%goal-parent =pid =gid]
       [%goal-actionable =pid =gid]
       [%goal-complete =pid =gid]
+      [%goal-active =pid =gid]
       [%setting setting=@t]
       [%pool-tags =pid]
       [%all-local-goal-tags ~]

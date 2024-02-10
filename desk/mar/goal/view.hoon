@@ -31,6 +31,7 @@
         [%goal-parent (ot ~[pid+pid gid+gid])]
         [%goal-actionable (ot ~[pid+pid gid+gid])]
         [%goal-complete (ot ~[pid+pid gid+gid])]
+        [%goal-active (ot ~[pid+pid gid+gid])]
         [%setting (ot ~[setting+so])]
         [%pool-tags (ot ~[pid+pid])]
         [%all-local-goal-tags ul]

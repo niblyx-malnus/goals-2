@@ -311,6 +311,11 @@
     =/  =goal:gol  (~(got by goals.pool) gid.vyu)
     (pure:m !>([%loob done.i.status.end.goal]))
     ::
+      %goal-active
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
+    (pure:m !>([%loob done.i.status.start.goal]))
+    ::
       %pool-tags
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
