@@ -97,7 +97,7 @@
     =/  old=pool:gol  (~(got by pools.store) pid)
     ?:  (~(has by goals.old) gid)
       =/  pore               (archive-goal:(apex:pl old) gid mod)
-      =/  new=pool:gol  abet:(delete-goal:(apex:pl old) gid mod)
+      =/  new=pool:gol  abet:(delete-goal:pore gid mod)
       =.  pools.store        (~(put by pools.store) pid new)
       ?~  idx=(find [gid]~ goal-order.local.store)  this
       =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
@@ -112,21 +112,21 @@
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
     =/  new=pool:gol  abet:(move:(apex:pl old) cid upid mod)
-    =.  pools.store        (~(put by pools.store) pid new)
+    =.  pools.store   (~(put by pools.store) pid new)
     this
     ::
       %yoke
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
     =/  new=pool:gol  abet:(plex-sequence:(apex:pl old) yoks mod)
-    =.  pools.store        (~(put by pools.store) pid new)
+    =.  pools.store   (~(put by pools.store) pid new)
     this
     ::
       %mark-actionable
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
     =/  new=pool:gol  abet:(mark-actionable:(apex:pl old) gid mod)
-    =.  pools.store  (~(put by pools.store) pid new)
+    =.  pools.store   (~(put by pools.store) pid new)
     this
     ::
       %mark-complete
