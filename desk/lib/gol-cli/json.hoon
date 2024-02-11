@@ -142,6 +142,8 @@
         [%unmark-actionable (ot ~[pid+pid gid+gid])]
         [%mark-complete (ot ~[pid+pid gid+gid])]
         [%unmark-complete (ot ~[pid+pid gid+gid])]
+        [%mark-active (ot ~[pid+pid gid+gid])]
+        [%unmark-active (ot ~[pid+pid gid+gid])]
         [%pools-slot-above (ot ~[dis+pid dat+pid])]
         [%pools-slot-below (ot ~[dis+pid dat+pid])]
         [%goals-slot-above (ot ~[dis+key dat+key])]

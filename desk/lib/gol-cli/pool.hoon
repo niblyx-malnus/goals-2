@@ -603,28 +603,6 @@
     ==
   this(goals.p (~(put by goals.p) gid.nid goal))
 ::
-++  mark-complete
-  |=  [=gid:gol now=@da mod=ship]
-  ^-  _this
-  ~&  %marking-complete
-  =/  pore  (mark-done s+gid now mod)
-  (mark-done:pore e+gid now mod)
-::
-++  unmark-complete
-  |=  [=gid:gol now=@da mod=ship]
-  ^-  _this
-  =/  pore  (unmark-done e+gid now mod)
-  :: Unmark start done if possible
-  ?~  unk=(mole |.((unmark-done:pore s+gid now mod)))
-    pore
-  u.unk
-::
-++  mark-active
-  |=  [=gid:gol now=@da mod=ship]
-  ^-  _this
-  ~&  %marking-active
-  (mark-done s+gid now mod)
-::
 ++  bounded
   |=  [=nid:gol =moment:gol dir=?(%l %r)]
   ^-  ?

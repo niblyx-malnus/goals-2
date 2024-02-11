@@ -45,6 +45,8 @@
           [%unmark-actionable =pid =gid]
           [%mark-complete =pid =gid]
           [%unmark-complete =pid =gid]
+          [%mark-active =pid =gid]
+          [%unmark-active =pid =gid]
           [%update-goal-perms =pid =gid chief=ship rec=_| =deputies]
       ==
     +$  hitch
