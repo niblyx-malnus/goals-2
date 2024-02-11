@@ -565,7 +565,7 @@
         %s
       ?:  done.i.status.start.goal
         ~|("already-done" !!)
-      ?:  (lte now timestamp.i.status.start.goal)
+      ?:  (lth now timestamp.i.status.start.goal)
         ~|("bad-time" !!)
       goal(status.start [[now %&] status.start.goal])
       ::
@@ -590,7 +590,7 @@
         %s
       ?.  done.i.status.start.goal
         ~|("already-undone" !!)
-      ?:  (lte now timestamp.i.status.start.goal)
+      ?:  (lth now timestamp.i.status.start.goal)
         ~|("bad-time" !!)
       goal(status.start [[now %|] status.start.goal])
       ::
