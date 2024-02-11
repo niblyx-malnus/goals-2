@@ -28,7 +28,7 @@
   :: Initialize inflowing and outflowing nodes
   =.  outflow.start.goal  (~(put in *(set nid:gol)) [%e gid])
   =.  inflow.end.goal     (~(put in *(set nid:gol)) [%s gid])
-  =.  status.start.goal   [[now %|] ~]
+  =.  status.start.goal   [[now %&] ~] :: a created goal is considered started
   =.  status.end.goal     [[now %|] ~]
   goal
 ::
