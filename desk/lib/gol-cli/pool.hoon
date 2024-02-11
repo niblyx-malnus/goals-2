@@ -28,7 +28,7 @@
   :: Initialize inflowing and outflowing nodes
   =.  outflow.start.goal  (~(put in *(set nid:gol)) [%e gid])
   =.  inflow.end.goal     (~(put in *(set nid:gol)) [%s gid])
-  =.  status.start.goal   [[now %&] ~] :: a created goal is considered started
+  =.  status.start.goal   [[now %|] ~]
   =.  status.end.goal     [[now %|] ~]
   goal
 ::
@@ -43,9 +43,11 @@
   =.  this  (move gid upid host.pid.p) :: divine intervention (owner)
   :: mark the goal started if possible
   ::
-  ?^  mol=(mole |.((mark-done s+gid now mod)))
-    u.mol
-  this
+  =/  mul  (mule |.((mark-done s+gid now mod)))
+  ?-  -.mul
+    %&  p.mul
+    %|  ((slog p.mul) this)
+  ==
 ::
 :: Extract goal from goals
 ++  wrest-goal
