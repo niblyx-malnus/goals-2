@@ -96,7 +96,6 @@
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
     =/  new=pool:gol  abet:(delete-goal:(apex:pl old) gid mod)
-    ~&  checking-goal+(~(has by goals.new) gid)
     =.  pools.store   (~(put by pools.store) pid new)
     ?~  idx=(find [gid]~ goal-order.local.store)  this
     =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
@@ -128,6 +127,8 @@
     =/  old=pool:gol  (~(got by pools.store) pid)
     =/  new=pool:gol  abet:(mark-complete:(apex:pl old) gid now.bowl mod)
     =.  pools.store  (~(put by pools.store) pid new)
+    :: automatically complete parent if all its children are complete
+    ::
     =/  parent=(unit gid:gol)  parent:(~(got by goals.new) gid)
     ?~  parent  this
     ?.  %-  ~(all in (~(young nd goals.new) u.parent))

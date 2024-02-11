@@ -67,6 +67,7 @@
     :*  gid
         virtual=(~(has in children.goal) gid)
         summary
+        done.i.status.start
         done.i.status.end
         actionable
         %+  weld

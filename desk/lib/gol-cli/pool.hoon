@@ -54,7 +54,6 @@
   :: Get subgoals of goal including self
   ::
   =/  prog  (progeny:tv gid)
-  ~&  prog+prog
   :: Move goal to root
   ::
   =/  pore  (move gid ~ host.pid.p) :: divine intervention (owner)
@@ -64,11 +63,9 @@
   :: Get extracted goals
   ::
   =/  trac=goals:gol  (gat-by goals.p.pore ~(tap in prog))
-  ~&  trac+trac
   :: Update goals to remaining
   ::
   =.  goals.p.pore  (gus-by goals.p.pore ~(tap in prog))
-  ~&  checking-within+(~(has by goals.p.pore) gid)
   :: both of these should get validated here (validate-goals:vd goals)
   :: return extracted goals and remaining goals
   ::
@@ -547,6 +544,13 @@
   ?:  (has-nested gid)  ~|("has-nested" !!)
   this(goals.p (~(put by goals.p) gid goal(actionable %&)))
 ::
+++  unmark-actionable
+  |=  [=gid:gol mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm gid mod)
+  =/  goal  (~(got by goals.p) gid)
+  this(goals.p (~(put by goals.p) gid goal(actionable %|)))
+::
 ++  mark-done
   |=  [=nid:gol now=@da mod=ship]
   ^-  _this
@@ -573,26 +577,6 @@
   ~&  goal
   this(goals.p (~(put by goals.p) gid.nid goal))
 ::
-++  mark-complete
-  |=  [=gid:gol now=@da mod=ship]
-  ^-  _this
-  ~&  %marking-complete
-  =/  pore  (mark-done s+gid now mod)
-  (mark-done:pore e+gid now mod)
-::
-++  mark-active
-  |=  [=gid:gol now=@da mod=ship]
-  ^-  _this
-  ~&  %marking-active
-  (mark-done s+gid now mod)
-::
-++  unmark-actionable
-  |=  [=gid:gol mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  =/  goal  (~(got by goals.p) gid)
-  this(goals.p (~(put by goals.p) gid goal(actionable %|)))
-::
 ++  unmark-done
   |=  [=nid:gol now=@da mod=ship]
   ^-  _this
@@ -617,6 +601,13 @@
     ==
   this(goals.p (~(put by goals.p) gid.nid goal))
 ::
+++  mark-complete
+  |=  [=gid:gol now=@da mod=ship]
+  ^-  _this
+  ~&  %marking-complete
+  =/  pore  (mark-done s+gid now mod)
+  (mark-done:pore e+gid now mod)
+::
 ++  unmark-complete
   |=  [=gid:gol now=@da mod=ship]
   ^-  _this
@@ -625,6 +616,12 @@
   ?~  unk=(mole |.((unmark-done:pore s+gid now mod)))
     pore
   u.unk
+::
+++  mark-active
+  |=  [=gid:gol now=@da mod=ship]
+  ^-  _this
+  ~&  %marking-active
+  (mark-done s+gid now mod)
 ::
 ++  bounded
   |=  [=nid:gol =moment:gol dir=?(%l %r)]
