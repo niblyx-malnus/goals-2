@@ -166,26 +166,28 @@
     ::
       %mark-active
     =+  axn
-    =/  old=pool:gol  (~(got by pools.store) pid)
     :: automatically mark parent active if possible
-    =/  parent=(unit gid:gol)  parent:(~(got by goals.old) gid)
+    =/  parent=(unit gid:gol)
+      parent:(~(got by goals:(~(got by pools.store) pid)) gid)
     =?  this  ?=(^ parent)
       (handle-action:this [%mark-active pid u.parent])
     ~&  %marking-active
+    =/  old=pool:gol  (~(got by pools.store) pid)
     =/  new=pool:gol  abet:(mark-done:(apex:pl old) s+gid now.bowl mod)
     this(pools.store (~(put by pools.store) pid new))
     ::
       %unmark-active
     =+  axn
-    =/  old=pool:gol  (~(got by pools.store) pid)
     :: automatically unmark child active if possible
-    =/  children=(list gid:gol)  ~(tap in children:(~(got by goals.old) gid))
+    =/  children=(list gid:gol)
+      ~(tap in children:(~(got by goals:(~(got by pools.store) pid)) gid))
     =.  this
       |-
       ?~  children
         this
       (handle-action:this [%unmark-active pid i.children])
     ~&  %unmarking-active
+    =/  old=pool:gol  (~(got by pools.store) pid)
     =/  new=pool:gol  abet:(unmark-done:(apex:pl old) s+gid now.bowl mod)
     this(pools.store (~(put by pools.store) pid new))
     ::
