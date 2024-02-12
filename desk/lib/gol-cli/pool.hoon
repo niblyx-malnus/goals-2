@@ -564,16 +564,16 @@
     ?-    -.nid
         %s
       ?:  done.i.status.start.goal
-        ~|("already-done" !!)
+        ~|("already-done" goal)
       ?:  (lth now timestamp.i.status.start.goal)
-        ~|("bad-time" !!)
+        ~|("bad-time" goal)
       goal(status.start [[now %&] status.start.goal])
       ::
         %e
       ?:  done.i.status.end.goal
-        ~|("already-done" !!)
+        ~|("already-done" goal)
       ?:  (lth now timestamp.i.status.end.goal)
-        ~|("bad-time" !!)
+        ~|("bad-time" goal)
       goal(status.end [[now %&] status.end.goal])
     ==
   ~&  goal
@@ -589,16 +589,16 @@
     ?-    -.nid
         %s
       ?.  done.i.status.start.goal
-        ~|("already-undone" !!)
+        ~|("already-undone" goal)
       ?:  (lth now timestamp.i.status.start.goal)
-        ~|("bad-time" !!)
+        ~|("bad-time" goal)
       goal(status.start [[now %|] status.start.goal])
       ::
         %e
       ?.  done.i.status.end.goal
-        ~|("already-undone" !!)
+        ~|("already-undone" goal)
       ?:  (lth now timestamp.i.status.end.goal)
-        ~|("bad-time" !!)
+        ~|("bad-time" goal)
       goal(status.end [[now %|] status.end.goal])
     ==
   this(goals.p (~(put by goals.p) gid.nid goal))
