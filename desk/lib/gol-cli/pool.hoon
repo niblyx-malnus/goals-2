@@ -40,14 +40,7 @@
       (check-goal-create-perm u.upid mod)
   =/  goal  (init-goal gid summary mod now mod)
   =.  goals.p  (~(put by goals.p) gid goal)
-  =.  this  (move gid upid host.pid.p) :: divine intervention (owner)
-  :: mark the goal started if possible
-  ::
-  =/  mul  (mule |.((mark-done s+gid now mod)))
-  ?-  -.mul
-    %&  p.mul
-    %|  ((slog p.mul) this)
-  ==
+  (move gid upid host.pid.p) :: divine intervention (owner)
 ::
 :: Extract goal from goals
 ++  wrest-goal
