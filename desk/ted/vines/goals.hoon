@@ -365,27 +365,7 @@
         summary.u.goal
     ==
     ::
-      %goal-data
-    %-  pure:m  !>
-    :-  %goal-data
-    %+  turn  keys.vyu
-    |=  =key:gol
-    =/  =pool:gol                (~(got by pools.store) pid.key)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.key)
-    =+  (~(got by goals.pool) gid.key)
-    :*  gid
-        summary
-        %+  weld
-          %+  turn
-            ~(tap in (~(gut by tags.local.store) [pid.key gid] ~))
-          (lead |)
-        %+  turn
-          ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
-        (lead &)
-        done.i.status.start
-        done.i.status.end
-        actionable
-    ==
+    %goal-data  (goal-data keys.vyu)
   ==
   ::
     %json-tree-action
@@ -434,5 +414,30 @@
   %=  $
     pools  t.pools
     goals  (~(uni by goals) goals.i.pools)
+  ==
+++  goal-data
+  |=  keys=(list key:gol)
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+  %-  pure:m  !>
+  :-  %goal-data
+  %+  turn  keys
+  |=  =key:gol
+  =/  =pool:gol                (~(got by pools.store) pid.key)
+  =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.key)
+  =+  (~(got by goals.pool) gid.key)
+  :*  gid
+      summary
+      %+  weld
+        %+  turn
+          ~(tap in (~(gut by tags.local.store) [pid.key gid] ~))
+        (lead |)
+      %+  turn
+        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
+      (lead &)
+      done.i.status.start
+      done.i.status.end
+      actionable
   ==
 --
