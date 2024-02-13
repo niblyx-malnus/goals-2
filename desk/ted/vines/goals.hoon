@@ -427,11 +427,11 @@
   =/  =pool:gol                (~(got by pools.store) pid.key)
   =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.key)
   =+  (~(got by goals.pool) gid.key)
-  :*  gid
+  :*  key
       summary
       %+  weld
         %+  turn
-          ~(tap in (~(gut by tags.local.store) [pid.key gid] ~))
+          ~(tap in (~(gut by tags.local.store) key ~))
         (lead |)
       %+  turn
         ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))

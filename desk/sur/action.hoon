@@ -132,7 +132,7 @@
 +$  tags  (list (pair ? @t)) :: local/public tags
 ::
 +$  goal-datum
-  $:  =gid
+  $:  =key
       summary=@t
       =tags
       active=?

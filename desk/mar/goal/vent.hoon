@@ -16,7 +16,7 @@
       %+  turn  goals.vnt
       |=  goal-datum
       %-  pairs
-      :~  [%gid (enjs-gid gid)]
+      :~  [%key (enjs-key key)]
           [%summary s+summary]
           [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
           [%active b+active]
