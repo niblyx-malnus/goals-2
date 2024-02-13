@@ -37,7 +37,7 @@
         [%all-local-goal-tags ul]
         [%collections ul]
         [%collection (ot ~[path+pa])]
-        [%goal-data ul]
+        [%goal-data (ar key)]
     ==
     ++  type
       %-  of
