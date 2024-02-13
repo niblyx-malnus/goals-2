@@ -6,6 +6,9 @@
       [%pools-slot-below dis=pid dat=pid]
       [%goals-slot-above dis=key dat=key]
       [%goals-slot-below dis=key dat=key]
+      [%update-local-goal-tags =key p=(each (set @t) (set @t))]
+      [%update-local-tag-property tag=@t p=(each [@t @t] @t)]
+      [%update-setting p=(each [@t @t] @t)]
       [%put-collection =path =collection]
       [%del-collection =path]
   ==
@@ -24,7 +27,7 @@
 ++  goal-action
   =<  goal-action
   |%
-  +$  goal-action  $%(create mutate local)
+  +$  goal-action  $%(create mutate)
   +$  create
     $%  [%create-goal =pid upid=(unit gid) summary=@t actionable=?]
         [%create-goal-with-tag =pid upid=(unit gid) summary=@t actionable=? tag=@t]
@@ -56,11 +59,6 @@
           [%update-goal-field =pid =gid p=(each [@t @t] @t)]
       ==
     --
-  +$  local
-    $%  [%update-local-goal-tags =key p=(each (set @t) (set @t))]
-        [%update-local-tag-property tag=@t p=(each [@t @t] @t)]
-        [%update-setting p=(each [@t @t] @t)]
-    ==
   --
 ::
 +$  core-yoke
@@ -128,13 +126,25 @@
       [%all-local-goal-tags ~]
       [%collections ~]
       [%collection =path]
+      [%goal-data keys=(list key)]
   ==
 ::
 +$  tags  (list (pair ? @t)) :: local/public tags
 ::
++$  goal-datum
+  $:  =gid
+      summary=@t
+      =tags
+      active=?
+      complete=?
+      actionable=?
+  ==
+::
 +$  goal-vent
   $@  ~
-  $%  [%pool-roots roots=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
+  $%  [%keys keys=(list key)]
+      [%goal-data goals=(list goal-datum)]
+      [%pool-roots roots=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
       [%goal-young young=(list [gid ? @t ? ? ? tags])] :: gid, summary, atv, cmp, axn, tags
       [%harvest harvest=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags
       [%pool-tag-goals goals=(list [gid @t ? ? ? tags])]   :: gid, summary, atv, cmp, axn, tags

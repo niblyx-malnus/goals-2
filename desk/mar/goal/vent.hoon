@@ -11,6 +11,19 @@
     ^-  ^json
     ?~  vnt  ~
     ?-    -.vnt
+        %goal-data
+      :-  %a
+      %+  turn  goals.vnt
+      |=  goal-datum
+      %-  pairs
+      :~  [%gid (enjs-gid gid)]
+          [%summary s+summary]
+          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
+          [%active b+active]
+          [%complete b+complete]
+          [%actionable b+actionable]
+      ==
+      ::
         %pool-roots
       :-  %a
       %+  turn  roots.vnt
@@ -117,6 +130,7 @@
       %cord         s+p.vnt
       %ucord        ?~(p.vnt ~ s+u.p.vnt)
       %loob         b+p.vnt
+      %keys         a+(turn keys.vnt enjs-key)
       %collections  a+(turn paths.vnt |=(=^path s+(spat path)))
       ::
         %collection  
