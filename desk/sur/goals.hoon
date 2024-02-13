@@ -52,6 +52,13 @@
 ::
 +$  pools  (map pid pool)
 ::
++$  collection
+  $:  keys=(list key)
+      themes=(set @t)
+      :: title=@t
+      :: description=@t
+  ==
+::
 +$  local
   $:  goal-order=(list key)
       pool-order=(list pid) :: order of pools
@@ -59,6 +66,7 @@
       fields=(map key (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
+      collections=(axal (map @ta collection))
       settings=(map @t @t)
   ==
 ::

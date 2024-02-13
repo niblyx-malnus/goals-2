@@ -340,6 +340,30 @@
     ?~  vals
       (pure:m !>([%tags (turn ~(tap in tags) (lead |))]))
     $(vals t.vals, tags (~(uni in tags) i.vals))
+    ::
+      %collections
+    (pure:m !>([%collections (turn ~(tap of collections.local.store) head)]))
+    ::
+      %collection
+    =/  cos=(map @ta collection:gol)
+      (fall (~(get of collections.local.store) (snip path.vyu)) ~)
+    ?.  (~(has by cos) (rear path.vyu))
+      (pure:m !>([%collection ~ ~]))
+    =/  =collection:gol  (~(got by cos) (rear path.vyu))
+    %-  pure:m  !>
+    :-  %collection
+    :-  themes.collection
+    %+  murn  keys.collection
+    |=  =key:gol
+    =/  goal=(unit goal:gol)
+      (~(get by goals:(fall (~(get by pools.store) pid.key) *pool:gol)) gid.key)
+    ?~  goal
+      ~
+    :-  ~
+    :*  key
+        done.i.status.end.u.goal
+        summary.u.goal
+    ==
   ==
   ::
     %json-tree-action

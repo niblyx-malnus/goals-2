@@ -112,11 +112,26 @@
           [%title s+title]
       ==
       ::
-      %tags        a+(turn tags.vnt |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))
-      %uid         ?~(gid.vnt ~ (enjs-gid u.gid.vnt))
-      %cord        s+p.vnt
-      %ucord       ?~(p.vnt ~ s+u.p.vnt)
-      %loob        b+p.vnt
+      %tags         a+(turn tags.vnt |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))
+      %uid          ?~(gid.vnt ~ (enjs-gid u.gid.vnt))
+      %cord         s+p.vnt
+      %ucord        ?~(p.vnt ~ s+u.p.vnt)
+      %loob         b+p.vnt
+      %collections  a+(turn paths.vnt |=(=^path s+(spat path)))
+      ::
+        %collection  
+      %-  pairs
+      :~  [%themes a+(turn ~(tap in themes.vnt) (lead %s))]
+          :-  %goals
+          :-  %a
+          %+  turn  goals.vnt
+          |=  [=key complete=? desc=@t]
+          %-  pairs
+          :~  [%key (enjs-key key)]
+              [%complete b+complete]
+              [%description s+desc]
+          ==
+      ==
     ==
   --
 ++  grab

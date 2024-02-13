@@ -148,6 +148,8 @@
         [%pools-slot-below (ot ~[dis+pid dat+pid])]
         [%goals-slot-above (ot ~[dis+key dat+key])]
         [%goals-slot-below (ot ~[dis+key dat+key])]
+        [%put-collection (ot ~[path+pa collection+collection])]
+        [%del-collection (ot ~[path+pa])]
         [%update-pool-perms (ot ~[pid+pid new+perms])]
         [%update-pool-property pd-pool-property]
         [%update-pool-tag-property pd-pool-tag-property]
@@ -158,6 +160,8 @@
         [%update-local-tag-property pd-local-tag-property]
         [%update-setting pd-setting]
     ==
+  ::
+  ++  collection  (ot ~[keys+(ar key) themes+(as so)])
   ::
   ++  tag  (ot ~[text+so color+so private+bo])
   ::

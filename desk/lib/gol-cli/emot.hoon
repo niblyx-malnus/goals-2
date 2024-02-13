@@ -251,6 +251,24 @@
     =.  goal-order.local.store  (into goal-order.local.store +(u.idx) dis)
     this
     ::
+      %put-collection
+    =/  cos=(map @ta collection:gol)
+      (fall (~(get of collections.local.store) (snip path.axn)) ~)
+    =.  cos  (~(put by cos) (rear path.axn) collection.axn)
+    =.  collections.local.store
+      (~(put of collections.local.store) (snip path.axn) cos)
+    this
+    ::
+      %del-collection
+    =/  cos=(map @ta collection:gol)
+      (fall (~(get of collections.local.store) (snip path.axn)) ~)
+    =.  cos  (~(del by cos) (rear path.axn))
+    =.  collections.local.store
+      ?~  cos
+        (~(del of collections.local.store) (snip path.axn))
+      (~(put of collections.local.store) (snip path.axn) cos)
+    this
+    ::
       %put-module
     !!
     ::

@@ -6,6 +6,8 @@
       [%pools-slot-below dis=pid dat=pid]
       [%goals-slot-above dis=key dat=key]
       [%goals-slot-below dis=key dat=key]
+      [%put-collection =path =collection]
+      [%del-collection =path]
   ==
 ++  pool-action
   $%  [%create-pool title=@t]
@@ -124,6 +126,8 @@
       [%setting setting=@t]
       [%pool-tags =pid]
       [%all-local-goal-tags ~]
+      [%collections ~]
+      [%collection =path]
   ==
 ::
 +$  tags  (list (pair ? @t)) :: local/public tags
@@ -143,5 +147,7 @@
       [%cord p=@t]
       [%ucord p=(unit @t)]
       [%loob p=?]
+      [%collections paths=(list path)]
+      [%collection themes=(set @t) goals=(list [key ? @t])]
   ==
 --
