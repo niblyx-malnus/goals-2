@@ -4,8 +4,8 @@ export type Tag = {
 };
 
 export type Goal = {
-  gid: string,
-  description: string,
+  key: string,
+  summary: string,
   tags: Tag[],
   active: boolean,
   complete: boolean,

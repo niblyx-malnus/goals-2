@@ -35,12 +35,12 @@ function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; t
     fetchGoals();
   }, [refresh, host, name, tag]);
 
-  const moveGoalUp = async (gid: string) => {
-    const index = _.findIndex(goals, { gid });
+  const moveGoalUp = async (key: string) => {
+    const index = _.findIndex(goals, { key });
     if (index > 0) {
       try {
-        const aboveGoalId = goals[index - 1].gid;
-        await api.goalsSlotAbove(gid, aboveGoalId);
+        const aboveGoalId = goals[index - 1].key;
+        await api.goalsSlotAbove(key, aboveGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -48,12 +48,12 @@ function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; t
     }
   };
   
-  const moveGoalDown = async (gid: string) => {
-    const index = _.findIndex(goals, { gid });
+  const moveGoalDown = async (key: string) => {
+    const index = _.findIndex(goals, { key });
     if (index >= 0 && index < goals.length - 1) {
-      const belowGoalId = goals[index + 1].gid;
+      const belowGoalId = goals[index + 1].key;
       try {
-        await api.goalsSlotBelow(gid, belowGoalId);
+        await api.goalsSlotBelow(key, belowGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -87,7 +87,7 @@ function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; t
         { 
           displayedGoals.map((goal, index) => (
           <div
-            key={goal.gid}
+            key={goal.key}
             className="block text-current no-underline hover:no-underline"
           >
             <GoalRow

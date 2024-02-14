@@ -193,56 +193,60 @@ const api = {
       };
     return await api.goalAction(json);
   },
-  addGoalTag: async (gid: string, isPublic: boolean, text: string) => {
+  addGoalTag: async (key: string, isPublic: boolean, text: string) => {
+    console.log(key);
     const json = isPublic
       ?  {
           'update-goal-tags': {
-            id: gid,
+            key: key,
             method: 'uni',
             tags: [text]
           }
         }
       :  {
           'update-local-goal-tags': {
-            id: gid,
+            key: key,
             method: 'uni',
             tags: [text]
           }
         };
     return await api.goalAction(json);
   },
-  delGoalTag: async (goalId: string, isPublic: boolean, text: string) => {
+  delGoalTag: async (key: string, isPublic: boolean, text: string) => {
+    console.log(key);
     const json = isPublic
       ?  {
           'update-goal-tags': {
-            id: goalId,
+            key: key,
             method: 'dif',
             tags: [text]
           }
         }
       :  {
           'update-local-goal-tags': {
-            id: goalId,
+            key: key,
             method: 'dif',
             tags: [text]
           }
         };
     return await api.goalAction(json);
   },
-  addLocalGoalTag: async (goalId: string, text: string) => {
+  addLocalGoalTag: async (key: string, text: string) => {
+    console.log(key);
     const json = {
         'update-local-goal-tags': {
-          id: goalId,
+          key: key,
           method: 'uni',
           tags: [text]
         }
       };
     return await api.goalAction(json);
   },
-  delLocalGoalTag: async (goalId: string, text: string) => {
+  delLocalGoalTag: async (key: string, text: string) => {
+    console.log(key);
     const json = {
         'update-local-goal-tags': {
-          id: goalId,
+          key: key,
           method: 'dif',
           tags: [text]
         }

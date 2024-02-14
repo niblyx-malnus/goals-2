@@ -26,7 +26,7 @@ const GoalRow: React.FC<{
     moveGoalDown
   }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [newDescription, setNewDescription] = useState(goal.description);
+  const [newDescription, setNewDescription] = useState(goal.summary);
   const [isActionable, setIsActionable] = useState(goal.actionable);
   const [isComplete, setisComplete] = useState(goal.complete);
   const [panel, setPanel] = useState('');
@@ -91,7 +91,7 @@ const GoalRow: React.FC<{
     // Only proceed if the user confirms
     if (isConfirmed) {
       try {
-        await api.deleteGoal(pid, goal.gid);
+        await api.deleteGoal(pid, goal.key);
         refresh();
       } catch (error) {
         console.error(error);
@@ -103,7 +103,7 @@ const GoalRow: React.FC<{
   const updateGoal = async () => {
     try {
       console.log("updating goal...");
-      await api.setGoalSummary(pid, goal.gid, newDescription);
+      await api.setGoalSummary(pid, goal.key, newDescription);
       refresh();
       setIsEditing(false);
     } catch (error) {
@@ -113,7 +113,7 @@ const GoalRow: React.FC<{
 
   const cancelUpdateGoal = async () => {
     try {
-      setNewDescription(goal.description);
+      setNewDescription(goal.summary);
       refresh();
       setIsEditing(false);
     } catch (error) {
@@ -146,8 +146,8 @@ const GoalRow: React.FC<{
 
   const toggleActionable = async () => {
     try {
-      await api.setGoalActionable(goal.gid, !isActionable);
-      const actionable = await api.getGoalActionable(pid, goal.gid);
+      await api.setGoalActionable(goal.key, !isActionable);
+      const actionable = await api.getGoalActionable(pid, goal.key);
       setIsActionable(actionable);
       refresh();
     } catch (error) {
@@ -157,8 +157,8 @@ const GoalRow: React.FC<{
   
   const toggleComplete = async () => {
     try {
-      await api.setGoalComplete(pid, goal.gid, !isComplete);
-      const complete = await api.getGoalComplete(pid, goal.gid);
+      await api.setGoalComplete(pid, goal.key, !isComplete);
+      const complete = await api.getGoalComplete(pid, goal.key);
       setisComplete(complete);
       refresh();
     } catch (error) {
@@ -167,7 +167,7 @@ const GoalRow: React.FC<{
   };
   
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(goal.gid);
+    navigator.clipboard.writeText(goal.key);
   }
 
   // Toggle dropdown visibility
@@ -184,14 +184,14 @@ const GoalRow: React.FC<{
       // Logic to add the new tag to the goal
       // For example, update the tags array and send a request to the backend
       if (newTag.trim() !== '') {
-        await api.addGoalTag(goal.gid, newTagIsPublic, newTag);
+        await api.addGoalTag(`${pid}${goal.key}`, newTagIsPublic, newTag);
         setNewTag(''); // Reset input field
         await api.updateSetting('put', 'placeholder-tag', newTag);
         const fetchedTag = await api.getSetting("placeholder-tag");
         setPlaceholderTag(fetchedTag || 'today');
         refresh();
       } else {
-        await api.addGoalTag(goal.gid, newTagIsPublic, placeholderTag);
+        await api.addGoalTag(`${pid}${goal.key}`, newTagIsPublic, placeholderTag);
         const fetchedTag = await api.getSetting("placeholder-tag");
         setPlaceholderTag(fetchedTag || 'today');
         refresh();
@@ -221,7 +221,7 @@ const GoalRow: React.FC<{
     try {
       // Logic to remove the tag from the goal
       // For example, update the tags array and send a request to the backend
-      await api.delGoalTag(`${goal.gid}`, tagToRemove.isPublic, tagToRemove.tag);
+      await api.delGoalTag(`${goal.key}`, tagToRemove.isPublic, tagToRemove.tag);
       refresh();
     } catch (error) {
       console.error("Error removing tag: ", error);
@@ -231,7 +231,7 @@ const GoalRow: React.FC<{
   const toggleActive = async () => {
     const newActiveState = !isActive;
     try {
-      await api.setGoalActive(pid, goal.gid, newActiveState);
+      await api.setGoalActive(pid, goal.key, newActiveState);
       setIsActive(newActiveState); // Update the local state to reflect the change
       refresh(); // Call refresh to update the UI based on the new state
     } catch (error) {
@@ -319,7 +319,7 @@ const GoalRow: React.FC<{
         console.log(`Creating new ${listType} list for ${dateKey}.`);
       }
   
-      const updatedKeys = [`${pid}${goal.gid}`, ...data.keys];
+      const updatedKeys = [`${pid}${goal.key}`, ...data.keys];
       await api.jsonPut(path, { ...data, keys: updatedKeys });
       alert('Goal added to TodoList successfully');
       refresh();
@@ -349,10 +349,10 @@ const GoalRow: React.FC<{
             >
               <FiCopy />
             </button>
-            <button onClick={() => moveGoalUp(goal.gid)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+            <button onClick={() => moveGoalUp(goal.key)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
               ↑
             </button>
-            <button onClick={() => moveGoalDown(goal.gid)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+            <button onClick={() => moveGoalDown(goal.key)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
               ↓
             </button>
           </>
@@ -369,10 +369,10 @@ const GoalRow: React.FC<{
       ) : (
         <div
           className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-2 ${isComplete ? 'line-through' : ''}`}
-          onClick={() => navigateToGoal(goal.gid)}
+          onClick={() => navigateToGoal(goal.key)}
           onDoubleClick={() => setIsEditing(true)}
         >
-          {goal.description}
+          {goal.summary}
         </div>
       )}
       { 

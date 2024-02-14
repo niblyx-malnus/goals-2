@@ -1,236 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FiPlus, FiX, FiTrash } from 'react-icons/fi';
-import { getWeekDay, getMonday, addDays, formatDate, getMonth, getQuarter, getYear } from '../dateUtils';
+import React, { useState, useEffect } from 'react';
+import { formatDate } from '../dateUtils';
 import useStore from './store';
 import api from '../../api';
-import { Goal, periodType, isPeriodType } from './types';
+import { periodType } from './types';
+import { Goal } from '../../types';
 import { ourPool } from '../../constants';
-
-const determinePath = (periodType: periodType, date: Date) => {
-  let dateKey;
-  switch (periodType) {
-    case 'day':
-      dateKey = formatDate(date);
-      break;
-    case 'week':
-      dateKey = formatDate(getMonday(date));
-      break;
-    case 'month':
-      dateKey = getMonth(date);
-      break;
-    case 'quarter':
-      dateKey = getQuarter(date);
-      break;
-    case 'year':
-      dateKey = getYear(date);
-      break;
-    default:
-      throw new Error(`Unknown listType: ${periodType}`);
-  }
-  return `/period/${periodType}/${dateKey}.json`;
-};
-
-const formatDateDisplay = (periodType: periodType, date: Date) => {
-  switch (periodType) {
-    case 'day':
-      return `${getWeekDay(date)}, ${formatDate(date)}`;
-    case 'week':
-      return `Week of ${formatDate(getMonday(date))}`;
-    case 'month':
-      // Assuming getMonth returns the month and year in format "YYYY-MM"
-      return `${new Date(date).toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
-    case 'quarter':
-      // Assuming getQuarter returns "YYYY-QX"
-      const quarter = getQuarter(date).split('-')[1];
-      return `${quarter} of ${date.getFullYear()}`;
-    case 'year':
-      return `${getYear(date)}`;
-    default:
-      return '';
-  }
-};
-
-const formatNowDisplay = (periodType: periodType) => {
-  switch (periodType) {
-    case 'day':
-      return 'Today';
-    case 'week':
-      return 'This Week';
-    case 'month':
-      return 'This Month';
-    case 'quarter': 
-      return 'This Quarter';
-    case 'year':
-      return 'This Year';
-    default:
-      return '';
-  }
-}
-
-const navigateDate = (currentDate: Date, periodType: periodType, direction: 'prev' | 'next') => {
-  let adjustment = 1; // Default for day
-  if (periodType === 'week') {
-    adjustment = 7;
-  } else if (periodType === 'month') {
-    adjustment = direction === 'next' ? 1 : -1;
-    return new Date(currentDate.setMonth(currentDate.getMonth() + adjustment));
-  } else if (periodType === 'quarter') {
-    adjustment = direction === 'next' ? 3 : -3;
-    return new Date(currentDate.setMonth(currentDate.getMonth() + adjustment));
-  } else if (periodType === 'year') {
-    adjustment = direction === 'next' ? 1 : -1;
-    return new Date(currentDate.setFullYear(currentDate.getFullYear() + adjustment));
-  }
-  // For day and week navigation
-  return addDays(currentDate, direction === 'next' ? adjustment : -adjustment);
-};
-
-const TodoRow = ({
-  goal,
-  onToggleComplete,
-  onDelete,
-  onRemove,
-  onAddToTodoList
-}: {
-  goal: Goal,
-  onToggleComplete: (id: string) => void,
-  onDelete: (id: string) => void,
-  onRemove: (id: string) => void,
-  onAddToTodoList: (path: string, key: string) => void
-}) => {
-  const [panel, setPanel] = useState('');
-  const [listType, setListType] = useState<periodType>('day');
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  
-  const rowRef = useRef<HTMLLIElement>(null);
-
-  useEffect(() => {
-    // Function to check if clicked outside of element
-    const handleClickOutside = (event: { target: any; }) => {
-      if (rowRef.current && !rowRef.current.contains(event.target)) {
-        setPanel(''); // Close the panel
-      }
-    };
-  
-    // Add event listener when the component mounts
-    document.addEventListener("mousedown", handleClickOutside);
-  
-    // Cleanup event listener
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const togglePlusPanel = () => {
-    if (panel === '') {
-      setPanel('plus');
-    } else {
-      setPanel('');
-    }
-  }
-
-  const AddPanel = () => {
-    const path = determinePath(listType, selectedDate);
-  
-    // Check if the selected selectedDate is today for the "Now" button
-    const isTodaySelected = formatDate(new Date()) === formatDate(selectedDate);
-
-    const handleListTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newValue = e.target.value;
-      if (isPeriodType(newValue)) {
-        setListType(newValue);
-      } else {
-        console.error(`${newValue} is not a valid periodType`);
-        // Handle the error appropriately
-      }
-    };
-    
-    return (
-      <div className="z-10 absolute right-0 bottom-full mt-2 w-64 bg-white p-4 shadow-lg rounded-lg">
-        <div className="flex justify-center mb-4">
-          <select
-            value={listType}
-            onChange={handleListTypeChange}
-            className="max-w-20 mr-2 px-3 py-2 bg-gray-200 text-gray-800 rounded-md"
-          >
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-            <option value="quarter">Quarter</option>
-            <option value="year">Year</option>
-          </select>
-          <button 
-            className={`w-28 px-3 py-1 text-sm font-medium rounded-md ${isTodaySelected ? 'bg-gray-400 text-white' : 'bg-blue-500 text-white'}`}
-            onClick={() => !isTodaySelected && setSelectedDate(new Date())}
-            disabled={isTodaySelected}>
-            {formatNowDisplay(listType)}
-          </button>
-        </div>
-        <div className="flex items-center justify-between mb-4">
-          <button 
-            className="p-2 rounded-md bg-gray-200 text-gray-800" 
-            onClick={() => setSelectedDate(navigateDate(selectedDate, listType, 'prev'))}>
-            ←
-          </button>
-          <span className="text-sm text-center font-medium">
-            {formatDateDisplay(listType, selectedDate)}
-          </span>
-          <button 
-            className="p-2 rounded-md bg-gray-200 text-gray-800" 
-            onClick={() => setSelectedDate(navigateDate(selectedDate, listType, 'next'))}>
-            →
-          </button>
-        </div>
-        <button 
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600" 
-          onClick={() => onAddToTodoList(path, goal.key)}>
-          Add to {listType} list
-        </button>
-      </div>
-    );
-  };
-  
-  const toggleComplete = () => {
-    onToggleComplete(goal.key);
-  }
-
-  return (
-    <li ref={rowRef} className={`flex justify-between items-center mb-2 p-2 ${goal.complete ? 'bg-gray-200' : 'bg-white'} rounded shadow`}>
-      <span
-        className={`flex-1 cursor-pointer ${goal.complete ? 'line-through' : ''}`}
-        onClick={toggleComplete}
-      >
-        {goal.summary}
-      </span>
-      <div className="relative group">
-        <button
-          onClick={togglePlusPanel}
-          className="mr-1 bg-gray-300 hover:bg-gray-500 font-bold py-1 px-1 rounded"
-        >
-          <FiPlus />
-        </button>
-        {panel === 'plus' && <AddPanel />}
-      </div>
-      <button
-        onClick={() => onRemove(goal.key)}
-        className="mr-1 bg-gray-300 hover:bg-gray-500 font-bold py-1 px-1 rounded"
-      >
-        <FiX />
-      </button>
-      <button
-        onClick={() => {
-          const isConfirmed = window.confirm("Deleting a goal is irreversible. Are you sure you want to delete this goal?");
-          if (isConfirmed) {
-            onDelete(goal.key);
-          }
-        }}
-        className="bg-gray-300 hover:bg-gray-500 font-bold py-1 px-1 rounded"
-      >
-        <FiTrash />
-      </button>
-    </li>
-  );
-};
+import { isPeriodType, determinePath, formatDateDisplay, formatNowDisplay, navigateDate } from './helpers';
+import TodoRow from './TodoRow';
 
 const TodoList: React.FC = () => {
   const [viewType, setViewType] = useState<periodType>('day');
@@ -239,7 +15,7 @@ const TodoList: React.FC = () => {
   const [themeInput, setThemeInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
-  const { collections, setCollection, delCollection } = useStore(state => state);
+  const { collections, setCollection } = useStore(state => state);
 
   const path = determinePath(viewType, currentDate);
 
@@ -256,7 +32,7 @@ const TodoList: React.FC = () => {
       })
 
     setIsLoading(false);
-  }, [viewType, currentDate, setCollection, refresh]);
+  }, [viewType, currentDate, setCollection, refresh, path]);
 
   const isToday = formatDate(new Date()) === formatDate(currentDate);
 
@@ -346,7 +122,6 @@ const TodoList: React.FC = () => {
   };
 
   const handleRemoveTheme = (themeToRemove: string) => {
-    const pid = "/~niblyx-malnus/~2024.2.10..15.45.57..8116";
     try {
       if (path in collections) {
         api.jsonPut(path, { themes: collections[path].themes.filter(t => t !== themeToRemove), keys: collections[path].goals.map(goal => goal.key) })

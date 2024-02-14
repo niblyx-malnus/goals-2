@@ -86,15 +86,15 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
     fetchGoals();
   }, [refresh, isPool, host, name, goalId]);
 
-  const moveGoalUp = async (gid: string) => {
-    const index = _.findIndex(displayedGoals, { gid });
+  const moveGoalUp = async (key: string) => {
+    const index = _.findIndex(displayedGoals, { key });
     if (index > 0) {
-      const aboveGoalId = displayedGoals[index - 1].gid;
+      const aboveGoalId = displayedGoals[index - 1].key;
       try {
         if (isPool) {
-          await api.rootsSlotAbove(gid, aboveGoalId);
+          await api.rootsSlotAbove(key, aboveGoalId);
         } else {
-          await api.youngSlotAbove(`/${host}/${name}/${goalId}`, gid, aboveGoalId);
+          await api.youngSlotAbove(`/${host}/${name}/${goalId}`, key, aboveGoalId);
         }
         refresh();
       } catch (error) {
@@ -103,15 +103,15 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
     }
   };
   
-  const moveGoalDown = async (gid: string) => {
-    const index = _.findIndex(displayedGoals, { gid });
+  const moveGoalDown = async (key: string) => {
+    const index = _.findIndex(displayedGoals, { key });
     if (index >= 0 && index < displayedGoals.length - 1) {
-      const belowGoalId = displayedGoals[index + 1].gid;
+      const belowGoalId = displayedGoals[index + 1].key;
       try {
         if (isPool) {
-          await api.rootsSlotBelow(gid, belowGoalId);
+          await api.rootsSlotBelow(key, belowGoalId);
         } else {
-          await api.youngSlotBelow(`/${host}/${name}/${goalId}`, gid, belowGoalId);
+          await api.youngSlotBelow(`/${host}/${name}/${goalId}`, key, belowGoalId);
         }
         refresh();
       } catch (error) {
@@ -145,7 +145,7 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
       <ul>
         {displayedGoals.map((goal, index) => (
           <div
-            key={goal.gid}
+            key={goal.key}
             className="block text-current no-underline hover:no-underline"
           >
             <GoalRow
