@@ -4,14 +4,14 @@ import api from '../api';
 import { FiCopy, FiEdit, FiSave, FiTrash, FiX, FiMenu, FiInfo } from 'react-icons/fi';
 
 function PoolRow({
-    pin,
+    pid,
     title,
     refresh,
     movePoolUp,
     movePoolDown,
     showButtons,
   }: {
-    pin: string;
+    pid: string;
     title: string;
     refresh: () => void;
     movePoolUp: (poolId: string) => void,
@@ -23,7 +23,7 @@ function PoolRow({
 
   const updatePool = async () => {
     try {
-      await api.setPoolTitle(pin, newTitle);
+      await api.setPoolTitle(pid, newTitle);
       setIsEditing(false);
       refresh();
     } catch (error) {
@@ -44,7 +44,7 @@ function PoolRow({
   const navigate = useNavigate();
 
   const navigateToPool = (tag: string) => {
-    navigate(`/pool/${pin}`);
+    navigate(`/pool/${pid}`);
   };
 
   const deletePool = async () => {
@@ -54,7 +54,7 @@ function PoolRow({
     // Only proceed if the user confirms
     if (isConfirmed) {
       try {
-        await api.deletePool(pin);
+        await api.deletePool(pid);
         refresh();
       } catch (error) {
         console.error(error);
@@ -63,7 +63,7 @@ function PoolRow({
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(pin);
+    navigator.clipboard.writeText(pid);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -86,10 +86,10 @@ function PoolRow({
             >
               <FiCopy />
             </button>
-            <button onClick={() => movePoolUp(pin)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+            <button onClick={() => movePoolUp(pid)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
               ↑
             </button>
-            <button onClick={() => movePoolDown(pin)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+            <button onClick={() => movePoolDown(pid)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
               ↓
             </button>
           </>
@@ -106,7 +106,7 @@ function PoolRow({
       ) : (
         <div
           className={"truncate bg-gray-100 rounded cursor-pointer flex-grow p-2"}
-          onClick={() => navigateToPool(pin)}
+          onClick={() => navigateToPool(pid)}
           onDoubleClick={() => setIsEditing(true)}
         >
           {title}

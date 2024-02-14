@@ -6,12 +6,3 @@ export interface State {
   expiration: number | null; // time of next expiration in unix seconds
   tags: string[];
 }
-
-export interface StoreState {
-  states: Record<string, State>;
-}
-
-export interface StoreActions {
-  setState: (id: string, state: State) => void;
-  delState: (id: string) => void;
-}

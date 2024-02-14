@@ -1,52 +1,58 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { FiCopy, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu, FiInfo, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiCopy, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu, FiInfo, FiEye, FiEyeOff, FiCheck, FiPlay, FiSquare, FiPlus } from 'react-icons/fi';
+import { getWeekDay, getMonday, addDays, formatDate } from './dateUtils';
 import useStore from '../store';
-
-type Tag = {
-  isPublic: boolean;
-  tag: string;
-};
+import { Tag, Goal } from '../types';
 
 const GoalRow: React.FC<{
     host: string,
     poolName: string,
-    name: string,
-    id: string,
-    complete: boolean,
-    actionable: boolean,
+    goal: Goal,
     showButtons: boolean,
     tags: Tag[],
     refresh: () => void,
-    moveGoalUp: (id: string) => void,
-    moveGoalDown: (id: string) => void
+    moveGoalUp: (goalId: string) => void,
+    moveGoalDown: (goalId: string) => void
   }> = ({
     host,
     poolName,
-    name,
-    id,
-    complete,
-    actionable,
+    goal,
     showButtons,
     tags,
+    refresh,
     moveGoalUp,
-    moveGoalDown,
-    refresh
+    moveGoalDown
   }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [newDescription, setNewDescription] = useState(name);
-  const [isActionable, setIsActionable] = useState(actionable);
-  const [isComplete, setIsComplete] = useState(complete);
-  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [newDescription, setNewDescription] = useState(goal.description);
+  const [isActionable, setIsActionable] = useState(goal.actionable);
+  const [isComplete, setisComplete] = useState(goal.complete);
+  const [panel, setPanel] = useState('');
   const [newTag, setNewTag] = useState('');
   const rowRef = useRef<HTMLDivElement>(null);
-  const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [newTagIsPublic, setNewTagIsPublic] = useState(true);
+  const [isActive, setIsActive] = useState(goal.active);
+  const [listType, setListType] = useState<'day' | 'week'>('day');
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
+  const pid = `/${host}/${poolName}`;
 
   const toggleInfoPanel = () => {
-    setShowInfoPanel(!showInfoPanel);
+    if (panel === 'info') {
+      setPanel('');
+    } else {
+      setPanel('info');
+    }
+  };
+
+  const toggleAddPanel = () => {
+    if (panel === 'add') {
+      setPanel('');
+    } else {
+      setPanel('add');
+    }
   };
 
   // Use Zustand store
@@ -68,8 +74,7 @@ const GoalRow: React.FC<{
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (rowRef.current && !rowRef.current.contains(event.target as Node)) {
-        setShowTagDropdown(false);
-        setShowInfoPanel(false);
+        setPanel('');
       }
     };
 
@@ -86,7 +91,7 @@ const GoalRow: React.FC<{
     // Only proceed if the user confirms
     if (isConfirmed) {
       try {
-        await api.deleteGoal(id);
+        await api.deleteGoal(pid, goal.gid);
         refresh();
       } catch (error) {
         console.error(error);
@@ -98,7 +103,7 @@ const GoalRow: React.FC<{
   const updateGoal = async () => {
     try {
       console.log("updating goal...");
-      await api.setGoalSummary(id, newDescription);
+      await api.setGoalSummary(pid, goal.gid, newDescription);
       refresh();
       setIsEditing(false);
     } catch (error) {
@@ -108,7 +113,7 @@ const GoalRow: React.FC<{
 
   const cancelUpdateGoal = async () => {
     try {
-      setNewDescription(name);
+      setNewDescription(goal.description);
       refresh();
       setIsEditing(false);
     } catch (error) {
@@ -127,8 +132,8 @@ const GoalRow: React.FC<{
 
   const navigate = useNavigate();
 
-  const navigateToGoal = (id: string) => {
-    navigate(`/goal${id}`);
+  const navigateToGoal = (gid: string) => {
+    navigate(`/goal${pid}${gid}`);
   };
 
   const navigateToPoolTag = (tag: string) => {
@@ -141,8 +146,8 @@ const GoalRow: React.FC<{
 
   const toggleActionable = async () => {
     try {
-      await api.setGoalActionable(id, !isActionable);
-      const actionable = await api.getGoalActionable(id);
+      await api.setGoalActionable(goal.gid, !isActionable);
+      const actionable = await api.getGoalActionable(pid, goal.gid);
       setIsActionable(actionable);
       refresh();
     } catch (error) {
@@ -152,9 +157,9 @@ const GoalRow: React.FC<{
   
   const toggleComplete = async () => {
     try {
-      await api.setGoalComplete(id, !isComplete);
-      const complete = await api.getGoalComplete(id);
-      setIsComplete(complete);
+      await api.setGoalComplete(pid, goal.gid, !isComplete);
+      const complete = await api.getGoalComplete(pid, goal.gid);
+      setisComplete(complete);
       refresh();
     } catch (error) {
       console.error(error);
@@ -162,12 +167,16 @@ const GoalRow: React.FC<{
   };
   
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(id);
+    navigator.clipboard.writeText(goal.gid);
   }
 
   // Toggle dropdown visibility
   const toggleTagDropdown = () => {
-    setShowTagDropdown(!showTagDropdown);
+    if (panel === 'tag') {
+      setPanel('');
+    } else {
+      setPanel('tag');
+    }
   };
 
   const addNewTag = async () => {
@@ -175,14 +184,14 @@ const GoalRow: React.FC<{
       // Logic to add the new tag to the goal
       // For example, update the tags array and send a request to the backend
       if (newTag.trim() !== '') {
-        await api.addGoalTag(id, newTagIsPublic, newTag);
+        await api.addGoalTag(goal.gid, newTagIsPublic, newTag);
         setNewTag(''); // Reset input field
         await api.updateSetting('put', 'placeholder-tag', newTag);
         const fetchedTag = await api.getSetting("placeholder-tag");
         setPlaceholderTag(fetchedTag || 'today');
         refresh();
       } else {
-        await api.addGoalTag(id, newTagIsPublic, placeholderTag);
+        await api.addGoalTag(goal.gid, newTagIsPublic, placeholderTag);
         const fetchedTag = await api.getSetting("placeholder-tag");
         setPlaceholderTag(fetchedTag || 'today');
         refresh();
@@ -212,18 +221,124 @@ const GoalRow: React.FC<{
     try {
       // Logic to remove the tag from the goal
       // For example, update the tags array and send a request to the backend
-      await api.delGoalTag(id, tagToRemove.isPublic, tagToRemove.tag);
+      await api.delGoalTag(`${goal.gid}`, tagToRemove.isPublic, tagToRemove.tag);
       refresh();
     } catch (error) {
       console.error("Error removing tag: ", error);
     }
   };
+
+  const toggleActive = async () => {
+    const newActiveState = !isActive;
+    try {
+      await api.setGoalActive(pid, goal.gid, newActiveState);
+      setIsActive(newActiveState); // Update the local state to reflect the change
+      refresh(); // Call refresh to update the UI based on the new state
+    } catch (error) {
+      console.error("Error toggling goal active state:", error);
+    }
+  };
+
+  const StatusIcon = () => {
+    if (goal.complete) {
+      return <FiCheck />;
+    } else if (isActive) {
+      return <button onClick={toggleActive} className="icon-button"><FiSquare /></button>;
+    } else {
+      return <button onClick={toggleActive} className="icon-button"><FiPlay /></button>;
+    }
+  };
+
+  const AddPanel = () => {
+    const navigateDate = (direction: 'prev' | 'next') => {
+      const adjustment = listType === 'day' ? 1 : 7;
+      const newDate = addDays(selectedDate, direction === 'next' ? adjustment : -adjustment);
+      setSelectedDate(newDate);
+    };
+  
+    // Check if the selected date is today for the "Now" button
+    const isTodaySelected = formatDate(new Date()) === formatDate(selectedDate);
+    
+    return (
+      <div className="z-10 absolute right-0 bottom-full mt-2 w-64 bg-white p-4 shadow-lg rounded-lg">
+        <div className="flex justify-between mb-4">
+          <button 
+            className={`px-3 py-1 text-sm font-medium rounded-md ${listType === 'day' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} mr-1`} 
+            onClick={() => setListType('day')}>
+            Day
+          </button>
+          <button 
+            className={`px-3 py-1 text-sm font-medium rounded-md ${isTodaySelected ? 'bg-gray-400 text-white' : 'bg-blue-500 text-white'} mr-1`} 
+            onClick={() => !isTodaySelected && setSelectedDate(new Date())}
+            disabled={isTodaySelected}>
+            Now
+          </button>
+          <button 
+            className={`px-3 py-1 text-sm font-medium rounded-md ${listType === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`} 
+            onClick={() => setListType('week')}>
+            Week
+          </button>
+        </div>
+        <div className="flex items-center justify-between mb-4">
+          <button 
+            className="p-2 rounded-md bg-gray-200 text-gray-800" 
+            onClick={() => navigateDate('prev')}>
+            ←
+          </button>
+          <span className="text-sm text-center font-medium">
+            {listType === 'day' ? `${getWeekDay(selectedDate)}, ${formatDate(selectedDate)}` : `Week of ${formatDate(getMonday(selectedDate))}`}
+          </span>
+          <button 
+            className="p-2 rounded-md bg-gray-200 text-gray-800" 
+            onClick={() => navigateDate('next')}>
+            →
+          </button>
+        </div>
+        <button 
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600" 
+          onClick={addGoalToTodoList}>
+          Add to {listType} list
+        </button>
+      </div>
+    );
+  };
+
+  const addGoalToTodoList = async () => {
+    const formattedDate = formatDate(selectedDate);
+    const dateKey = listType === 'day' ? formattedDate : formatDate(getMonday(selectedDate));
+    const path = `/period/${listType}/${dateKey}.json`;
+  
+    let data = { keys:[], themes: [] };
+  
+    try {
+      try {
+        // Try reading existing data
+        const existingData = await api.jsonRead(path);
+        if (existingData) data = existingData;
+      } catch (error) {
+        console.log(`Creating new ${listType} list for ${dateKey}.`);
+      }
+  
+      const updatedKeys = [`${pid}${goal.gid}`, ...data.keys];
+      await api.jsonPut(path, { ...data, keys: updatedKeys });
+      alert('Goal added to TodoList successfully');
+      refresh();
+    } catch (error) {
+      console.error('Failed to add goal to TodoList:', error);
+      alert('Failed to add goal to TodoList');
+    }
+  };
   
   return (
-    <div ref={rowRef} className={`flex justify-between items-center p-1 mt-2 rounded ${isActionable ? 'hover:bg-blue-500 bg-blue-400' : 'hover:bg-gray-300 bg-gray-200'}`}>
+    <div ref={rowRef} className={`flex justify-between items-center mt-2 rounded ${isActionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200`}>
       {
         showButtons && (
           <>
+            <button
+              className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+            >
+              <StatusIcon />
+            </button>
             <div className="flex flex-col space-y-1">
               <input type="checkbox" checked={isActionable} onChange={toggleActionable} />
               <input type="checkbox" checked={isComplete} onChange={toggleComplete} />
@@ -234,10 +349,10 @@ const GoalRow: React.FC<{
             >
               <FiCopy />
             </button>
-            <button onClick={() => moveGoalUp(id)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+            <button onClick={() => moveGoalUp(goal.gid)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
               ↑
             </button>
-            <button onClick={() => moveGoalDown(id)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
+            <button onClick={() => moveGoalDown(goal.gid)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
               ↓
             </button>
           </>
@@ -254,12 +369,24 @@ const GoalRow: React.FC<{
       ) : (
         <div
           className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-2 ${isComplete ? 'line-through' : ''}`}
-          onClick={() => navigateToGoal(id)}
+          onClick={() => navigateToGoal(goal.gid)}
           onDoubleClick={() => setIsEditing(true)}
         >
-          {name}
+          {goal.description}
         </div>
       )}
+      { 
+        showButtons && (
+          <div className="relative group">
+            <button
+              onClick={toggleAddPanel}
+              className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+            >
+              <FiPlus />
+            </button>
+            {panel === 'add' && <AddPanel />}
+          </div>
+        )}
       { 
         showButtons && (
           <div className="relative group">
@@ -274,7 +401,7 @@ const GoalRow: React.FC<{
                 </span>
               )}
             </button>
-            {showTagDropdown && (
+            {panel === 'tag' && (
               <div className="absolute right-full bottom-0 ml-1 w-40 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
                 <ul>
                   {tags.map((tag, index) => (
@@ -358,7 +485,7 @@ const GoalRow: React.FC<{
           <FiInfo />
         </button>
         {
-          showInfoPanel && (
+          panel === 'info' && (
             <div className="absolute right-full bottom-0 ml-1 w-40 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
               <p>Info Panel</p>
               {/* Place your info content here */}

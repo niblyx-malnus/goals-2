@@ -364,7 +364,6 @@ const StateRow: React.FC<StateRowProps> = ({
         <div className="relative group">
           <button
             className="m-1 cursor-pointer text-gray-800 relative justify-center flex items-center"
-
             onClick={toggleTagsPanel}
           >
             <FiTag />

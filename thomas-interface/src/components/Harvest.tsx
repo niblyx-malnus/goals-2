@@ -3,36 +3,23 @@ import api from '../api';
 import _ from 'lodash';
 import GoalRow from './GoalRow';
 import useStore from '../store';
-
-type Tag = {
-  tag: string;
-  isPublic: boolean;
-};
-
-type Goal = {
-  id: string,
-  tags: Tag[],
-  description: string,
-  complete: boolean,
-  actionable: boolean
-}; // Type for pool object
+import { Tag, Goal } from '../types';
 
 function Harvest({
   host,
   name,
-  goalKey,
+  goalId,
   method,
   tags,
   refresh,
 }: {
   host: any;
   name: any;
-  goalKey: any;
+  goalId: any;
   method: string;
   tags: Tag[];
   refresh: () => void;
 }) {
-  const isPool = goalKey == null;
   const [goals, setGoals] = useState<Goal[]>([]);
   const [filteredGoals, setFilteredGoals] = useState<Goal[]>(goals); // State for filtered goals
 
@@ -45,11 +32,11 @@ function Harvest({
     const fetchGoals = async () => {
       try {
         let fetchedGoals;
-        const isMain = host === null && name === null && goalKey === null;
+        const isMain = host === null && name === null && goalId === null;
         if (isMain) {
           fetchedGoals = await api.mainHarvest();
-        } else if (host && name && goalKey != null) {
-          fetchedGoals = await api.goalHarvest(`/${host}/${name}/${goalKey}`);
+        } else if (host && name && goalId != null) {
+          fetchedGoals = await api.goalHarvest(`/${host}/${name}`, `/${goalId}`);
         } else {
           fetchedGoals = await api.poolHarvest(`/${host}/${name}`);
         }
@@ -60,7 +47,7 @@ function Harvest({
     };
   
     fetchGoals();
-  }, [refresh, host, name, goalKey, method, tags]);
+  }, [refresh, host, name, goalId, method, tags]);
 
   // Function to filter goals by selected tags
   useEffect(() => {
@@ -85,12 +72,12 @@ function Harvest({
     }
   }, [refresh, goals, method, tags]);
 
-  const moveGoalUp = async (id: string) => {
-    const index = _.findIndex(goals, { id });
+  const moveGoalUp = async (gid: string) => {
+    const index = _.findIndex(goals, { gid });
     if (index > 0) {
       try {
-        const aboveGoalId = goals[index - 1].id;
-        await api.goalsSlotAbove(id, aboveGoalId);
+        const aboveGoalId = goals[index - 1].gid;
+        await api.goalsSlotAbove(gid, aboveGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -98,12 +85,12 @@ function Harvest({
     }
   };
   
-  const moveGoalDown = async (id: string) => {
-    const index = _.findIndex(goals, { id });
+  const moveGoalDown = async (gid: string) => {
+    const index = _.findIndex(goals, { gid });
     if (index >= 0 && index < goals.length - 1) {
-      const belowGoalId = goals[index + 1].id;
+      const belowGoalId = goals[index + 1].gid;
       try {
-        await api.goalsSlotBelow(id, belowGoalId);
+        await api.goalsSlotBelow(gid, belowGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -125,16 +112,13 @@ function Harvest({
       <ul>
         {filteredGoals.map((goal, index) => (
           <div
-            key={goal.id}
+            key={goal.gid}
             className="block text-current no-underline hover:no-underline"
           >
             <GoalRow
               host={host}
               poolName={name}
-              name={goal.description}
-              id={goal.id}
-              complete={goal.complete}
-              actionable={goal.actionable}
+              goal={goal}
               showButtons={showButtons}
               tags={goal.tags}
               refresh={refresh}

@@ -4,7 +4,7 @@ import api from '../api';
 import _ from 'lodash';
 import useStore from '../store';
 
-type Pool = { pin: string, title: string }; // Type for pool object
+type Pool = { pid: string, title: string }; // Type for pool object
 
 function PoolList({ refresh } : { refresh: () => void; }) {
   const [pools, setPools] = useState<Pool[]>([]); // Updated from titles to pools
@@ -28,12 +28,12 @@ function PoolList({ refresh } : { refresh: () => void; }) {
     fetchPools();
   }, [refresh]);
 
-  const movePoolUp = async (pin: string) => {
-    const index = _.findIndex(pools, { pin });
+  const movePoolUp = async (pid: string) => {
+    const index = _.findIndex(pools, { pid });
     if (index > 0) {
-      const abovePoolId = pools[index - 1].pin;
+      const abovePoolId = pools[index - 1].pid;
       try {
-        await api.poolsSlotAbove(pin, abovePoolId);
+        await api.poolsSlotAbove(pid, abovePoolId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -41,12 +41,12 @@ function PoolList({ refresh } : { refresh: () => void; }) {
     }
   };
   
-  const movePoolDown = async (pin: string) => {
-    const index = _.findIndex(pools, { pin });
+  const movePoolDown = async (pid: string) => {
+    const index = _.findIndex(pools, { pid });
     if (index >= 0 && index < pools.length - 1) {
-      const belowGoalId = pools[index + 1].pin;
+      const belowGoalId = pools[index + 1].pid;
       try {
-        await api.poolsSlotBelow(pin, belowGoalId);
+        await api.poolsSlotBelow(pid, belowGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -68,10 +68,10 @@ function PoolList({ refresh } : { refresh: () => void; }) {
       <ul>
         {pools.map((pool, index) => (
           <div
-            key={pool.pin}
+            key={pool.pid}
             className="block text-current no-underline hover:no-underline"
           >
-            <PoolRow pin={pool.pin} title={pool.title} refresh={refresh} movePoolUp={movePoolUp} movePoolDown={movePoolDown} showButtons={showButtons}/>
+            <PoolRow pid={pool.pid} title={pool.title} refresh={refresh} movePoolUp={movePoolUp} movePoolDown={movePoolDown} showButtons={showButtons}/>
           </div>
         ))}
       </ul>

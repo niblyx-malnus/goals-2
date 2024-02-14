@@ -2,20 +2,16 @@ import React, { useState, useEffect } from 'react';
 import MarkdownEditor from './MarkdownEditor';
 import GoalList from './GoalList';
 import Harvest from './Harvest';
-import PoolTagSearch from './TagSearchBar';
+import TagSearchBar from './TagSearchBar';
 import api from '../api';
-import '../global.css';
 import { useNavigate } from 'react-router-dom';
 import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
+import { Tag } from '../types';
 
-type Tag = {
-  tag: string;
-  isPublic: boolean;
-};
-
-function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any; }) {
-  const poolId = `/${host}/${name}`;
-  const goalId = `/${host}/${name}/${goalKey}`;
+function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }) {
+  const pid = `/${host}/${name}`;
+  const gid = `/${goalId}`;
+  const goalKey = `/${host}/${name}/${goalId}`;
   const [parent, setParent] = useState<string | null>(null);
   const [goalDescription, setGoalDescription] = useState<string>('');
   const [goalNote, setGoalNote] = useState<string>('');
@@ -52,7 +48,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const handleSummarySave = () => {
     setIsEditingSummary(false);
     setGoalDescription(editableSummary);
-    api.setGoalSummary(goalId, editableSummary);
+    api.setGoalSummary(pid, goalId, editableSummary);
   };
 
   const handleSummaryCancel = () => {
@@ -85,7 +81,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
 
   const fetchCompleted = async () => {
     try {
-      const fetchedCompleted = await api.getGoalComplete(goalId);
+      const fetchedCompleted = await api.getGoalComplete(pid, gid);
       setCompleted(fetchedCompleted);
     } catch (error) {
       console.error("Error fetching tags: ", error);
@@ -94,7 +90,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
 
   const fetchActionable = async () => {
     try {
-      const fetchedActionable = await api.getGoalActionable(goalId);
+      const fetchedActionable = await api.getGoalActionable(pid, gid);
       setActionable(fetchedActionable);
     } catch (error) {
       console.error("Error fetching tags: ", error);
@@ -104,7 +100,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const toggleActionable = async () => {
     try {
       await api.setGoalActionable(goalId, !actionable);
-      const temp = await api.getGoalActionable(goalId);
+      const temp = await api.getGoalActionable(pid, gid);
       setActionable(temp);
     } catch (error) {
       console.error(error);
@@ -113,8 +109,8 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   
   const toggleComplete = async () => {
     try {
-      await api.setGoalComplete(goalId, !completed);
-      const temp = await api.getGoalComplete(goalId);
+      await api.setGoalComplete(pid, goalId, !completed);
+      const temp = await api.getGoalComplete(pid, gid);
       setCompleted(temp);
     } catch (error) {
       console.error(error);
@@ -136,7 +132,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   useEffect(() => {
     const fetchGoalData = async () => {
       try {
-        const fetchedDesc = await api.getGoalSummary(goalId);
+        const fetchedDesc = await api.getGoalSummary(pid, gid);
         setGoalDescription(fetchedDesc);
         // ... other fetch calls
       } catch (error) {
@@ -161,14 +157,14 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
     navigate(`/pools`);
   };
 
-  const navigateToPoolPage = (poolId: string) => {
+  const navigateToPoolPage = (pid: string) => {
     setDropdownOpen(false);
-    navigate(`/pool${poolId}`);
+    navigate(`/pool${pid}`);
   };
 
-  const navigateToGoalPage = (goalId: string) => {
+  const navigateToGoalPage = (pid:string, gid: string) => {
     setDropdownOpen(false);
-    navigate(`/goal${goalId}`);
+    navigate(`/goal${pid}/${gid}`);
   };
 
   const handleInputFocus = async () => {
@@ -195,13 +191,13 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   useEffect(() => {
     const fetch = async () => {
       try {
-        const fetchedDesc = await api.getGoalSummary(goalId);
+        const fetchedDesc = await api.getGoalSummary(pid, gid);
         setGoalDescription(fetchedDesc);
-        const fetchedNote = await api.getGoalNote(goalId);
+        const fetchedNote = await api.getGoalNote(pid, gid);
         setGoalNote(fetchedNote);
-        const fetchedParent = await api.getGoalParent(goalId);
+        const fetchedParent = await api.getGoalParent(pid, gid);
         setParent(fetchedParent);
-        const fetchedTags = await api.getGoalTags(goalId);
+        const fetchedTags = await api.getGoalTags(pid, gid);
         setGoalTags(fetchedTags);
       } catch (error) {
         console.error("Error fetching pools: ", error);
@@ -213,7 +209,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const handleAddTitle = async () => {
     if (newDescription.trim() !== '') {
       try {
-        await api.createGoal(poolId, goalId, newDescription, true);
+        await api.createGoal(pid, gid, newDescription, true);
       } catch (error) {
         console.error(error);
       }
@@ -224,7 +220,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
   const saveMarkdown = async (markdown: string) => {
     try {
       await api.editGoalNote(goalId, markdown);
-      const fetchedNote = await api.getGoalNote(goalId);
+      const fetchedNote = await api.getGoalNote(pid, gid);
       setGoalNote(fetchedNote);
     } catch (error) {
       console.error(error);
@@ -262,7 +258,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
       try {
         await api.addGoalTag(goalId, newTagIsPublic, e.currentTarget.value.trim()); // Assuming such a function exists in your API
-        const fetchedTags = await api.getGoalTags(goalId);
+        const fetchedTags = await api.getGoalTags(pid, gid);
         setGoalTags(fetchedTags);
         e.currentTarget.value = ''; // Clear the input
       } catch (error) {
@@ -276,7 +272,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
     const tagToRemove = goalTags[index];
     try {
       await api.delGoalTag(goalId, tagToRemove.isPublic, tagToRemove.tag); // Assuming such a function exists in your API
-      const fetchedTags = await api.getGoalTags(goalId);
+      const fetchedTags = await api.getGoalTags(pid, gid);
       setGoalTags(fetchedTags);
     } catch (error) {
       console.error("Error removing goal tag: ", error);
@@ -287,20 +283,20 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
     <div className="bg-gray-200 h-full flex justify-center items-center h-screen">
       <div className="bg-blue-300 p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <PoolTagSearch host={host} name={name}/>
+          <TagSearchBar poolId={pid} />
         </div>
         <div className="flex justify-between pb-2">
           {parent && (
             <div
               className="cursor-pointer"
-              onClick={() => navigateToGoalPage(parent)}
+              onClick={() => navigateToGoalPage(pid, parent)}
             >
               <h2 className="text-blue-800">Parent Goal</h2>
             </div>
           )}
           <div
             className="cursor-pointer"
-            onClick={() => navigateToPoolPage(poolId)}
+            onClick={() => navigateToPoolPage(pid)}
           >
             <h2 className="text-blue-800">Parent Pool</h2>
           </div>
@@ -501,7 +497,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
                 Add
               </button>
             </div>
-            <GoalList host={host} name={name} goalKey={goalKey} refresh={triggerRefreshKids}/>
+            <GoalList host={host} name={name} goalId={goalId} refresh={triggerRefreshKids}/>
             <div className="items-center mt-2 rounded">
               <MarkdownEditor
                 initialMarkdown={goalNote}
@@ -565,7 +561,7 @@ function GoalPage({ host, name, goalKey }: { host: any; name: any; goalKey: any;
                 ))}
               </div>
             </div>
-            <Harvest host={host} name={name} goalKey={goalKey} method={selectedOperation} tags={harvestTags} refresh={triggerRefreshHarvest}/>
+            <Harvest host={host} name={name} goalId={goalId} method={selectedOperation} tags={harvestTags} refresh={triggerRefreshHarvest}/>
           </>
         )}
       </div>

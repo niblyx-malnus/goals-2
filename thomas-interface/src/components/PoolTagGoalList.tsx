@@ -3,19 +3,7 @@ import api from '../api';
 import _ from 'lodash';
 import GoalRow from './GoalRow';
 import useStore from '../store';
-
-type Tag = {
-  isPublic: boolean;
-  tag: string;
-};
-
-type Goal = {
-  id: string,
-  tags: Tag[],
-  description: string,
-  complete: boolean,
-  actionable: boolean
-};
+import { Goal } from '../types';
 
 function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -38,6 +26,7 @@ function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; t
       try {
         const fetchedGoals = await api.getPoolTagGoals(`/${host}/${name}`, tag);
         setGoals(fetchedGoals);
+        console.log(fetchedGoals);
       } catch (error) {
         console.error("Error fetching goals: ", error);
       }
@@ -46,12 +35,12 @@ function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; t
     fetchGoals();
   }, [refresh, host, name, tag]);
 
-  const moveGoalUp = async (id: string) => {
-    const index = _.findIndex(goals, { id });
+  const moveGoalUp = async (gid: string) => {
+    const index = _.findIndex(goals, { gid });
     if (index > 0) {
       try {
-        const aboveGoalId = goals[index - 1].id;
-        await api.goalsSlotAbove(id, aboveGoalId);
+        const aboveGoalId = goals[index - 1].gid;
+        await api.goalsSlotAbove(gid, aboveGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -59,12 +48,12 @@ function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; t
     }
   };
   
-  const moveGoalDown = async (id: string) => {
-    const index = _.findIndex(goals, { id });
+  const moveGoalDown = async (gid: string) => {
+    const index = _.findIndex(goals, { gid });
     if (index >= 0 && index < goals.length - 1) {
-      const belowGoalId = goals[index + 1].id;
+      const belowGoalId = goals[index + 1].gid;
       try {
-        await api.goalsSlotBelow(id, belowGoalId);
+        await api.goalsSlotBelow(gid, belowGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -95,18 +84,16 @@ function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; t
         </label>
       </div>
       <ul>
-        {displayedGoals.map((goal, index) => (
+        { 
+          displayedGoals.map((goal, index) => (
           <div
-            key={goal.id}
+            key={goal.gid}
             className="block text-current no-underline hover:no-underline"
           >
             <GoalRow
               host={host}
               poolName={name}
-              name={goal.description}
-              id={goal.id}
-              complete={goal.complete}
-              actionable={goal.actionable}
+              goal={goal}
               showButtons={showButtons}
               tags={goal.tags}
               refresh={refresh}

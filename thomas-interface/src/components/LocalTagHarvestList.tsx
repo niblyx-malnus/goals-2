@@ -3,19 +3,7 @@ import api from '../api';
 import _ from 'lodash';
 import GoalRow from './GoalRow';
 import useStore from '../store';
-
-type Tag = {
-  tag: string;
-  isPublic: boolean;
-};
-
-type Goal = {
-  id: string,
-  tags: Tag[],
-  description: string,
-  complete: boolean,
-  actionable: boolean
-};
+import { Goal } from '../types';
 
 function LocalTagHarvestList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -38,12 +26,12 @@ function LocalTagHarvestList({ host, name, tag, refresh }: { host: any; name: an
     fetchGoals();
   }, [refresh, host, name, tag]);
 
-  const moveGoalUp = async (id: string) => {
-    const index = _.findIndex(goals, { id });
+  const moveGoalUp = async (gid: string) => {
+    const index = _.findIndex(goals, { gid });
     if (index > 0) {
       try {
-        const aboveGoalId = goals[index - 1].id;
-        await api.goalsSlotAbove(id, aboveGoalId);
+        const aboveGoalId = goals[index - 1].gid;
+        await api.goalsSlotAbove(gid, aboveGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -51,12 +39,12 @@ function LocalTagHarvestList({ host, name, tag, refresh }: { host: any; name: an
     }
   };
   
-  const moveGoalDown = async (id: string) => {
-    const index = _.findIndex(goals, { id });
+  const moveGoalDown = async (gid: string) => {
+    const index = _.findIndex(goals, { gid });
     if (index >= 0 && index < goals.length - 1) {
-      const belowGoalId = goals[index + 1].id;
+      const belowGoalId = goals[index + 1].gid;
       try {
-        await api.goalsSlotBelow(id, belowGoalId);
+        await api.goalsSlotBelow(gid, belowGoalId);
         refresh();
       } catch (error) {
         console.error("Error reordering", error);
@@ -80,16 +68,13 @@ function LocalTagHarvestList({ host, name, tag, refresh }: { host: any; name: an
       <ul>
         {goals.map((goal, index) => (
           <div
-            key={goal.id}
+            key={goal.gid}
             className="block text-current no-underline hover:no-underline"
           >
             <GoalRow
               host={host}
               poolName={name}
-              name={goal.description}
-              id={goal.id}
-              complete={goal.complete}
-              actionable={goal.actionable}
+              goal={goal}
               showButtons={showButtons}
               tags={goal.tags}
               refresh={refresh}

@@ -8,8 +8,7 @@ type Tag = {
   tag: string;
 };
 
-function TagSearchBar({ host, name }: { host: any; name: any; }) {
-  const poolId = `/${host}/${name}`;
+function TagSearchBar({ poolId }: { poolId: string | null }) {
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
@@ -21,9 +20,11 @@ function TagSearchBar({ host, name }: { host: any; name: any; }) {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const fetchedTags = await api.getPoolTags(poolId);
-        setAllTags(fetchedTags);
-        setFilteredTags(fetchedTags); // Initialize with all tags
+        if (poolId !== null) {
+          const fetchedTags = await api.getPoolTags(poolId);
+          setAllTags(fetchedTags);
+          setFilteredTags(fetchedTags); // Initialize with all tags
+        }
       } catch (error) {
         console.error("Error fetching tags: ", error);
       }
@@ -38,7 +39,7 @@ function TagSearchBar({ host, name }: { host: any; name: any; }) {
 
   const navigateToTagPage = (tag: string) => {
     setDropdownOpen(false);
-    navigate(`/pool-tag/${host}/${name}/${tag}`);
+    navigate(`/pool-tag${poolId}/${tag}`);
   };
 
   const handleInputFocus = async () => {

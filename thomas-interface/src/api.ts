@@ -1,10 +1,6 @@
 import memoize from "lodash/memoize";
 import Urbit from "@urbit/http-api";
-
-type Tag = {
-  isPublic: boolean;
-  tag: string;
-};
+import { title } from "process";
 
 const live = process.env.REACT_APP_LIVE;
 const ship = "niblyx-malnus";
@@ -105,6 +101,15 @@ const api = {
       body: json, // the actual poke content
     }, 'goals');
   },
+  goalKeyToPidGid: (path: string) => {
+    console.log(`Splitting path: ${path}`);
+    const parts = path.split('/').filter(Boolean);
+    if (parts.length !== 3) {
+      throw new Error('Path must be in the format of /{host}/{name}/{id}');
+    }
+    const [host, name, gid] = parts;
+    return { pid: `/${host}/${name}`, gid: `/${gid}` };
+  },
   jsonTree: async (path: string) => {
     const json = { tree: { path: path } };
     return await api.jsonTreeAction(json);
@@ -132,15 +137,15 @@ const api = {
     };
     return await api.goalView(json);
   },
-  poolHarvest: async (poolId: string) => {
+  poolHarvest: async (pid: string) => {
     const json = {
-      harvest: { type: { pool: poolId } }
+      harvest: { type: { pid: pid } }
     };
     return await api.goalView(json);
   },
-  goalHarvest: async (goalId: string) => {
+  goalHarvest: async (pid: string, gid: string) => {
     const json = {
-      harvest: { type: { goal: goalId } }
+      harvest: { type: { pid: pid, gid: gid } }
     };
     return await api.goalView(json);
   },
@@ -148,22 +153,39 @@ const api = {
     const json = { 'create-pool': { title: title } };
     return await api.goalAction(json);
   },
-  createGoal: async (poolId: string, parentId: string | null, summary: string, actionable: boolean) => {
+  putCollection: async (path: string, keys: string[], themes: string[]) => {
+    const json = {
+      'put-collection': {
+        path: path,
+        collection: {
+          keys: keys,
+          themes: themes
+        }
+      }
+    };
+    return await api.goalAction(json);
+  },
+  delCollection: async (path: string) => {
+    const json = { 'del-collection': { path :path } };
+    return await api.goalAction(json);
+  },
+  createGoal: async (pid: string, upid: string | null, summary: string, actionable: boolean) => {
     const json = {
         'create-goal': {
-          pin: poolId,
-          upid: parentId,
+          pid: pid,
+          upid: upid,
           summary: summary,
           actionable: actionable
         }
       };
-    return await api.goalAction(json);
+    const gid: string = await api.goalAction(json);
+    return `${pid}${gid}`;
   },
-  createGoalWithTag: async (poolId: string, parentId: string | null, summary: string, actionable: boolean, tag: string) => {
+  createGoalWithTag: async (pid: string, upid: string | null, summary: string, actionable: boolean, tag: string) => {
     const json = {
         'create-goal-with-tag': {
-          pin: poolId,
-          upid: parentId,
+          pid: pid,
+          upid: upid,
           summary: summary,
           actionable: actionable,
           tag: tag
@@ -171,18 +193,18 @@ const api = {
       };
     return await api.goalAction(json);
   },
-  addGoalTag: async (goalId: string, isPublic: boolean, text: string) => {
+  addGoalTag: async (gid: string, isPublic: boolean, text: string) => {
     const json = isPublic
       ?  {
           'update-goal-tags': {
-            id: goalId,
+            id: gid,
             method: 'uni',
             tags: [text]
           }
         }
       :  {
           'update-local-goal-tags': {
-            id: goalId,
+            id: gid,
             method: 'uni',
             tags: [text]
           }
@@ -230,7 +252,7 @@ const api = {
   editPoolTitle: async (poolId: string, title: string) => {
     const json = {
         'update-pool-property': {
-          pin: poolId,
+          pid: poolId,
           method: 'put',
           property: 'title',
           data: title,
@@ -241,7 +263,7 @@ const api = {
   editPoolNote: async (poolId: string, note: string) => {
     const json = {
         'update-pool-property': {
-          pin: poolId,
+          pid: poolId,
           method: 'put',
           property: 'note',
           data: note,
@@ -252,7 +274,7 @@ const api = {
   editPoolTagNote: async (poolId: string, tag: string, note: string) => {
     const json = {
         'update-pool-tag-property': {
-          pin: poolId,
+          pid: poolId,
           tag: tag,
           method: 'put',
           property: 'note',
@@ -272,10 +294,11 @@ const api = {
       };
     return await api.goalAction(json);
   },
-  setGoalSummary: async (goalId: string, summary: string) => {
+  setGoalSummary: async (pid: string, gid: string, summary: string) => {
     const json = {
         'set-summary': {
-          id: goalId,
+          pid: pid,
+          gid: gid,
           summary: summary,
         }
       };
@@ -284,7 +307,7 @@ const api = {
   setPoolTitle: async (poolId: string, title: string) => {
     const json = {
         'set-pool-title': {
-          pin: poolId,
+          pid: poolId,
           title: title,
         }
       };
@@ -301,10 +324,16 @@ const api = {
       };
     return await api.goalAction(json);
   },
-  setGoalComplete: async (goalId: string, complete: boolean) => {
+  setGoalComplete: async (pid: string, gid: string, complete: boolean) => {
     const json = complete
-      ? { 'mark-complete': { id: goalId } }
-      : { 'unmark-complete': { id: goalId } }
+      ? { 'mark-complete': { pid: pid, gid: gid } }
+      : { 'unmark-complete': { pid: pid, gid: gid } }
+    return await api.goalAction(json);
+  },
+  setGoalActive: async (pid: string, gid: string, active: boolean) => {
+    const json = active
+      ? { 'mark-active': { pid: pid, gid: gid } }
+      : { 'unmark-active': { pid: pid, gid: gid } }
     return await api.goalAction(json);
   },
   setGoalActionable: async (goalId: string, actionable: boolean) => {
@@ -313,12 +342,12 @@ const api = {
       : { 'unmark-actionable': { id: goalId } }
     return await api.goalAction(json);
   },
-  deleteGoal: async (goalId: string) => {
-    const json = { 'delete-goal': { id: goalId } };
+  deleteGoal: async (pid: string, gid: string) => {
+    const json = { 'delete-goal': { pid: pid, gid: gid } };
     return await api.goalAction(json);
   },
   deletePool: async (poolId: string) => {
-    const json = { 'delete-pool': { pin: poolId } };
+    const json = { 'delete-pool': { pid: poolId } };
     return await api.goalAction(json);
   },
   youngSlotAbove: async (parentId: string, dis: string, dat: string) => {
@@ -371,20 +400,29 @@ const api = {
       };
     return await api.goalAction(json);
   },
+  getGoalData: async (keys: string[]) => {
+    return await api.goalView({ "goal-data": { "keys": keys } });
+  },
+  getCollections: async () => {
+    return await api.goalView({ "collections": null });
+  },
+  getCollection: async (path: string) => {
+    return await api.goalView({ "path": path });
+  },
   getPoolsIndex: async () => {
     return await api.goalView({ "pools-index": null });
   },
   getPoolRoots: async (id: string) => {
-    return await api.goalView({ "pool-roots": { pin: id } });
+    return await api.goalView({ "pool-roots": { pid: id } });
   },
-  getGoalYoung: async (id: string) => {
-    return await api.goalView({ "goal-young": { id: id } });
+  getGoalYoung: async (pid:string, gid: string) => {
+    return await api.goalView({ "goal-young": { pid: pid, gid: gid } });
   },
-  getPoolTagGoals: async (pin: string, tag: string) => {
-    return await api.goalView({ "pool-tag-goals": { pin: pin, tag: tag } });
+  getPoolTagGoals: async (pid: string, tag: string) => {
+    return await api.goalView({ "pool-tag-goals": { pid: pid, tag: tag } });
   },
-  getPoolTagHarvest: async (pin: string, tag: string) => {
-    return await api.goalView({ "pool-tag-harvest": { pin: pin, tag: tag } });
+  getPoolTagHarvest: async (pid: string, tag: string) => {
+    return await api.goalView({ "pool-tag-harvest": { pid: pid, tag: tag } });
   },
   getLocalTagGoals: async (tag: string) => {
     return await api.goalView({ "local-tag-goals": { tag: tag } });
@@ -392,44 +430,48 @@ const api = {
   getLocalTagHarvest: async (tag: string) => {
     return await api.goalView({ "local-tag-harvest": { tag: tag } });
   },
-  getPoolTitle: async (id: string) => {
-    return await api.goalView({ "pool-title": { pin: id } });
+  getPoolTitle: async (pid: string) => {
+    return await api.goalView({ "pool-title": { pid: pid } });
   },
-  getPoolNote: async (id: string) => {
-    return await api.goalView({ "pool-note": { pin: id } });
+  getPoolNote: async (pid: string) => {
+    return await api.goalView({ "pool-note": { pid: pid } });
   },
-  getPoolTagNote: async (id: string, tag: string) => {
-    return await api.goalView({ "pool-tag-note": { pin: id, tag: tag } });
+  getPoolTagNote: async (pid: string, tag: string) => {
+    return await api.goalView({ "pool-tag-note": { pid: pid, tag: tag } });
   },
   getLocalTagNote: async (tag: string) => {
     return await api.goalView({ "local-tag-note": { tag: tag } });
   },
-  getGoalSummary: async (id: string) => {
-    return await api.goalView({ "goal-summary": { id: id } });
+  getGoalSummary: async (pid: string, gid: string) => {
+    return await api.goalView({ "goal-summary": { pid: pid, gid: gid } });
   },
-  getGoalNote: async (id: string) => {
-    return await api.goalView({ "goal-note": { id: id } });
+  getGoalNote: async (pid: string, gid: string) => {
+    return await api.goalView({ "goal-note": { pid: pid, gid: gid } });
   },
-  getGoalTags: async (id: string) => {
-    return await api.goalView({ "goal-tags": { id: id } });
+  getGoalTags: async (pid: string, gid: string) => {
+    return await api.goalView({ "goal-tags": { pid: pid, gid: gid } });
   },
-  getLocalGoalTags: async (id: string) => {
-    return await api.goalView({ "local-goal-tags": { id: id } });
+  getLocalGoalTags: async (pid: string, gid: string) => {
+    return await api.goalView({ "local-goal-tags": { pid: pid, gid: gid } });
   },
-  getGoalParent: async (id: string) => {
-    return await api.goalView({ "goal-parent": { id: id } });
+  getGoalParent: async (pid: string, gid: string) => {
+    return await api.goalView({ "goal-parent": { pid: pid, gid: gid } });
   },
-  getGoalActionable: async (id: string) => {
-    return await api.goalView({ "goal-actionable": { id: id } });
+  getGoalActionable: async (pid: string, gid: string) => {
+    return await api.goalView({ "goal-actionable": { pid: pid, gid: gid } });
   },
-  getGoalComplete: async (id: string) => {
-    return await api.goalView({ "goal-complete": { id: id } });
+  getGoalComplete: async (pid: string, gid: string) => {
+    return await api.goalView({ "goal-complete": { pid: pid, gid: gid } });
+  },
+  getGoalActive: async (pid: string, gid: string) => {
+    return await api.goalView({ "goal-active": { pid: pid, gid: gid } });
   },
   getSetting: async (setting: string) => {
+    console.log(`getting setting: ${setting}`)
     return await api.goalView({ "setting": { setting: setting } });
   },
-  getPoolTags: async (poolId: string) => {
-    return await api.goalView({ "pool-tags": { pin: poolId } });
+  getPoolTags: async (pid: string) => {
+    return await api.goalView({ "pool-tags": { pid: pid } });
   },
   getAllLocalGoalTags: async () => {
     return await api.goalView({ "all-local-goal-tags": null });

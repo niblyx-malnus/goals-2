@@ -9,30 +9,85 @@ import Mileage from './components/Mileage';
 import StateList from './components/States/StateList';
 import WeeklyTargetList from './components/WeeklyTargets/WeeklyTargetList';
 import WeeklyTargetPage from './components/WeeklyTargets/WeeklyTargetPage';
+import CalendarApp from './components/Calendar/CalendarApp';
+import TodoList from './components/Periods/TodoList';
+import { Link } from 'react-router-dom';
+
+function BackToHome() {
+  return (
+    <div className="mb-4">
+      <Link to="/" className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
+        ← Back to Home
+      </Link>
+    </div>
+  );
+}
+
+function Home() {
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h2 className="text-2xl font-semibold mb-4">Modules</h2>
+      <ul className="list-none m-0 p-0">
+        <li className="mb-2"><Link to="/pools" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Pools</Link></li>
+        <li className="mb-2"><Link to="/jsons" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">FileSystem</Link></li>
+        <li className="mb-2"><Link to="/mileage" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Mileage</Link></li>
+        <li className="mb-2"><Link to="/states" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">State List</Link></li>
+        <li className="mb-2"><Link to="/weekly_targets" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Weekly Targets</Link></li>
+        <li className="mb-2"><Link to="/calendar" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Calendar</Link></li>
+        <li className="mb-2"><Link to="/periods" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Todo List</Link></li>
+      </ul>
+    </div>
+  );
+}
 
 function PoolPageWrapper() {
   let { host, name } = useParams();
-  return <PoolPage host={host} name={name} />;
+  return (
+    <div>
+      <BackToHome />
+      <PoolPage host={host} name={name} />
+    </div>
+  );
 }
 
 function GoalPageWrapper() {
-  let { host, name, goalKey } = useParams();
-  return <GoalPage host={host} name={name} goalKey={goalKey} />;
+  let { host, name, goalId } = useParams();
+  return (
+    <div>
+      <BackToHome />
+      <GoalPage host={host} name={name} goalId={goalId} />
+    </div>
+  );
 }
 
 function PoolTagPageWrapper() {
   let { host, name, tag } = useParams();
-  return <PoolTagPage host={host} name={name} tag={tag} />;
+  return (
+    <div>
+      <BackToHome />
+      <PoolTagPage host={host} name={name} tag={tag} />
+    </div>
+  );
 }
 
 function LocalTagPageWrapper() {
-  let { host, name, tag } = useParams();
-  return <LocalTagPage tag={tag} />;
+  let { tag } = useParams();
+  return (
+    <div>
+      <BackToHome />
+      <LocalTagPage tag={tag} />
+    </div>
+  );
 }
 
 function WeeklyTargetPageWrapper() {
   let { id } = useParams();
-  return <WeeklyTargetPage id={id as string} />;
+  return (
+    <div>
+      <BackToHome />
+      <WeeklyTargetPage id={id as string} />
+    </div>
+  );
 }
 
 function App() {
@@ -40,17 +95,19 @@ function App() {
     <Router basename="/apps/goals">
       <div>
         <Routes>
-          <Route path="/" element={<Pools />} />
-          <Route path="/pools" element={<Pools />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/pools" element={<div><BackToHome /><Pools /></div>} />
           <Route path="/pool/:host/:name" element={<PoolPageWrapper />} />
-          <Route path="/goal/:host/:name/:goalKey" element={<GoalPageWrapper />} />
+          <Route path="/goal/:host/:name/:goalId" element={<GoalPageWrapper />} />
           <Route path="/pool-tag/:host/:name/:tag" element={<PoolTagPageWrapper />} />
           <Route path="/local-tag/:tag" element={<LocalTagPageWrapper />} />
-          <Route path="/jsons" element={<FileSystem />} />
-          <Route path="/mileage" element={<Mileage />} />
-          <Route path="/states" element={<StateList />} />
-          <Route path="/weekly_targets" element={<WeeklyTargetList />} />
+          <Route path="/jsons" element={<div><BackToHome /><FileSystem /></div>} />
+          <Route path="/mileage" element={<div><BackToHome /><Mileage /></div>} />
+          <Route path="/states" element={<div><BackToHome /><StateList /></div>} />
+          <Route path="/weekly_targets" element={<div><BackToHome /><WeeklyTargetList /></div>} />
           <Route path="/weekly_targets/:id" element={<WeeklyTargetPageWrapper />} />
+          <Route path="/calendar" element={<div><BackToHome /><CalendarApp /></div>} />
+          <Route path="/periods" element={<div><BackToHome /><TodoList /></div>} />
         </Routes>
       </div>
     </Router>

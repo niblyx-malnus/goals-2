@@ -3,7 +3,7 @@ import MarkdownEditor from './MarkdownEditor';
 import { useNavigate } from 'react-router-dom';
 import GoalList from './GoalList';
 import Harvest from './Harvest';
-import PoolTagSearch from './TagSearchBar';
+import TagSearchBar from './TagSearchBar';
 import api from '../api';
 import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
 
@@ -147,7 +147,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
     <div className="bg-gray-200 flex justify-center items-center h-screen">
       <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <PoolTagSearch host={host} name={name} />
+          <TagSearchBar poolId={poolId} />
         </div>
         <div
           className="cursor-pointer"
@@ -295,7 +295,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
                 Add
               </button>
             </div>
-            <GoalList host={host} name={name} goalKey={null} refresh={triggerRefreshRoots}/>
+            <GoalList host={host} name={name} goalId={null} refresh={triggerRefreshRoots}/>
             <div className="items-center mt-2 rounded">
               <MarkdownEditor
                 initialMarkdown={poolNote}
@@ -355,7 +355,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
                 ))}
               </div>
             </div>
-            <Harvest host={host} name={name} goalKey={null} method={selectedOperation} tags={tags} refresh={triggerRefreshHarvest}/>
+            <Harvest host={host} name={name} goalId={null} method={selectedOperation} tags={tags} refresh={triggerRefreshHarvest}/>
           </>
          )}
         </div>

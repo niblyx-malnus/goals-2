@@ -5,7 +5,6 @@ import PoolTagGoalList from './PoolTagGoalList';
 import PoolTagHarvestList from './PoolTagHarvestList';
 import Harvest from './Harvest'; // Assuming this is the correct import
 import api from '../api';
-import '../global.css';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 function PoolTagPage({ host, name, tag }: { host: any; name: any; tag: any; }) {

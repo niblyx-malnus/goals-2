@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PoolList from './PoolList';
 import Harvest from './Harvest';
 import { useNavigate } from 'react-router-dom';
-import PoolTagSearch from './TagSearchBar';
+import TagSearchBar from './TagSearchBar';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import api from '../api';
 
@@ -78,7 +78,7 @@ function Pools() {
     <div className="bg-gray-200 h-full flex justify-center items-center h-screen">
       <div className="bg-[#DFF7DC] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <PoolTagSearch host={''} name={''}/>
+          <TagSearchBar poolId={null} />
         </div>
         <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">All Pools</h1>
         <div className="flex flex-wrap justify-center mb-4">
@@ -180,7 +180,7 @@ function Pools() {
                 </div>
               ))}
             </div>
-            <Harvest method={selectedOperation} tags={tags} host={null} name={null} goalKey={null} refresh={triggerRefreshHarvest}/>
+            <Harvest method={selectedOperation} tags={tags} host={null} name={null} goalId={null} refresh={triggerRefreshHarvest}/>
           </div>
         )}
       </div>

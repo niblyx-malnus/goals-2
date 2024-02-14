@@ -5,7 +5,6 @@ import LocalTagGoalList from './LocalTagGoalList';
 import LocalTagHarvestList from './LocalTagHarvestList';
 import Harvest from './Harvest'; // Assuming this is the correct import
 import api from '../api';
-import '../global.css';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 function LocalTagPage({ tag }: { tag: any; }) {

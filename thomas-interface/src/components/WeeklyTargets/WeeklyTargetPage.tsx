@@ -203,12 +203,12 @@ const WeeklyTargetPage = ({ id }: { id: string }) => {
       </div>
       <h1 className="text-2xl">{weeklyTarget?.description}</h1>
       { isLoading && (
-        <div className="flex justify-center mt-20">
+        <div className="flex justify-center pt-100 mt-100">
           <div className="animate-spin rounded-full h-16 w-16 border-b-8 border-t-transparent border-blue-500"></div>
         </div>
       )}      
       { !isLoading && (
-        <div className="w-full max-w-md p-4 border border-gray-300 shadow-lg rounded-lg">
+        <div className="w-full max-w-md p-4">
           <div className="pb-4 flex justify-between items-center">
             <button
               onClick={() => navigateWeeks('previous')}
