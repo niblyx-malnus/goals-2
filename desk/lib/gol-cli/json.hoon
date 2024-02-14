@@ -104,9 +104,8 @@
   ++  ud-goal-tags
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (pid (~(got by p.jon) 'pid'))
-    :-  (gid (~(got by p.jon) 'gid'))
-    %.  o+(~(del by (~(del by p.jon) 'pid')) 'gid')
+    :-  (key (~(got by p.jon) 'key'))
+    %.  o+(~(del by p.jon) 'key')
     %+  (ud (set @t) (set @t))
       (ot ~[tags+(as so)])
     (ot ~[tags+(as so)])

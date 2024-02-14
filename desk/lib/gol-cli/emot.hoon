@@ -408,17 +408,17 @@
     this(pool-info.store (~(put by pool-info.store) pid.axn data))
     ::
       %update-goal-tags
-    =/  old=pool:gol  (~(got by pools.store) pid.axn)
-    ?>  (check-goal-edit-perm:(apex:pl old) gid.axn mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pid.axn *pool-data:gol)
-    =/  tags=(set @t)       (~(gut by tags.data) gid.axn ~)
+    =/  old=pool:gol  (~(got by pools.store) pid.key.axn)
+    ?>  (check-goal-edit-perm:(apex:pl old) gid.key.axn mod)
+    =/  data=pool-data:gol  (~(gut by pool-info.store) pid.key.axn *pool-data:gol)
+    =/  tags=(set @t)       (~(gut by tags.data) gid.key.axn ~)
     =.  tags
       ?-  -.p.axn
         %&  (~(uni in tags) p.p.axn)
         %|  (~(dif in tags) p.p.axn)
       ==
-    =.  tags.data           (~(put by tags.data) gid.axn tags)
-    this(pool-info.store (~(put by pool-info.store) pid.axn data))
+    =.  tags.data           (~(put by tags.data) gid.key.axn tags)
+    this(pool-info.store (~(put by pool-info.store) pid.key.axn data))
     ::
       %update-setting
     =,  local.store

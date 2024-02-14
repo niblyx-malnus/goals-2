@@ -55,7 +55,7 @@
           [%update-goal-perms =pid =gid chief=ship rec=_| =deputies]
       ==
     +$  hitch
-      $%  [%update-goal-tags =pid =gid p=(each (set @t) (set @t))]
+      $%  [%update-goal-tags =key p=(each (set @t) (set @t))]
           [%update-goal-field =pid =gid p=(each [@t @t] @t)]
       ==
     --
