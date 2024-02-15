@@ -35,8 +35,6 @@
         [%setting (ot ~[setting+so])]
         [%pool-tags (ot ~[pid+pid])]
         [%all-local-goal-tags ul]
-        [%collections ul]
-        [%collection (ot ~[path+pa])]
         [%goal-data (ot ~[keys+(ar key)])]
     ==
     ++  type

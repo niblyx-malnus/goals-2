@@ -1,5 +1,6 @@
 /-  gol=goals, axn=action, pyk=peek, spider, jot=json-tree
-/+  *ventio, tree=filetree, gol-cli-traverse, gol-cli-node
+/+  *ventio, tree=filetree, gol-cli-traverse, gol-cli-node,
+    goj=gol-cli-json
 =,  strand=strand:spider
 ^-  thread:spider
 ::
@@ -20,6 +21,8 @@
   =+  !<(act=action:axn vase)
   ?+    -.act  (just-poke [our dap]:gowl mark vase)
       %create-goal
+    :: Hacky way to get new id
+    ::
     =/  old=(set gid:gol)  ~(key by goals:(~(got by pools.store) pid.act))
     ;<  ~  bind:m  (poke [our dap]:gowl mark vase)
     ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
@@ -27,7 +30,7 @@
     =/  gid-list=(list gid:gol)  ~(tap in (~(dif in new) old))
     ?>  ?=(^ gid-list)
     ?>  =(1 (lent gid-list))
-    (pure:m !>([%uid `i.gid-list]))
+    (pure:m !>((enjs-key:goj [pid.act i.gid-list])))
   ==
   ::
     %goal-view
@@ -122,82 +125,74 @@
     ::
       %pools-index
     %-  pure:m  !>
-    :-  %pools-index
+    %-  enjs-pools-index
     %+  turn  pool-order.local.store
     |=(=pid:gol [pid title:(~(got by pools.store) pid)])
     ::
       %pool-title
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    (pure:m !>([%cord title.pool]))
+    (pure:m !>(s+title.pool))
     ::
       %pool-note
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
-    (pure:m !>([%cord (~(gut by ?~(pd ~ properties.u.pd)) 'note' '')]))
+    (pure:m !>(s+(~(gut by ?~(pd ~ properties.u.pd)) 'note' '')))
     ::
       %pool-tag-note
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     =/  properties      (~(gut by ?~(pd ~ tag-properties.u.pd)) tag.vyu ~)
-    (pure:m !>([%cord (~(gut by properties) 'note' '')]))
+    (pure:m !>(s+(~(gut by properties) 'note' '')))
     ::
       %local-tag-note
     =/  properties  (~(gut by tag-properties.local.store) tag.vyu ~)
-    (pure:m !>([%cord (~(gut by properties) 'note' '')]))
+    (pure:m !>(s+(~(gut by properties) 'note' '')))
     ::
       %goal-summary
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (pure:m !>([%cord summary.goal]))
+    (pure:m !>(s+summary.goal))
     ::
       %goal-note
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     =/  fields=(map @t @t)  (~(gut by ?~(pd ~ fields.u.pd)) gid.vyu ~)
-    (pure:m !>([%cord (~(gut by fields) 'note' '')]))
+    (pure:m !>(s+(~(gut by fields) 'note' '')))
     ::
       %setting
-    (pure:m !>([%ucord (~(get by settings.local.store) setting.vyu)]))
+    (pure:m !>(s+(~(get by settings.local.store) setting.vyu)))
     ::
       %goal-tags
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
-    =/  tags=(list (pair ? @t))
-      %+  weld
-        %+  turn
-          ~(tap in (~(gut by tags.local.store) [pid.vyu gid.vyu] ~))
-        (lead |)
-      %+  turn
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid.vyu ~)))
-      (lead &)
-    (pure:m !>([%tags tags]))
+    =/  tags=(list @t)
+      ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid.vyu ~)))
+    (pure:m !>(a+(turn tags (lead %s))))
     ::
       %local-goal-tags
-    =/  tags=(list (pair ? @t))
-      %+  turn
-        ~(tap in (~(gut by tags.local.store) [pid.vyu gid.vyu] ~))
-      (lead |)
-    (pure:m !>([%tags tags]))
+    =/  tags=(list @t)
+      ~(tap in (~(gut by tags.local.store) [pid.vyu gid.vyu] ~))
+    (pure:m !>(a+(turn tags (lead %s))))
     ::
       %goal-parent
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     =/  =goal:gol  (~(got by goals.pool) gid.vyu)
-    (pure:m !>([%uid parent.goal]))
+    (pure:m !>(?~(parent.goal ~ (enjs-key:goj [pid.vyu u.parent.goal]))))
     ::
       %goal-actionable
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     =/  =goal:gol  (~(got by goals.pool) gid.vyu)
-    (pure:m !>([%loob actionable.goal]))
+    (pure:m !>(b+actionable.goal))
     ::
       %goal-complete
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     =/  =goal:gol  (~(got by goals.pool) gid.vyu)
-    (pure:m !>([%loob done.i.status.end.goal]))
+    (pure:m !>(b+done.i.status.end.goal))
     ::
       %goal-active
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     =/  =goal:gol  (~(got by goals.pool) gid.vyu)
-    (pure:m !>([%loob done.i.status.start.goal]))
+    (pure:m !>(b+done.i.status.start.goal))
     ::
       %pool-tags
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
@@ -206,7 +201,7 @@
     =|  tags=(set @t)
     |-
     ?~  vals
-      (pure:m !>([%tags (turn ~(tap in tags) (lead &))]))
+      (pure:m !>(a+(turn ~(tap in tags) (lead %s))))
     $(vals t.vals, tags (~(uni in tags) i.vals))
     ::
       %all-local-goal-tags
@@ -214,34 +209,10 @@
     =|  tags=(set @t)
     |-
     ?~  vals
-      (pure:m !>([%tags (turn ~(tap in tags) (lead |))]))
+      (pure:m !>(a+(turn ~(tap in tags) (lead %s))))
     $(vals t.vals, tags (~(uni in tags) i.vals))
     ::
     %goal-data  (goal-data keys.vyu)
-    ::
-      %collections
-    (pure:m !>([%collections (turn ~(tap of collections.local.store) head)]))
-    ::
-      %collection
-    =/  cos=(map @ta collection:gol)
-      (fall (~(get of collections.local.store) (snip path.vyu)) ~)
-    ?.  (~(has by cos) (rear path.vyu))
-      (pure:m !>([%collection ~ ~]))
-    =/  =collection:gol  (~(got by cos) (rear path.vyu))
-    %-  pure:m  !>
-    :-  %collection
-    :-  themes.collection
-    %+  murn  keys.collection
-    |=  =key:gol
-    =/  goal=(unit goal:gol)
-      (~(get by goals:(fall (~(get by pools.store) pid.key) *pool:gol)) gid.key)
-    ?~  goal
-      ~
-    :-  ~
-    :*  key
-        done.i.status.end.u.goal
-        summary.u.goal
-    ==
   ==
   ::
     %json-tree-action
@@ -260,7 +231,7 @@
     =|  jsons=(map path json)
     |-
     ?~  paths.act
-      (pure:m !>(jsons+jsons))
+      (pure:m !>((enjs-jsons jsons)))
     =/  jons=(map @ta json)
       (fall (~(get of json-tree.store) (snip i.paths.act)) ~)
     =/  =json  (~(got by jons) (rear i.paths.act))
@@ -270,8 +241,8 @@
     ==
     ::
       %tree
-    %-  pure:m
-    !>  :-  %tree
+    =;  paths=(list path)
+      (pure:m !>(a+(turn paths |=(=path s+(spat path)))))
     %-  zing
     %+  turn  ~(tap of (~(dip of json-tree.store) path.act))
     |=  [=path =(map @ta json)]
@@ -291,13 +262,38 @@
     pools  t.pools
     goals  (~(uni by goals) goals.i.pools)
   ==
++$  goal-datum
+  $:  =key:gol
+      summary=@t
+      labels=(list @t) :: pool-specific
+      tags=(list @t)   :: private
+      active=?
+      complete=?
+      actionable=?
+  ==
+++  enjs-goal-data
+  =,  enjs:format
+  |=  goal-data=(list goal-datum)
+  ^-  json
+  :-  %a
+  %+  turn  goal-data
+  |=  goal-datum
+  %-  pairs
+  :~  [%key (enjs-key:goj key)]
+      [%summary s+summary]
+      [%labels a+(turn labels (lead %s))]
+      [%tags a+(turn tags (lead %s))]
+      [%active b+active]
+      [%complete b+complete]
+      [%actionable b+actionable]
+  ==
 ++  goal-data
   |=  keys=(list key:gol)
   =/  m  (strand ,vase)
   ^-  form:m
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   %-  pure:m  !>
-  :-  %goal-data
+  %-  enjs-goal-data
   %+  turn  keys
   |=  =key:gol
   =/  =pool:gol                (~(got by pools.store) pid.key)
@@ -311,4 +307,18 @@
       done.i.status.end
       actionable
   ==
+++  enjs-pools-index
+  =,  enjs:format
+  |=  pools-index=(list [pid:gol @])
+  :-  %a
+  %+  turn  pools-index
+  |=  [=pid:gol title=@t] 
+  %-  pairs
+  :~  [%pid s+(enjs-pid:goj pid)]
+      [%title s+title]
+  ==
+++  enjs-jsons
+  =,  enjs:format
+  |=  jsons=(map ^path ^json)
+  o/(malt (turn ~(tap by jsons) |=([=^path =^json] [(spat path) json])))
 --

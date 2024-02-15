@@ -124,34 +124,6 @@
       [%setting setting=@t]
       [%pool-tags =pid]
       [%all-local-goal-tags ~]
-      [%collections ~]
-      [%collection =path]
       [%goal-data keys=(list key)]
-  ==
-::
-+$  tags  (list (pair ? @t)) :: local/public tags
-::
-+$  goal-datum
-  $:  =key
-      summary=@t
-      labels=(list @t) :: pool-specific
-      tags=(list @t)   :: private
-      active=?
-      complete=?
-      actionable=?
-  ==
-::
-+$  goal-vent
-  $@  ~
-  $%  [%keys keys=(list key)]
-      [%goal-data goals=(list goal-datum)]
-      [%pools-index pools=(list [pid @t])]
-      [%tags =tags]
-      [%uid gid=(unit gid)]
-      [%cord p=@t]
-      [%ucord p=(unit @t)]
-      [%loob p=?]
-      [%collections paths=(list path)]
-      [%collection themes=(set @t) goals=(list [key ? @t])]
   ==
 --
