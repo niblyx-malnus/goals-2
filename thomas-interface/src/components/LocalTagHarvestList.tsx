@@ -76,7 +76,6 @@ function LocalTagHarvestList({ host, name, tag, refresh }: { host: any; name: an
               poolName={name}
               goal={goal}
               showButtons={showButtons}
-              tags={goal.tags}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}

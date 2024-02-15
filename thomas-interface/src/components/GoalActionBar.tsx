@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { FiSquare, FiCheckSquare, FiTag, FiX, FiEdit, FiTrash, FiSave, FiMenu, FiCheck, FiPlay, FiLock } from 'react-icons/fi';
+import { FiPlay, FiPause, FiTriangle, FiArchive, FiCircle, FiTag, FiX, FiInfo, FiEye, FiEyeOff, FiCopy, FiPlus, FiLock } from 'react-icons/fi';
 import { getWeekDay, getMonday, addDays, formatDate } from './dateUtils';
-import GoalActionBar from './GoalActionBar';
 import useStore from '../store';
 import { Tag, Goal } from '../types';
 
@@ -18,43 +17,39 @@ const TagIcon = () => {
   );
 };
 
-const GoalRow: React.FC<{
-    host: string,
-    poolName: string,
+const ActionableIcon = (actionable: boolean) => {
+  if (actionable) {
+    return <FiTriangle />;
+  } else {
+    return <FiCircle />;
+  }
+};
+
+const ActiveIcon = (active: boolean) => {
+  if (active) {
+    return <FiPause />;
+  } else {
+    return <FiPlay />;
+  }
+};
+
+const GoalActionBar: React.FC<{
     goal: Goal,
-    showButtons: boolean,
     refresh: () => void,
-    moveGoalUp: (goalId: string) => void,
-    moveGoalDown: (goalId: string) => void
+    toggleEdit: () => void,
   }> = ({
-    host,
-    poolName,
     goal,
-    showButtons,
+    toggleEdit,
     refresh,
-    moveGoalUp,
-    moveGoalDown
   }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [newDescription, setNewDescription] = useState(goal.summary);
-  const [isActionable, setIsActionable] = useState(goal.actionable);
   const [panel, setPanel] = useState('');
   const [newTag, setNewTag] = useState('');
-  const rowRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
   const [newTagIsPublic, setNewTagIsPublic] = useState(true);
-  const [isActive, setIsActive] = useState(goal.active);
   const [listType, setListType] = useState<'day' | 'week'>('day');
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const pid = `/${host}/${poolName}`;
-
-  const toggleActionBar = () => {
-    if (panel === 'action-bar') {
-      setPanel('');
-    } else {
-      setPanel('action-bar');
-    }
-  };
+  const { pid } = api.goalKeyToPidGid(goal.key);
 
   const toggleInfoPanel = () => {
     if (panel === 'info') {
@@ -71,8 +66,6 @@ const GoalRow: React.FC<{
       setPanel('add');
     }
   };
-
-  const toggleEdit = () => { setIsEditing(!isEditing); }
 
   // Use Zustand store
   const { placeholderTag, setPlaceholderTag } = useStore(state => ({ 
@@ -92,7 +85,7 @@ const GoalRow: React.FC<{
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (rowRef.current && !rowRef.current.contains(event.target as Node)) {
+      if (barRef.current && !barRef.current.contains(event.target as Node)) {
         setPanel('');
       }
     };
@@ -101,86 +94,16 @@ const GoalRow: React.FC<{
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [rowRef]);
-
-  const deleteGoal = async () => {
-    // Show confirmation dialog
-    const isConfirmed = window.confirm("Deleting a goal is irreversible. Are you sure you want to delete this goal?");
-  
-    // Only proceed if the user confirms
-    if (isConfirmed) {
-      try {
-        await api.deleteGoal(goal.key);
-        refresh();
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
-
-
-  const updateGoal = async () => {
-    try {
-      console.log("updating goal...");
-      await api.setGoalSummary(goal.key, newDescription);
-      refresh();
-      setIsEditing(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const cancelUpdateGoal = async () => {
-    try {
-      setNewDescription(goal.summary);
-      refresh();
-      setIsEditing(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      updateGoal();
-    }
-    if (event.key === 'Escape') {
-      cancelUpdateGoal();
-    }
-  };
+  }, [barRef]);
 
   const navigate = useNavigate();
 
-  const navigateToGoal = (gid: string) => {
-    navigate(`/goal${pid}${gid}`);
-  };
-
   const navigateToPoolTag = (tag: string) => {
-    navigate(`/pool-tag/${host}/${poolName}/${tag}`);
+    navigate(`/pool-tag${pid}/${tag}`);
   };
 
   const navigateToLocalTag = (tag: string) => {
     navigate(`/local-tag/${tag}`);
-  };
-
-  const toggleActionable = async () => {
-    try {
-      await api.setGoalActionable(goal.key, !isActionable);
-      const actionable = await api.getGoalActionable(goal.key);
-      setIsActionable(actionable);
-      refresh();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
-  const toggleComplete = async () => {
-    try {
-      await api.setGoalComplete(goal.key, !goal.complete);
-      refresh();
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   // Toggle dropdown visibility
@@ -241,25 +164,6 @@ const GoalRow: React.FC<{
     }
   };
 
-  const toggleActive = async () => {
-    const newActiveState = !isActive;
-    try {
-      await api.setGoalActive(goal.key, newActiveState);
-      setIsActive(newActiveState); // Update the local state to reflect the change
-      refresh(); // Call refresh to update the UI based on the new state
-    } catch (error) {
-      console.error("Error toggling goal active state:", error);
-    }
-  };
-
-  const CompleteIcon = () => {
-    if (goal.complete) {
-      return <FiCheckSquare />;
-    } else {
-      return <FiSquare />;
-    }
-  };
-
   const AddPanel = () => {
     const navigateDate = (direction: 'prev' | 'next') => {
       const adjustment = listType === 'day' ? 1 : 7;
@@ -271,7 +175,7 @@ const GoalRow: React.FC<{
     const isTodaySelected = formatDate(new Date()) === formatDate(selectedDate);
     
     return (
-      <div className="z-10 absolute right-0 bottom-full mt-2 w-64 bg-white p-4 shadow-lg rounded-lg">
+      <div>
         <div className="flex justify-between mb-4">
           <button 
             className={`px-3 py-1 text-sm font-medium rounded-md ${listType === 'day' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} mr-1`} 
@@ -314,6 +218,59 @@ const GoalRow: React.FC<{
     );
   };
 
+  const InfoPanel = () => {
+    return (
+      <div>
+        <p>Info Panel</p>
+        {/* Place your info content here */}
+      </div>
+    );
+  };
+
+  const TagPanel = () => {
+    return (
+      <div>
+        <ul>
+          {goal.tags.map((tag, index) => (
+            <li key={index} className="flex justify-between items-center p-1">
+              { tag.isPublic
+                ?  <FiEye className="mr-2"/>
+                : <FiEyeOff className="mr-2"/>
+              }
+              <span
+                onClick={() => tag.isPublic ? navigateToPoolTag(tag.tag) : navigateToLocalTag(tag.tag)}
+                className="cursor-pointer"
+              >
+                {tag.tag}
+              </span>
+              <button onClick={() => removeTag(tag)} className="text-xs p-1">
+                <FiX />
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="flex items-center">
+          <button
+            onClick={() => setNewTagIsPublic(!newTagIsPublic)}
+            className="p-2 mr-2 border border-gray-300 rounded flex items-center justify-center"
+            style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+          >
+            {newTagIsPublic ? <FiEye /> : <FiEyeOff />}
+          </button>
+          <input
+            type="text"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            onKeyDown={handleNewTagKeyDown}
+            className="w-full p-1 border rounded"
+            placeholder={"Add tag: " + placeholderTag}
+            style={{ height: '2rem' }} // Match the height of the button
+          />
+        </div>
+      </div>
+    );
+  };
+
   const addGoalToTodoList = async () => {
     const formattedDate = formatDate(selectedDate);
     const dateKey = listType === 'day' ? formattedDate : formatDate(getMonday(selectedDate));
@@ -339,87 +296,76 @@ const GoalRow: React.FC<{
       alert('Failed to add goal to TodoList');
     }
   };
+
+  const copyToClipboard = () => {
+    setPanel('');
+    navigator.clipboard.writeText(goal.key);
+  }
   
   return (
-    <div ref={rowRef} className={`flex justify-between items-center mt-2 rounded ${isActionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200`}>
-      {
-        showButtons && (
-          <>
-            <button
-              className="p-2 rounded bg-gray-100"
-              onClick={toggleComplete}
-            >
-              <CompleteIcon />
-            </button>
-          </>
-        )
-      }
-      {isEditing ? (
-        <input 
-          type="text" 
-          value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
-          className="truncate bg-white shadow rounded cursor-pointer flex-grow p-2"
-          onKeyDown={handleKeyDown}
-        />
-      ) : (
-        <div
-          className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-2 ${goal.complete ? 'line-through' : ''}`}
-          onClick={() => navigateToGoal(goal.key)}
-          onDoubleClick={toggleEdit}
+    <div ref={barRef} className="p-1 relative group bg-gray-200 flex items-center">
+      <button
+        className="p-2 rounded bg-gray-100"
+        onClick={copyToClipboard}
+      >
+        <FiCopy />
+      </button>
+      <button
+        onClick={toggleAddPanel}
+        className="p-2 rounded bg-gray-100"
+      >
+        <FiPlus />
+      </button>
+      <button
+        className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+      >
+        <TagIcon />
+      </button>
+      <div className="relative group">
+        <button
+          className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+          onClick={handleTagButtonClick}
         >
-          {goal.summary}
-        </div>
-      )}
-      {showButtons && !isEditing && (
-        <>
-          <button
-            className="p-2 rounded bg-gray-100"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            <FiEdit />
-          </button>
-          <button
-            className="p-2 rounded bg-gray-100"
-            onClick={deleteGoal}
-          >
-            <FiTrash />
-          </button>
-        </>
-      )}
-      {showButtons && isEditing && (
-        <>
-          <button
-            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-            onClick={updateGoal}
-          >
-            <FiSave />
-          </button>
-          <button
-            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-            onClick={cancelUpdateGoal}
-          >
-            <FiX />
-          </button>
-        </>
-      )}
+          <FiTag />
+          {goal.tags.length > 0 && (
+            <span className="absolute top-0 right-0 bg-gray-300 rounded-full text-xs px-1">
+              {goal.tags.length}
+            </span>
+          )}
+        </button>
+      </div>
+      <button
+        className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+      >
+        {ActionableIcon(goal.actionable)}
+      </button>
+      <button
+        className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+      >
+        {ActiveIcon(goal.active)}
+      </button>
+      <button
+        className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+      >
+        <FiArchive />
+      </button>
       <div className="relative group">
         <button
           className="p-2 rounded bg-gray-100"
-          onClick={toggleActionBar}
+          onClick={toggleInfoPanel}
         >
-          <FiMenu />
+          <FiInfo />
         </button>
-        {
-          panel === 'action-bar' && (
-            <div className="absolute right-0 bottom-8 shadow-2xl rounded-md">
-              <GoalActionBar goal={goal} toggleEdit={toggleEdit} refresh={refresh} />
-            </div>
-          )
-        }
+        { panel !== '' && (
+          <div className="z-10 absolute right-0 bottom-full mt-2 w-64 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
+            {panel === 'add' && <AddPanel />}
+            {panel === 'tag' && <TagPanel />}
+            { panel === 'info' && <InfoPanel /> }
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default GoalRow;
+export default GoalActionBar;

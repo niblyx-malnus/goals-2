@@ -71,9 +71,8 @@ const TodoList: React.FC = () => {
   };
 
   const handleDelete = async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
     try {
-      await api.deleteGoal(pid, gid);
+      await api.deleteGoal(key);
       if (path in collections) {
         api.jsonPut(path, { themes: collections[path].themes, keys: collections[path].goals.map(goal => goal.key).filter(k => k !== key) })
       }
@@ -94,11 +93,10 @@ const TodoList: React.FC = () => {
     }
   };
 
-  const handleToggleComplete = async (id: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(id);
+  const handleToggleComplete = async (key: string) => {
     try {
-      const isCompleted = await api.getGoalComplete(pid, gid);
-      await api.setGoalComplete(pid, gid, !isCompleted);
+      const isCompleted = await api.getGoalComplete(key);
+      await api.setGoalComplete(key, !isCompleted);
       setRefresh(!refresh);
       // No need to update the local state for completion status, as it will be fetched dynamically
     } catch (error) {

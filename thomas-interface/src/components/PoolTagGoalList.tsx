@@ -95,7 +95,6 @@ function PoolTagGoalList({ host, name, tag, refresh }: { host: any; name: any; t
               poolName={name}
               goal={goal}
               showButtons={showButtons}
-              tags={goal.tags}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}

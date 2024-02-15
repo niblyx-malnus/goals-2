@@ -93,7 +93,6 @@ function LocalTagGoalList({ host, name, tag, refresh }: { host: any; name: any; 
               poolName={name}
               goal={goal}
               showButtons={showButtons}
-              tags={goal.tags}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}

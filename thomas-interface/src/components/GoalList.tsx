@@ -153,7 +153,6 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
               poolName={name}
               goal={goal}
               showButtons={showButtons}
-              tags={goal.tags}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}

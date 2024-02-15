@@ -11,7 +11,7 @@ import { Tag } from '../types';
 function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }) {
   const pid = `/${host}/${name}`;
   const gid = `/${goalId}`;
-  const goalKey = `/${host}/${name}/${goalId}`;
+  const key = `/${host}/${name}/${goalId}`;
   const [parent, setParent] = useState<string | null>(null);
   const [goalDescription, setGoalDescription] = useState<string>('');
   const [goalNote, setGoalNote] = useState<string>('');
@@ -48,7 +48,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   const handleSummarySave = () => {
     setIsEditingSummary(false);
     setGoalDescription(editableSummary);
-    api.setGoalSummary(pid, goalId, editableSummary);
+    api.setGoalSummary(key, editableSummary);
   };
 
   const handleSummaryCancel = () => {
@@ -81,7 +81,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
 
   const fetchCompleted = async () => {
     try {
-      const fetchedCompleted = await api.getGoalComplete(pid, gid);
+      const fetchedCompleted = await api.getGoalComplete(key);
       setCompleted(fetchedCompleted);
     } catch (error) {
       console.error("Error fetching tags: ", error);
@@ -90,7 +90,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
 
   const fetchActionable = async () => {
     try {
-      const fetchedActionable = await api.getGoalActionable(pid, gid);
+      const fetchedActionable = await api.getGoalActionable(key);
       setActionable(fetchedActionable);
     } catch (error) {
       console.error("Error fetching tags: ", error);
@@ -100,7 +100,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   const toggleActionable = async () => {
     try {
       await api.setGoalActionable(goalId, !actionable);
-      const temp = await api.getGoalActionable(pid, gid);
+      const temp = await api.getGoalActionable(key);
       setActionable(temp);
     } catch (error) {
       console.error(error);
@@ -109,8 +109,8 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   
   const toggleComplete = async () => {
     try {
-      await api.setGoalComplete(pid, goalId, !completed);
-      const temp = await api.getGoalComplete(pid, gid);
+      await api.setGoalComplete(key, !completed);
+      const temp = await api.getGoalComplete(key);
       setCompleted(temp);
     } catch (error) {
       console.error(error);
@@ -132,7 +132,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   useEffect(() => {
     const fetchGoalData = async () => {
       try {
-        const fetchedDesc = await api.getGoalSummary(pid, gid);
+        const fetchedDesc = await api.getGoalSummary(key);
         setGoalDescription(fetchedDesc);
         // ... other fetch calls
       } catch (error) {
@@ -191,13 +191,13 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   useEffect(() => {
     const fetch = async () => {
       try {
-        const fetchedDesc = await api.getGoalSummary(pid, gid);
+        const fetchedDesc = await api.getGoalSummary(key);
         setGoalDescription(fetchedDesc);
-        const fetchedNote = await api.getGoalNote(pid, gid);
+        const fetchedNote = await api.getGoalNote(key);
         setGoalNote(fetchedNote);
-        const fetchedParent = await api.getGoalParent(pid, gid);
+        const fetchedParent = await api.getGoalParent(key);
         setParent(fetchedParent);
-        const fetchedTags = await api.getGoalTags(pid, gid);
+        const fetchedTags = await api.getGoalTags(key);
         setGoalTags(fetchedTags);
       } catch (error) {
         console.error("Error fetching pools: ", error);
@@ -220,7 +220,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   const saveMarkdown = async (markdown: string) => {
     try {
       await api.editGoalNote(goalId, markdown);
-      const fetchedNote = await api.getGoalNote(pid, gid);
+      const fetchedNote = await api.getGoalNote(key);
       setGoalNote(fetchedNote);
     } catch (error) {
       console.error(error);
@@ -258,7 +258,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
       try {
         await api.addGoalTag(goalId, newTagIsPublic, e.currentTarget.value.trim()); // Assuming such a function exists in your API
-        const fetchedTags = await api.getGoalTags(pid, gid);
+        const fetchedTags = await api.getGoalTags(key);
         setGoalTags(fetchedTags);
         e.currentTarget.value = ''; // Clear the input
       } catch (error) {
@@ -272,7 +272,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
     const tagToRemove = goalTags[index];
     try {
       await api.delGoalTag(goalId, tagToRemove.isPublic, tagToRemove.tag); // Assuming such a function exists in your API
-      const fetchedTags = await api.getGoalTags(pid, gid);
+      const fetchedTags = await api.getGoalTags(key);
       setGoalTags(fetchedTags);
     } catch (error) {
       console.error("Error removing goal tag: ", error);

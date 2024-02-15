@@ -36,7 +36,7 @@ function Harvest({
         if (isMain) {
           fetchedGoals = await api.mainHarvest();
         } else if (host && name && goalId != null) {
-          fetchedGoals = await api.goalHarvest(`/${host}/${name}`, `/${goalId}`);
+          fetchedGoals = await api.goalHarvest(`/${host}/${name}/${goalId}`);
         } else {
           fetchedGoals = await api.poolHarvest(`/${host}/${name}`);
         }
@@ -120,7 +120,6 @@ function Harvest({
               poolName={name}
               goal={goal}
               showButtons={showButtons}
-              tags={goal.tags}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}
