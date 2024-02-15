@@ -160,7 +160,7 @@
     (pure:m !>(s+(~(gut by fields) 'note' '')))
     ::
       %setting
-    (pure:m !>(?~(s=(~(get by settings.local.store) setting.vyu) ~ u.s)))
+    (pure:m !>(?~(s=(~(get by settings.local.store) setting.vyu) ~ s+u.s)))
     ::
       %goal-tags
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
