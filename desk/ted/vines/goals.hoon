@@ -305,13 +305,8 @@
   =+  (~(got by goals.pool) gid.key)
   :*  key
       summary
-      %+  weld
-        %+  turn
-          ~(tap in (~(gut by tags.local.store) key ~))
-        (lead |)
-      %+  turn
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~)))
-      (lead &)
+      ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~))) :: labels (pool-specific)
+      ~(tap in (~(gut by tags.local.store) key ~))   :: tags (private)
       done.i.status.start
       done.i.status.end
       actionable

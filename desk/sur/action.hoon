@@ -134,7 +134,8 @@
 +$  goal-datum
   $:  =key
       summary=@t
-      =tags
+      labels=(list @t) :: pool-specific
+      tags=(list @t)   :: private
       active=?
       complete=?
       actionable=?

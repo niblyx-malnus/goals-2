@@ -18,7 +18,8 @@
       %-  pairs
       :~  [%key (enjs-key key)]
           [%summary s+summary]
-          [%tags a+(turn tags |=([b=? =@t] (pairs ~[['isPublic' b+b] tag+s/t])))]
+          [%labels a+(turn labels (lead %s))]
+          [%tags a+(turn tags (lead %s))]
           [%active b+active]
           [%complete b+complete]
           [%actionable b+actionable]
