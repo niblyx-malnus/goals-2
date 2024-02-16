@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiPlus, FiX, FiTrash, FiTag, FiEye, FiEyeOff } from 'react-icons/fi';
-import { Tag, Goal } from '../../types';
-import { periodType } from './types';
-import { formatDate } from '../dateUtils';
-import { isPeriodType, determinePath, formatDateDisplay, formatNowDisplay, navigateDate } from './helpers';
+import AddPanel from './AddTodoPanel';
+import { Goal } from '../../types';
 import api from '../../api';
 
 const TodoRow = ({
@@ -20,8 +18,6 @@ const TodoRow = ({
   onAddToTodoList: (path: string, key: string) => void
 }) => {
   const [panel, setPanel] = useState('');
-  const [listType, setListType] = useState<periodType>('day');
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [newTag, setNewTag] = useState('');
   const [newTagIsPublic, setNewTagIsPublic] = useState(true);
   
@@ -60,67 +56,6 @@ const TodoRow = ({
       setPanel('tag');
     }
   };
-
-  const AddPanel = () => {
-    const path = determinePath(listType, selectedDate);
-  
-    // Check if the selected selectedDate is today for the "Now" button
-    const isTodaySelected = formatDate(new Date()) === formatDate(selectedDate);
-
-    const handleListTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newValue = e.target.value;
-      if (isPeriodType(newValue)) {
-        setListType(newValue);
-      } else {
-        console.error(`${newValue} is not a valid periodType`);
-        // Handle the error appropriately
-      }
-    };
-    
-    return (
-      <div className="z-10 absolute right-0 bottom-full mt-2 w-64 bg-white p-4 shadow-lg rounded-lg">
-        <div className="flex justify-center mb-4">
-          <select
-            value={listType}
-            onChange={handleListTypeChange}
-            className="max-w-20 mr-2 px-3 py-2 bg-gray-200 text-gray-800 rounded-md"
-          >
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-            <option value="quarter">Quarter</option>
-            <option value="year">Year</option>
-          </select>
-          <button 
-            className={`w-28 px-3 py-1 text-sm font-medium rounded-md ${isTodaySelected ? 'bg-gray-400 text-white' : 'bg-blue-500 text-white'}`}
-            onClick={() => !isTodaySelected && setSelectedDate(new Date())}
-            disabled={isTodaySelected}>
-            {formatNowDisplay(listType)}
-          </button>
-        </div>
-        <div className="flex items-center justify-between mb-4">
-          <button 
-            className="p-2 rounded-md bg-gray-200 text-gray-800" 
-            onClick={() => setSelectedDate(navigateDate(selectedDate, listType, 'prev'))}>
-            ←
-          </button>
-          <span className="text-sm text-center font-medium">
-            {formatDateDisplay(listType, selectedDate)}
-          </span>
-          <button 
-            className="p-2 rounded-md bg-gray-200 text-gray-800" 
-            onClick={() => setSelectedDate(navigateDate(selectedDate, listType, 'next'))}>
-            →
-          </button>
-        </div>
-        <button 
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600" 
-          onClick={() => onAddToTodoList(path, goal.key)}>
-          Add to {listType} list
-        </button>
-      </div>
-    );
-  };
   
   const toggleComplete = () => {
     onToggleComplete(goal.key);
@@ -131,11 +66,11 @@ const TodoRow = ({
       // Logic to add the new tag to the goal
       // For example, update the tags array and send a request to the backend
       if (newTag.trim() !== '') {
-        await api.addGoalTag(goal.key, newTagIsPublic, newTag);
+        await api.addGoalTag(goal.key, newTag);
         setNewTag(''); // Reset input field
         await api.updateSetting('put', 'placeholder-tag', newTag);
       } else {
-        await api.addGoalTag(goal.key, newTagIsPublic, 'placeholder');
+        await api.addGoalTag(goal.key, 'placeholder');
       }
     } catch (error) {
       console.error("Error adding new tag: ", error);
@@ -152,11 +87,11 @@ const TodoRow = ({
     }
   };
 
-  const removeTag = async (tagToRemove: Tag) => {
+  const removeTag = async (tagToRemove: string) => {
     try {
       // Logic to remove the tag from the goal
       // For example, update the tags array and send a request to the backend
-      await api.delGoalTag(`${goal.key}`, tagToRemove.isPublic, tagToRemove.tag);
+      await api.delGoalTag(goal.key, tagToRemove);
     } catch (error) {
       console.error("Error removing tag: ", error);
     }
@@ -179,11 +114,15 @@ const TodoRow = ({
       <div className="relative group">
         <button
           onClick={togglePlusPanel}
-          className="mr-1 bg-gray-300 hover:bg-gray-500 font-bold py-1 px-1 rounded"
+          className="mr-1 bg-gray-300 font-bold py-1 px-1 rounded"
         >
           <FiPlus />
         </button>
-        {panel === 'plus' && <AddPanel />}
+        {panel === 'plus' && (
+          <div className="z-10 absolute right-0 bottom-full mt-2 w-64 bg-white p-4 shadow-lg rounded-lg">
+            <AddPanel goalKey={goal.key} />
+          </div>
+        )}
       </div>
       <div className="relative group">
         <button
@@ -202,14 +141,10 @@ const TodoRow = ({
             <ul>
               {goal.tags.map((tag, index) => (
                 <li key={index} className="flex justify-between items-center p-1 hover:bg-gray-200">
-                  { tag.isPublic
-                    ?  <FiEye className="mr-2"/>
-                    : <FiEyeOff className="mr-2"/>
-                  }
                   <span
                     className="cursor-pointer"
                   >
-                    {tag.tag}
+                    {tag}
                   </span>
                   <button onClick={() => removeTag(tag)} className="text-xs p-1">
                     <FiX />

@@ -1,9 +1,9 @@
-import { BrowserRouter as Router, Route, Routes, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useParams, Link, Navigate } from 'react-router-dom';
 import Pools from './components/Pools';
 import PoolPage from './components/PoolPage';
 import GoalPage from './components/GoalPage';
-import PoolTagPage from './components/PoolTagPage';
-import LocalTagPage from './components/LocalTagPage';
+import LabelPage from './components/LabelPage';
+import TagPage from './components/TagPage';
 import FileSystem from './components/FileSystem/FileSystem';
 import Mileage from './components/Mileage';
 import StateList from './components/States/StateList';
@@ -11,7 +11,8 @@ import WeeklyTargetList from './components/WeeklyTargets/WeeklyTargetList';
 import WeeklyTargetPage from './components/WeeklyTargets/WeeklyTargetPage';
 import CalendarApp from './components/Calendar/CalendarApp';
 import TodoList from './components/Periods/TodoList';
-import { Link } from 'react-router-dom';
+import { getCurrentDayDateKey } from './components/Periods/utils';
+import { periodType } from './types';
 
 function BackToHome() {
   return (
@@ -60,22 +61,22 @@ function GoalPageWrapper() {
   );
 }
 
-function PoolTagPageWrapper() {
+function LabelPageWrapper() {
   let { host, name, tag } = useParams();
   return (
     <div>
       <BackToHome />
-      <PoolTagPage host={host} name={name} tag={tag} />
+      <LabelPage host={host} name={name} tag={tag} />
     </div>
   );
 }
 
-function LocalTagPageWrapper() {
+function TagPageWrapper() {
   let { tag } = useParams();
   return (
     <div>
       <BackToHome />
-      <LocalTagPage tag={tag} />
+      <TagPage tag={tag} />
     </div>
   );
 }
@@ -90,6 +91,16 @@ function WeeklyTargetPageWrapper() {
   );
 }
 
+function TodoListWrapper() {
+  let { periodType, dateKey } = useParams();
+  return (
+    <div>
+      <BackToHome />
+      <TodoList periodType={periodType as periodType} dateKey={dateKey as string} />
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router basename="/apps/goals">
@@ -99,15 +110,17 @@ function App() {
           <Route path="/pools" element={<div><BackToHome /><Pools /></div>} />
           <Route path="/pool/:host/:name" element={<PoolPageWrapper />} />
           <Route path="/goal/:host/:name/:goalId" element={<GoalPageWrapper />} />
-          <Route path="/pool-tag/:host/:name/:tag" element={<PoolTagPageWrapper />} />
-          <Route path="/local-tag/:tag" element={<LocalTagPageWrapper />} />
+          <Route path="/pool-tag/:host/:name/:tag" element={<LabelPageWrapper />} />
+          <Route path="/local-tag/:tag" element={<TagPageWrapper />} />
           <Route path="/jsons" element={<div><BackToHome /><FileSystem /></div>} />
           <Route path="/mileage" element={<div><BackToHome /><Mileage /></div>} />
           <Route path="/states" element={<div><BackToHome /><StateList /></div>} />
           <Route path="/weekly_targets" element={<div><BackToHome /><WeeklyTargetList /></div>} />
           <Route path="/weekly_targets/:id" element={<WeeklyTargetPageWrapper />} />
           <Route path="/calendar" element={<div><BackToHome /><CalendarApp /></div>} />
-          <Route path="/periods" element={<div><BackToHome /><TodoList /></div>} />
+          <Route path="/periods" element={<Navigate to={`/periods/day/${getCurrentDayDateKey()}`} />} />
+          {/* Render TodoList for /periods/day/:dateKey */}
+          <Route path="/periods/:periodType/:dateKey" element={<TodoListWrapper />} />
         </Routes>
       </div>
     </Router>

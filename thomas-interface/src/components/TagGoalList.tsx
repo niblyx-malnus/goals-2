@@ -5,18 +5,26 @@ import GoalRow from './GoalRow';
 import useStore from '../store';
 import { Goal } from '../types';
 
-function PoolTagHarvestList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
+function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: string; refresh: () => void; }) {
   const [goals, setGoals] = useState<Goal[]>([]);
+
+  // Use Zustand store
+  const { showCompleted, setShowCompleted } = useStore(state => ({ 
+      showCompleted: state.showCompleted, 
+      setShowCompleted: state.setShowCompleted 
+    }));
 
   const { showButtons, setShowButtons } = useStore(state => ({ 
       showButtons: state.showButtons, 
       setShowButtons: state.setShowButtons 
     }));
 
+  const displayedGoals = showCompleted ? goals : goals.filter(goal => !goal.complete);
+
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const fetchedGoals = await api.getPoolTagHarvest(`/${host}/${name}`, tag);
+        const fetchedGoals = await api.getTagGoals(tag);
         setGoals(fetchedGoals);
       } catch (error) {
         console.error("Error fetching goals: ", error);
@@ -58,6 +66,15 @@ function PoolTagHarvestList({ host, name, tag, refresh }: { host: any; name: any
         <label className="flex items-center space-x-2">
           <input 
             type="checkbox" 
+            checked={showCompleted} 
+            onChange={() => setShowCompleted(!showCompleted)} 
+            className="form-checkbox rounded"
+          />
+          <span>Show Completed</span>
+        </label>
+        <label className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
             checked={showButtons} 
             onChange={() => setShowButtons(!showButtons)} 
             className="form-checkbox rounded"
@@ -66,7 +83,7 @@ function PoolTagHarvestList({ host, name, tag, refresh }: { host: any; name: any
         </label>
       </div>
       <ul>
-        {goals.map((goal, index) => (
+        {displayedGoals.map((goal, index) => (
           <div
             key={goal.key}
             className="block text-current no-underline hover:no-underline"
@@ -87,4 +104,4 @@ function PoolTagHarvestList({ host, name, tag, refresh }: { host: any; name: any
   );
 };
 
-export default PoolTagHarvestList;
+export default TagGoalList;

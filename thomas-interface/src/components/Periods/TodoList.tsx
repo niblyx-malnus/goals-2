@@ -1,51 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { formatDate } from '../dateUtils';
-import useStore from './store';
+import useStore from '../../store';
 import api from '../../api';
-import { periodType } from './types';
+import { periodType } from '../../types';
 import { Goal } from '../../types';
 import { ourPool } from '../../constants';
-import { isPeriodType, determinePath, formatDateDisplay, formatNowDisplay, navigateDate } from './helpers';
+import { getAdjacentPeriod, convertToPeriod, formatDateKeyDisplay, getCurrentPeriod, isPeriodType, formatNowDisplay } from './utils';
+import { useNavigate } from 'react-router-dom';
 import TodoRow from './TodoRow';
 
-const TodoList: React.FC = () => {
-  const [viewType, setViewType] = useState<periodType>('day');
-  const [currentDate, setCurrentDate] = useState(new Date());
+const TodoList: React.FC<{
+  periodType: periodType,
+  dateKey: string
+}> = ({
+  periodType,
+  dateKey
+}) => {
   const [input, setInput] = useState('');
   const [themeInput, setThemeInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const { collections, setCollection } = useStore(state => state);
 
-  const path = determinePath(viewType, currentDate);
+  const navigate = useNavigate();
+
+  const jsonPath = `/periods/${periodType}/${dateKey}.json`;
+  
+  const today = getCurrentPeriod(periodType);
 
   useEffect(() => {
     setIsLoading(true);
   
-    api.jsonRead(path)
+    api.jsonRead(jsonPath)
       .then(async (data: { keys: string[], themes: string[] }) => {
         const goals: Goal[] = await api.getGoalData(data.keys);
-        setCollection(path, { themes: data.themes, goals: goals });
+        setCollection(jsonPath, { themes: data.themes, goals: goals });
       })
       .catch(error => {
-        setCollection(path, { goals: [], themes: [] });
+        setCollection(jsonPath, { goals: [], themes: [] });
       })
 
     setIsLoading(false);
-  }, [viewType, currentDate, setCollection, refresh, path]);
-
-  const isToday = formatDate(new Date()) === formatDate(currentDate);
+  }, [periodType, setCollection, refresh, jsonPath]);
 
   const handleCreate = async () => {
     if (!input.trim()) return;
     try {
       const key = await api.createGoal(ourPool, null, input, true);
-      if (path in collections) {
-        if (!collections[path].goals.some(goal => goal.key === key)) {
-          api.jsonPut(path, { themes: collections[path].themes, keys: [...collections[path].goals.map(goal => goal.key), key] })
+      console.log("getting created key");
+      console.log(key);
+      if (jsonPath in collections) {
+        if (!collections[jsonPath].goals.some(goal => goal.key === key)) {
+          api.jsonPut(jsonPath, { themes: collections[jsonPath].themes, keys: [...collections[jsonPath].goals.map(goal => goal.key), key] })
         }
       } else {
-        api.jsonPut(path, { themes: [], keys: [] })
+        api.jsonPut(jsonPath, { themes: [], keys: [] })
       }
       setInput('');
       setRefresh(!refresh);
@@ -54,14 +62,14 @@ const TodoList: React.FC = () => {
     }
   };
 
-  const handleAdd = async (path: string, key: string) => {
+  const handleAdd = async (jsonPath: string, key: string) => {
     try {
-      if (path in collections) {
-        if (!collections[path].goals.some(goal => goal.key === key)) {
-          api.jsonPut(path, { themes: collections[path].themes, keys: [...collections[path].goals.map(goal => goal.key), key] })
+      if (jsonPath in collections) {
+        if (!collections[jsonPath].goals.some(goal => goal.key === key)) {
+          api.jsonPut(jsonPath, { themes: collections[jsonPath].themes, keys: [...collections[jsonPath].goals.map(goal => goal.key), key] })
         }
       } else {
-        api.jsonPut(path, { themes: [], keys: [] })
+        api.jsonPut(jsonPath, { themes: [], keys: [] })
       }
       setInput('');
       setRefresh(!refresh);
@@ -73,8 +81,8 @@ const TodoList: React.FC = () => {
   const handleDelete = async (key: string) => {
     try {
       await api.deleteGoal(key);
-      if (path in collections) {
-        api.jsonPut(path, { themes: collections[path].themes, keys: collections[path].goals.map(goal => goal.key).filter(k => k !== key) })
+      if (jsonPath in collections) {
+        api.jsonPut(jsonPath, { themes: collections[jsonPath].themes, keys: collections[jsonPath].goals.map(goal => goal.key).filter(k => k !== key) })
       }
       setRefresh(!refresh);
     } catch (error) {
@@ -84,8 +92,8 @@ const TodoList: React.FC = () => {
 
   const handleRemove = async (key: string) => {
     try {
-      if (path in collections) {
-        api.jsonPut(path, { themes: collections[path].themes, keys: collections[path].goals.map(goal => goal.key).filter(k => k !== key) })
+      if (jsonPath in collections) {
+        api.jsonPut(jsonPath, { themes: collections[jsonPath].themes, keys: collections[jsonPath].goals.map(goal => goal.key).filter(k => k !== key) })
       }
       setRefresh(!refresh);
     } catch (error) {
@@ -108,10 +116,10 @@ const TodoList: React.FC = () => {
     setThemeInput(''); // Clear input after adding
     if (!themeInput.trim()) return;
     try {
-      if (path in collections) {
-        api.jsonPut(path, { themes: [...collections[path].themes, themeInput], keys: collections[path].goals.map(goal => goal.key) })
+      if (jsonPath in collections) {
+        api.jsonPut(jsonPath, { themes: [...collections[jsonPath].themes, themeInput], keys: collections[jsonPath].goals.map(goal => goal.key) })
       } else {
-        api.jsonPut(path, { themes: [themeInput], keys: [] })
+        api.jsonPut(jsonPath, { themes: [themeInput], keys: [] })
       }
       setRefresh(!refresh);
     } catch (error) {
@@ -121,8 +129,8 @@ const TodoList: React.FC = () => {
 
   const handleRemoveTheme = (themeToRemove: string) => {
     try {
-      if (path in collections) {
-        api.jsonPut(path, { themes: collections[path].themes.filter(t => t !== themeToRemove), keys: collections[path].goals.map(goal => goal.key) })
+      if (jsonPath in collections) {
+        api.jsonPut(jsonPath, { themes: collections[jsonPath].themes.filter(t => t !== themeToRemove), keys: collections[jsonPath].goals.map(goal => goal.key) })
         setRefresh(!refresh);
       }
     } catch (error) {
@@ -131,17 +139,21 @@ const TodoList: React.FC = () => {
   };
 
   const goToToday = () => {
-    setCurrentDate(new Date());
+    navigate(`/periods/${periodType}/${today}`);
   };
 
-  const handleViewTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newValue = e.target.value;
-    if (isPeriodType(newValue)) {
-      setViewType(newValue);
+  const handlePeriodTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (isPeriodType(e.target.value)) {
+      const newDateKey = convertToPeriod(periodType, dateKey, e.target.value);
+      navigate(`/periods/${e.target.value}/${newDateKey}`);
     } else {
-      console.error(`${newValue} is not a valid periodType`);
-      // Handle the error appropriately
+      console.error(`${e.target.value} is not a valid periodType`);
     }
+  };
+
+  const handleNavigation = (direction: 'prev' | 'next') => {
+    const newDateKey = getAdjacentPeriod(periodType, dateKey, direction);
+    navigate(`/periods/${periodType}/${newDateKey}`);
   };
 
   return (
@@ -149,8 +161,8 @@ const TodoList: React.FC = () => {
       <div className="relative group items-center">
         <div className="mb-4 flex justify-center">
           <select
-            value={viewType}
-            onChange={handleViewTypeChange}
+            value={periodType}
+            onChange={handlePeriodTypeChange}
             className="max-w-20 mr-2 px-3 py-2 bg-gray-200 text-gray-800 rounded-md"
           >
             <option value="day">Day</option>
@@ -161,15 +173,15 @@ const TodoList: React.FC = () => {
           </select>
           <button
             onClick={goToToday}
-            className={`w-28 py-1 px-2 ${isToday ? 'bg-gray-400' : 'bg-blue-700'} text-white rounded`}
-            disabled={isToday}
+            className={`w-28 py-1 px-2 ${dateKey === today ? 'bg-gray-400' : 'bg-blue-700'} text-white rounded`}
+            disabled={dateKey === today}
           >
-            {formatNowDisplay(viewType)}
+            {formatNowDisplay(periodType)}
           </button>
         </div>
         <div className="mb-4 flex justify-between">
           <button
-            onClick={() => setCurrentDate(navigateDate(currentDate, viewType, 'prev'))}
+            onClick={() => handleNavigation('prev')}
             className="py-2 px-4 bg-gray-300 text-gray-700 rounded"
           >
             Prev
@@ -177,10 +189,10 @@ const TodoList: React.FC = () => {
           <div
             className="w-56 text-center font-bold py-2 px-4 bg-gray-200 text-gray-700 rounded"
           >
-            {formatDateDisplay(viewType, currentDate)}
+            {formatDateKeyDisplay(periodType, dateKey)}
           </div>
           <button
-            onClick={() => setCurrentDate(navigateDate(currentDate, viewType, 'next'))}
+            onClick={() => handleNavigation('next')}
             className="py-2 px-4 bg-gray-300 text-gray-700 rounded"
           >
             Next
@@ -205,7 +217,7 @@ const TodoList: React.FC = () => {
       )}
       {!isLoading && (
         <div className="flex justify-center flex-wrap">
-          {collections[path]?.themes.map(theme => (
+          {collections[jsonPath]?.themes.map(theme => (
             <div key={theme} className="bg-blue-100 text-blue-800 text-sm font-semibold mr-2 mb-2 px-3 py-1 rounded-full flex align-center">
               {theme}
               <button
@@ -236,7 +248,7 @@ const TodoList: React.FC = () => {
       )}
     { !isLoading && (
       <ul>
-        {collections[path]?.goals.map((goal) => (
+        {collections[jsonPath]?.goals.map((goal) => (
           <TodoRow
             goal={goal}
             onToggleComplete={handleToggleComplete}

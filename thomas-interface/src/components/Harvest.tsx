@@ -3,7 +3,7 @@ import api from '../api';
 import _ from 'lodash';
 import GoalRow from './GoalRow';
 import useStore from '../store';
-import { Tag, Goal } from '../types';
+import { Goal } from '../types';
 
 function Harvest({
   host,
@@ -17,7 +17,7 @@ function Harvest({
   name: any;
   goalId: any;
   method: string;
-  tags: Tag[];
+  tags: string[];
   refresh: () => void;
 }) {
   const [goals, setGoals] = useState<Goal[]>([]);

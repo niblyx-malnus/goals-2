@@ -1,6 +1,7 @@
 import memoize from "lodash/memoize";
 import Urbit from "@urbit/http-api";
 import { title } from "process";
+import { goalKeyToPidGid } from './utils';
 
 const live = process.env.REACT_APP_LIVE;
 const ship = "niblyx-malnus";
@@ -75,7 +76,7 @@ const api = {
       inputDesk: 'goals', // where does the input mark live
       inputMark: 'goal-view', // name of input mark
       outputDesk: 'goals', // where does the output mark live
-      outputMark: 'goal-vent', // name of output mark
+      outputMark: 'json', // name of output mark
       body: json, // the actual poke content
     }, 'goals');
   },
@@ -86,7 +87,7 @@ const api = {
       inputDesk: 'goals', // where does the input mark live
       inputMark: 'goal-action', // name of input mark
       outputDesk: 'goals', // where does the output mark live
-      outputMark: 'goal-vent', // name of output mark
+      outputMark: 'json', // name of output mark
       body: json, // the actual poke content
     }, 'goals');
   },
@@ -97,18 +98,9 @@ const api = {
       inputDesk: 'goals', // where does the input mark live
       inputMark: 'json-tree-action', // name of input mark
       outputDesk: 'goals', // where does the output mark live
-      outputMark: 'json-tree-vent', // name of output mark
+      outputMark: 'json', // name of output mark
       body: json, // the actual poke content
     }, 'goals');
-  },
-  goalKeyToPidGid: (path: string) => {
-    console.log(`Splitting path: ${path}`);
-    const parts = path.split('/').filter(Boolean);
-    if (parts.length !== 3) {
-      throw new Error('Path must be in the format of /{host}/{name}/{id}');
-    }
-    const [host, name, gid] = parts;
-    return { pid: `/${host}/${name}`, gid: `/${gid}` };
   },
   jsonTree: async (path: string) => {
     const json = { tree: { path: path } };
@@ -144,7 +136,7 @@ const api = {
     return await api.goalView(json);
   },
   goalHarvest: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     const json = {
       harvest: { type: { pid: pid, gid: gid } }
     };
@@ -179,8 +171,7 @@ const api = {
           actionable: actionable
         }
       };
-    const gid: string = await api.goalAction(json);
-    return `${pid}${gid}`;
+    return await api.goalAction(json);
   },
   createGoalWithTag: async (pid: string, upid: string | null, summary: string, actionable: boolean, tag: string) => {
     const json = {
@@ -194,64 +185,48 @@ const api = {
       };
     return await api.goalAction(json);
   },
-  addGoalTag: async (key: string, isPublic: boolean, text: string) => {
+  addGoalLabel: async (key: string, label: string) => {
     console.log(key);
-    const json = isPublic
-      ?  {
-          'update-goal-tags': {
-            key: key,
-            method: 'uni',
-            tags: [text]
-          }
+    const json = {
+        'update-goal-tags': {
+          key: key,
+          method: 'uni',
+          tags: [label]
         }
-      :  {
-          'update-local-goal-tags': {
-            key: key,
-            method: 'uni',
-            tags: [text]
-          }
-        };
+      }
     return await api.goalAction(json);
   },
-  delGoalTag: async (key: string, isPublic: boolean, text: string) => {
-    console.log(key);
-    const json = isPublic
-      ?  {
-          'update-goal-tags': {
-            key: key,
-            method: 'dif',
-            tags: [text]
-          }
-        }
-      :  {
-          'update-local-goal-tags': {
-            key: key,
-            method: 'dif',
-            tags: [text]
-          }
-        };
-    return await api.goalAction(json);
-  },
-  addLocalGoalTag: async (key: string, text: string) => {
+  addGoalTag: async (key: string, tag: string) => {
     console.log(key);
     const json = {
         'update-local-goal-tags': {
           key: key,
           method: 'uni',
-          tags: [text]
+          tags: [tag]
         }
-      };
+      }
     return await api.goalAction(json);
   },
-  delLocalGoalTag: async (key: string, text: string) => {
+  delGoalLabel: async (key: string, label: string) => {
+    console.log(key);
+    const json = {
+        'update-goal-tags': {
+          key: key,
+          method: 'dif',
+          tags: [label]
+        }
+      }
+    return await api.goalAction(json);
+  },
+  delGoalTag: async (key: string, tag: string) => {
     console.log(key);
     const json = {
         'update-local-goal-tags': {
           key: key,
           method: 'dif',
-          tags: [text]
+          tags: [tag]
         }
-      };
+      }
     return await api.goalAction(json);
   },
   editPoolTitle: async (poolId: string, title: string) => {
@@ -300,7 +275,7 @@ const api = {
     return await api.goalAction(json);
   },
   setGoalSummary: async (key: string, summary: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     const json = {
         'set-summary': {
           pid: pid,
@@ -331,14 +306,14 @@ const api = {
     return await api.goalAction(json);
   },
   setGoalComplete: async (key: string, complete: boolean) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     const json = complete
       ? { 'mark-complete': { pid: pid, gid: gid } }
       : { 'unmark-complete': { pid: pid, gid: gid } }
     return await api.goalAction(json);
   },
   setGoalActive: async (key: string, active: boolean) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     const json = active
       ? { 'mark-active': { pid: pid, gid: gid } }
       : { 'unmark-active': { pid: pid, gid: gid } }
@@ -351,7 +326,7 @@ const api = {
     return await api.goalAction(json);
   },
   deleteGoal: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     const json = { 'delete-goal': { pid: pid, gid: gid } };
     return await api.goalAction(json);
   },
@@ -427,16 +402,16 @@ const api = {
   getGoalYoung: async (pid:string, gid: string) => {
     return await api.goalView({ "goal-young": { pid: pid, gid: gid } });
   },
-  getPoolTagGoals: async (pid: string, tag: string) => {
-    return await api.goalView({ "pool-tag-goals": { pid: pid, tag: tag } });
+  getLabelGoals: async (pid: string, label: string) => {
+    return await api.goalView({ "pool-tag-goals": { pid: pid, tag: label } });
   },
-  getPoolTagHarvest: async (pid: string, tag: string) => {
-    return await api.goalView({ "pool-tag-harvest": { pid: pid, tag: tag } });
+  getLabelHarvest: async (pid: string, label: string) => {
+    return await api.goalView({ "pool-tag-harvest": { pid: pid, tag: label } });
   },
-  getLocalTagGoals: async (tag: string) => {
+  getTagGoals: async (tag: string) => {
     return await api.goalView({ "local-tag-goals": { tag: tag } });
   },
-  getLocalTagHarvest: async (tag: string) => {
+  getTagHarvest: async (tag: string) => {
     return await api.goalView({ "local-tag-harvest": { tag: tag } });
   },
   getPoolTitle: async (pid: string) => {
@@ -445,52 +420,52 @@ const api = {
   getPoolNote: async (pid: string) => {
     return await api.goalView({ "pool-note": { pid: pid } });
   },
-  getPoolTagNote: async (pid: string, tag: string) => {
-    return await api.goalView({ "pool-tag-note": { pid: pid, tag: tag } });
+  getLabelNote: async (pid: string, label: string) => {
+    return await api.goalView({ "pool-tag-note": { pid: pid, tag: label } });
   },
-  getLocalTagNote: async (tag: string) => {
+  getTagNote: async (tag: string) => {
     return await api.goalView({ "local-tag-note": { tag: tag } });
   },
   getGoalSummary: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     return await api.goalView({ "goal-summary": { pid: pid, gid: gid } });
   },
   getGoalNote: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     return await api.goalView({ "goal-note": { pid: pid, gid: gid } });
   },
-  getGoalTags: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+  getGoalLabels: async (key: string) => {
+    const { pid, gid } = goalKeyToPidGid(key);
     return await api.goalView({ "goal-tags": { pid: pid, gid: gid } });
   },
-  getLocalGoalTags: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+  getGoalTags: async (key: string) => {
+    const { pid, gid } = goalKeyToPidGid(key);
     return await api.goalView({ "local-goal-tags": { pid: pid, gid: gid } });
   },
   getGoalParent: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     return await api.goalView({ "goal-parent": { pid: pid, gid: gid } });
   },
   getGoalActionable: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     return await api.goalView({ "goal-actionable": { pid: pid, gid: gid } });
   },
   getGoalComplete: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     return await api.goalView({ "goal-complete": { pid: pid, gid: gid } });
   },
   getGoalActive: async (key: string) => {
-    const { pid, gid } = api.goalKeyToPidGid(key);
+    const { pid, gid } = goalKeyToPidGid(key);
     return await api.goalView({ "goal-active": { pid: pid, gid: gid } });
   },
   getSetting: async (setting: string) => {
     console.log(`getting setting: ${setting}`)
     return await api.goalView({ "setting": { setting: setting } });
   },
-  getPoolTags: async (pid: string) => {
+  getPoolLabels: async (pid: string) => {
     return await api.goalView({ "pool-tags": { pid: pid } });
   },
-  getAllLocalGoalTags: async () => {
+  getAllTags: async () => {
     return await api.goalView({ "all-local-goal-tags": null });
   },
 };

@@ -3,15 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
-type Tag = {
-  isPublic: boolean;
-  tag: string;
-};
-
 function TagSearchBar({ poolId }: { poolId: string | null }) {
-  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
+  const [filteredTags, setFilteredTags] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tagIsPublic, setTagIsPublic] = useState(false);
   
@@ -21,7 +16,7 @@ function TagSearchBar({ poolId }: { poolId: string | null }) {
     const fetchTags = async () => {
       try {
         if (poolId !== null) {
-          const fetchedTags = await api.getPoolTags(poolId);
+          const fetchedTags = await api.getPoolLabels(poolId);
           setAllTags(fetchedTags);
           setFilteredTags(fetchedTags); // Initialize with all tags
         }
@@ -33,7 +28,7 @@ function TagSearchBar({ poolId }: { poolId: string | null }) {
   }, [poolId, dropdownOpen]);
 
   useEffect(() => {
-    const filtered = allTags.filter(tag => tag.tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredTags(filtered);
   }, [searchTerm, allTags]);
 
@@ -77,14 +72,10 @@ function TagSearchBar({ poolId }: { poolId: string | null }) {
           <div
             key={index}
             className="tag-item flex items-center p-1 hover:bg-gray-200 cursor-pointer"
-            onClick={() => navigateToTagPage(tag.tag)}
+            onClick={() => navigateToTagPage(tag)}
             style={{ lineHeight: '1.5rem' }}
           >
-            { tag.isPublic
-              ?  <FiEye className="mr-2"/>
-              : <FiEyeOff className="mr-2"/>
-            }
-            {tag.tag}
+            {tag}
           </div>
         ))}
       </div>

@@ -1,13 +1,16 @@
-export type Tag = {
-  isPublic: boolean;
-  tag: string;
-};
-
 export type Goal = {
   key: string,
   summary: string,
-  tags: Tag[],
+  labels: string[],
+  tags: string[],
   active: boolean,
   complete: boolean,
   actionable: boolean
 };
+
+export type periodType = 'day' | 'week' | 'month' | 'quarter' | 'year';
+
+export type Collection = {
+  goals: Goal[]
+  themes: string[],
+}

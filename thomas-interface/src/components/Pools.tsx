@@ -6,25 +6,20 @@ import TagSearchBar from './TagSearchBar';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import api from '../api';
 
-type Tag = {
-  isPublic: boolean;
-  tag: string;
-};
-
 function Pools() {
   const [newTitle, setNewTitle] = useState<string>('');
   const [refreshPools, setRefreshPools] = useState(false);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
-  const [tags, setTags] = useState<Tag[]>([]); // For managing Harvest tags
+  const [tags, setTags] = useState<string[]>([]); // For managing Harvest tags
   const [selectedOperation, setSelectedOperation] = useState('some'); // For managing the Harvest operation
   const [activeTab, setActiveTab] = useState('Pools'); // New state for active tab
   const [tagIsPublic, setTagIsPublic] = useState(false);
-  const [allLocalTags, setAllLocalTags] = useState<Tag[]>([]);
+  const [allLocalTags, setAllLocalTags] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const fetchedTags = await api.getAllLocalGoalTags();
+        const fetchedTags = await api.getAllTags();
         setAllLocalTags(fetchedTags);
       } catch (error) {
         console.error("Error fetching tags: ", error);
@@ -64,7 +59,7 @@ function Pools() {
   // Function to add a tag for Harvest
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-      setTags([...tags, { isPublic: false, tag: e.currentTarget.value.trim() }]);
+      setTags([...tags, e.currentTarget.value.trim()]);
       e.currentTarget.value = ''; // Clear the input
     }
   };
@@ -86,9 +81,9 @@ function Pools() {
             <div
               key={index}
               className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
-              onClick={() => navigateToLocalTagPage(tag.tag)}
+              onClick={() => navigateToLocalTagPage(tag)}
             >
-              {tag.tag}
+              {tag}
             </div>
           ))}
         </div>
@@ -170,7 +165,7 @@ function Pools() {
                     ?  <FiEye className="mr-2"/>
                     : <FiEyeOff className="mr-2"/>
                   }
-                  {tag.tag}
+                  {tag}
                   <button 
                     className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
                     onClick={() => handleRemoveTag(index)}

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MarkdownEditor from './MarkdownEditor';
-import LocalTagGoalList from './LocalTagGoalList';
-import LocalTagHarvestList from './LocalTagHarvestList';
+import PoolTagGoalList from './LabelGoalList';
+import PoolTagHarvestList from './LabelHarvestList';
 import Harvest from './Harvest'; // Assuming this is the correct import
 import api from '../api';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
 
-function LocalTagPage({ tag }: { tag: any; }) {
-  const [localTagNote, setLocalTagNote] = useState<string>('');
+function LabelPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
+  const poolId = `/${host}/${name}`;
+  const [poolTagNote, setPoolTagNote] = useState<string>('');
   const [selectedOperation, setSelectedOperation] = useState('some');
   const [newDescription, setNewDescription] = useState<string>('');
   const [refreshGoals, setRefreshGoals] = useState(false);
@@ -23,24 +23,28 @@ function LocalTagPage({ tag }: { tag: any; }) {
     navigate(`/pools`);
   };
 
+  const navigateToPoolPage = () => {
+    navigate(`/pool/${host}/${name}`);
+  };
+
   // Fetch pool tag details on mount
   useEffect(() => {
     const fetch = async () => {
       try {
-        const fetchedNote = await api.getLocalTagNote(tag);
-        setLocalTagNote(fetchedNote);
+        const fetchedNote = await api.getLabelNote(poolId, tag);
+        setPoolTagNote(fetchedNote);
       } catch (error) {
         console.error("Error fetching pool tag details: ", error);
       }
     };
     fetch();
-  }, [tag]);
+  }, [poolId, tag]);
 
   const saveMarkdown = async (markdown: string) => {
     try {
-      await api.editLocalTagNote(tag, markdown);
-      const fetchedNote = await api.getLocalTagNote(tag);
-      setLocalTagNote(fetchedNote);
+      await api.editPoolTagNote(poolId, tag, markdown);
+      const fetchedNote = await api.getLabelNote(poolId, tag);
+      setPoolTagNote(fetchedNote);
     } catch (error) {
       console.error(error);
     }
@@ -50,6 +54,17 @@ function LocalTagPage({ tag }: { tag: any; }) {
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
       setTags([...tags, e.currentTarget.value.trim()]);
       e.currentTarget.value = ''; // Clear the input
+    }
+  };
+
+  const handleAddTitle = async () => {
+    if (newDescription.trim() !== '') {
+      try {
+        await api.createGoalWithTag(`/${host}/${name}`, null, newDescription, true, tag);
+      } catch (error) {
+        console.error(error);
+      }
+      setNewDescription('');
     }
   };
 
@@ -65,6 +80,12 @@ function LocalTagPage({ tag }: { tag: any; }) {
     <div className="bg-gray-200 h-full flex justify-center items-center">
       <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full">
         <div className="flex justify-between pb-2">
+          <div
+            className="cursor-pointer"
+            onClick={navigateToPoolPage}
+          >
+            <h2 className="text-blue-800">Parent Pool</h2>
+          </div>
           <div
             className="cursor-pointer"
             onClick={navigateToAllPools}
@@ -99,19 +120,38 @@ function LocalTagPage({ tag }: { tag: any; }) {
             </li>
           </ul>
         </div>
+        <div className="pt-6 flex items-center mb-4">
+          <input
+            type="text"
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddTitle();
+            }}
+            placeholder="Enter new title..."
+            className="p-2 flex-grow border box-border rounded mr-2 w-full" // <-- Notice the flex-grow and w-full here
+          />
+          <button 
+            onClick={handleAddTitle} 
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none"
+            style={{maxWidth: '100px'}} // This ensures button never grows beyond 100px.
+          >
+            Add
+          </button>
+        </div>
         {activeTab === 'Goals' && (
           <>
-            <LocalTagGoalList host={null} name={null} tag={tag} refresh={triggerRefreshRoots}/>
+            <PoolTagGoalList host={host} name={name} tag={tag} refresh={triggerRefreshRoots}/>
           </>
         )}
         {activeTab === 'Harvest' && (
           <>
-            <LocalTagHarvestList host={null} name={null} tag={tag} refresh={triggerRefreshHarvest}/>
+            <PoolTagHarvestList host={host} name={name} tag={tag} refresh={triggerRefreshHarvest}/>
           </>
         )}
         <div className="p-6 markdown-container all:unstyled overflow-y-auto">
           <MarkdownEditor
-            initialMarkdown={localTagNote}
+            initialMarkdown={poolTagNote}
             onSave={saveMarkdown}
           />
         </div>
@@ -120,4 +160,4 @@ function LocalTagPage({ tag }: { tag: any; }) {
   );
 }
 
-export default LocalTagPage;
+export default LabelPage;

@@ -7,11 +7,6 @@ import TagSearchBar from './TagSearchBar';
 import api from '../api';
 import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
 
-type Tag = {
-  isPublic: boolean;
-  tag: string;
-};
-
 function Pool({ host, name }: { host: any; name: any; }) {
   const poolId = `/${host}/${name}`;
   const [poolTitle, setPoolTitle] = useState<string>('');
@@ -23,18 +18,18 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [goalId1, setGoalId1] = useState<string>('');
   const [goalId2, setGoalId2] = useState<string>('');
   const [activeTab, setActiveTab] = useState('Roots');
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [selectedOperation, setSelectedOperation] = useState('some');
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editableTitle, setEditableTitle] = useState(poolTitle);
   const [tagIsPublic, setTagIsPublic] = useState(false);
-  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const fetchedTags = await api.getPoolTags(poolId);
+        const fetchedTags = await api.getPoolLabels(poolId);
         setAllTags(fetchedTags);
       } catch (error) {
         console.error("Error fetching tags: ", error);
@@ -194,9 +189,9 @@ function Pool({ host, name }: { host: any; name: any; }) {
             <div
               key={index}
               className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
-              onClick={() => navigateToPoolTagPage(tag.tag)}
+              onClick={() => navigateToPoolTagPage(tag)}
             >
-              {tag.tag}
+              {tag}
             </div>
           ))}
         </div>
@@ -330,7 +325,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
                     className="p-2 flex-grow border box-border rounded"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-                        setTags([...tags, { isPublic: false, tag: e.currentTarget.value.trim() }]);
+                        setTags([...tags, e.currentTarget.value.trim()]);
                         e.currentTarget.value = ''; // Clear the input
                       }
                     }}
@@ -340,11 +335,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
               <div className="flex flex-wrap justify-center mb-4">
                 {tags.map((tag, index) => (
                   <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-                    { false
-                      ?  <FiEye className="mr-2"/>
-                      : <FiEyeOff className="mr-2"/>
-                    }
-                    {tag.tag}
+                    {tag}
                     <button 
                       className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
                       onClick={() => setTags(tags.filter((_, i) => i !== index))}

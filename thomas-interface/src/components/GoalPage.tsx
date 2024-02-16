@@ -6,7 +6,6 @@ import TagSearchBar from './TagSearchBar';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
-import { Tag } from '../types';
 
 function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }) {
   const pid = `/${host}/${name}`;
@@ -22,12 +21,12 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   const [goalId1, setGoalId1] = useState<string>('');
   const [goalId2, setGoalId2] = useState<string>('');
   const [activeTab, setActiveTab] = useState('Sub-goals');
-  const [harvestTags, setHarvestTags] = useState<Tag[]>([]);
+  const [harvestTags, setHarvestTags] = useState<string[]>([]);
   const [selectedOperation, setSelectedOperation] = useState('some');
-  const [goalTags, setGoalTags] = useState<Tag[]>([]);
-  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [goalTags, setGoalTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
+  const [filteredTags, setFilteredTags] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isEditingSummary, setIsEditingSummary] = useState(false);
@@ -71,7 +70,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
 
   const fetchTags = async () => {
     try {
-      const fetchedTags = await api.getPoolTags(`/${host}/${name}`);
+      const fetchedTags = await api.getPoolLabels(`/${host}/${name}`);
       setAllTags(fetchedTags);
       setFilteredTags(fetchedTags); // Initialize with all tags
     } catch (error) {
@@ -143,7 +142,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   }, [goalId]);
 
   useEffect(() => {
-    const filtered = allTags.filter(tag => tag.tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredTags(filtered);
   }, [searchTerm, allTags]);
 
@@ -244,7 +243,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   // Function to handle adding tags
   const addHarvestTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-      setHarvestTags([...harvestTags, { isPublic: false, tag: e.currentTarget.value.trim() }]);
+      setHarvestTags([...harvestTags, e.currentTarget.value.trim()]);
       e.currentTarget.value = ''; // Clear the input
     }
   };
@@ -257,7 +256,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   const addGoalTag = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
       try {
-        await api.addGoalTag(goalId, newTagIsPublic, e.currentTarget.value.trim()); // Assuming such a function exists in your API
+        await api.addGoalTag(goalId, e.currentTarget.value.trim()); // Assuming such a function exists in your API
         const fetchedTags = await api.getGoalTags(key);
         setGoalTags(fetchedTags);
         e.currentTarget.value = ''; // Clear the input
@@ -271,7 +270,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   const removeGoalTag = async (index: number) => {
     const tagToRemove = goalTags[index];
     try {
-      await api.delGoalTag(goalId, tagToRemove.isPublic, tagToRemove.tag); // Assuming such a function exists in your API
+      await api.delGoalTag(goalId, tagToRemove); // Assuming such a function exists in your API
       const fetchedTags = await api.getGoalTags(key);
       setGoalTags(fetchedTags);
     } catch (error) {
@@ -379,16 +378,12 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
         <div className="flex flex-wrap justify-center mb-4">
           {goalTags.map((tag, index) => (
             <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-              { tag.isPublic
-                ? <FiEye className="mr-2"/>
-                : <FiEyeOff className="mr-2"/>
-              }
               <div
                 key={index}
                 className="flex items-center bg-gray-200 rounded cursor-pointer"
-                onClick={() => navigateToTagPage(tag.tag)}
+                onClick={() => navigateToTagPage(tag)}
               >
-                {tag.tag}
+                {tag}
               </div>
               <button 
                 className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
@@ -537,16 +532,12 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
               <div className="flex flex-wrap justify-center mb-4">
                 {harvestTags.map((tag, index) => (
                   <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-                    { tag.isPublic
-                      ? <FiEye className="mr-2"/>
-                      : <FiEyeOff className="mr-2"/>
-                    }
                     <div
                       key={index}
                       className="flex items-center bg-gray-200 rounded cursor-pointer"
-                      onClick={() => navigateToTagPage(tag.tag)}
+                      onClick={() => navigateToTagPage(tag)}
                     >
-                      {tag.tag}
+                      {tag}
                     </div>
                     <button 
                       className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
