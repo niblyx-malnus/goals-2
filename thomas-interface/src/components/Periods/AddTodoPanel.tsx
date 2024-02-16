@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { Goal, periodType } from '../../types';
-import { useNavigate } from 'react-router-dom';
 import { getCurrentPeriod, getAdjacentPeriod, isPeriodType, formatDateKeyDisplay, formatNowDisplay, convertToPeriod } from './utils';
 import useStore from '../../store';
 import api from '../../api';
+import useCustomNavigation from '../useCustomNavigation';
 
-const AddTodoPanel = ({ goalKey }: { goalKey: string }) => {
+const AddTodoPanel = ({
+  goalKey,
+  exit,
+}: {
+  goalKey: string,
+  exit: () => void,
+}) => {
   const [periodType, setPeriodType] = useState<periodType>('day');
   const [dateKey, setDateKey] = useState(getCurrentPeriod(periodType));
 
@@ -15,11 +21,7 @@ const AddTodoPanel = ({ goalKey }: { goalKey: string }) => {
 
   const { setCollection } = useStore(state => state);
 
-  const navigate = useNavigate();
-
-  const navigateToPeriod = () => {
-    navigate(`/periods/${periodType}/${dateKey}`);
-  };
+  const { navigateToPeriod } = useCustomNavigation();
 
   const readTodoList = async (jsonPath: string) => {
     try {
@@ -27,6 +29,11 @@ const AddTodoPanel = ({ goalKey }: { goalKey: string }) => {
     } catch (error) {
       return { keys: [], themes: [] };
     }
+  }
+
+  const handleClickText = (e: React.MouseEvent<HTMLSpanElement>) => {
+    exit();
+    navigateToPeriod(periodType, dateKey);
   }
 
   const onAddToTodoList = async (jsonPath: string) => {
@@ -82,7 +89,7 @@ const AddTodoPanel = ({ goalKey }: { goalKey: string }) => {
           ←
         </button>
         <span
-          onClick={() => navigateToPeriod()}
+          onClick={handleClickText}
           className="cursor-pointer text-sm text-center font-medium"
         >
           {formatDateKeyDisplay(periodType, dateKey)}

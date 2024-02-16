@@ -89,8 +89,6 @@ function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: 
             className="block text-current no-underline hover:no-underline"
           >
             <GoalRow
-              host={host}
-              poolName={name}
               goal={goal}
               showButtons={showButtons}
               refresh={refresh}

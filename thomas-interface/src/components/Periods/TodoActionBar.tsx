@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiArchive, FiTag, FiInfo, FiCopy, FiPlus } from 'react-icons/fi';
-import { TagIcon, ActionableIcon, ActiveIcon } from './CustomIcons';
-import AddTodoPanel from './Periods/AddTodoPanel';
-import LabelPanel from './Panels/LabelPanel';
-import TagPanel from './Panels/TagPanel';
-import { Goal } from '../types';
+import { FiArchive, FiTag, FiInfo, FiCopy, FiTrash } from 'react-icons/fi';
+import { TagIcon, ActionableIcon, ActiveIcon } from '../CustomIcons';
+import LabelPanel from '../Panels/LabelPanel';
+import TagPanel from '../Panels/TagPanel';
+import { Goal } from '../../types';
+import api from '../../api';
 
 const GoalActionBar: React.FC<{
     goal: Goal,
@@ -24,16 +24,6 @@ const GoalActionBar: React.FC<{
     }
   };
 
-  const toggleAddTodoPanel = () => {
-    console.log("Opening add panel...");
-    console.log(goal);
-    if (panel === 'add') {
-      setPanel('');
-    } else {
-      setPanel('add');
-    }
-  };
-
   const toggleLabelPanel = () => {
     if (panel === 'label') {
       setPanel('');
@@ -47,6 +37,21 @@ const GoalActionBar: React.FC<{
       setPanel('');
     } else {
       setPanel('tag');
+    }
+  };
+
+  const deleteGoal = async () => {
+    // Show confirmation dialog
+    const isConfirmed = window.confirm("Deleting a goal is irreversible. Are you sure you want to delete this goal?");
+  
+    // Only proceed if the user confirms
+    if (isConfirmed) {
+      try {
+        await api.deleteGoal(goal.key);
+        refresh();
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
@@ -84,12 +89,6 @@ const GoalActionBar: React.FC<{
         onClick={copyToClipboard}
       >
         <FiCopy />
-      </button>
-      <button
-        onClick={toggleAddTodoPanel}
-        className="p-2 rounded bg-gray-100"
-      >
-        <FiPlus />
       </button>
       <div className="relative group">
         <button
@@ -132,6 +131,12 @@ const GoalActionBar: React.FC<{
       >
         <FiArchive />
       </button>
+      <button
+        className="p-2 rounded bg-gray-100"
+        onClick={deleteGoal}
+      >
+        <FiTrash />
+      </button>
       <div className="relative group">
         <button
           className="p-2 rounded bg-gray-100"
@@ -141,7 +146,6 @@ const GoalActionBar: React.FC<{
         </button>
         { panel !== '' && (
           <div className="z-10 absolute right-0 bottom-full mt-2 w-64 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
-            { panel === 'add' && <AddTodoPanel goalKey={goal.key} exit={() => setPanel('')} /> }
             { panel === 'label' && <LabelPanel goal={goal} exit={() => setPanel('')} refresh={refresh}/> }
             { panel === 'tag' && <TagPanel goal={goal} exit={() => setPanel('')} refresh={refresh}/> }
             { panel === 'info' && <InfoPanel /> }

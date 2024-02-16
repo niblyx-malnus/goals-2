@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiX } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import useCustomNavigation from '../useCustomNavigation';
 import api from '../../api';
 import { Goal } from '../../types';
 
@@ -15,11 +15,7 @@ const TagPanel: React.FC<{
   }) => {
   const [newTag, setNewTag] = useState<string>('');
 
-  const navigate = useNavigate();
-
-  const navigateToTag = (tag: string) => {
-    navigate(`/tag/${tag}`);
-  };
+  const { navigateToTag } = useCustomNavigation();
 
   const removeTag = async (tagToRemove: string) => {
     try {

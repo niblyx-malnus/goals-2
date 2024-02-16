@@ -110,8 +110,8 @@ function App() {
           <Route path="/pools" element={<div><BackToHome /><Pools /></div>} />
           <Route path="/pool/:host/:name" element={<PoolPageWrapper />} />
           <Route path="/goal/:host/:name/:goalId" element={<GoalPageWrapper />} />
-          <Route path="/pool-tag/:host/:name/:tag" element={<LabelPageWrapper />} />
-          <Route path="/local-tag/:tag" element={<TagPageWrapper />} />
+          <Route path="/label/:host/:name/:tag" element={<LabelPageWrapper />} />
+          <Route path="/tag/:tag" element={<TagPageWrapper />} />
           <Route path="/jsons" element={<div><BackToHome /><FileSystem /></div>} />
           <Route path="/mileage" element={<div><BackToHome /><Mileage /></div>} />
           <Route path="/states" element={<div><BackToHome /><StateList /></div>} />

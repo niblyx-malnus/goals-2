@@ -1,21 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
-import { FiSquare, FiCheckSquare, FiX, FiEdit, FiTrash, FiSave, FiMenu } from 'react-icons/fi';
+import { FiX, FiEdit, FiTrash, FiSave, FiMenu } from 'react-icons/fi';
+import { CompleteIcon } from './CustomIcons';
 import GoalActionBar from './GoalActionBar';
 import { Goal } from '../types';
+import api from '../api';
 
 const GoalRow: React.FC<{
-    host: string,
-    poolName: string,
     goal: Goal,
     showButtons: boolean,
     refresh: () => void,
     moveGoalUp: (goalId: string) => void,
     moveGoalDown: (goalId: string) => void
   }> = ({
-    host,
-    poolName,
     goal,
     showButtons,
     refresh,
@@ -23,11 +20,9 @@ const GoalRow: React.FC<{
     moveGoalDown
   }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [newDescription, setNewDescription] = useState(goal.summary);
+  const [newSummary, setNewSummary] = useState(goal.summary);
   const [panel, setPanel] = useState('');
   const rowRef = useRef<HTMLDivElement>(null);
-
-  const pid = `/${host}/${poolName}`;
 
   const toggleActionBar = () => {
     console.log(goal);
@@ -68,11 +63,10 @@ const GoalRow: React.FC<{
     }
   };
 
-
-  const updateGoal = async () => {
+  const editGoalSummary = async () => {
     try {
       console.log("updating goal...");
-      await api.setGoalSummary(goal.key, newDescription);
+      await api.setGoalSummary(goal.key, newSummary);
       refresh();
       setIsEditing(false);
     } catch (error) {
@@ -80,9 +74,9 @@ const GoalRow: React.FC<{
     }
   };
 
-  const cancelUpdateGoal = async () => {
+  const cancelEditGoalSummary = async () => {
     try {
-      setNewDescription(goal.summary);
+      setNewSummary(goal.summary);
       refresh();
       setIsEditing(false);
     } catch (error) {
@@ -92,10 +86,10 @@ const GoalRow: React.FC<{
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      updateGoal();
+      editGoalSummary();
     }
     if (event.key === 'Escape') {
-      cancelUpdateGoal();
+      cancelEditGoalSummary();
     }
   };
 
@@ -110,33 +104,22 @@ const GoalRow: React.FC<{
     }
   };
 
-  const CompleteIcon = () => {
-    if (goal.complete) {
-      return <FiCheckSquare />;
-    } else {
-      return <FiSquare />;
-    }
-  };
-  
   return (
     <div ref={rowRef} className={`flex justify-between items-center mt-2 rounded ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200`}>
-      {
-        showButtons && (
-          <>
-            <button
-              className="p-2 rounded bg-gray-100"
-              onClick={toggleComplete}
-            >
-              <CompleteIcon />
-            </button>
-          </>
+      { showButtons && (
+          <button
+            className="p-2 rounded bg-gray-100"
+            onClick={toggleComplete}
+          >
+            <CompleteIcon complete={goal.complete}/>
+          </button>
         )
       }
       {isEditing ? (
         <input 
           type="text" 
-          value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
+          value={newSummary}
+          onChange={(e) => setNewSummary(e.target.value)}
           className="truncate bg-white shadow rounded cursor-pointer flex-grow p-2"
           onKeyDown={handleKeyDown}
         />
@@ -169,13 +152,13 @@ const GoalRow: React.FC<{
         <>
           <button
             className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-            onClick={updateGoal}
+            onClick={editGoalSummary}
           >
             <FiSave />
           </button>
           <button
             className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-            onClick={cancelUpdateGoal}
+            onClick={cancelEditGoalSummary}
           >
             <FiX />
           </button>

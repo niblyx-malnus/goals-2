@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { FiX } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
 import api from '../../api';
-import { goalKeyToPidGid } from '../../utils';
+import { pidFromKey } from '../../utils';
 import { Goal } from '../../types';
+import useCustomNavigation from '../useCustomNavigation';
 
 const LabelPanel: React.FC<{
     goal: Goal,
@@ -16,12 +16,7 @@ const LabelPanel: React.FC<{
   }) => {
   const [newLabel, setNewLabel] = useState<string>('');
 
-  const navigate = useNavigate();
-
-  const navigateToLabel = (label: string) => {
-    const { pid } = goalKeyToPidGid(goal.key);
-    navigate(`/label${pid}/${label}`);
-  };
+  const { navigateToLabel } = useCustomNavigation();
 
   const removeLabel = async (labelToRemove: string) => {
     try {
@@ -65,7 +60,7 @@ const LabelPanel: React.FC<{
         {goal.labels.map((label, index) => (
           <li key={index} className="flex justify-between items-center p-1">
             <span
-              onClick={() => navigateToLabel(label)}
+              onClick={() => navigateToLabel(pidFromKey(goal.key), label)}
               className="cursor-pointer"
             >
               {label}

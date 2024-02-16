@@ -62,22 +62,6 @@ const TodoList: React.FC<{
     }
   };
 
-  const handleAdd = async (jsonPath: string, key: string) => {
-    try {
-      if (jsonPath in collections) {
-        if (!collections[jsonPath].goals.some(goal => goal.key === key)) {
-          api.jsonPut(jsonPath, { themes: collections[jsonPath].themes, keys: [...collections[jsonPath].goals.map(goal => goal.key), key] })
-        }
-      } else {
-        api.jsonPut(jsonPath, { themes: [], keys: [] })
-      }
-      setInput('');
-      setRefresh(!refresh);
-    } catch (error) {
-      console.error("Failed to create a new goal:", error);
-    }
-  };
-
   const handleDelete = async (key: string) => {
     try {
       await api.deleteGoal(key);
@@ -249,13 +233,17 @@ const TodoList: React.FC<{
     { !isLoading && (
       <ul>
         {collections[jsonPath]?.goals.map((goal) => (
-          <TodoRow
-            goal={goal}
-            onToggleComplete={handleToggleComplete}
-            onDelete={handleDelete}
-            onRemove={handleRemove}
-            onAddToTodoList={handleAdd}
-          />
+          <div
+            key={goal.key}
+            className="block text-current no-underline hover:no-underline"
+          >
+            <TodoRow
+              goal={goal}
+              onToggleComplete={handleToggleComplete}
+              onDelete={handleDelete}
+              onRemove={handleRemove}
+            />
+          </div>
         ))}
       </ul>
     )}

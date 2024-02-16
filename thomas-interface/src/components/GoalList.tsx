@@ -143,14 +143,12 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
         </label>
       </div>
       <ul>
-        {displayedGoals.map((goal, index) => (
+        {displayedGoals.map((goal) => (
           <div
             key={goal.key}
             className="block text-current no-underline hover:no-underline"
           >
             <GoalRow
-              host={host}
-              poolName={name}
               goal={goal}
               showButtons={showButtons}
               refresh={refresh}

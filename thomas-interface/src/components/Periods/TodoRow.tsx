@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiPlus, FiX, FiTrash, FiTag, FiEye, FiEyeOff } from 'react-icons/fi';
-import AddPanel from './AddTodoPanel';
+import { useNavigate } from 'react-router-dom';
+import { FiPlus, FiEdit, FiSave, FiX, FiTrash, FiMinus, FiMenu } from 'react-icons/fi';
+import { CompleteIcon } from '../CustomIcons';
+import AddTodoPanel from './AddTodoPanel';
+import TodoActionBar from './TodoActionBar';
 import { Goal } from '../../types';
 import api from '../../api';
 
@@ -9,19 +12,18 @@ const TodoRow = ({
   onToggleComplete,
   onDelete,
   onRemove,
-  onAddToTodoList,
 }: {
   goal: Goal,
   onToggleComplete: (id: string) => void,
   onDelete: (id: string) => void,
   onRemove: (id: string) => void,
-  onAddToTodoList: (path: string, key: string) => void
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newSummary, setNewSummary] = useState(goal.summary);
   const [panel, setPanel] = useState('');
-  const [newTag, setNewTag] = useState('');
-  const [newTagIsPublic, setNewTagIsPublic] = useState(true);
-  
-  const rowRef = useRef<HTMLLIElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Function to check if clicked outside of element
@@ -48,12 +50,12 @@ const TodoRow = ({
     }
   }
 
-  // Toggle dropdown visibility
-  const toggleTagDropdown = () => {
-    if (panel === 'tag') {
+  const toggleActionBar = () => {
+    console.log(goal);
+    if (panel === 'action-bar') {
       setPanel('');
     } else {
-      setPanel('tag');
+      setPanel('action-bar');
     }
   };
   
@@ -61,136 +63,129 @@ const TodoRow = ({
     onToggleComplete(goal.key);
   }
 
-  const addNewTag = async () => {
+  const toggleEdit = () => { setIsEditing(!isEditing); }
+
+  const editGoalSummary = async () => {
     try {
-      // Logic to add the new tag to the goal
-      // For example, update the tags array and send a request to the backend
-      if (newTag.trim() !== '') {
-        await api.addGoalTag(goal.key, newTag);
-        setNewTag(''); // Reset input field
-        await api.updateSetting('put', 'placeholder-tag', newTag);
-      } else {
-        await api.addGoalTag(goal.key, 'placeholder');
-      }
+      console.log("updating goal...");
+      await api.setGoalSummary(goal.key, newSummary);
+      // refresh();
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error adding new tag: ", error);
+      console.error(error);
     }
   };
 
-  const handleTagButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (event.shiftKey) {
-      // Shift+Click: Add placeholder tag directly
-      addNewTag();
-    } else {
-      // Regular Click: Toggle dropdown
-      toggleTagDropdown();
-    }
-  };
-
-  const removeTag = async (tagToRemove: string) => {
+  const cancelEditGoalSummary = async () => {
     try {
-      // Logic to remove the tag from the goal
-      // For example, update the tags array and send a request to the backend
-      await api.delGoalTag(goal.key, tagToRemove);
+      setNewSummary(goal.summary);
+      // refresh();
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error removing tag: ", error);
+      console.error(error);
     }
   };
 
-  const handleNewTagKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      addNewTag();
+      editGoalSummary();
+    }
+    if (event.key === 'Escape') {
+      cancelEditGoalSummary();
     }
   };
 
   return (
-    <li ref={rowRef} className={`flex justify-between items-center mb-2 p-2 ${goal.complete ? 'bg-gray-200' : 'bg-white'} rounded shadow`}>
-      <span
-        className={`flex-1 cursor-pointer ${goal.complete ? 'line-through' : ''}`}
+    <div ref={rowRef} className={`flex justify-between items-center mt-2 rounded ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200`}>
+      <button
+        className="p-2 rounded bg-gray-100"
         onClick={toggleComplete}
       >
-        {goal.summary}
-      </span>
+        <CompleteIcon complete={goal.complete}/>
+      </button>
       <div className="relative group">
         <button
           onClick={togglePlusPanel}
-          className="mr-1 bg-gray-300 font-bold py-1 px-1 rounded"
+          className="p-2 rounded bg-gray-100"
         >
           <FiPlus />
         </button>
         {panel === 'plus' && (
-          <div className="z-10 absolute right-0 bottom-full mt-2 w-64 bg-white p-4 shadow-lg rounded-lg">
-            <AddPanel goalKey={goal.key} />
+          <div className="z-10 absolute left-0 bottom-full mt-2 w-64 bg-white p-4 shadow-lg rounded-lg">
+            <AddTodoPanel goalKey={goal.key} exit={() => setPanel('')} />
           </div>
         )}
       </div>
+      {isEditing ? (
+        <input 
+          type="text" 
+          value={newSummary}
+          onChange={(e) => setNewSummary(e.target.value)}
+          className="truncate bg-white shadow rounded cursor-pointer flex-grow p-2"
+          onKeyDown={handleKeyDown}
+        />
+      ) : (
+        <div
+          className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-2 ${goal.complete ? 'line-through' : ''}`}
+          onClick={() => navigate(`/goal${goal.key}`)}
+          onDoubleClick={toggleEdit}
+        >
+          {goal.summary}
+        </div>
+      )}
+      { !isEditing && (
+        <>
+          <button
+            className="p-2 rounded bg-gray-100"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            <FiEdit />
+          </button>
+          <button
+            className="p-2 rounded bg-gray-100"
+            onClick={() => {
+              const isConfirmed = window.confirm("Are you sure you want to remove this goal from this list?");
+              if (isConfirmed) {
+                onRemove(goal.key);
+              }
+            }}
+          >
+            <FiMinus />
+          </button>
+        </>
+      )}
+      { isEditing && (
+        <>
+          <button
+            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+            onClick={editGoalSummary}
+          >
+            <FiSave />
+          </button>
+          <button
+            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+            onClick={cancelEditGoalSummary}
+          >
+            <FiX />
+          </button>
+        </>
+      )}
       <div className="relative group">
         <button
-          className="mr-1 bg-gray-300 hover:bg-gray-400 font-bold py-1 px-1 rounded"
-          onClick={handleTagButtonClick}
+          className="p-2 rounded bg-gray-100"
+          onClick={toggleActionBar}
         >
-        <FiTag />
-          {goal.tags.length > 0 && (
-            <span className="absolute bottom-0 right-0 bg-gray-300 rounded-full text-xs px-1">
-              {goal.tags.length}
-            </span>
-          )}
+          <FiMenu />
         </button>
-        {panel === 'tag' && (
-          <div className="absolute right-full bottom-0 ml-1 w-40 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
-            <ul>
-              {goal.tags.map((tag, index) => (
-                <li key={index} className="flex justify-between items-center p-1 hover:bg-gray-200">
-                  <span
-                    className="cursor-pointer"
-                  >
-                    {tag}
-                  </span>
-                  <button onClick={() => removeTag(tag)} className="text-xs p-1">
-                    <FiX />
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="flex items-center">
-              <button
-                onClick={() => setNewTagIsPublic(!newTagIsPublic)}
-                className="p-2 mr-2 border border-gray-300 rounded hover:bg-gray-200 flex items-center justify-center"
-                style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
-              >
-                {newTagIsPublic ? <FiEye /> : <FiEyeOff />}
-              </button>
-              <input
-                type="text"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={handleNewTagKeyDown}
-                className="w-full p-1 border rounded"
-                placeholder={"Add tag " }
-                style={{ height: '2rem' }} // Match the height of the button
-              />
+        {
+          panel === 'action-bar' && (
+            <div className="absolute right-0 bottom-8 shadow-2xl rounded-md">
+              <TodoActionBar goal={goal} refresh={() => console.log("refresh")} />
             </div>
-          </div>
-        )}
+          )
+        }
       </div>
-      <button
-        onClick={() => onRemove(goal.key)}
-        className="mr-1 bg-gray-300 hover:bg-gray-500 font-bold py-1 px-1 rounded"
-      >
-        <FiX />
-      </button>
-      <button
-        onClick={() => {
-          const isConfirmed = window.confirm("Deleting a goal is irreversible. Are you sure you want to delete this goal?");
-          if (isConfirmed) {
-            onDelete(goal.key);
-          }
-        }}
-        className="bg-gray-300 hover:bg-gray-500 font-bold py-1 px-1 rounded"
-      >
-        <FiTrash />
-      </button>
-    </li>
+    </div>
   );
 };
 
