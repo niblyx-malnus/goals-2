@@ -8,13 +8,11 @@ import api from '../api';
 
 const GoalRow: React.FC<{
     goal: Goal,
-    showButtons: boolean,
     refresh: () => void,
     moveGoalUp: (goalId: string) => void,
     moveGoalDown: (goalId: string) => void
   }> = ({
     goal,
-    showButtons,
     refresh,
     moveGoalUp,
     moveGoalDown
@@ -106,33 +104,35 @@ const GoalRow: React.FC<{
 
   return (
     <div ref={rowRef} className={`flex justify-between items-center mt-2 rounded ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200`}>
-      { showButtons && (
-          <button
-            className="p-2 rounded bg-gray-100"
-            onClick={toggleComplete}
-          >
-            <CompleteIcon complete={goal.complete}/>
-          </button>
-        )
-      }
-      {isEditing ? (
+      <button
+        className="p-2 rounded bg-gray-100 text-white"
+        onClick={toggleComplete}
+      >
+        <div className="text-white">
+          <CompleteIcon
+            complete={goal.complete}
+            style={ { color: goal.complete ? 'black' : goal.active ? 'black' : 'gray' } }
+          />
+        </div>
+      </button>
+      { isEditing ? (
         <input 
           type="text" 
           value={newSummary}
           onChange={(e) => setNewSummary(e.target.value)}
-          className="truncate bg-white shadow rounded cursor-pointer flex-grow p-2"
+          className="truncate bg-white shadow rounded cursor-pointer flex-grow p-1"
           onKeyDown={handleKeyDown}
         />
       ) : (
         <div
-          className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-2 ${goal.complete ? 'line-through' : ''}`}
+          className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-1 ${goal.complete ? 'line-through' : ''}`}
           onClick={() => navigate(`/goal${goal.key}`)}
           onDoubleClick={toggleEdit}
         >
           {goal.summary}
         </div>
       )}
-      {showButtons && !isEditing && (
+      { !isEditing && (
         <>
           <button
             className="p-2 rounded bg-gray-100"
@@ -148,7 +148,7 @@ const GoalRow: React.FC<{
           </button>
         </>
       )}
-      {showButtons && isEditing && (
+      { isEditing && (
         <>
           <button
             className="p-2 rounded bg-gray-100 hover:bg-gray-200"

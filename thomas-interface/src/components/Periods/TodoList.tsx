@@ -19,6 +19,8 @@ const TodoList: React.FC<{
   const [themeInput, setThemeInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [selectedGoalKey, setSelectedGoalKey] = useState<string | null>(null);
+
   const { collections, setCollection } = useStore(state => state);
 
   const navigate = useNavigate();
@@ -42,6 +44,38 @@ const TodoList: React.FC<{
     setIsLoading(false);
   }, [periodType, setCollection, refresh, jsonPath]);
 
+  const moveGoal = (aboveGoalKey: string | null, belowGoalKey: string | null) => {
+    if (selectedGoalKey !== null) {
+      let keys = collections[jsonPath]?.goals.map(goal => goal.key) ?? [];
+      const currentIndex = keys.indexOf(selectedGoalKey);
+  
+      // Early exit if the goal isn't found
+      if (currentIndex === -1) return;
+  
+      // Remove the selected goal from its current position
+      keys.splice(currentIndex, 1);
+  
+      let newIndex = 0;
+      if (belowGoalKey) {
+        // If there's a belowGoalKey, find its new index
+        newIndex = keys.indexOf(belowGoalKey);
+      } else if (aboveGoalKey) {
+        // If there's an aboveGoalKey, place after it (hence +1)
+        newIndex = keys.indexOf(aboveGoalKey) + 1;
+      }
+  
+      // Insert the selected goal at the new position
+      keys.splice(newIndex, 0, selectedGoalKey);
+  
+      // Update the API with the new goals order
+      api.jsonPut(jsonPath, { themes: collections[jsonPath].themes, keys: keys })
+        .then(() => {
+          setRefresh(!refresh); // Trigger a refresh to re-fetch the updated goals
+        })
+        .catch(error => console.error("Failed to reorder goals:", error));
+    }
+  };
+
   const handleCreate = async () => {
     if (!input.trim()) return;
     try {
@@ -62,18 +96,6 @@ const TodoList: React.FC<{
     }
   };
 
-  const handleDelete = async (key: string) => {
-    try {
-      await api.deleteGoal(key);
-      if (jsonPath in collections) {
-        api.jsonPut(jsonPath, { themes: collections[jsonPath].themes, keys: collections[jsonPath].goals.map(goal => goal.key).filter(k => k !== key) })
-      }
-      setRefresh(!refresh);
-    } catch (error) {
-      console.error("Failed to delete goal:", error);
-    }
-  };
-
   const handleRemove = async (key: string) => {
     try {
       if (jsonPath in collections) {
@@ -82,17 +104,6 @@ const TodoList: React.FC<{
       setRefresh(!refresh);
     } catch (error) {
       console.error("Failed to remove goal:", error);
-    }
-  };
-
-  const handleToggleComplete = async (key: string) => {
-    try {
-      const isCompleted = await api.getGoalComplete(key);
-      await api.setGoalComplete(key, !isCompleted);
-      setRefresh(!refresh);
-      // No need to update the local state for completion status, as it will be fetched dynamically
-    } catch (error) {
-      console.error("Failed to toggle goal completion:", error);
     }
   };
 
@@ -232,19 +243,42 @@ const TodoList: React.FC<{
       )}
     { !isLoading && (
       <ul>
-        {collections[jsonPath]?.goals.map((goal) => (
-          <div
-            key={goal.key}
-            className="block text-current no-underline hover:no-underline"
-          >
+      {collections[jsonPath]?.goals.map((goal, index) => (
+        <React.Fragment key={index}>
+          {/* Insert separator before the first goal for moving to the start */}
+          {selectedGoalKey !== null && index === 0 && (
+            <li
+              onClick={() => moveGoal(null, goal.key)}
+              className="cursor-pointer my-2 h-3 rounded-full bg-blue-200"
+            />
+          )}
+          <div className="block text-current no-underline hover:no-underline">
             <TodoRow
               goal={goal}
-              onToggleComplete={handleToggleComplete}
-              onDelete={handleDelete}
               onRemove={handleRemove}
+              toggleMove={
+                () => {
+                  console.log(selectedGoalKey);
+                  if (selectedGoalKey === goal.key) {
+                    setSelectedGoalKey(null);
+                  } else {
+                    setSelectedGoalKey(goal.key);
+                  }
+                }
+              }
+              moveState={selectedGoalKey === goal.key}
+              refresh={() => setRefresh(!refresh)}
             />
           </div>
-        ))}
+          {/* Separator between goals or after the last goal */}
+          {selectedGoalKey !== null && (
+            <li
+              onClick={() => moveGoal(goal.key, collections[jsonPath]?.goals[index + 1]?.key || null)}
+              className="cursor-pointer my-2 h-3 rounded-full bg-blue-200"
+            />
+          )}
+        </React.Fragment>
+      ))}
       </ul>
     )}
     </div>

@@ -24,6 +24,7 @@
     "moment-timezone": "^0.5.45",
     "postcss": "^8.4.31",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-big-calendar": "^1.8.7",
     "react-calendar": "^4.8.0",
     "react-datepicker": "^5.0.0",
@@ -66,6 +67,7 @@
   "devDependencies": {
     "@types/lodash": "^4.14.199",
     "@types/luxon": "^3.4.2",
+    "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-big-calendar": "^1.8.8",
     "@types/react-datepicker": "^4.19.5",
     "@types/uuid": "^9.0.8",

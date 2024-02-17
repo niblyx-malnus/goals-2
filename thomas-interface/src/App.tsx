@@ -11,6 +11,7 @@ import WeeklyTargetList from './components/WeeklyTargets/WeeklyTargetList';
 import WeeklyTargetPage from './components/WeeklyTargets/WeeklyTargetPage';
 import CalendarApp from './components/Calendar/CalendarApp';
 import TodoList from './components/Periods/TodoList';
+import ListComponent from './components/ListComponent';
 import { getCurrentDayDateKey } from './components/Periods/utils';
 import { periodType } from './types';
 
@@ -36,6 +37,7 @@ function Home() {
         <li className="mb-2"><Link to="/weekly_targets" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Weekly Targets</Link></li>
         <li className="mb-2"><Link to="/calendar" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Calendar</Link></li>
         <li className="mb-2"><Link to="/periods" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Todo List</Link></li>
+        <li className="mb-2"><Link to="/draggable" className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Draggable List</Link></li>
       </ul>
     </div>
   );
@@ -119,8 +121,8 @@ function App() {
           <Route path="/weekly_targets/:id" element={<WeeklyTargetPageWrapper />} />
           <Route path="/calendar" element={<div><BackToHome /><CalendarApp /></div>} />
           <Route path="/periods" element={<Navigate to={`/periods/day/${getCurrentDayDateKey()}`} />} />
-          {/* Render TodoList for /periods/day/:dateKey */}
           <Route path="/periods/:periodType/:dateKey" element={<TodoListWrapper />} />
+          <Route path="/draggable" element={<div><BackToHome /><ListComponent /></div>} />
         </Routes>
       </div>
     </Router>

@@ -1,8 +1,8 @@
 
 import { FiCheckSquare, FiSquare, FiTag, FiLock, FiTriangle, FiCircle, FiPause, FiPlay } from 'react-icons/fi';
 
-export const CompleteIcon = ({ complete }: { complete: boolean }) => {
-  return complete ? <FiCheckSquare /> : <FiSquare />;
+export const CompleteIcon = ({ complete, style }: { complete: boolean, style?: React.CSSProperties }) => {
+  return complete ? <FiCheckSquare style={style} /> : <FiSquare style={style} />;
 };
 
 export const TagIcon = () => {

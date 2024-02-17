@@ -9,11 +9,6 @@ type Pool = { pid: string, title: string }; // Type for pool object
 function PoolList({ refresh } : { refresh: () => void; }) {
   const [pools, setPools] = useState<Pool[]>([]); // Updated from titles to pools
 
-  const { showButtons, setShowButtons } = useStore(state => ({ 
-      showButtons: state.showButtons, 
-      setShowButtons: state.setShowButtons 
-    }));
-
   // Fetch pools on mount
   useEffect(() => {
     const fetchPools = async () => {
@@ -56,22 +51,13 @@ function PoolList({ refresh } : { refresh: () => void; }) {
 
   return (
     <>
-      <label className="flex items-center space-x-2">
-        <input 
-          type="checkbox" 
-          checked={showButtons} 
-          onChange={() => setShowButtons(!showButtons)} 
-          className="form-checkbox rounded"
-        />
-        <span>Show Buttons</span>
-      </label>
       <ul>
         {pools.map((pool, index) => (
           <div
             key={pool.pid}
             className="block text-current no-underline hover:no-underline"
           >
-            <PoolRow pid={pool.pid} title={pool.title} refresh={refresh} movePoolUp={movePoolUp} movePoolDown={movePoolDown} showButtons={showButtons}/>
+            <PoolRow pid={pool.pid} title={pool.title} refresh={refresh} movePoolUp={movePoolUp} movePoolDown={movePoolDown}/>
           </div>
         ))}
       </ul>

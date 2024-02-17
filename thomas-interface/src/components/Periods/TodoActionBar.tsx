@@ -81,6 +81,24 @@ const GoalActionBar: React.FC<{
     setPanel('');
     navigator.clipboard.writeText(goal.key);
   }
+
+  const toggleActionable = async () => {
+    try {
+      await api.setGoalActionable(goal.key, !goal.actionable);
+      refresh();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const toggleActive = async () => {
+    try {
+      await api.setGoalActive(goal.key, !goal.active);
+      refresh();
+    } catch (error) {
+      console.error(error);
+    }
+  };
   
   return (
     <div ref={barRef} className="p-1 relative group bg-gray-200 flex items-center">
@@ -118,11 +136,13 @@ const GoalActionBar: React.FC<{
       </div>
       <button
         className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+        onClick={toggleActionable}
       >
         {ActionableIcon(goal.actionable)}
       </button>
       <button
         className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+        onClick={toggleActive}
       >
         {ActiveIcon(goal.active)}
       </button>

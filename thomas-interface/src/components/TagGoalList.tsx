@@ -14,11 +14,6 @@ function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: 
       setShowCompleted: state.setShowCompleted 
     }));
 
-  const { showButtons, setShowButtons } = useStore(state => ({ 
-      showButtons: state.showButtons, 
-      setShowButtons: state.setShowButtons 
-    }));
-
   const displayedGoals = showCompleted ? goals : goals.filter(goal => !goal.complete);
 
   useEffect(() => {
@@ -72,15 +67,6 @@ function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: 
           />
           <span>Show Completed</span>
         </label>
-        <label className="flex items-center space-x-2">
-          <input 
-            type="checkbox" 
-            checked={showButtons} 
-            onChange={() => setShowButtons(!showButtons)} 
-            className="form-checkbox rounded"
-          />
-          <span>Show Buttons</span>
-        </label>
       </div>
       <ul>
         {displayedGoals.map((goal, index) => (
@@ -90,7 +76,6 @@ function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: 
           >
             <GoalRow
               goal={goal}
-              showButtons={showButtons}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}

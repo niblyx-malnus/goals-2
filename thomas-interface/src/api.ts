@@ -319,10 +319,11 @@ const api = {
       : { 'unmark-active': { pid: pid, gid: gid } }
     return await api.goalAction(json);
   },
-  setGoalActionable: async (goalId: string, actionable: boolean) => {
+  setGoalActionable: async (key: string, actionable: boolean) => {
+    const { pid, gid } = goalKeyToPidGid(key);
     const json = actionable
-      ? { 'mark-actionable': { id: goalId } }
-      : { 'unmark-actionable': { id: goalId } }
+      ? { 'mark-actionable': {pid: pid, gid: gid } }
+      : { 'unmark-actionable': { pid: pid, gid: gid } }
     return await api.goalAction(json);
   },
   deleteGoal: async (key: string) => {

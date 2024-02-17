@@ -23,11 +23,6 @@ function Harvest({
   const [goals, setGoals] = useState<Goal[]>([]);
   const [filteredGoals, setFilteredGoals] = useState<Goal[]>(goals); // State for filtered goals
 
-  const { showButtons, setShowButtons } = useStore(state => ({ 
-      showButtons: state.showButtons, 
-      setShowButtons: state.setShowButtons 
-    }));
-
   useEffect(() => {
     const fetchGoals = async () => {
       try {
@@ -100,15 +95,6 @@ function Harvest({
 
   return (
     <>
-      <label className="flex items-center space-x-2">
-        <input 
-          type="checkbox" 
-          checked={showButtons} 
-          onChange={() => setShowButtons(!showButtons)} 
-          className="form-checkbox rounded"
-        />
-        <span>Show Buttons</span>
-      </label>
       <ul>
         {filteredGoals.map((goal, index) => (
           <div
@@ -117,7 +103,6 @@ function Harvest({
           >
             <GoalRow
               goal={goal}
-              showButtons={showButtons}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}

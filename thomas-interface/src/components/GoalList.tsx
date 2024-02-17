@@ -15,25 +15,6 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
       setShowCompleted: state.setShowCompleted 
     }));
 
-  const { showButtons, setShowButtons } = useStore(state => ({ 
-      showButtons: state.showButtons, 
-      setShowButtons: state.setShowButtons 
-    }));
-
-  useEffect(() => {
-    const updateShowButtonsSetting = async () => {
-      try {
-        // Convert boolean to string
-        const showButtonsValue = showButtons ? "true" : "false";
-        await api.updateSetting('put', 'show-buttons', showButtonsValue);
-      } catch (error) {
-        console.error("Failed to update show-buttons setting:", error);
-      }
-    };
-  
-    updateShowButtonsSetting();
-  }, [showButtons]);
-  
   useEffect(() => {
     const updateShowCompletedSetting = async () => {
       try {
@@ -51,10 +32,8 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const showButtonsValue = await api.getSetting('show-buttons');
         const showCompletedValue = await api.getSetting('show-completed');
         // Convert string to boolean
-        setShowButtons(showButtonsValue === "true");
         setShowCompleted(showCompletedValue === "true");
       } catch (error) {
         console.error("Failed to fetch settings:", error);
@@ -62,7 +41,7 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
     };
   
     fetchSettings();
-  }, [setShowButtons, setShowCompleted]); // Empty dependency array to run only on mount
+  }, [setShowCompleted]); // Empty dependency array to run only on mount
 
   const displayedGoals = showCompleted ? goals : goals.filter(goal => !goal.complete);
 
@@ -132,15 +111,6 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
           />
           <span>Show Completed</span>
         </label>
-        <label className="flex items-center space-x-2">
-          <input 
-            type="checkbox" 
-            checked={showButtons} 
-            onChange={() => setShowButtons(!showButtons)} 
-            className="form-checkbox rounded"
-          />
-          <span>Show Buttons</span>
-        </label>
       </div>
       <ul>
         {displayedGoals.map((goal) => (
@@ -150,7 +120,6 @@ function GoalList({ host, name, goalId, refresh }: { host: any; name: any; goalI
           >
             <GoalRow
               goal={goal}
-              showButtons={showButtons}
               refresh={refresh}
               moveGoalUp={moveGoalUp}
               moveGoalDown={moveGoalDown}

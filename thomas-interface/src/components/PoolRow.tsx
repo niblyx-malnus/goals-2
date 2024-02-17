@@ -9,14 +9,12 @@ function PoolRow({
     refresh,
     movePoolUp,
     movePoolDown,
-    showButtons,
   }: {
     pid: string;
     title: string;
     refresh: () => void;
     movePoolUp: (poolId: string) => void,
     movePoolDown: (poolId: string) => void
-    showButtons: boolean;
   }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
@@ -77,35 +75,29 @@ function PoolRow({
 
   return (
     <div className="flex justify-between items-center p-2 mt-2 bg-gray-200 hover:bg-gray-300 rounded">
-      {
-        showButtons && (
-          <>
-            <button
-              className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-              onClick={copyToClipboard}
-            >
-              <FiCopy />
-            </button>
-            <button onClick={() => movePoolUp(pid)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
-              ↑
-            </button>
-            <button onClick={() => movePoolDown(pid)} className="p-2 rounded bg-gray-100 hover:bg-gray-200">
-              ↓
-            </button>
-          </>
-        )
-      }
+      <button
+        className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+        onClick={copyToClipboard}
+      >
+        <FiCopy />
+      </button>
+      <button onClick={() => movePoolUp(pid)} className="p-1 rounded bg-gray-100 hover:bg-gray-200">
+        ↑
+      </button>
+      <button onClick={() => movePoolDown(pid)} className="p-1 rounded bg-gray-100 hover:bg-gray-200">
+        ↓
+      </button>
       {isEditing ? (
         <input 
           type="text" 
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
-          className="bg-white shadow rounded cursor-pointer flex-grow p-2"
+          className="bg-white shadow rounded cursor-pointer flex-grow p-1"
           onKeyDown={handleKeyDown}
         />
       ) : (
         <div
-          className={"truncate bg-gray-100 rounded cursor-pointer flex-grow p-2"}
+          className={"truncate bg-gray-100 rounded cursor-pointer flex-grow p-1"}
           onClick={() => navigateToPool(pid)}
           onDoubleClick={() => setIsEditing(true)}
         >
@@ -113,7 +105,7 @@ function PoolRow({
         </div>
 
       )}
-      {showButtons && !isEditing && (
+      { !isEditing && (
         <>
           <button
             className="p-2 rounded bg-gray-100 hover:bg-gray-200"
@@ -129,7 +121,7 @@ function PoolRow({
           </button>
         </>
       )}
-      {showButtons && isEditing && (
+      { isEditing && (
         <>
           <button
             className="p-2 rounded bg-teal-100 hover:bg-teal-200"
