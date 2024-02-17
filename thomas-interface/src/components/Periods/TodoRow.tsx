@@ -79,7 +79,7 @@ const TodoRow = ({
     try {
       console.log("updating goal...");
       await api.setGoalSummary(goal.key, newSummary);
-      // refresh();
+      refresh();
       setIsEditing(false);
     } catch (error) {
       console.error(error);
@@ -89,7 +89,7 @@ const TodoRow = ({
   const cancelEditGoalSummary = async () => {
     try {
       setNewSummary(goal.summary);
-      // refresh();
+      refresh();
       setIsEditing(false);
     } catch (error) {
       console.error(error);
@@ -133,7 +133,7 @@ const TodoRow = ({
       ) : (
         <div
           className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-1 ${goal.complete ? 'line-through' : ''}`}
-          // onClick={() => navigate(`/goal${goal.key}`)}
+          onClick={() => navigate(`/goal${goal.key}`)}
           onDoubleClick={toggleEdit}
         >
           {goal.summary}
