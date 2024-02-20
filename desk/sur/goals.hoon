@@ -23,6 +23,7 @@
       actionable=?    :: 
       chief=ship      :: sole person responsible
       =deputies       :: %edit can edit but not move
+      :: open-to=(unit ?(%admins %deputies %viewers))
   ==
 +$  goals    (map gid goal)
 ::

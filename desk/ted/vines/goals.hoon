@@ -294,11 +294,14 @@
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   %-  pure:m  !>
   %-  enjs-goal-data
-  %+  turn  keys
+  %+  murn  keys
   |=  =key:gol
   =/  =pool:gol                (~(got by pools.store) pid.key)
   =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.key)
-  =+  (~(got by goals.pool) gid.key)
+  ?~  get=(~(get by goals.pool) gid.key)
+    ~
+  =+  u.get
+  :-  ~
   :*  key
       summary
       ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~))) :: labels (pool-specific)
