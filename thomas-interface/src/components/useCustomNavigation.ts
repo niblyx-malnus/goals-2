@@ -14,11 +14,26 @@ const useCustomNavigation = () => {
   const navigateToTag = (tag: string) => {
     navigate(`/tag/${tag}`);
   };
+
+  const navigateToGoal = (key: string) => {
+    navigate(`/goal${key}`);
+  };
+
+  const navigateToPool = (pid: string) => {
+    navigate(`/pool${pid}`);
+  };
+
+  const navigateToPools = () => {
+    navigate(`/pools`);
+  };
   
   return {
     navigateToPeriod,
     navigateToLabel,
     navigateToTag,
+    navigateToGoal,
+    navigateToPool,
+    navigateToPools,
   };
 };
 

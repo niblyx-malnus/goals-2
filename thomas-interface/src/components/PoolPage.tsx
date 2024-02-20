@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import MarkdownEditor from './MarkdownEditor';
+import useStore from '../store';
 import { useNavigate } from 'react-router-dom';
 import GoalList from './GoalList';
 import Harvest from './Harvest';
 import TagSearchBar from './TagSearchBar';
 import api from '../api';
 import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FaListUl } from 'react-icons/fa';
+import useCustomNavigation from './useCustomNavigation';
 
 function Pool({ host, name }: { host: any; name: any; }) {
   const poolId = `/${host}/${name}`;
@@ -25,6 +28,8 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [editableTitle, setEditableTitle] = useState(poolTitle);
   const [tagIsPublic, setTagIsPublic] = useState(false);
   const [allTags, setAllTags] = useState<string[]>([]);
+  const { navigateToPeriod } = useCustomNavigation();
+  const { currentPeriodType, getCurrentPeriod } = useStore(state => state);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -143,6 +148,13 @@ function Pool({ host, name }: { host: any; name: any; }) {
       <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <TagSearchBar poolId={poolId} />
+          <button
+            onClick={() => navigateToPeriod(currentPeriodType, getCurrentPeriod())}
+            className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
+            style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+          >
+            <FaListUl />
+          </button>
         </div>
         <div
           className="cursor-pointer"

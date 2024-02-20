@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Goal, periodType } from '../../types';
-import { getCurrentPeriod, getAdjacentPeriod, isPeriodType, formatDateKeyDisplay, formatNowDisplay, convertToPeriod } from './utils';
+import { getCurrentPeriod, getAdjacentPeriod, isPeriodType, formatDateKeyDisplay, formatNowDisplay } from './utils';
 import useStore from '../../store';
 import api from '../../api';
 import useCustomNavigation from '../useCustomNavigation';
@@ -14,6 +14,11 @@ const AddTodoPanel = ({
 }) => {
   const [periodType, setPeriodType] = useState<periodType>('day');
   const [dateKey, setDateKey] = useState(getCurrentPeriod(periodType));
+  const [currentDay, setCurrentDay] = useState(getCurrentPeriod('day'));
+  const [currentWeek, setCurrentWeek] = useState(getCurrentPeriod('week'));
+  const [currentMonth, setCurrentMonth] = useState(getCurrentPeriod('month'));
+  const [currentQuarter, setCurrentQuarter] = useState(getCurrentPeriod('quarter'));
+  const [currentYear, setCurrentYear] = useState(getCurrentPeriod('year'));
 
   const jsonPath = `/periods/${periodType}/${dateKey}.json`;
 
@@ -55,10 +60,50 @@ const AddTodoPanel = ({
     const newPeriod = e.target.value;
     if (isPeriodType(newPeriod)) {
       setPeriodType(newPeriod);
-      setDateKey(convertToPeriod(periodType, dateKey, newPeriod));
+      let newDateKey;
+      switch (newPeriod) {
+        case 'day':
+          newDateKey = currentDay;
+          break;
+        case 'week':
+          newDateKey = currentWeek;
+          break;
+        case 'month':
+          newDateKey = currentMonth;
+          break;
+        case 'quarter':
+          newDateKey = currentQuarter;
+          break;
+        case 'year':
+          newDateKey = currentYear;
+          break;
+      }
+      setDateKey(newDateKey);
     } else {
       console.error(`${newPeriod} is not a valid periodType`);
     }
+  };
+
+  const handleNavigation = (direction: 'prev' | 'next') => {
+    const newDateKey = getAdjacentPeriod(periodType, dateKey, direction);
+    switch (periodType) {
+      case 'day':
+        setCurrentDay(dateKey);
+        break;
+      case 'week':
+        setCurrentWeek(dateKey);
+        break;
+      case 'month':
+        setCurrentMonth(dateKey);
+        break;
+      case 'quarter':
+        setCurrentQuarter(dateKey);
+        break;
+      case 'year':
+        setCurrentYear(dateKey);
+        break;
+    }
+    setDateKey(newDateKey);
   };
   
   return (
@@ -85,7 +130,7 @@ const AddTodoPanel = ({
       <div className="flex items-center justify-between mb-4">
         <button 
           className="p-2 rounded-md bg-gray-200 text-gray-800" 
-          onClick={() => setDateKey(getAdjacentPeriod(periodType, dateKey, 'prev'))}>
+          onClick={() => handleNavigation('prev')}>
           ←
         </button>
         <span
@@ -96,7 +141,7 @@ const AddTodoPanel = ({
         </span>
         <button 
           className="p-2 rounded-md bg-gray-200 text-gray-800" 
-          onClick={() => setDateKey(getAdjacentPeriod(periodType, dateKey, 'next'))}>
+          onClick={() => handleNavigation('next')}>
           →
         </button>
       </div>

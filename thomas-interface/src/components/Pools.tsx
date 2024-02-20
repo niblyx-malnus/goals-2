@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import PoolList from './PoolList';
+import useStore from '../store';
 import Harvest from './Harvest';
 import { useNavigate } from 'react-router-dom';
 import TagSearchBar from './TagSearchBar';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import api from '../api';
+import { FaListUl } from 'react-icons/fa';
+import useCustomNavigation from './useCustomNavigation';
 
 function Pools() {
   const [newTitle, setNewTitle] = useState<string>('');
@@ -15,6 +18,8 @@ function Pools() {
   const [activeTab, setActiveTab] = useState('Pools'); // New state for active tab
   const [tagIsPublic, setTagIsPublic] = useState(false);
   const [allLocalTags, setAllLocalTags] = useState<string[]>([]);
+  const { navigateToPeriod } = useCustomNavigation();
+  const { currentPeriodType, getCurrentPeriod } = useStore(state => state);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -74,6 +79,13 @@ function Pools() {
       <div className="bg-[#DFF7DC] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <TagSearchBar poolId={null} />
+          <button
+            onClick={() => navigateToPeriod(currentPeriodType, getCurrentPeriod())}
+            className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
+            style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+          >
+            <FaListUl />
+          </button>
         </div>
         <h1 className="text-2xl font-semibold text-blue-600 text-center mb-4">All Pools</h1>
         <div className="flex flex-wrap justify-center mb-4">

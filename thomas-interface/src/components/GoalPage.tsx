@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useStore from '../store';
 import MarkdownEditor from './MarkdownEditor';
 import GoalList from './GoalList';
 import Harvest from './Harvest';
@@ -6,6 +7,8 @@ import TagSearchBar from './TagSearchBar';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { FiX, FiSave, FiEdit2, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FaListUl } from 'react-icons/fa';
+import useCustomNavigation from './useCustomNavigation';
 
 function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }) {
   const pid = `/${host}/${name}`;
@@ -35,6 +38,9 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   const [actionable, setActionable] = useState(false);
   const [harvestTagIsPublic, setHarvestTagIsPublic] = useState(false);
   const [newTagIsPublic, setNewTagIsPublic] = useState(true);
+  const { navigateToPeriod } = useCustomNavigation();
+
+  const { currentPeriodType, getCurrentPeriod } = useStore(state => state);
 
   const handleSummaryEdit = () => {
     setIsEditingSummary(true);
@@ -283,6 +289,13 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
       <div className="bg-blue-300 p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <TagSearchBar poolId={pid} />
+          <button
+            onClick={() => navigateToPeriod(currentPeriodType, getCurrentPeriod())}
+            className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
+            style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+          >
+            <FaListUl />
+          </button>
         </div>
         <div className="flex justify-between pb-2">
           {parent && (

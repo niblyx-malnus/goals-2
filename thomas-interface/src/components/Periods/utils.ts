@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon';
-import { getMonday, getWeekDay, formatDate, getMonth, getQuarter, getYear } from '../dateUtils';
 import { periodType } from '../../types';
 
 export const getAdjacentPeriod = (periodType: string, dateKey: string, direction: string): string => {
@@ -16,10 +14,10 @@ export const getAdjacentPeriod = (periodType: string, dateKey: string, direction
       const [yearM, monthM] = dateKey.split('-').map(Number);
       return adjustMonth(yearM, monthM, direction);
     case 'quarter':
-      const [yearQ, quarter] = dateKey.split('-Q');
+      const [yearQ, quarter] = dateKey.split('-q');
       return adjustQuarter(Number(yearQ), Number(quarter), direction);
     case 'year':
-      return (Number(dateKey) + direction === 'prev' ? -1 : 1).toString();
+      return (Number(dateKey) + (direction === 'prev' ? -1 : 1)).toString();
     default:
       return "Invalid periodType";
   }
@@ -40,7 +38,7 @@ const adjustQuarter = (year: number, quarter: number, direction: string): string
     const newYear = direction === 'prev' && quarter === 1 ? year - 1 :
                     direction === 'next' && quarter === 4 ? year + 1 :
                     year;
-    return `${newYear}-Q${newQuarter}`;
+    return `${newYear}-q${newQuarter}`;
 };
 
 const formatDateKey = (date: Date): string => {
@@ -48,53 +46,25 @@ const formatDateKey = (date: Date): string => {
 };
 
 export const convertDay = (dateKey: string, newPeriod: periodType): string => {
-    const [year, month, day] = dateKey.split('-').map(Number);
-    switch (newPeriod) {
-      case 'day':
-        return dateKey;
-      case 'week':
-        if (new Date(year, month - 1, day).getDay() === 1) {
-          return dateKey; // Return the same date if it's a Monday
-        } else {
-          const monday = day - new Date(year, month - 1, day).getDay() + 1;
-          return `${year}-${month.toString().padStart(2, '0')}-${monday.toString().padStart(2, '0')}`;
-        }
-      case 'month':
-        return `${year}-${month.toString().padStart(2, '0')}`;
-      case 'quarter':
-        const quarter = Math.ceil(month / 3);
-        return `${year}-Q${quarter}`;
-      case 'year':
-        return `${year}`;
-    }
-};
-
-export const getFirstDay = (periodType: string, dateKey: string): string => {
-    switch (periodType) {
-        case 'day':
-            return dateKey;
-        case 'week':
-            return dateKey; // Return the same date for the 'week' period type
-        case 'month':
-            return `${dateKey}-01`;
-        case 'quarter':
-            const [yearQ, quarter] = dateKey.split('-Q').map(Number);
-            const quarterStartMonth = (quarter - 1) * 3 + 1;
-            return `${yearQ}-${quarterStartMonth.toString().padStart(2, '0')}-01`;
-        case 'year':
-            return `${dateKey}-01-01`;
-        default:
-            return '';
-    }
-};
-
-export const convertToPeriod = (currentPeriod: string, dateKey: string, newPeriod: periodType): string => {
-    if (currentPeriod === 'day') {
-        return convertDay(dateKey, newPeriod);
-    } else {
-        const firstDay = getFirstDay(currentPeriod, dateKey);
-        return convertDay(firstDay, newPeriod);
-    }
+  const [year, month, day] = dateKey.split('-').map(Number);
+  switch (newPeriod) {
+    case 'day':
+      return dateKey;
+    case 'week':
+      if (new Date(year, month - 1, day).getDay() === 1) {
+        return dateKey; // Return the same date if it's a Monday
+      } else {
+        const monday = day - new Date(year, month - 1, day).getDay() + 1;
+        return `${year}-${month.toString().padStart(2, '0')}-${monday.toString().padStart(2, '0')}`;
+      }
+    case 'month':
+      return `${year}-${month.toString().padStart(2, '0')}`;
+    case 'quarter':
+      const quarter = Math.ceil(month / 3);
+      return `${year}-q${quarter}`;
+    case 'year':
+      return `${year}`;
+  }
 };
 
 export const getCurrentDayDateKey = (): string => {
@@ -113,21 +83,23 @@ export const formatDateKeyDisplay = (periodType: string, dateKey: string): strin
     const [year, month, day] = dateKey.split('-').map(Number);
 
     switch (periodType) {
-        case 'day':
-            const dayName = getWeekDayX(year, month, day);
-            return `${dayName}, ${formatDateX(year, month, day)}`;
-        case 'week':
-            const monday = getMondayX(year, month, day);
-            return `Week of ${formatDateX(monday.year, monday.month, monday.day)}`;
-        case 'month':
-            return `${getMonthName(month)} ${year}`;
-        case 'quarter':
-            const [quarterYear, quarter] = dateKey.split('-Q');
-            return `Q${quarter} of ${quarterYear}`;
-        case 'year':
-            return dateKey;
-        default:
-            return '';
+      case 'day':
+        const dateD = new Date(dateKey);
+        const dayName = getWeekDay(year, month, day);
+        return `${dayName} ${dateD.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})}`;
+        // return `${dayName} ${formatDate(year, month, day)}`;
+      case 'week':
+        const dateW = new Date(dateKey);
+        return `Week of ${dateW.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})}`;
+      case 'month':
+        return `${getMonthName(month)} ${year}`;
+      case 'quarter':
+        const [quarterYear, quarter] = dateKey.split('-q');
+        return `Q${quarter} of ${quarterYear}`;
+      case 'year':
+        return dateKey;
+      default:
+        return '';
     }
 };
 
@@ -139,19 +111,19 @@ export const getMonthName = (monthNumber: number): string => {
     return months[monthNumber - 1]; // Adjusting for zero-based indexing
 };
 
-const getWeekDayX = (year: number, month: number, day: number): string => {
+const getWeekDay = (year: number, month: number, day: number): string => {
     const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
     return weekDays[dayOfWeek];
 };
 
-const getMondayX = (year: number, month: number, day: number): { year: number, month: number, day: number } => {
+const getMonday = (year: number, month: number, day: number): { year: number, month: number, day: number } => {
     const monday = new Date(Date.UTC(year, month - 1, day));
     const mondayDate = monday.getUTCDate() - monday.getUTCDay() + (monday.getUTCDay() === 0 ? -6 : 1);
     return { year: monday.getUTCFullYear(), month: monday.getUTCMonth() + 1, day: mondayDate };
 };
 
-const formatDateX = (year: number, month: number, day: number): string => {
+const formatDate = (year: number, month: number, day: number): string => {
     return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
 };
 
