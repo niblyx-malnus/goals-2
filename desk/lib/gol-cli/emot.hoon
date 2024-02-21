@@ -131,6 +131,7 @@
     ::
       %mark-complete
     =+  axn
+    =.  this  (handle-action [%mark-active pid gid])
     =/  old=pool:gol  (~(got by pools.store) pid)
     ~&  %marking-complete
     =/  pore
@@ -146,6 +147,7 @@
     ?.  %-  ~(all in (~(young nd goals.new) u.parent))
         |=(=gid:gol done.i.status:(~(got-node nd goals.new) e+gid))
       this
+    :: TODO: make this only occur if has permissions on ancestors...
     :: owner responsible for resulting completions
     =.  src.bowl  our.bowl
     (handle-action:this [%mark-complete pid u.parent])
