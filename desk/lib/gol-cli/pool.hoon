@@ -421,23 +421,20 @@
 ++  move-to-root
   |=  [=gid:gol mod=ship]
   ^-  _this
-  ~&  %moving-to-root
   ?.  (check-move-to-root-perm gid mod)
     ~|("missing-move-to-root-perms" !!)
   =/  k  (~(got by goals.p) gid)  
-  ?~  parent.k  this
+  ?~  parent.k  this(roots.p [gid roots.p])
   =/  q  (~(got by goals.p) u.parent.k)
   ?>  (~(has in (sy children.q)) gid)
   =.  goals.p  (~(put by goals.p) gid k(parent ~))
   =.  goals.p  (~(put by goals.p) u.parent.k q(children (find-and-oust gid children.q)))
   =.  roots.p  [gid roots.p]
-  ~&  roots+roots.p
   (yoke [%held-rend gid u.parent.k] mod)
 ::
 ++  move-to-goal
   |=  [kid=gid:gol pid=gid:gol mod=ship]
   ^-  _this
-  ~&  %moving-to-goal
   ?.  (check-move-to-goal-perm kid pid mod)
     ~|("missing-move-to-goal-perms" !!)
   ::
@@ -448,7 +445,6 @@
   =.  goals.p.pore  (~(put by goals.p.pore) kid k(parent (some pid)))
   =.  goals.p.pore  (~(put by goals.p.pore) pid q(children [kid children.q]))
   =.  roots.p.pore  (find-and-oust kid roots.p.pore)
-  ~&  roots+roots.p.pore
   (yoke:pore [%held-yoke kid pid] mod)
 ::
 ++  move
