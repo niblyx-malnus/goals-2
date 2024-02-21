@@ -35,6 +35,7 @@
 ++  create-goal
   |=  [=gid:gol upid=(unit gid:gol) summary=@t now=@da mod=ship]
   ^-  _this
+  ~&  %creating-goal
   ?>  ?~  upid
         (check-root-create-perm mod)
       (check-goal-create-perm u.upid mod)
@@ -420,6 +421,7 @@
 ++  move-to-root
   |=  [=gid:gol mod=ship]
   ^-  _this
+  ~&  %moving-to-root
   ?.  (check-move-to-root-perm gid mod)
     ~|("missing-move-to-root-perms" !!)
   =/  k  (~(got by goals.p) gid)  
@@ -435,6 +437,7 @@
 ++  move-to-goal
   |=  [kid=gid:gol pid=gid:gol mod=ship]
   ^-  _this
+  ~&  %moving-to-goal
   ?.  (check-move-to-goal-perm kid pid mod)
     ~|("missing-move-to-goal-perms" !!)
   ::
