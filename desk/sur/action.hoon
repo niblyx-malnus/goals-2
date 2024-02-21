@@ -53,6 +53,7 @@
           [%mark-active =pid =gid]
           [%unmark-active =pid =gid]
           [%update-goal-perms =pid =gid chief=ship rec=_| =deputies]
+          [%reorder-roots =pid roots=(list gid)]
           [%reorder-children =pid =gid children=(list gid)]
           [%reorder-borrowed =pid =gid borrowed=(list gid)]
           [%reorder-borrowed-by =pid =gid borrowed-by=(list gid)]

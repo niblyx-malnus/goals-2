@@ -42,6 +42,7 @@
       title=@t
       =perms
       =goals
+      roots=(list gid)
       =archive
       :: label-properties=(map @t (map @t @t))
       :: attribute-properties=(map @t (map @t @t))

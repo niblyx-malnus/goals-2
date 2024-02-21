@@ -13,17 +13,20 @@
       outflow=(set nid)
   ==
 +$  deputies  (map ship ?(%edit %create))
++$  open-to   (unit ?(%admins %deputies %viewers)) :: who can claim goal
 +$  goal
   $:  =gid
       summary=@t         :: (140 character summary of a goal)
       parent=(unit gid)
-      children=(set gid) :: make this a list of unique children
+      children=(list gid)
+      borrowed-by=(list gid)
+      borrowed=(list gid)
       start=node
       end=node
       actionable=?
       chief=ship         :: sole person responsible
       =deputies          :: %edit can edit but not move
-      :: open-to=(unit ?(%admins %deputies %viewers))
+      =open-to
       :: labels=(set @t)
       :: attributes=(map @t @t)
   ==

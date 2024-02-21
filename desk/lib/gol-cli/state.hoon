@@ -5,15 +5,15 @@
 |%
 +$  card  card:agent:gall
 ::
-+$  state-5-25  [%'5-25' =store]
-+$  state-5-24  [%'5-24' =store:old-goals]
++$  state-5-26  [%'5-26' =store]
++$  state-5-25  [%'5-25' =store:old-goals]
 +$  versioned-state
-  $%  state-5-24
-      state-5-25
+  $%  state-5-25
+      state-5-26
   ==
 ::
 ++  upgrade-io
-  |=  [new=state-5-25 =bowl:gall]
+  |=  [new=state-5-26 =bowl:gall]
   |^  ^-  (list card)
   :: TODO: Follow all pools and prompt others to refollow?
   ;:  weld
@@ -35,10 +35,10 @@
 ::
 ++  convert-to-latest
   |=  old=versioned-state
-  ^-  state-5-25
+  ^-  state-5-26
   ?-  -.old
-    %'5-24'  (convert-5-24-to-5-25 old)
-      %'5-25'
+    %'5-25'  (convert-5-25-to-5-26 old)
+      %'5-26'
     %=    old
         pools.store
       %-  ~(gas by *pools)
@@ -71,37 +71,20 @@
   ==
 :: Development states
 ::
-++  convert-5-24-to-5-25
-  |=  =state-5-24
-  ^-  state-5-25
+++  convert-5-25-to-5-26
+  |=  =state-5-25
+  ^-  state-5-26
   =/  pools
     %-  ~(gas by *pools)
-    %+  turn  ~(tap by pools.store.state-5-24)
+    %+  turn  ~(tap by pools.store.state-5-25)
     |=  [=pid =pool:old-goals]
-    =/  goals
-      %-  ~(gas by *goals)
-      %+  turn  ~(tap by goals.pool)
-      |=  [=gid =goal:old-goals]
-      :-  gid
-      :*  gid.goal
-          summary.goal
-          parent.goal
-          ~(tap in children.goal)
-          ~
-          ~
-          start.goal
-          end.goal
-          actionable.goal
-          chief.goal
-          deputies.goal
-          ~
-      ==
     :-  pid
     :*  pid.pool
         title.pool
         perms.pool
-        goals
+        goals.pool
+        (~(waif-goals gol-cli-node goals.pool))
         ~
     ==
-  [%'5-25' pools [local pool-info json-tree]:store:state-5-24]
+  [%'5-26' pools [local pool-info json-tree]:store:state-5-25]
 --

@@ -38,9 +38,7 @@
   ?-    -.vyu
       %pool-roots
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    =/  keys=(list key:gol)
-      (turn (~(waif-goals gol-cli-node goals.pool)) (lead pid.vyu))
-    (goal-data keys)
+    (goal-data (turn roots.pool (lead pid.vyu)))
     ::
       %goal-children
     =/  =pool:gol       (~(got by pools.store) pid.vyu)

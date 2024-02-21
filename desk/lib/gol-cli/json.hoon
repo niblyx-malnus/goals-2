@@ -143,6 +143,7 @@
         [%unmark-complete (ot ~[pid+pid gid+gid])]
         [%mark-active (ot ~[pid+pid gid+gid])]
         [%unmark-active (ot ~[pid+pid gid+gid])]
+        [%reorder-roots (ot ~[pid+pid roots+(ar gid)])]
         [%reorder-children (ot ~[pid+pid gid+gid children+(ar gid)])]
         [%reorder-borrowed (ot ~[pid+pid gid+gid borrowed+(ar gid)])]
         [%reorder-borrowed-by (ot ~[pid+pid gid+gid borrowed-by+(ar gid)])]

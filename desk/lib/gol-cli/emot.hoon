@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-25:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-26:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -31,7 +31,7 @@
   :*  (unique-pin own now)
       title
       (~(put by *perms:gol) own %owner)
-      ~  ~
+      ~  ~  ~
   ==
 ::
 ++  clone-pool
@@ -52,25 +52,31 @@
   ^-  _this
   =/  mod  src.bowl
   ?-    -.axn
+      %reorder-roots
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pid)
+    =/  new=pool:gol  abet:(reorder-roots:(apex:pl old) roots mod)
+    this(pools.store (~(put by pools.store) pid new))
+    ::
       %reorder-children
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
     =/  =goal:gol     (~(got by goals.old) gid)
-    =/  new=pool:gol  abet:(reorder-children:(apex:pl old) gid children our.bowl)
+    =/  new=pool:gol  abet:(reorder-children:(apex:pl old) gid children mod)
     this(pools.store (~(put by pools.store) pid new))
     ::
       %reorder-borrowed
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
     =/  =goal:gol     (~(got by goals.old) gid)
-    =/  new=pool:gol  abet:(reorder-borrowed:(apex:pl old) gid borrowed our.bowl)
+    =/  new=pool:gol  abet:(reorder-borrowed:(apex:pl old) gid borrowed mod)
     this(pools.store (~(put by pools.store) pid new))
     ::
       %reorder-borrowed-by
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
     =/  =goal:gol     (~(got by goals.old) gid)
-    =/  new=pool:gol  abet:(reorder-borrowed-by:(apex:pl old) gid borrowed-by our.bowl)
+    =/  new=pool:gol  abet:(reorder-borrowed-by:(apex:pl old) gid borrowed-by mod)
     this(pools.store (~(put by pools.store) pid new))
     ::
       %create-goal

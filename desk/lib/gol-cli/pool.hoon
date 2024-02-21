@@ -428,6 +428,7 @@
   ?>  (~(has in (sy children.q)) gid)
   =.  goals.p  (~(put by goals.p) gid k(parent ~))
   =.  goals.p  (~(put by goals.p) u.parent.k q(children (find-and-oust gid children.q)))
+  =.  roots.p  [gid roots.p]
   (yoke [%held-rend gid u.parent.k] mod)
 ::
 ++  move-to-goal
@@ -442,6 +443,7 @@
   ?<  (~(has in (sy children.q)) kid)
   =.  goals.p.pore  (~(put by goals.p.pore) kid k(parent (some pid)))
   =.  goals.p.pore  (~(put by goals.p.pore) pid q(children [kid children.q]))
+  =.  roots.p.pore  (find-and-oust kid roots.p.pore)
   (yoke:pore [%held-yoke kid pid] mod)
 ::
 ++  move
@@ -470,6 +472,13 @@
   =.  goals.p  (~(put by goals.p) borrower d(borrowed-by (find-and-oust borrower borrowed-by.d)))
   =.  goals.p  (~(put by goals.p) borrowed r(borrowed (find-and-oust borrowed borrowed.r)))
   (yoke [%nest-rend borrowed borrower] mod)
+::
+++  reorder-roots
+  |=  [roots=(list gid:gol) mod=ship]
+  ^-  _this
+  ?>  (check-pool-edit-perm mod)
+  ?>  =((sy roots) (sy roots.p))
+  this(roots.p roots)
 ::
 ++  reorder-children
   |=  [=gid:gol children=(list gid:gol) mod=ship]
