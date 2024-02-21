@@ -13,17 +13,22 @@
       outflow=(set nid)
   ==
 +$  deputies  (map ship ?(%edit %create))
++$  open-to   (unit ?(%admins %deputies %viewers)) :: who can claim goal
 +$  goal
   $:  =gid
-      summary=@t      :: (140 character summary of a goal)
+      summary=@t         :: (140 character summary of a goal)
       parent=(unit gid)
-      children=(set gid)
+      children=(list gid)
+      borrowed-by=(list gid)
+      borrowed=(list gid)
       start=node
       end=node
-      actionable=?    :: 
-      chief=ship      :: sole person responsible
-      =deputies       :: %edit can edit but not move
-      :: open-to=(unit ?(%admins %deputies %viewers))
+      actionable=?
+      chief=ship         :: sole person responsible
+      =deputies          :: %edit can edit but not move
+      =open-to
+      :: labels=(set @t)
+      :: attributes=(map @t @t)
   ==
 +$  goals    (map gid goal)
 ::
@@ -38,6 +43,8 @@
       =perms
       =goals
       =archive
+      :: label-properties=(map @t (map @t @t))
+      :: attribute-properties=(map @t (map @t @t))
   ==
 ::
 +$  module  [parent=(unit gid) version=@ud body=json]

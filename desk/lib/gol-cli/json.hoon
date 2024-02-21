@@ -502,7 +502,7 @@
   :~  [%gid (enjs-gid gid.goal)]
       [%summary s+summary.goal]
       [%parent ?~(parent.goal ~ (enjs-gid u.parent.goal))]
-      [%children a+(turn ~(tap in children.goal) enjs-gid)]
+      [%children a+(turn children.goal enjs-gid)]
       [%start (enjs-node start.goal)]
       [%end (enjs-node end.goal)]
       [%actionable b+actionable.goal]

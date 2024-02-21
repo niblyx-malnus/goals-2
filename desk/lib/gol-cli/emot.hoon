@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-24:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-25:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -180,7 +180,7 @@
     =+  axn
     :: automatically unmark child active if possible
     =/  children=(list gid:gol)
-      ~(tap in children:(~(got by goals:(~(got by pools.store) pid)) gid))
+      children:(~(got by goals:(~(got by pools.store) pid)) gid)
     =.  this
       |-
       ?~  children

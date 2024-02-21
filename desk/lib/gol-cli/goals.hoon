@@ -13,7 +13,7 @@
 ::
 :: creating a mapping from old ids to new ids
 :: to be used in the process of copying goals
-++  new-ids
+++  new-gids
   |=  [=(list gid:gol) =pid:gol now=@da]
   ^-  (map gid:gol gid:gol)
   =/  idx  0
@@ -21,34 +21,34 @@
   |-
   ?:  =(idx (lent list))
     map
-  =/  new-id  (unique-id pid now)
+  =/  new-gid  (unique-id pid now)
   %=  $
     idx  +(idx)
-    map  (~(put by map) (snag idx list) new-id)
+    map  (~(put by map) (snag idx list) new-gid)
   ==
 ::
 ++  clone-goals
   |=  [=goals:gol =pid:gol now=@da]
-  ^-  [id-map=(map gid:gol gid:gol) =goals:gol]
-  =/  id-map  (new-ids ~(tap in ~(key by goals)) pid now)
-  :-  id-map
+  ^-  [gid-map=(map gid:gol gid:gol) =goals:gol]
+  =/  gid-map  (new-gids ~(tap in ~(key by goals)) pid now)
+  :-  gid-map
   |^
   %-  ~(gas by *goals:gol)
   %+  turn  ~(tap by goals)
   |=  [=gid:gol =goal:gol]
-  :-  (~(got by id-map) gid)
+  :-  (~(got by gid-map) gid)
   %=  goal
-    parent  ?~(parent.goal ~ (some (new-id u.parent.goal)))
-    children  (new-set-id children.goal)
+    parent  ?~(parent.goal ~ (some (new-gid u.parent.goal)))
+    children  (new-list-gid children.goal)
     ::
     inflow.start  (new-set-nid inflow.start.goal)
     outflow.start  (new-set-nid outflow.start.goal)
     inflow.end  (new-set-nid inflow.end.goal)
     outflow.end  (new-set-nid outflow.end.goal)
   ==
-  ++  new-id  |=(=gid:gol (~(got by id-map) gid))
-  ++  new-nid  |=(=nid:gol [-.nid (new-id gid.nid)])
-  ++  new-set-id  |=(=(set gid:gol) (~(run in set) new-id))
-  ++  new-set-nid  |=(=(set nid:gol) (~(run in set) new-nid))
+  ++  new-gid  |=(=gid:gol (~(got by gid-map) gid))
+  ++  new-nid  |=(=nid:gol [-.nid (new-gid gid.nid)])
+  ++  new-list-gid  |=(=(list gid:gol) (turn list new-gid))
+  ++  new-set-nid   |=(=(set nid:gol) (~(run in set) new-nid))
   --
 --

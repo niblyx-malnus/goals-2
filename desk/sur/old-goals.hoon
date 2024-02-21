@@ -1,82 +1,96 @@
 /-  jot=json-tree
 |%
 +$  moment    (unit @da)
-+$  pin       [host=ship name=term]
-+$  id        @ta
-+$  nid       [?(%k %d) =id] :: node id
-+$  key       [=pin =id]
++$  pid       [host=ship name=term]
++$  gid       @ta
++$  nid       [?(%s %e) =gid] :: node gid
++$  key       [=pid =gid]
++$  status    (lest [timestamp=@da done=?])
 +$  node
-  $:  done=$~(%| ?) :: kickoff: goal started; deadline: goal completed
+  $:  =status
       =moment
       inflow=(set nid)
       outflow=(set nid)
   ==
 +$  deputies  (map ship ?(%edit %create))
 +$  goal
-  $:  =id
-      par=(unit id)   :: parent=(unit id)
-      kids=(set id)   :: children=(set id)
-      kickoff=node
-      deadline=node
-      actionable=?    :: 
-      chief=ship      :: sole person responsible
-      =deputies       :: %edit can edit but not move
-      summary=@t      :: (140 character summary of a goal)
+  $:  =gid
+      summary=@t         :: (140 character summary of a goal)
+      parent=(unit gid)
+      children=(set gid) :: make this a list of unique children
+      start=node
+      end=node
+      actionable=?
+      chief=ship         :: sole person responsible
+      =deputies          :: %edit can edit but not move
+      :: open-to=(unit ?(%admins %deputies %viewers))
+      :: labels=(set @t)
+      :: attributes=(map @t @t)
   ==
-+$  goals    (map id goal)
++$  goals    (map gid goal)
 ::
-+$  role     ?(%owner %admin %creator)
-+$  perms    (map ship (unit role))
++$  role     ?(%owner %admin %creator %viewer)
++$  perms    (map ship role)
 ::
-+$  archive  (map id [par=(unit id) =goals])
++$  archive  (map gid [par=(unit gid) =goals])
 ::
 +$  pool
-  $:  =pin
+  $:  =pid
+      title=@t
       =perms
       =goals
       =archive
-      title=@t
+      :: label-properties=(map @t (map @t @t))
+      :: attribute-properties=(map @t (map @t @t))
   ==
 ::
-+$  stock     (list [=id chief=ship]) :: lineage; youngest to oldest
-+$  ranks     (map ship id) :: map of ship to highest ranking goal id
-+$  edge      (pair nid nid)
-+$  edges     (set edge)
-::
-+$  order-by
-  $:  by-precedence=(list id)
-      by-kickoff=(list id)
-      by-deadline=(list id)
-  ==
-::
-+$  module  [parent=(unit id) version=@ud body=json]
++$  module  [parent=(unit gid) version=@ud body=json]
 ::
 +$  pool-data
   $:  properties=(map @t @t)
-      tags=(map id (set @t))
-      fields=(map id (map @t @t))
+      tags=(map gid (set @t))
+      fields=(map gid (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
       modules=(map @t (map @t module))
   ==
 ::
-+$  pools  (map pin pool)
++$  pools  (map pid pool)
+::
++$  collection
+  $:  keys=(list key)
+      themes=(set @t)
+      :: title=@t
+      :: description=@t
+  ==
 ::
 +$  local
   $:  goal-order=(list key)
-      pool-order=(list pin) :: order of pools
+      pool-order=(list pid) :: order of pools
       tags=(map key (set @t))
       fields=(map key (map @t @t))
       tag-properties=(map @t (map @t @t))
       field-properties=(map @t (map @t @t))
+      collections=(axal (map @ta collection))
       settings=(map @t @t)
   ==
 ::
 +$  store  
   $:  =pools
       =local
-      pool-info=(map pin pool-data)
+      pool-info=(map pid pool-data)
       =json-tree:jot
+  ==
+::
++$  stock     (list [=gid chief=ship]) :: lineage; youngest to oldest
++$  ranks     (map ship gid) :: map of ship to highest ranking goal gid
++$  edge      (pair nid nid)
++$  edges     (set edge)
+::
++$  order-by
+  $:  by-precedence=(list gid)
+      by-kickoff=(list gid)
+      by-deadline=(list gid)
   ==
 ::
 +$  node-trace
@@ -88,31 +102,31 @@
 +$  goal-trace
   $:  =stock
       =ranks
-      young=(list [id virtual=?])
-      young-by-precedence=(list [id virtual=?])
-      young-by-kickoff=(list [id virtual=?])
-      young-by-deadline=(list [id virtual=?])
+      young=(list [gid virtual=?])
+      young-by-precedence=(list [gid virtual=?])
+      young-by-kickoff=(list [gid virtual=?])
+      young-by-deadline=(list [gid virtual=?])
       progress=[complete=@ total=@]
-      prio-left=(set id)
-      prio-ryte=(set id)
-      prec-left=(set id)
-      prec-ryte=(set id)
-      nest-left=(set id)
-      nest-ryte=(set id)
+      prio-left=(set gid)
+      prio-ryte=(set gid)
+      prec-left=(set gid)
+      prec-ryte=(set gid)
+      nest-left=(set gid)
+      nest-ryte=(set gid)
   ==
 +$  pool-trace
-  $:  stock-map=(map id stock)
-      roots=(list id)
-      roots-by-precedence=(list id)
-      roots-by-kickoff=(list id)
-      roots-by-deadline=(list id)
-      cache-roots=(list id)
-      cache-roots-by-precedence=(list id)
-      cache-roots-by-kickoff=(list id)
-      cache-roots-by-deadline=(list id)
-      d-k-precs=(map id (set id))
-      k-k-precs=(map id (set id))
-      d-d-precs=(map id (set id))
+  $:  stock-map=(map gid stock)
+      roots=(list gid)
+      roots-by-precedence=(list gid)
+      roots-by-kickoff=(list gid)
+      roots-by-deadline=(list gid)
+      cache-roots=(list gid)
+      cache-roots-by-precedence=(list gid)
+      cache-roots-by-kickoff=(list gid)
+      cache-roots-by-deadline=(list gid)
+      d-k-precs=(map gid (set gid))
+      k-k-precs=(map gid (set gid))
+      d-d-precs=(map gid (set gid))
       left-bounds=(map nid moment)
       ryte-bounds=(map nid moment)
       left-plumbs=(map nid @)
@@ -120,7 +134,7 @@
   ==
 +$  trace
   $:  nodes=(map nid node-trace)
-      goals=(map id goal-trace)
-      pools=(map pin pool-trace)
+      goals=(map gid goal-trace)
+      pools=(map pid pool-trace)
   ==
 --

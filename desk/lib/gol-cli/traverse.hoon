@@ -718,7 +718,7 @@
   =/  ginn  (ginn gid:gol (set gid:gol))
   =.  ginn
     %=  ginn
-      flow  |=(=gid:gol ~(tap in children:(~(got by goals) gid)))
+      flow  |=(=gid:gol children:(~(got by goals) gid))
       init  |=(=gid:gol (~(put in *(set gid:gol)) gid))
       meld  |=([gid:gol gid:gol a=(set gid:gol) b=(set gid:gol)] (~(uni in a) b))
     ==

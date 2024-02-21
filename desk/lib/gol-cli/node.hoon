@@ -111,7 +111,7 @@
   %~  tap  in
   %-  %~  dif  in
       (~(gas in *(set gid:gol)) (yung gid))
-  children:(~(got by goals) gid)
+  (sy children:(~(got by goals) gid))
 ::
 :: extracts ids of incomplete goals from a list of ids
 ++  incomplete
@@ -173,7 +173,7 @@
     ~(tap in flow)
   |=  =nid:gol
   ?.  ?&  =(dst -.nid) :: we keep when destination is as specified
-          |(kid !(~(has in children.goal) gid.nid)) :: if k false, must not be in children
+          |(kid !(~(has in (sy children.goal)) gid.nid)) :: if k false, must not be in children
           |(parent !?~(parent.goal %| =(gid.nid u.parent.goal))) :: if p is false, must not be parent
       ==
     ~
@@ -186,5 +186,5 @@
 ++  nest-left  |=(=gid:gol (neighbors gid %| %& %l %e %e))
 ++  nest-ryte  |=(=gid:gol (neighbors gid %& %| %r %e %e))
 ::
-++  young  |=(=gid:gol (~(uni in children:(~(got by goals) gid)) (nest-left gid)))
+++  young  |=(=gid:gol (~(uni in (~(gas in *(set gid:gol)) children:(~(got by goals) gid))) (nest-left gid)))
 --

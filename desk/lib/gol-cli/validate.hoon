@@ -1,6 +1,7 @@
 /-  gol=goals
 /+  *gol-cli-util, gol-cli-node, gol-cli-traverse
 :: TODO: confirm start and end status timestamps alternate in order
+:: TODO: confirm validity of borrowed / borrowed-by
 |%
 ::
 ++  all-own-edges
@@ -18,7 +19,7 @@
     children  
       %-  ~(uni in children)
       ^-  (set (pair gid:gol gid:gol))
-      %-  ~(run in children.goal)
+      %-  ~(run in (sy children.goal))
       |=(kid=gid:gol [kid gid])
     parents  
       ?~  parent.goal

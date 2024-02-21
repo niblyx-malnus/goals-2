@@ -359,8 +359,8 @@
   ::
   =/  l  (~(got by goals.p) gid.n1)
   =/  r  (~(got by goals.p) gid.n2)
-  ?:  ?|  &(=(-.n1 %e) =(-.n2 %e) (~(has in children.r) gid.n1))
-          &(=(-.n1 %s) =(-.n2 %s) (~(has in children.l) gid.n2))
+  ?:  ?|  &(=(-.n1 %e) =(-.n2 %e) (~(has in (sy children.r)) gid.n1))
+          &(=(-.n1 %s) =(-.n2 %s) (~(has in (sy children.l)) gid.n2))
       ==
     ~|("owned-goal" !!)
   :: dag-rend
@@ -394,6 +394,29 @@
     (dag-rend:pore [%s rid] [%s lid] mod)
   ==
 ::
+++  find-and-oust
+  |*  [item=* =(list)]
+  ^-  (^list _item)
+  ?~  idx=(find [item]~ list)  
+    list
+  (oust [u.idx 1] list)
+::
+++  slot-above
+  |=  [dis=* dat=* =(list)]
+  ^-  (^list _dis)
+  ?~  idx=(find [dis]~ list)  !!
+  =.  list  (oust [u.idx 1] list)
+  ?~  idx=(find [dat]~ list)  !!
+  (into list u.idx dis)
+::
+++  slot-below
+  |=  [dis=* dat=* =(list)]
+  ^-  (^list _dis)
+  ?~  idx=(find [dis]~ list)  !!
+  =.  list  (oust [u.idx 1] list)
+  ?~  idx=(find [dat]~ list)  !!
+  (into list +(u.idx) dis)
+::
 ++  move-to-root
   |=  [=gid:gol mod=ship]
   ^-  _this
@@ -402,8 +425,9 @@
   =/  k  (~(got by goals.p) gid)  
   ?~  parent.k  this
   =/  q  (~(got by goals.p) u.parent.k)
+  ?>  (~(has in (sy children.q)) gid)
   =.  goals.p  (~(put by goals.p) gid k(parent ~))
-  =.  goals.p  (~(put by goals.p) u.parent.k q(children (~(del in children.q) gid)))
+  =.  goals.p  (~(put by goals.p) u.parent.k q(children (find-and-oust gid children.q)))
   (yoke [%held-rend gid u.parent.k] mod)
 ::
 ++  move-to-goal
@@ -415,14 +439,61 @@
   =/  pore  (move-to-root kid host.pid.p) :: divine intervention (owner)
   =/  k  (~(got by goals.p.pore) kid)
   =/  q  (~(got by goals.p.pore) pid)
+  ?<  (~(has in (sy children.q)) kid)
   =.  goals.p.pore  (~(put by goals.p.pore) kid k(parent (some pid)))
-  =.  goals.p.pore  (~(put by goals.p.pore) pid q(children (~(put in children.q) kid)))
+  =.  goals.p.pore  (~(put by goals.p.pore) pid q(children [kid children.q]))
   (yoke:pore [%held-yoke kid pid] mod)
 ::
 ++  move
   |=  [kid=gid:gol upid=(unit gid:gol) mod=ship]
   ^-  _this
   ?~(upid (move-to-root kid mod) (move-to-goal kid u.upid mod))
+::
+++  borrow
+  |=  [borrower=gid:gol borrowed=gid:gol mod=ship]
+  ^-  _this
+  =/  r  (~(got by goals.p) borrower)
+  =/  d  (~(got by goals.p) borrowed)
+  ?<  (~(has in (sy borrowed.r)) borrowed)
+  ?<  (~(has in (sy borrowed-by.d)) borrower)
+  =.  goals.p  (~(put by goals.p) borrower d(borrowed-by [borrower borrowed-by.d]))
+  =.  goals.p  (~(put by goals.p) borrowed r(borrowed [borrowed borrowed.r]))
+  (yoke [%nest-yoke borrowed borrower] mod)
+::
+++  unborrow
+  |=  [borrower=gid:gol borrowed=gid:gol mod=ship]
+  ^-  _this
+  =/  r  (~(got by goals.p) borrower)
+  =/  d  (~(got by goals.p) borrowed)
+  ?>  (~(has in (sy borrowed.r)) borrowed)
+  ?>  (~(has in (sy borrowed-by.d)) borrower)
+  =.  goals.p  (~(put by goals.p) borrower d(borrowed-by (find-and-oust borrower borrowed-by.d)))
+  =.  goals.p  (~(put by goals.p) borrowed r(borrowed (find-and-oust borrowed borrowed.r)))
+  (yoke [%nest-rend borrowed borrower] mod)
+::
+++  reorder-children
+  |=  [=gid:gol children=(list gid:gol) mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm gid mod)
+  =/  =goal:gol  (~(got by goals.p) gid)
+  ?>  =((sy children) (sy children.goal))
+  this(goals.p (~(put by goals.p) gid goal(children children)))
+::
+++  reorder-borrowed
+  |=  [=gid:gol borrowed=(list gid:gol) mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm gid mod)
+  =/  =goal:gol  (~(got by goals.p) gid)
+  ?>  =((sy borrowed) (sy borrowed.goal))
+  this(goals.p (~(put by goals.p) gid goal(borrowed borrowed)))
+::
+++  reorder-borrowed-by
+  |=  [=gid:gol borrowed-by=(list gid:gol) mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm gid mod)
+  =/  =goal:gol  (~(got by goals.p) gid)
+  ?>  =((sy borrowed-by) (sy borrowed-by.goal))
+  this(goals.p (~(put by goals.p) gid goal(borrowed-by borrowed-by)))
 ::
 ++  yoke-sequence
   |=  [yoks=(list exposed-yoke:act) mod=ship]
@@ -641,6 +712,7 @@
   this(perms.p (~(put by perms.p) ship u.role))
 ::
 :: set the chief of a goal or optionally all its subgoals
+:: TODO: incorporate open-to.goal
 ++  set-chief
   |=  [=gid:gol chief=ship rec=?(%.y %.n) mod=ship]
   ^-  _this
