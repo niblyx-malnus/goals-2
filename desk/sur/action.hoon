@@ -53,6 +53,9 @@
           [%mark-active =pid =gid]
           [%unmark-active =pid =gid]
           [%update-goal-perms =pid =gid chief=ship rec=_| =deputies]
+          [%reorder-children =pid =gid children=(list gid)]
+          [%reorder-borrowed =pid =gid borrowed=(list gid)]
+          [%reorder-borrowed-by =pid =gid borrowed-by=(list gid)]
       ==
     +$  hitch
       $%  [%update-goal-tags =key p=(each (set @t) (set @t))]
@@ -102,7 +105,9 @@
 ::
 +$  goal-view
   $%  [%pool-roots =pid]   :: gid, summary, cmp, axn
-      [%goal-young =pid =gid] :: gid, summary, cmp, axn
+      [%goal-children =pid =gid] :: gid, summary, cmp, axn
+      [%goal-borrowed =pid =gid]
+      [%goal-borrowed-by =pid =gid]
       [%harvest type=harvest-type]
       [%pool-tag-goals =pid tag=@t]
       [%pool-tag-harvest =pid tag=@t]

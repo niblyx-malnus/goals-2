@@ -52,6 +52,27 @@
   ^-  _this
   =/  mod  src.bowl
   ?-    -.axn
+      %reorder-children
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pid)
+    =/  =goal:gol     (~(got by goals.old) gid)
+    =/  new=pool:gol  abet:(reorder-children:(apex:pl old) gid children our.bowl)
+    this(pools.store (~(put by pools.store) pid new))
+    ::
+      %reorder-borrowed
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pid)
+    =/  =goal:gol     (~(got by goals.old) gid)
+    =/  new=pool:gol  abet:(reorder-borrowed:(apex:pl old) gid borrowed our.bowl)
+    this(pools.store (~(put by pools.store) pid new))
+    ::
+      %reorder-borrowed-by
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pid)
+    =/  =goal:gol     (~(got by goals.old) gid)
+    =/  new=pool:gol  abet:(reorder-borrowed-by:(apex:pl old) gid borrowed-by our.bowl)
+    this(pools.store (~(put by pools.store) pid new))
+    ::
       %create-goal
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)

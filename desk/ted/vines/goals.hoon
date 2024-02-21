@@ -42,12 +42,20 @@
       (turn (~(waif-goals gol-cli-node goals.pool)) (lead pid.vyu))
     (goal-data keys)
     ::
-      %goal-young
+      %goal-children
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    =/  keys=(list key:gol)
-      (turn ~(tap in (~(young gol-cli-node goals.pool) gid.vyu)) (lead pid.vyu))
-    (goal-data keys)
+    (goal-data (turn children.goal (lead pid.vyu)))
+    ::
+      %goal-borrowed
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  =goal:gol       (~(got by goals.pool) gid.vyu)
+    (goal-data (turn borrowed.goal (lead pid.vyu)))
+    ::
+      %goal-borrowed-by
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  =goal:gol       (~(got by goals.pool) gid.vyu)
+    (goal-data (turn borrowed-by.goal (lead pid.vyu)))
     ::
       %harvest
     =;  harvest=(list key:gol)

@@ -14,7 +14,9 @@
     ^-  $-(json goal-view)
     %-  of
     :~  [%pool-roots (ot ~[pid+pid])]
-        [%goal-young (ot ~[pid+pid gid+gid])]
+        [%goal-children (ot ~[pid+pid gid+gid])]
+        [%goal-borrowed (ot ~[pid+pid gid+gid])]
+        [%goal-borrowed-by (ot ~[pid+pid gid+gid])]
         [%harvest (ot ~[type+type])]
         [%pool-tag-goals (ot ~[pid+pid tag+so])]
         [%pool-tag-harvest (ot ~[pid+pid tag+so])]
