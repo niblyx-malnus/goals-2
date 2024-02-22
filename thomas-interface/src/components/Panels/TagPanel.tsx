@@ -55,6 +55,24 @@ const TagPanel: React.FC<{
 
   return (
     <div>
+      {/* Display inheritedTags */}
+      {goal.inheritedTags && goal.inheritedTags.length > 0 && (
+        <ul>
+          {goal.inheritedTags.map((tag, index) => (
+            <li key={index} className="flex justify-between items-center p-1 text-gray-500">
+              <span
+                onClick={() => navigateToTag(tag)}
+                className="cursor-pointer"
+              >
+                {tag}
+              </span>
+            </li>
+          ))}
+          <hr className="my-2" /> {/* Horizontal line separator */}
+        </ul>
+      )}
+
+      {/* Display tags */}
       <ul>
         {goal.tags.map((tag, index) => (
           <li key={index} className="flex justify-between items-center p-1">

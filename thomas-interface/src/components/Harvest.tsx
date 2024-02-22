@@ -104,8 +104,6 @@ function Harvest({
             <GoalRow
               goal={goal}
               refresh={refresh}
-              moveGoalUp={moveGoalUp}
-              moveGoalDown={moveGoalDown}
             />
           </div>
         ))}

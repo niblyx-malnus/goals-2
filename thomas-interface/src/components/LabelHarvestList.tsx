@@ -60,8 +60,6 @@ function LabelHarvestList({ host, name, tag, refresh }: { host: any; name: any; 
             <GoalRow
               goal={goal}
               refresh={refresh}
-              moveGoalUp={moveGoalUp}
-              moveGoalDown={moveGoalDown}
             />
           </div>
         ))}

@@ -77,8 +77,6 @@ function TagGoalList({ host, name, tag, refresh }: { host: any; name: any; tag: 
             <GoalRow
               goal={goal}
               refresh={refresh}
-              moveGoalUp={moveGoalUp}
-              moveGoalDown={moveGoalDown}
             />
           </div>
         ))}

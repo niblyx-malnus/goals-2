@@ -58,8 +58,6 @@ function TagHarvestList({ host, name, tag, refresh }: { host: any; name: any; ta
             <GoalRow
               goal={goal}
               refresh={refresh}
-              moveGoalUp={moveGoalUp}
-              moveGoalDown={moveGoalDown}
             />
           </div>
         ))}

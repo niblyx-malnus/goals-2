@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiX, FiEdit, FiTrash, FiSave, FiMenu } from 'react-icons/fi';
+import { FaArrowsAlt } from 'react-icons/fa'; 
 import { CompleteIcon } from './CustomIcons';
 import GoalActionBar from './GoalActionBar';
 import { Goal } from '../types';
@@ -9,13 +10,13 @@ import api from '../api';
 const GoalRow: React.FC<{
     goal: Goal,
     refresh: () => void,
-    moveGoalUp: (goalId: string) => void,
-    moveGoalDown: (goalId: string) => void
+    toggleMove?: () => void,
+    moveState?: boolean,
   }> = ({
     goal,
     refresh,
-    moveGoalUp,
-    moveGoalDown
+    toggleMove,
+    moveState = false,
   }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newSummary, setNewSummary] = useState(goal.summary);
@@ -104,6 +105,14 @@ const GoalRow: React.FC<{
 
   return (
     <div ref={rowRef} className={`flex justify-between items-center mt-2 rounded ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200`}>
+      {toggleMove &&
+        <button
+          className={`p-2 rounded bg-gray-${moveState ? "300" : "100"}`}
+          onClick={toggleMove}
+        >
+          <FaArrowsAlt style={{ color: moveState ? "#f7fafc" : "gray" }} />
+        </button>
+      }
       <button
         className="p-2 rounded bg-gray-100 text-white"
         onClick={toggleComplete}

@@ -3,6 +3,8 @@ export type Goal = {
   summary: string,
   labels: string[],
   tags: string[],
+  inheritedLabels: string[],
+  inheritedTags: string[],
   active: boolean,
   complete: boolean,
   actionable: boolean

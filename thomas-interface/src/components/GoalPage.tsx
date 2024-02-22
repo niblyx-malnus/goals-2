@@ -38,9 +38,8 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
   const [actionable, setActionable] = useState(false);
   const [harvestTagIsPublic, setHarvestTagIsPublic] = useState(false);
   const [newTagIsPublic, setNewTagIsPublic] = useState(true);
-  const { navigateToPeriod } = useCustomNavigation();
-
-  const { currentPeriodType, getCurrentPeriod } = useStore(state => state);
+  const { navigateToPeriod, navigateToTag } = useCustomNavigation();
+  const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
 
   const handleSummaryEdit = () => {
     setIsEditingSummary(true);
@@ -151,11 +150,6 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
     const filtered = allTags.filter(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredTags(filtered);
   }, [searchTerm, allTags]);
-
-  const navigateToTagPage = (tag: string) => {
-    setDropdownOpen(false);
-    navigate(`/pool-tag/${host}/${name}/${tag}`);
-  };
 
   const navigateToAllPools = () => {
     setDropdownOpen(false);
@@ -290,7 +284,12 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
         <div className="flex justify-between items-center mb-4">
           <TagSearchBar poolId={pid} />
           <button
-            onClick={() => navigateToPeriod(currentPeriodType, getCurrentPeriod())}
+            onClick={
+              () => {
+                setCurrentTreePage(`/goal${pid}${gid}`);
+                navigateToPeriod(currentPeriodType, getCurrentPeriod());
+              }
+            }
             className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
             style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
           >
@@ -394,7 +393,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
               <div
                 key={index}
                 className="flex items-center bg-gray-200 rounded cursor-pointer"
-                onClick={() => navigateToTagPage(tag)}
+                onClick={() => navigateToTag(tag)}
               >
                 {tag}
               </div>
@@ -505,7 +504,12 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
                 Add
               </button>
             </div>
-            <GoalList host={host} name={name} goalId={goalId} refresh={triggerRefreshKids}/>
+            <GoalList
+              host={host}
+              name={name}
+              goalId={goalId}
+              refresh={triggerRefreshKids}
+            />
             <div className="items-center mt-2 rounded">
               <MarkdownEditor
                 initialMarkdown={goalNote}
@@ -548,7 +552,7 @@ function GoalPage({ host, name, goalId }: { host: any; name: any; goalId: any; }
                     <div
                       key={index}
                       className="flex items-center bg-gray-200 rounded cursor-pointer"
-                      onClick={() => navigateToTagPage(tag)}
+                      onClick={() => navigateToTag(tag)}
                     >
                       {tag}
                     </div>

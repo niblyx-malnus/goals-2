@@ -13,6 +13,8 @@ interface StoreState {
   currentQuarter: string;
   currentYear: string;
 
+  currentTreePage: string;
+
   showCompleted: boolean;
   collections: Record<string, Collection>;
 }
@@ -29,6 +31,9 @@ interface StoreActions {
   setCurrentYear: (period: string) => void;
   getCurrentPeriod: () => string;
 
+  setCurrentTreePage: (page: string) => void;
+  getCurrentTreePage: () => string;
+
   setShowCompleted: (show: boolean) => void;
   setCollection: (path: string, collection: Collection) => void;
   delCollection: (path: string) => void;
@@ -42,6 +47,7 @@ const useStore = create<StoreState & StoreActions>((set, get) => ({
   currentMonth: getCurrentPeriod('month'),
   currentQuarter: getCurrentPeriod('quarter'),
   currentYear: getCurrentPeriod('year'),
+  currentTreePage: '/pools',
   setPlaceholderLabel: (tag: string) => set({ placeholderLabel: tag }),
   setCurrentPeriodType: (periodType: periodType) => set({ currentPeriodType: periodType }),
   setCurrentDay: (period: string) => set({ currentDay: period }),
@@ -66,6 +72,8 @@ const useStore = create<StoreState & StoreActions>((set, get) => ({
         return '';
     }
   },
+  setCurrentTreePage: (page: string) => set({currentTreePage: page }),
+  getCurrentTreePage: () => { return get().currentTreePage; },
   showCompleted: false,
   setShowCompleted: (show: boolean) => set({ showCompleted: show }),
   collections: {},

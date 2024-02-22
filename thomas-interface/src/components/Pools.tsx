@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import PoolList from './PoolList';
 import useStore from '../store';
 import Harvest from './Harvest';
-import { useNavigate } from 'react-router-dom';
 import TagSearchBar from './TagSearchBar';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import api from '../api';
@@ -18,8 +17,8 @@ function Pools() {
   const [activeTab, setActiveTab] = useState('Pools'); // New state for active tab
   const [tagIsPublic, setTagIsPublic] = useState(false);
   const [allLocalTags, setAllLocalTags] = useState<string[]>([]);
-  const { navigateToPeriod } = useCustomNavigation();
-  const { currentPeriodType, getCurrentPeriod } = useStore(state => state);
+  const { navigateToPeriod, navigateToTag } = useCustomNavigation();
+  const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -42,23 +41,16 @@ function Pools() {
     setRefreshHarvest(!refreshHarvest);
   };
 
-  const navigate = useNavigate();
-
   const handleAddTitle = async () => {
     if (newTitle.trim() !== '') {
       try {
         await api.createPool(newTitle);
-        const updatedPools = await api.getPoolsIndex(); // Get updated list
         setRefreshPools(true);
       } catch (error) {
         console.error(error);
       }
       setNewTitle('');
     }
-  };
-
-  const navigateToLocalTagPage = (tag: string) => {
-    navigate(`/local-tag/${tag}`);
   };
 
   // Function to add a tag for Harvest
@@ -80,7 +72,12 @@ function Pools() {
         <div className="flex justify-between items-center mb-4">
           <TagSearchBar poolId={null} />
           <button
-            onClick={() => navigateToPeriod(currentPeriodType, getCurrentPeriod())}
+            onClick={
+              () => {
+                setCurrentTreePage(`/pools`);
+                navigateToPeriod(currentPeriodType, getCurrentPeriod());
+              }
+            }
             className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
             style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
           >
@@ -93,7 +90,7 @@ function Pools() {
             <div
               key={index}
               className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
-              onClick={() => navigateToLocalTagPage(tag)}
+              onClick={() => navigateToTag(tag)}
             >
               {tag}
             </div>

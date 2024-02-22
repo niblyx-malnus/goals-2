@@ -131,14 +131,13 @@ const api = {
   },
   poolHarvest: async (pid: string) => {
     const json = {
-      harvest: { type: { pid: pid } }
+      harvest: { type: { pool: pid } }
     };
     return await api.goalView(json);
   },
   goalHarvest: async (key: string) => {
-    const { pid, gid } = goalKeyToPidGid(key);
     const json = {
-      harvest: { type: { pid: pid, gid: gid } }
+      harvest: { type: { goal: key } }
     };
     return await api.goalView(json);
   },
@@ -285,6 +284,25 @@ const api = {
       };
     return await api.goalAction(json);
   },
+  reorderRoots: async (pid: string, roots: string[]) => {
+    const json = { 'reorder-roots': { pid: pid, roots: roots }};
+    return await api.goalAction(json);
+  },
+  reorderChildren: async (key: string, children: string[]) => {
+    const { pid, gid } = goalKeyToPidGid(key);
+    const json = { 'reorder-children': { pid: pid, gid: gid, children: children }};
+    return await api.goalAction(json);
+  },
+  reorderBorrowed: async (key: string, borrowed: string[]) => {
+    const { pid, gid } = goalKeyToPidGid(key);
+    const json = { 'reorder-borrowed': { pid: pid, gid: gid, borrowed: borrowed }};
+    return await api.goalAction(json);
+  },
+  reorderBorrowedBy: async (key: string, borrowedBy: string[]) => {
+    const { pid, gid } = goalKeyToPidGid(key);
+    const json = { 'reorder-borrowed-by': { pid: pid, gid: gid, 'borrowed-by': borrowedBy }};
+    return await api.goalAction(json);
+  },
   setPoolTitle: async (poolId: string, title: string) => {
     const json = {
         'set-pool-title': {
@@ -371,8 +389,9 @@ const api = {
     const json = { 'reorder-pools': { pools: pools, } };
     return await api.goalAction(json);
   },
-  move: async (cid: string, upid: string | null) => {
-    const json = { 'move': { cid: cid, upid: upid } };
+  move: async (key: string, upid: string | null) => {
+    const { pid, gid } = goalKeyToPidGid(key);
+    const json = { 'move': { pid: pid, cid: gid, upid: upid } };
     return await api.goalAction(json);
   },
   updateSetting: async (method: string, setting: string, contents: string) => {
@@ -400,8 +419,14 @@ const api = {
   getPoolRoots: async (id: string) => {
     return await api.goalView({ "pool-roots": { pid: id } });
   },
-  getGoalYoung: async (pid:string, gid: string) => {
-    return await api.goalView({ "goal-young": { pid: pid, gid: gid } });
+  getGoalChildren: async (pid:string, gid: string) => {
+    return await api.goalView({ "goal-children": { pid: pid, gid: gid } });
+  },
+  getGoalBorrowed: async (pid:string, gid: string) => {
+    return await api.goalView({ "goal-borrowed": { pid: pid, gid: gid } });
+  },
+  getGoalBorrowedBy: async (pid:string, gid: string) => {
+    return await api.goalView({ "goal-borrowed-by": { pid: pid, gid: gid } });
   },
   getLabelGoals: async (pid: string, label: string) => {
     return await api.goalView({ "pool-tag-goals": { pid: pid, tag: label } });

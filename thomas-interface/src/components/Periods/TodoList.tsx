@@ -28,7 +28,7 @@ function TagSearchBar({ tags, onTagSelected }: { tags: string[], onTagSelected: 
     <div className="flex items-center tag-search-dropdown relative">
       <input
         type="text"
-        placeholder="Add tag filter..."
+        placeholder="Add tag/label filter..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         onFocus={handleInputFocus}
@@ -62,6 +62,8 @@ function TagFilter({
   setTagOrLabel,
   selectedOperation,
   setSelectedOperation,
+  includeInherited,
+  setIncludeInherited,
 }: {
   uniqueTags: string[],
   tags: string[],
@@ -70,6 +72,8 @@ function TagFilter({
   setTagOrLabel: (op: 'both' | 'tag' | 'label') => void,
   selectedOperation: 'some' | 'every',
   setSelectedOperation: (op: 'some' | 'every') => void,
+  includeInherited: boolean,
+  setIncludeInherited: (i: boolean) => void,
 }) {
 
   const addFilterTag = async (tag: string) => {
@@ -81,7 +85,26 @@ function TagFilter({
 
   return (
     <div className="flex flex-col items-center h-auto">
-      <div className="flex justify-center items-center w-full mb-1">
+      <div className="relative group w-full mb-1">
+        <div className="p-2 flex flex-row justify-center items-center">
+          <select
+            className="p-1 border rounded ml-2"
+            value={selectedOperation}
+            onChange={(e) => setSelectedOperation(e.target.value as 'some' | 'every')}
+          >
+            <option value="some">Some</option>
+            <option value="every">Every</option>
+          </select>
+          <label className="p-2 flex items-center space-x-2">
+            <input 
+              type="checkbox" 
+              checked={includeInherited} 
+              onChange={(e) => setIncludeInherited(e.target.checked)} 
+              className="form-checkbox rounded"
+            />
+            <span>Include Inherited</span>
+          </label>
+        </div>
         <div className="flex flex-row justify-center items-center">
           <select
             className="p-1 border rounded mr-2"
@@ -97,14 +120,6 @@ function TagFilter({
             tags={uniqueTags}
             onTagSelected={addFilterTag}
           />
-          <select
-            className="p-1 border rounded ml-2"
-            value={selectedOperation}
-            onChange={(e) => setSelectedOperation(e.target.value as 'some' | 'every')}
-          >
-            <option value="some">Some</option>
-            <option value="every">Every</option>
-          </select>
         </div>
       </div>
       <div className="flex flex-wrap justify-center mb-1">
@@ -128,7 +143,8 @@ const filterGoalsByTags = (
   tagOrLabel: 'both' | 'tag' | 'label',
   goals: Goal[],
   tags: string[],
-  operation: string
+  operation: string,
+  includeInherited: boolean
 ): Goal[] => {
   if (tags.length === 0) return goals;
 
@@ -136,12 +152,21 @@ const filterGoalsByTags = (
 
   goals.forEach(goal => {
     let tagSet = new Set();
+    let goalTags: string[];
+    let goalLabels: string[];
+    if (includeInherited) {
+      goalTags = [...goal.tags, ...goal.inheritedTags];
+      goalLabels = [...goal.labels, ...goal.inheritedLabels];
+    } else {
+      goalTags = goal.tags;
+      goalLabels = goal.labels;
+    }
     if (tagOrLabel === 'both') {
-      tagSet = new Set([...goal.tags, ...goal.labels]);
+      tagSet = new Set([...goalTags, ...goalLabels]);
     } else if (tagOrLabel === 'tag') {
-      tagSet = new Set(goal.tags);
+      tagSet = new Set(goalTags);
     } else if (tagOrLabel === 'label') {
-      tagSet = new Set(goal.labels);
+      tagSet = new Set(goalLabels);
     }
     const isMatch = operation === 'some' 
       ? tags.some(tag => tagSet.has(tag)) 
@@ -169,11 +194,12 @@ const TodoList: React.FC<{
   const { navigateToPools } = useCustomNavigation();
   const [tags, setTags] = useState<string[]>([]);
   const [selectedOperation, setSelectedOperation] = useState<'some' | 'every'>('some');
+  const [includeInherited, setIncludeInherited] = useState(true);
   const [tagOrLabel, setTagOrLabel] = useState<'both' | 'tag' | 'label'>('both');
   const [displayList, setDisplayList] = useState<Goal[]>([]);
   const [uniqueTags, setUniqueTags] = useState<string[]>([]);
 
-  const { collections, setCollection } = useStore(state => state);
+  const { collections, setCollection, getCurrentTreePage } = useStore(state => state);
   const {
     setCurrentPeriodType,
     currentDay,
@@ -202,14 +228,23 @@ const TodoList: React.FC<{
         const goals = await api.getGoalData(data.keys);
         // Calculate the union of all tags
         const allTags: string[] = goals.reduce((acc: any[], goal: Goal) => {
+          let goalTags: string[];
+          let goalLabels: string[];
+          if (includeInherited) {
+            goalTags = [...goal.tags, ...goal.inheritedTags];
+            goalLabels = [...goal.labels, ...goal.inheritedLabels];
+          } else {
+            goalTags = goal.tags;
+            goalLabels = goal.labels;
+          }
           if (tagOrLabel === 'both') {
-            acc.push(...goal.labels, ...goal.tags);
+            acc.push(...goalLabels, ...goalTags);
             return acc;
           } else if (tagOrLabel === 'tag') {
-            acc.push(...goal.tags);
+            acc.push(...goalTags);
             return acc;
           } else {
-            acc.push(...goal.labels);
+            acc.push(...goalLabels);
             return acc;
           }
         }, []);
@@ -218,7 +253,7 @@ const TodoList: React.FC<{
         // Use a Set to remove duplicates, then spread into an array
         setUniqueTags(uniqueTags);
         setCollection(jsonPath, { themes: data.themes, goals });
-        const filteredArray = filterGoalsByTags(tagOrLabel, goals, tags, selectedOperation);
+        const filteredArray = filterGoalsByTags(tagOrLabel, goals, tags, selectedOperation, includeInherited);
         setDisplayList(filteredArray);
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -230,7 +265,7 @@ const TodoList: React.FC<{
     };
   
     fetchDataAndUpdateState();
-  }, [periodType, setCollection, refresh, jsonPath, tags, selectedOperation, tagOrLabel]);
+  }, [periodType, setCollection, refresh, jsonPath, tags, selectedOperation, tagOrLabel, includeInherited]);
 
   const moveGoal = (aboveGoalKey: string | null, belowGoalKey: string | null) => {
     if (selectedGoalKey !== null) {
@@ -388,7 +423,7 @@ const TodoList: React.FC<{
     <div className="max-w-xl mx-auto my-10 p-4">
       <div className="flex justify-center mb-3">
         <button
-          onClick={() => navigateToPools()}
+          onClick={ () => navigate(getCurrentTreePage()) }
           className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
           style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
         >
@@ -486,6 +521,8 @@ const TodoList: React.FC<{
         setTagOrLabel={setTagOrLabel}
         selectedOperation={selectedOperation}
         setSelectedOperation={setSelectedOperation}
+        includeInherited={includeInherited}
+        setIncludeInherited={setIncludeInherited}
       />
       { isLoading && (
         <div className="flex justify-center mt-10">
@@ -495,7 +532,7 @@ const TodoList: React.FC<{
       {
         !isLoading && (
           displayList.length === 0 && (
-            <div className="text-center mt-5 text-lg text-gray-600">No states found.</div>
+            <div className="text-center mt-5 text-lg text-gray-600">No todos found.</div>
           )
         )
       }

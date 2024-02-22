@@ -11,7 +11,7 @@ import { FaListUl } from 'react-icons/fa';
 import useCustomNavigation from './useCustomNavigation';
 
 function Pool({ host, name }: { host: any; name: any; }) {
-  const poolId = `/${host}/${name}`;
+  const pid = `/${host}/${name}`;
   const [poolTitle, setPoolTitle] = useState<string>('');
   const [poolNote, setPoolNote] = useState<string>('');
   const [newDescription, setNewDescription] = useState<string>('');
@@ -28,20 +28,20 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [editableTitle, setEditableTitle] = useState(poolTitle);
   const [tagIsPublic, setTagIsPublic] = useState(false);
   const [allTags, setAllTags] = useState<string[]>([]);
-  const { navigateToPeriod } = useCustomNavigation();
-  const { currentPeriodType, getCurrentPeriod } = useStore(state => state);
+  const { navigateToPeriod, navigateToLabel } = useCustomNavigation();
+  const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
 
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const fetchedTags = await api.getPoolLabels(poolId);
+        const fetchedTags = await api.getPoolLabels(pid);
         setAllTags(fetchedTags);
       } catch (error) {
         console.error("Error fetching tags: ", error);
       }
     };
     fetchTags();
-  }, [poolId]);
+  }, [pid]);
 
   // Function to enable editing mode
   const handleTitleEdit = () => {
@@ -53,7 +53,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const handleTitleSave = async () => {
     setIsEditingTitle(false);
     setPoolTitle(editableTitle);
-    await api.setPoolTitle(poolId, editableTitle); // Assuming this is the correct API call
+    await api.setPoolTitle(pid, editableTitle); // Assuming this is the correct API call
   };
 
   // Function to cancel editing
@@ -79,10 +79,6 @@ function Pool({ host, name }: { host: any; name: any; }) {
     navigate(`/pools`);
   };
 
-  const navigateToPoolTagPage = (tag: string) => {
-    navigate(`/pool-tag/${host}/${name}/${tag}`);
-  };
-
   // Function to toggle refreshFlag
   const triggerRefreshRoots = () => {
     setRefreshRoots(!refreshRoots);
@@ -97,16 +93,16 @@ function Pool({ host, name }: { host: any; name: any; }) {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const fetchedTitle = await api.getPoolTitle(poolId);
+        const fetchedTitle = await api.getPoolTitle(pid);
         setPoolTitle(fetchedTitle);
-        const fetchedNote = await api.getPoolNote(poolId);
+        const fetchedNote = await api.getPoolNote(pid);
         setPoolNote(fetchedNote);
       } catch (error) {
         console.error("Error fetching pools: ", error);
       }
     };
     fetch();
-  }, [poolId]);
+  }, [pid]);
 
   const handleAddTitle = async () => {
     if (newDescription.trim() !== '') {
@@ -121,8 +117,8 @@ function Pool({ host, name }: { host: any; name: any; }) {
 
   const saveMarkdown = async (markdown: string) => {
     try {
-      await api.editPoolNote(poolId, markdown);
-      const fetchedNote = await api.getPoolNote(poolId);
+      await api.editPoolNote(pid, markdown);
+      const fetchedNote = await api.getPoolNote(pid);
       setPoolNote(fetchedNote);
     } catch (error) {
       console.error(error);
@@ -147,9 +143,14 @@ function Pool({ host, name }: { host: any; name: any; }) {
     <div className="bg-gray-200 flex justify-center items-center h-screen">
       <div className="bg-[#FAF3DD] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <TagSearchBar poolId={poolId} />
+          <TagSearchBar poolId={pid} />
           <button
-            onClick={() => navigateToPeriod(currentPeriodType, getCurrentPeriod())}
+            onClick={
+              () => {
+                setCurrentTreePage(`/pool${pid}`);
+                navigateToPeriod(currentPeriodType, getCurrentPeriod());
+              }
+            }
             className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
             style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
           >
@@ -197,13 +198,13 @@ function Pool({ host, name }: { host: any; name: any; }) {
           )}
         </h1>
         <div className="flex flex-wrap justify-center mb-4">
-          {allTags.map((tag, index) => (
+          {allTags.map((label, index) => (
             <div
               key={index}
               className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
-              onClick={() => navigateToPoolTagPage(tag)}
+              onClick={() => navigateToLabel(pid, label)}
             >
-              {tag}
+              {label}
             </div>
           ))}
         </div>
@@ -302,7 +303,12 @@ function Pool({ host, name }: { host: any; name: any; }) {
                 Add
               </button>
             </div>
-            <GoalList host={host} name={name} goalId={null} refresh={triggerRefreshRoots}/>
+            <GoalList
+              host={host}
+              name={name}
+              goalId={null}
+              refresh={triggerRefreshRoots}
+            />
             <div className="items-center mt-2 rounded">
               <MarkdownEditor
                 initialMarkdown={poolNote}
