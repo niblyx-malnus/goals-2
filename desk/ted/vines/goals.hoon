@@ -62,21 +62,26 @@
         %main
       =/  all-goals=goals:gol  (all-goals store)
       =/  tv  ~(. gol-cli-traverse all-goals)
-      :: TODO: make all-goals flatten pid into goal ids
-      !!
-      :: (ordered-goals-harvest:tv goal-order.local.store)
+      :: TODO: extract keys from output
+      =/  key-order=(list gid:gol)
+        (turn goal-order.local.store encode-key)
+      (turn (ordered-goals-harvest:tv key-order) decode-key)
       ::
         %pool
       =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
-      =/  tv  ~(. gol-cli-traverse goals.pool)
-      !!
-      :: (ordered-goals-harvest:tv goal-order.local.store)
+      =/  tv  ~(. gol-cli-traverse (merge-pool-goals [pool]~))
+      =/  key-order=(list gid:gol)
+        (turn goal-order.local.store encode-key)
+      (turn (ordered-goals-harvest:tv key-order) decode-key)
       ::
         %goal
       =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
-      =/  tv  ~(. gol-cli-traverse goals.pool)
-      !!
-      :: (ordered-harvest:tv gid.type.vyu goal-order.local.store)
+      =/  tv  ~(. gol-cli-traverse (merge-pool-goals [pool]~))
+      =/  key-order=(list gid:gol)
+        (turn goal-order.local.store encode-key)
+      %+  turn
+        (ordered-harvest:tv (encode-key pid.pool gid.type.vyu) key-order)
+      decode-key
     ==
     ::
       %pool-tag-goals
@@ -93,17 +98,20 @@
       %pool-tag-harvest
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
-    =/  tag-goals=(list key:gol)
+    =/  tag-goals=(list gid:gol)
       %+  murn  ~(tap by ?~(pd ~ tags.u.pd))
       |=  [=gid:gol tags=(set @t)]
       ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
         ~
-      `[pid.vyu gid]
-    =/  harvest=(list key:gol)
-      !!
-    (goal-data harvest)
-      :: =/  tv  ~(. gol-cli-traverse goals.pool)
-      :: (custom-roots-ordered-goals-harvest:tv tag-goals goal-order.local.store)
+      `(encode-key pid.vyu gid)
+    =;  harvest=(list key:gol)
+      (goal-data harvest)
+    =/  tv  ~(. gol-cli-traverse (merge-pool-goals [pool]~))
+    =/  key-order=(list gid:gol)
+      (turn goal-order.local.store encode-key)
+    %+  turn
+      (custom-roots-ordered-goals-harvest:tv tag-goals key-order)
+    decode-key
     ::
       %local-tag-goals
     =;  keys=(list key:gol)
@@ -116,18 +124,21 @@
     `[pid gid]
     ::
       %local-tag-harvest
-    =/  tag-goals=(list key:gol)
+    =/  tag-goals=(list gid:gol)
       %+  murn  ~(tap by tags.local.store)
       |=  [[=pid:gol =gid:gol] tags=(set @t)]
       =/  =pool:gol       (~(got by pools.store) pid)
       ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
         ~
-      `[pid gid]
-    =/  harvest=(list key:gol)
-      !!
-    (goal-data harvest)
-      :: =/  tv  ~(. gol-cli-traverse (all-goals store))
-      :: (custom-roots-ordered-goals-harvest:tv tag-goals goal-order.local.store)
+      `(encode-key pid gid)
+    =;  harvest=(list key:gol)
+      (goal-data harvest)
+    =/  tv  ~(. gol-cli-traverse (all-goals store))
+    =/  key-order=(list gid:gol)
+      (turn goal-order.local.store encode-key)
+    %+  turn
+      (custom-roots-ordered-goals-harvest:tv tag-goals key-order)
+    decode-key
     ::
       %pools-index
     %-  pure:m  !>
@@ -258,16 +269,32 @@
 ==
 ::
 |%
-++  all-goals  
-  |=  =store:gol
+++  encode-key  |=(key:gol (rap 3 (enjs-pid:goj pid) '/' gid ~))
+++  decode-key
+  |=  =cord
+  ^-  key:gol
+  =/  =(pole knot)  (rash cord stap) 
+  ?>  ?=([host=@ta name=@ta gid=@ta ~] -)
+  [[(slav %p host.pole) name.pole] gid.pole]
+++  merge-pool-goals
+  |=  pools=(list pool:gol)
   ^-  goals:gol
-  =/  pools  ~(val by pools.store)
   =|  =goals:gol
-  |-  ?~  pools  goals
+  |-
+  ?~  pools
+    goals
   %=  $
     pools  t.pools
-    goals  (~(uni by goals) goals.i.pools)
+      goals
+    :: make unique goal ids by prepending pid
+    ::
+    %-  ~(uni by goals)
+    %-  ~(gas by *goals:gol)
+    %+  turn  ~(tap by goals.i.pools)
+    |=  [=gid:gol =goal:gol]
+    [(encode-key pid.i.pools gid) goal]
   ==
+++  all-goals  |=(=store:gol `goals:gol`(merge-pool-goals ~(val by pools.store)))
 +$  goal-datum
   $:  =key:gol
       summary=@t
