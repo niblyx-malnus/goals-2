@@ -327,6 +327,8 @@
       summary=@t
       labels=(list @t) :: pool-specific
       tags=(list @t)   :: private
+      inherited-labels=(list @t)
+      inherited-tags=(list @t)
       active=?
       complete=?
       actionable=?
@@ -343,6 +345,8 @@
       [%summary s+summary]
       [%labels a+(turn labels (lead %s))]
       [%tags a+(turn tags (lead %s))]
+      [%inherited-labels a+(turn inherited-labels (lead %s))]
+      [%inherited-tags a+(turn inherited-tags (lead %s))]
       [%active b+active]
       [%complete b+complete]
       [%actionable b+actionable]
@@ -361,15 +365,41 @@
   ?~  get=(~(get by goals.pool) gid.key)
     ~
   =+  u.get
+  |^
   :-  ~
   :*  key
       summary
       ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~))) :: labels (pool-specific)
       ~(tap in (~(gut by tags.local.store) key ~))   :: tags (private)
+      inherited-labels
+      inherited-tags
       done.i.status.start
       done.i.status.end
       actionable
   ==
+  ++  inherited-labels
+    %~  tap  in
+    %-  ~(gas in *(set @t))
+    |-
+    ^-  (list @t)
+    ?~  parent
+      ~
+    =/  =goal:gol  (~(got by goals.pool) u.parent)
+    %+  weld
+      ?~(pd ~ ~(tap in (~(gut by tags.u.pd) u.parent ~))) :: labels (pool-specific)
+    $(parent parent.goal)
+  ++  inherited-tags
+    %~  tap  in
+    %-  ~(gas in *(set @t))
+    |-
+    ^-  (list @t)
+    ?~  parent
+      ~
+    =/  =goal:gol  (~(got by goals.pool) u.parent)
+    %+  weld
+      ~(tap in (~(gut by tags.local.store) [pid.key u.parent] ~))   :: tags (private)
+    $(parent parent.goal)
+  --
 ++  enjs-pools-index
   =,  enjs:format
   |=  pools-index=(list [pid:gol @])
