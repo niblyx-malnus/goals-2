@@ -327,10 +327,12 @@
 +$  goal-datum
   $:  =key:gol
       summary=@t
+      note=@t
       labels=(list @t) :: pool-specific
       tags=(list @t)   :: private
       inherited-labels=(list @t)
       inherited-tags=(list @t)
+      parent=(unit key:gol)
       active=?
       complete=?
       actionable=?
@@ -340,11 +342,13 @@
   |=  goal-datum
   %-  pairs
   :~  [%key (enjs-key:goj key)]
+      [%note s+note]
       [%summary s+summary]
       [%labels a+(turn labels (lead %s))]
       [%tags a+(turn tags (lead %s))]
       ['inheritedLabels' a+(turn inherited-labels (lead %s))]
       ['inheritedTags' a+(turn inherited-tags (lead %s))]
+      [%parent ?~(parent ~ (enjs-key:goj key))]
       [%active b+active]
       [%complete b+complete]
       [%actionable b+actionable]
@@ -357,15 +361,18 @@
   ?~  pul=(~(get by pools.store) pid.key)  ~
   ?~  get=(~(get by goals.u.pul) gid.key)  ~
   =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.key)
+  =/  fields=(map @t @t)  (~(gut by ?~(pd ~ fields.u.pd)) gid.key ~)
   =+  u.get
   |^
   :-  ~
   :*  key
       summary
+      (~(gut by fields) 'note' '')
       ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~))) :: labels (pool-specific)
       ~(tap in (~(gut by tags.local.store) key ~))   :: tags (private)
       inherited-labels
       inherited-tags
+      ?~(parent ~ `[pid.key u.parent])
       done.i.status.start
       done.i.status.end
       actionable
