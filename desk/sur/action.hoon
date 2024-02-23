@@ -119,6 +119,7 @@
       [%pools-index ~]
       [%pool-title =pid]
       [%pool-note =pid]
+      [%goal =pid =gid]
       [%goal-summary =pid =gid]
       [%goal-note =pid =gid]
       [%goal-tags =pid =gid]

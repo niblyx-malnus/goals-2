@@ -38,26 +38,28 @@
   ?-    -.vyu
       %pool-roots
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    (goal-data (turn roots.pool (lead pid.vyu)))
+    (send-goal-data (turn roots.pool (lead pid.vyu)))
     ::
       %goal-children
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (goal-data (turn children.goal (lead pid.vyu)))
+    (send-goal-data (turn children.goal (lead pid.vyu)))
     ::
       %goal-borrowed
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (goal-data (turn borrowed.goal (lead pid.vyu)))
+    (send-goal-data (turn borrowed.goal (lead pid.vyu)))
     ::
       %goal-borrowed-by
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (goal-data (turn borrowed-by.goal (lead pid.vyu)))
+    (send-goal-data (turn borrowed-by.goal (lead pid.vyu)))
+    ::
+    %goal  (send-goal-datum [pid gid]:vyu)
     ::
       %harvest
     =;  harvest=(list key:gol)
-      (goal-data harvest)
+      (send-goal-data harvest)
     ?-    -.type.vyu
         %main
       =/  all-goals=goals:gol  (all-goals store)
@@ -94,7 +96,7 @@
       ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
         ~
       `[pid.vyu gid]
-    (goal-data keys)
+    (send-goal-data keys)
     ::
       %pool-tag-harvest
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
@@ -106,7 +108,7 @@
         ~
       `gid
     =;  harvest=(list key:gol)
-      (goal-data harvest)
+      (send-goal-data harvest)
     =/  tv  ~(. gol-cli-traverse goals.pool)
     =/  order=(list gid:gol)
       %+  murn  goal-order.local.store
@@ -116,7 +118,7 @@
     ::
       %local-tag-goals
     =;  keys=(list key:gol)
-      (goal-data keys)
+      (send-goal-data keys)
     %+  murn  ~(tap by tags.local.store)
     |=  [[=pid:gol =gid:gol] tags=(set @t)]
     =/  =pool:gol       (~(got by pools.store) pid)
@@ -133,7 +135,7 @@
         ~
       `(encode-key pid gid)
     =;  harvest=(list key:gol)
-      (goal-data harvest)
+      (send-goal-data harvest)
     =/  tv  ~(. gol-cli-traverse (all-goals store))
     =/  key-order=(list gid:gol)
       (turn goal-order.local.store encode-key)
@@ -230,7 +232,7 @@
       (pure:m !>(a+(turn ~(tap in tags) (lead %s))))
     $(vals t.vals, tags (~(uni in tags) i.vals))
     ::
-    %goal-data  (goal-data keys.vyu)
+    %goal-data  (send-goal-data keys.vyu)
   ==
   ::
     %json-tree-action
@@ -333,12 +335,8 @@
       complete=?
       actionable=?
   ==
-++  enjs-goal-data
+++  enjs-goal-datum
   =,  enjs:format
-  |=  goal-data=(list goal-datum)
-  ^-  json
-  :-  %a
-  %+  turn  goal-data
   |=  goal-datum
   %-  pairs
   :~  [%key (enjs-key:goj key)]
@@ -351,19 +349,14 @@
       [%complete b+complete]
       [%actionable b+actionable]
   ==
-++  goal-data
-  |=  keys=(list key:gol)
-  =/  m  (strand ,vase)
-  ^-  form:m
-  ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
-  %-  pure:m  !>
-  %-  enjs-goal-data
-  %+  murn  keys
-  |=  =key:gol
-  =/  =pool:gol                (~(got by pools.store) pid.key)
+++  enjs-goal-data
+  |=(goal-data=(list goal-datum) `json`a+(turn goal-data enjs-goal-datum))
+++  get-datum
+  |=  [=key:gol =store:gol]
+  ^-  (unit goal-datum)
+  ?~  pul=(~(get by pools.store) pid.key)  ~
+  ?~  get=(~(get by goals.u.pul) gid.key)  ~
   =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.key)
-  ?~  get=(~(get by goals.pool) gid.key)
-    ~
   =+  u.get
   |^
   :-  ~
@@ -384,7 +377,7 @@
     ^-  (list @t)
     ?~  parent
       ~
-    =/  =goal:gol  (~(got by goals.pool) u.parent)
+    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
     %+  weld
       ?~(pd ~ ~(tap in (~(gut by tags.u.pd) u.parent ~))) :: labels (pool-specific)
     $(parent parent.goal)
@@ -395,11 +388,23 @@
     ^-  (list @t)
     ?~  parent
       ~
-    =/  =goal:gol  (~(got by goals.pool) u.parent)
+    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
     %+  weld
       ~(tap in (~(gut by tags.local.store) [pid.key u.parent] ~))   :: tags (private)
     $(parent parent.goal)
   --
+++  send-goal-datum
+  |=  =key:gol
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+  (pure:m !>(?~(datum=(get-datum key store) ~ (enjs-goal-datum u.datum))))
+++  send-goal-data
+  |=  keys=(list key:gol)
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+  (pure:m !>((enjs-goal-data (murn keys (curr get-datum store)))))
 ++  enjs-pools-index
   =,  enjs:format
   |=  pools-index=(list [pid:gol @])
