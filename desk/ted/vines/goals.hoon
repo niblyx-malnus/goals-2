@@ -348,7 +348,7 @@
       [%tags a+(turn tags (lead %s))]
       ['inheritedLabels' a+(turn inherited-labels (lead %s))]
       ['inheritedTags' a+(turn inherited-tags (lead %s))]
-      [%parent ?~(parent ~ (enjs-key:goj key))]
+      [%parent ?~(parent ~ (enjs-key:goj u.parent))]
       [%active b+active]
       [%complete b+complete]
       [%actionable b+actionable]
