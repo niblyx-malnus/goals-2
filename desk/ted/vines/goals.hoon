@@ -168,51 +168,8 @@
     =/  properties  (~(gut by tag-properties.local.store) tag.vyu ~)
     (pure:m !>(s+(~(gut by properties) 'note' '')))
     ::
-      %goal-summary
-    =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (pure:m !>(s+summary.goal))
-    ::
-      %goal-note
-    =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
-    =/  fields=(map @t @t)  (~(gut by ?~(pd ~ fields.u.pd)) gid.vyu ~)
-    (pure:m !>(s+(~(gut by fields) 'note' '')))
-    ::
       %setting
     (pure:m !>(?~(s=(~(get by settings.local.store) setting.vyu) ~ s+u.s)))
-    ::
-      %goal-tags
-    =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
-    =/  tags=(list @t)
-      ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid.vyu ~)))
-    (pure:m !>(a+(turn tags (lead %s))))
-    ::
-      %local-goal-tags
-    =/  tags=(list @t)
-      ~(tap in (~(gut by tags.local.store) [pid.vyu gid.vyu] ~))
-    (pure:m !>(a+(turn tags (lead %s))))
-    ::
-      %goal-parent
-    =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
-    (pure:m !>(?~(parent.goal ~ (enjs-key:goj [pid.vyu u.parent.goal]))))
-    ::
-      %goal-actionable
-    =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
-    (pure:m !>(b+actionable.goal))
-    ::
-      %goal-complete
-    =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
-    (pure:m !>(b+done.i.status.end.goal))
-    ::
-      %goal-active
-    =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
-    (pure:m !>(b+done.i.status.start.goal))
     ::
       %pool-tags
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
