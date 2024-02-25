@@ -369,9 +369,16 @@
   =/  node1  (got-node:nd n1)
   =/  node2  (got-node:nd n2)
   =.  outflow.node1  (~(del in outflow.node1) n2)
-  =.  inflow.node2  (~(del in inflow.node2) n1)
+  =.  inflow.node2   (~(del in inflow.node2) n1)
   =.  goals.p  (update-node:nd n1 node1)
   =.  goals.p  (update-node:nd n2 node2)
+  ?.  &(=(-.n1 %e) =(-.n2 %e) (~(has in (sy borrowed.r)) gid.n1))
+    this
+  ~&  "removing-borrowed-goal"
+  =.  borrowed.r     (find-and-oust gid.n1 borrowed.r)
+  =.  borrowed-by.l  (find-and-oust gid.n2 borrowed-by.l)
+  =.  goals.p  (~(put by goals.p) gid.n1 l)
+  =.  goals.p  (~(put by goals.p) gid.n2 r)
   this
 ::
 ++  yoke
