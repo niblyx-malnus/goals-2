@@ -47,13 +47,15 @@
     ::
       %goal-borrowed
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  nd              ~(. gol-cli-node goals.pool)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (send-goal-data (turn borrowed.goal (lead pid.vyu)))
+    (send-goal-data (turn ~(tap in (nest-left:nd gid.vyu)) (lead pid.vyu)))
     ::
       %goal-borrowed-by
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  nd              ~(. gol-cli-node goals.pool)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (send-goal-data (turn borrowed-by.goal (lead pid.vyu)))
+    (send-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (lead pid.vyu)))
     ::
     %goal  (send-goal-datum [pid gid]:vyu)
     ::
@@ -251,8 +253,6 @@
       summary
       ?~(parent ~ `(encode-key pid u.parent))
       (turn children (cury encode-key pid))
-      (turn borrowed-by (cury encode-key pid))
-      (turn borrowed (cury encode-key pid))
       (convert-node pid start)
       (convert-node pid end)
       actionable

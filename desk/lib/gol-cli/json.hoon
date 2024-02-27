@@ -145,8 +145,6 @@
         [%unmark-active (ot ~[pid+pid gid+gid])]
         [%reorder-roots (ot ~[pid+pid roots+(ar gid)])]
         [%reorder-children (ot ~[pid+pid gid+gid children+(ar gid)])]
-        [%reorder-borrowed (ot ~[pid+pid gid+gid borrowed+(ar gid)])]
-        [%reorder-borrowed-by (ot ~[pid+pid gid+gid borrowed-by+(ar gid)])]
         [%pools-slot-above (ot ~[dis+pid dat+pid])]
         [%pools-slot-below (ot ~[dis+pid dat+pid])]
         [%goals-slot-above (ot ~[dis+key dat+key])]

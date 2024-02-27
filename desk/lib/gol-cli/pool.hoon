@@ -372,13 +372,6 @@
   =.  inflow.node2   (~(del in inflow.node2) n1)
   =.  goals.p  (update-node:nd n1 node1)
   =.  goals.p  (update-node:nd n2 node2)
-  ?.  &(=(-.n1 %e) =(-.n2 %e) (~(has in (sy borrowed.r)) gid.n1))
-    this
-  ~&  "removing-borrowed-goal"
-  =.  borrowed.r     (find-and-oust gid.n1 borrowed.r)
-  =.  borrowed-by.l  (find-and-oust gid.n2 borrowed-by.l)
-  =.  goals.p  (~(put by goals.p) gid.n1 l)
-  =.  goals.p  (~(put by goals.p) gid.n2 r)
   this
 ::
 ++  yoke
@@ -459,28 +452,6 @@
   ^-  _this
   ?~(upid (move-to-root kid mod) (move-to-goal kid u.upid mod))
 ::
-++  borrow
-  |=  [borrower=gid:gol borrowed=gid:gol mod=ship]
-  ^-  _this
-  =/  r  (~(got by goals.p) borrower)
-  =/  d  (~(got by goals.p) borrowed)
-  ?<  (~(has in (sy borrowed.r)) borrowed)
-  ?<  (~(has in (sy borrowed-by.d)) borrower)
-  =.  goals.p  (~(put by goals.p) borrower d(borrowed-by [borrower borrowed-by.d]))
-  =.  goals.p  (~(put by goals.p) borrowed r(borrowed [borrowed borrowed.r]))
-  (yoke [%nest-yoke borrowed borrower] mod)
-::
-++  unborrow
-  |=  [borrower=gid:gol borrowed=gid:gol mod=ship]
-  ^-  _this
-  =/  r  (~(got by goals.p) borrower)
-  =/  d  (~(got by goals.p) borrowed)
-  ?>  (~(has in (sy borrowed.r)) borrowed)
-  ?>  (~(has in (sy borrowed-by.d)) borrower)
-  =.  goals.p  (~(put by goals.p) borrower d(borrowed-by (find-and-oust borrower borrowed-by.d)))
-  =.  goals.p  (~(put by goals.p) borrowed r(borrowed (find-and-oust borrowed borrowed.r)))
-  (yoke [%nest-rend borrowed borrower] mod)
-::
 ++  reorder-roots
   |=  [roots=(list gid:gol) mod=ship]
   ^-  _this
@@ -495,22 +466,6 @@
   =/  =goal:gol  (~(got by goals.p) gid)
   ?>  =((sy children) (sy children.goal))
   this(goals.p (~(put by goals.p) gid goal(children children)))
-::
-++  reorder-borrowed
-  |=  [=gid:gol borrowed=(list gid:gol) mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  =/  =goal:gol  (~(got by goals.p) gid)
-  ?>  =((sy borrowed) (sy borrowed.goal))
-  this(goals.p (~(put by goals.p) gid goal(borrowed borrowed)))
-::
-++  reorder-borrowed-by
-  |=  [=gid:gol borrowed-by=(list gid:gol) mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  =/  =goal:gol  (~(got by goals.p) gid)
-  ?>  =((sy borrowed-by) (sy borrowed-by.goal))
-  this(goals.p (~(put by goals.p) gid goal(borrowed-by borrowed-by)))
 ::
 ++  yoke-sequence
   |=  [yoks=(list exposed-yoke:act) mod=ship]

@@ -19,8 +19,6 @@
       summary=@t         :: (140 character summary of a goal)
       parent=(unit gid)
       children=(list gid)
-      borrowed-by=(list gid)
-      borrowed=(list gid)
       start=node
       end=node
       actionable=?
