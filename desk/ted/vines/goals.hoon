@@ -89,6 +89,66 @@
       (turn (ordered-harvest:tv gid.type.vyu order) (lead pid.type.vyu))
     ==
     ::
+      %empty-goals
+    =;  empty=(list key:gol)
+      (send-goal-data empty)
+    ?-    -.type.vyu
+        %main
+      =/  all-goals=goals:gol  (all-goals store)
+      =/  tv  ~(. gol-cli-traverse all-goals)
+      =;  empty=(list gid:gol)
+        (turn empty decode-key)
+      %+  murn  ~(tap by all-goals)
+      |=  [=gid:gol =goal:gol]
+      ?:  actionable.goal  ~
+      ?~  children.goal  [~ gid]
+      =/  children-all-complete
+        %+  roll
+          `(list gid:gol)`children.goal
+        |=  [kid=gid:gol acc=?]
+        &(acc done.i.status.end:(~(got by all-goals) kid))
+      ?.  children-all-complete
+        ~
+      [~ gid]
+      ::
+        %pool
+      =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
+      =;  empty=(list gid:gol)
+        (turn empty (lead pid.type.vyu))
+      %+  murn  ~(tap by goals.pool)
+      |=  [=gid:gol =goal:gol]
+      ?:  actionable.goal  ~
+      ?~  children.goal  [~ gid]
+      =/  children-all-complete
+        %+  roll
+          `(list gid:gol)`children.goal
+        |=  [kid=gid:gol acc=?]
+        &(acc done.i.status.end:(~(got by goals.pool) kid))
+      ?.  children-all-complete
+        ~
+      [~ gid]
+      ::
+        %goal
+      =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
+      =/  tv  ~(. gol-cli-traverse goals.pool)
+      =/  prog=(set gid:gol)  (progeny:tv gid.type.vyu)
+      =;  empty=(list gid:gol)
+        (turn empty (lead pid.type.vyu))
+      %+  murn  ~(tap by goals.pool)
+      |=  [=gid:gol =goal:gol]
+      ?.  (~(has in prog) gid)  ~
+      ?:  actionable.goal  ~
+      ?~  children.goal  [~ gid]
+      =/  children-all-complete
+        %+  roll
+          `(list gid:gol)`children.goal
+        |=  [kid=gid:gol acc=?]
+        &(acc done.i.status.end:(~(got by goals.pool) kid))
+      ?.  children-all-complete
+        ~
+      [~ gid]
+    ==
+    ::
       %pool-tag-goals
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)

@@ -18,6 +18,7 @@
         [%goal-borrowed (ot ~[pid+pid gid+gid])]
         [%goal-borrowed-by (ot ~[pid+pid gid+gid])]
         [%harvest (ot ~[type+type])]
+        [%empty-goals (ot ~[type+type])]
         [%pool-tag-goals (ot ~[pid+pid tag+so])]
         [%pool-tag-harvest (ot ~[pid+pid tag+so])]
         [%local-tag-goals (ot ~[tag+so])]
