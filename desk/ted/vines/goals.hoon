@@ -392,7 +392,7 @@
       inherited-labels
       inherited-tags
       ?~(parent ~ `[pid.key u.parent])
-      (get-lineage u.get)
+      (flop (get-lineage u.get))
       done.i.status.start
       done.i.status.end
       actionable
