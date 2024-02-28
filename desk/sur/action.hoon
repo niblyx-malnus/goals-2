@@ -107,6 +107,7 @@
       [%goal-children =pid =gid] :: gid, summary, cmp, axn
       [%goal-borrowed =pid =gid]
       [%goal-borrowed-by =pid =gid]
+      [%goal-lineage =pid =gid]
       [%harvest type=harvest-type]     :: frontier
       [%empty-goals type=harvest-type]
       [%pool-tag-goals =pid tag=@t]

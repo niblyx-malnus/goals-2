@@ -252,6 +252,19 @@
     $(vals t.vals, tags (~(uni in tags) i.vals))
     ::
     %goal-data  (send-goal-data keys.vyu)
+    ::
+      %goal-lineage
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    =;  lineage=(list key:gol)
+      (send-goal-data lineage)
+    =/  =goal:gol  (~(got by goals.pool) gid.vyu)
+    |-
+    ?~  parent.goal
+      ~
+    =/  parent=goal:gol
+      (~(got by goals.pool) u.parent.goal)
+    :-  [pid.vyu u.parent.goal]
+    $(goal parent)
   ==
   ::
     %json-tree-action
@@ -350,7 +363,6 @@
       inherited-labels=(list @t)
       inherited-tags=(list @t)
       parent=(unit key:gol)
-      lineage=(list key:gol)
       active=?
       complete=?
       actionable=?
@@ -367,7 +379,6 @@
       ['inheritedLabels' a+(turn inherited-labels (lead %s))]
       ['inheritedTags' a+(turn inherited-tags (lead %s))]
       [%parent ?~(parent ~ (enjs-key:goj u.parent))]
-      [%lineage a+(turn lineage enjs-key:goj)]
       [%active b+active]
       [%complete b+complete]
       [%actionable b+actionable]
@@ -392,20 +403,10 @@
       inherited-labels
       inherited-tags
       ?~(parent ~ `[pid.key u.parent])
-      (get-lineage u.get)
       done.i.status.start
       done.i.status.end
       actionable
   ==
-  ++  get-lineage
-    |=  =goal:gol
-    ^-  (list key:gol)
-    ?~  parent.goal
-      ~
-    =/  parent=goal:gol
-      (~(got by goals.u.pul) u.parent.goal)
-    :-  [pid.key u.parent.goal]
-    (get-lineage parent)
   ++  inherited-labels
     %~  tap  in
     %-  ~(gas in *(set @t))
