@@ -274,14 +274,14 @@
     =/  able=(list gid:gol)
       %+  murn  prog
       |=  =gid:gol
-      ?.  actionable:(~(got by goals.pool) gid.vyu)
+      ?.  actionable:(~(got by goals.pool) gid)
         ~
       `gid.vyu
     ~&  able+able
     =/  comp=(list gid:gol)
       %+  murn  able
       |=  =gid:gol
-      ?.  done.i.status.end:(~(got by goals.pool) gid.vyu)
+      ?.  done.i.status.end:(~(got by goals.pool) gid)
         ~
       `gid.vyu
     ~&  comp+comp
