@@ -16,6 +16,7 @@
     :~  [%pool-roots (ot ~[pid+pid])]
         [%goal-children (ot ~[pid+pid gid+gid])]
         [%goal-borrowed (ot ~[pid+pid gid+gid])]
+        [%goal-lineage (ot ~[pid+pid gid+gid])]
         [%goal-borrowed-by (ot ~[pid+pid gid+gid])]
         [%harvest (ot ~[type+type])]
         [%empty-goals (ot ~[type+type])]
