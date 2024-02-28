@@ -127,7 +127,7 @@
     :~  [%create-pool (ot ~[title+so])]
         [%delete-pool (ot ~[pid+pid])]
         [%set-pool-title (ot ~[pid+pid title+so])]
-        [%create-goal (ot ~[pid+pid upid+unit-id summary+so actionable+bo])]
+        [%create-goal (ot ~[pid+pid upid+unit-id summary+so actionable+bo active+bo])]
         [%create-goal-with-tag (ot ~[pid+pid upid+unit-id summary+so actionable+bo tag+so])]
         [%archive-goal (ot ~[pid+pid gid+gid])]
         [%restore-goal (ot ~[pid+pid gid+gid])]

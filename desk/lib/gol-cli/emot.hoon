@@ -68,28 +68,33 @@
       %create-goal
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
-    =/  =gid:gol  (unique-id:gols pid now.bowl)
-    :: edit permissions implied in the success of spawn-goal
-    :: mark the goal started if possible
+    =/  =gid:gol      (unique-id:gols pid now.bowl)
     =/  new=pool:gol
       abet:(create-goal:(apex:pl old) gid upid summary now.bowl mod)
     =.  goal-order.local.store  [[pid gid] goal-order.local.store]
-    this(pools.store (~(put by pools.store) pid new))
+    =.  pools.store   (~(put by pools.store) pid new)
+    :: mark the goal started if active.axn and if possible
+    ::
+    ?.  active  this
+    ?~  dis=(mole |.((handle-action:this [%mark-active pid gid])))
+      this
+    u.dis
     ::
       %create-goal-with-tag
-    =+  axn
-    =/  old=pool:gol  (~(got by pools.store) pid)
-    =/  =gid:gol  (unique-id:gols pid now.bowl)
-    :: edit permissions implied in the success of spawn-goal
-    :: mark the goal started if possible
-    =/  new=pool:gol
-      abet:(create-goal:(apex:pl old) gid upid summary now.bowl mod)
-    =.  goal-order.local.store  [[pid gid] goal-order.local.store]
-    :: add the pool tag
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pid *pool-data:gol)
-    =.  tags.data           (~(put by tags.data) gid (sy ~[tag]))
-    =.  pool-info.store     (~(put by pool-info.store) pid data)
-    this(pools.store (~(put by pools.store) pid new))
+    !!
+    :: =+  axn
+    :: =/  old=pool:gol  (~(got by pools.store) pid)
+    :: =/  =gid:gol  (unique-id:gols pid now.bowl)
+    :: :: edit permissions implied in the success of spawn-goal
+    :: :: mark the goal started if possible
+    :: =/  new=pool:gol
+    ::   abet:(create-goal:(apex:pl old) gid upid summary now.bowl mod)
+    :: =.  goal-order.local.store  [[pid gid] goal-order.local.store]
+    :: :: add the pool tag
+    :: =/  data=pool-data:gol  (~(gut by pool-info.store) pid *pool-data:gol)
+    :: =.  tags.data           (~(put by tags.data) gid (sy ~[tag]))
+    :: =.  pool-info.store     (~(put by pool-info.store) pid data)
+    :: this(pools.store (~(put by pools.store) pid new))
     ::
       %archive-goal
     =+  axn

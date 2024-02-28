@@ -29,7 +29,7 @@
   |%
   +$  goal-action  $%(create mutate)
   +$  create
-    $%  [%create-goal =pid upid=(unit gid) summary=@t actionable=?]
+    $%  [%create-goal =pid upid=(unit gid) summary=@t actionable=? active=?]
         [%create-goal-with-tag =pid upid=(unit gid) summary=@t actionable=? tag=@t]
     ==
   ++  mutate
