@@ -270,21 +270,18 @@
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     =/  tv         ~(. gol-cli-traverse goals.pool)
     =/  prog=(list gid:gol)  ~(tap in (progeny:tv gid.vyu))
-    ~&  prog+prog
     =/  able=(list gid:gol)
       %+  murn  prog
       |=  =gid:gol
       ?.  actionable:(~(got by goals.pool) gid)
         ~
-      `gid.vyu
-    ~&  able+able
+      `gid
     =/  comp=(list gid:gol)
       %+  murn  able
       |=  =gid:gol
       ?.  done.i.status.end:(~(got by goals.pool) gid)
         ~
-      `gid.vyu
-    ~&  comp+comp
+      `gid
     %-  pure:m  !>
     =,  enjs:format
     %-  pairs
