@@ -265,6 +265,29 @@
       (~(got by goals.pool) u.parent.goal)
     :-  [pid.vyu u.parent.goal]
     $(goal parent)
+    ::
+      %goal-progress
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    =/  tv         ~(. gol-cli-traverse goals.pool)
+    =/  prog=(list gid:gol)  ~(tap in (progeny:tv gid.vyu))
+    =/  able=(list gid:gol)
+      %+  murn  prog
+      |=  =gid:gol
+      ?.  actionable:(~(got by goals.pool) gid.vyu)
+        ~
+      `gid.vyu
+    =/  comp=(list gid:gol)
+      %+  murn  able
+      |=  =gid:gol
+      ?.  done.i.status.end:(~(got by goals.pool) gid.vyu)
+        ~
+      `gid.vyu
+    %-  pure:m  !>
+    =,  enjs:format
+    %-  pairs
+    :~  [%complete (numb (lent comp))]
+        [%total (numb (lent able))]
+    ==
   ==
   ::
     %json-tree-action
