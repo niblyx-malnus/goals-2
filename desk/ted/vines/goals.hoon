@@ -350,7 +350,7 @@
       inherited-labels=(list @t)
       inherited-tags=(list @t)
       parent=(unit key:gol)
-      lineage=(list @t)
+      lineage=(list key:gol)
       active=?
       complete=?
       actionable=?
@@ -367,7 +367,7 @@
       ['inheritedLabels' a+(turn inherited-labels (lead %s))]
       ['inheritedTags' a+(turn inherited-tags (lead %s))]
       [%parent ?~(parent ~ (enjs-key:goj u.parent))]
-      [%lineage a+(turn lineage (lead %s))]
+      [%lineage a+(turn lineage enjs-key:goj)]
       [%active b+active]
       [%complete b+complete]
       [%actionable b+actionable]
@@ -399,12 +399,12 @@
   ==
   ++  get-lineage
     |=  =goal:gol
-    ^-  (list @t)
+    ^-  (list key:gol)
     ?~  parent.goal
       ~
     =/  parent=goal:gol
       (~(got by goals.u.pul) u.parent.goal)
-    :-  summary.parent
+    :-  [pid.key u.parent.goal]
     (get-lineage parent)
   ++  inherited-labels
     %~  tap  in
