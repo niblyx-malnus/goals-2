@@ -97,6 +97,8 @@
   =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
   =.  contents.archive.p  (~(put by contents.archive.p) gid [context trac])
   this
+:: TODO: when a goal is deleted from goals or from contents.archive
+::       update the contexts in the archive (or delete completely?)
 ::
 :: Restore goal from archive to main goals
 ++  restore-goal
@@ -107,11 +109,12 @@
         (check-goal-master gid mod)
       (check-goal-edit-perm u.context mod)
   =.  goals.p  (~(uni by goals.p) (validate-goals:vd goals))
+  =.  roots.p  [gid roots.p]
   =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
   =/  new-list=(list gid:gol)  (find-and-oust gid old-list)
   =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
   =.  contents.archive.p  (~(del by contents.archive.p) gid)
-  (move gid context mod)
+  (move:this gid context mod)
 ::
 :: Restore goal from archive to main goals at root
 ++  restore-to-root
@@ -457,7 +460,7 @@
   ?.  (check-move-to-root-perm gid mod)
     ~|("missing-move-to-root-perms" !!)
   =/  k  (~(got by goals.p) gid)  
-  ?~  parent.k  this(roots.p [gid roots.p])
+  ?~  parent.k  this :: already at root
   =/  q  (~(got by goals.p) u.parent.k)
   ?>  (~(has in (sy children.q)) gid)
   =.  goals.p  (~(put by goals.p) gid k(parent ~))
