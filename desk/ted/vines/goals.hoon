@@ -39,13 +39,13 @@
       %pool-archive
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     %-  send-archive-goal-data
-    %+  turn  (~(got by contexts.archive.pool) ~)
+    %+  turn  (~(gut by contexts.archive.pool) ~ ~)
     |=(=gid:gol [pid.vyu gid gid])
     ::
       %goal-archive
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     %-  send-archive-goal-data
-    %+  turn  (~(got by contexts.archive.pool) `gid.vyu)
+    %+  turn  (~(gut by contexts.archive.pool) `gid.vyu ~)
     |=(=gid:gol [pid.vyu gid gid])
     ::
       %pool-roots
