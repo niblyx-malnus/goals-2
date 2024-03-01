@@ -89,33 +89,66 @@
   |=  [=gid:gol mod=ship]
   ^-  _this
   ?>  (check-goal-edit-perm gid mod)
-  =/  parent=(unit gid:gol)  parent:(~(got by goals.p) gid)
+  =/  context=(unit gid:gol)  parent:(~(got by goals.p) gid)
   =^  trac  this
     (wrest-goal gid mod) :: mod has the correct perms for this
-  this(archive.p (~(put by archive.p) gid [parent trac]))
+  =/  old-list=(list gid:gol)  (~(gut by contexts.archive.p) context ~)
+  =/  new-list=(list gid:gol)  [gid old-list]
+  =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
+  =.  contents.archive.p  (~(put by contents.archive.p) gid [context trac])
+  this
 ::
 :: Restore goal from archive to main goals
 ++  restore-goal
   |=  [=gid:gol mod=ship]
   ^-  _this
-  :: TODO: Chief of goal etc should be able to renew in some cases?
+  =+  (~(got by contents.archive.p) gid)
+  ?>  ?~  context
+        (check-goal-master gid mod)
+      (check-goal-edit-perm u.context mod)
+  =.  goals.p  (~(uni by goals.p) (validate-goals:vd goals))
+  =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
+  =/  new-list=(list gid:gol)  (find-and-oust gid old-list)
+  =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
+  =.  contents.archive.p  (~(del by contents.archive.p) gid)
+  (move gid context mod)
+::
+:: Restore goal from archive to main goals at root
+++  restore-to-root
+  |=  [=gid:gol mod=ship]
+  ^-  _this
+  ?>  (check-goal-master gid mod)
+  =+  (~(got by contents.archive.p) gid)
+  =.  goals.p  (~(uni by goals.p) (validate-goals:vd goals))
+  =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
+  =/  new-list=(list gid:gol)  (find-and-oust gid old-list)
+  =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
+  =.  contents.archive.p  (~(del by contents.archive.p) gid)
+  this
+::
+++  delete-from-archive
+  |=  [=gid:gol mod=ship]
+  ^-  _this
+  :: Only admin level can perma-delete
   ::
-  ?>  (check-pool-edit-perm mod) :: only owner/admins can renew
-  =/  [parent=(unit gid:gol) new=goals:gol]  (~(got by archive.p) gid)
-  =.  goals.p    (~(uni by goals.p) (validate-goals:vd new))
-  =.  archive.p  (~(del by archive.p) gid)
-  ?^  mol=(mole |.((move gid parent mod)))
-    u.mol
-  ~&(%failed-to-restore-under-old-parent this)
+  ?>  (check-pool-edit-perm mod)
+  =+  (~(got by contents.archive.p) gid)
+  =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
+  =/  new-list=(list gid:gol)  (find-and-oust gid old-list)
+  =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
+  =.  contents.archive.p  (~(del by contents.archive.p) gid)
+  this
 ::
 :: Permanently delete goal and subgoals from archive
 ++  delete-goal
   |=  [=gid:gol mod=ship]
   ^-  _this
+  :: Only admin level can perma-delete
+  ::
   ?>  (check-pool-edit-perm mod)
   =^  trac  this
     (wrest-goal gid mod) :: correctly handles orders
-  this(archive.p (~(del by archive.p) gid))
+  this
 ::
 :: Partition the set of goals q from its complement q- in goals.p
 ++  partition
@@ -165,7 +198,7 @@
   ?|  =(mod host.pid.p)
       ?=([~ %admin] (~(got by perms.p) mod))
   ==
-:: owner, admin or deputy
+:: owner, admin or creator
 ::
 ++  check-root-create-perm
   |=  mod=ship

@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-27:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) [state-5-28:gs =trace:gol]]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -31,7 +31,7 @@
   :*  (unique-pin own now)
       title
       (~(put by *perms:gol) own %owner)
-      ~  ~  ~
+      ~  ~  [~ ~]
   ==
 ::
 ++  clone-pool

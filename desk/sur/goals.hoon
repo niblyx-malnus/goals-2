@@ -13,7 +13,7 @@
       outflow=(set nid)
   ==
 +$  deputies  (map ship ?(%edit %create))
-+$  open-to   (unit ?(%admins %deputies %viewers)) :: who can claim goal
++$  open-to   (unit ?(%admins %deputies %viewers)) :: who can claim the goal
 +$  goal
   $:  =gid
       summary=@t         :: (140 character summary of a goal)
@@ -33,7 +33,10 @@
 +$  role     ?(%owner %admin %creator %viewer)
 +$  perms    (map ship role)
 ::
-+$  archive  (map gid [par=(unit gid) =goals])
++$  archive
+  $:  contexts=(map (unit gid) (list gid))
+      contents=(map gid [context=(unit gid) =goals])
+  ==
 ::
 +$  pool
   $:  =pid

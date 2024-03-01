@@ -512,18 +512,38 @@
       [%deputies (pairs (turn ~(tap by deputies.goal) |=([=@p =@t] [(scot %p p) s+t])))]
   ==
 ::
+++  enjs-archive-contexts
+  =,  enjs:format
+  |=  contexts=(map (unit gid) (list gid))
+  ^-  json
+  %-  pairs
+  %+  turn  ~(tap by contexts)
+  |=  [context=(unit gid) archive=(list gid)]
+  ^-  [@t json]
+  :-  ?~(context 'pool-root' u.context)
+  a+(turn archive (lead %s))
+::
+++  enjs-archive-contents
+  =,  enjs:format
+  |=  contents=(map gid [(unit gid) goals])
+  ^-  json
+  %-  pairs
+  %+  turn  ~(tap by contents)
+  |=  [=gid context=(unit gid) =goals]
+  ^-  [@t json]
+  :-  gid
+  %-  pairs
+  :~  [%context ?~(context s+'pool-root' s+u.context)]
+      [%goals (enjs-goals goals)]
+  ==
+::
 ++  enjs-archive
   =,  enjs:format
   |=  =archive
   ^-  json
   %-  pairs
-  %+  turn  ~(tap by archive)
-  |=  [=gid par=(unit gid) =goals]
-  ^-  [@t json]
-  :-  gid
-  %-  pairs
-  :~  [%par ?~(par ~ s+u.par)]
-      [%goals (enjs-goals goals)]
+  :~  contexts+(enjs-archive-contexts contexts.archive)
+      contents+(enjs-archive-contents contents.archive)
   ==
 ::
 ++  enjs-fields
