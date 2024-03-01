@@ -62,7 +62,7 @@
   :: Update goals to remaining
   ::
   =.  goals.p.pore  (gus-by goals.p.pore ~(tap in prog))
-  :: both of these should get validated here (validate-goals:vd goals)
+  :: TODO: both of these should get validated here (validate-goals:vd goals)
   :: return extracted goals and remaining goals
   ::
   [trac pore]
@@ -473,8 +473,12 @@
   ^-  _this
   ?.  (check-move-to-goal-perm kid pid mod)
     ~|("missing-move-to-goal-perms" !!)
+  :: move to root first if necessary
   ::
-  =/  pore  (move-to-root kid host.pid.p) :: divine intervention (owner)
+  =/  pore
+    ?~  [parent:(~(got by goals.p) kid)]
+      this
+    (move-to-root kid host.pid.p) :: divine intervention (owner)
   =/  k  (~(got by goals.p.pore) kid)
   =/  q  (~(got by goals.p.pore) pid)
   ?<  (~(has in (sy children.q)) kid)
