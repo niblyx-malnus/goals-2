@@ -110,7 +110,7 @@
       (check-goal-edit-perm u.context mod)
   =.  goals.p  (~(uni by goals.p) (validate-goals:vd goals))
   =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
-  =/  new-list=(list gid:gol)  (find-and-oust gid old-list)
+  =/  new-list=(list gid:gol)  (purge-from-list gid old-list)
   =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
   =.  contents.archive.p  (~(del by contents.archive.p) gid)
   (move:this gid context mod)
@@ -123,10 +123,10 @@
   =+  (~(got by contents.archive.p) gid)
   =.  goals.p  (~(uni by goals.p) (validate-goals:vd goals))
   =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
-  =/  new-list=(list gid:gol)  (find-and-oust gid old-list)
+  =/  new-list=(list gid:gol)  (purge-from-list gid old-list)
   =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
   =.  contents.archive.p  (~(del by contents.archive.p) gid)
-  this
+  (move:this gid ~ mod)
 ::
 ++  delete-from-archive
   |=  [=gid:gol mod=ship]
@@ -136,7 +136,7 @@
   ?>  (check-pool-edit-perm mod)
   =+  (~(got by contents.archive.p) gid)
   =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
-  =/  new-list=(list gid:gol)  (find-and-oust gid old-list)
+  =/  new-list=(list gid:gol)  (purge-from-list gid old-list)
   =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
   =.  contents.archive.p  (~(del by contents.archive.p) gid)
   this
@@ -430,12 +430,16 @@
     (dag-rend:pore [%s rid] [%s lid] mod)
   ==
 ::
-++  find-and-oust
+++  purge-from-list
   |*  [item=* =(list)]
   ^-  (^list _item)
-  ?~  idx=(find [item]~ list)  
-    list
-  (oust [u.idx 1] list)
+  =/  allowed=(set _item)
+    (~(del in (silt list)) item)
+  %+  murn  list
+  |=  i=_item
+  ?.  (~(has in allowed) i)
+    ~
+  [~ i]
 ::
 ++  slot-above
   |=  [dis=* dat=* =(list)]
@@ -459,11 +463,12 @@
   ?.  (check-move-to-root-perm gid mod)
     ~|("missing-move-to-root-perms" !!)
   =/  k  (~(got by goals.p) gid)  
-  ?~  parent.k  this
+  ?~  parent.k
+    this(roots.p [gid (purge-from-list gid roots.p)])
   =/  q  (~(got by goals.p) u.parent.k)
   ?>  (~(has in (sy children.q)) gid)
   =.  goals.p  (~(put by goals.p) gid k(parent ~))
-  =.  goals.p  (~(put by goals.p) u.parent.k q(children (find-and-oust gid children.q)))
+  =.  goals.p  (~(put by goals.p) u.parent.k q(children (purge-from-list gid children.q)))
   =.  roots.p  [gid roots.p]
   (yoke [%held-rend gid u.parent.k] mod)
 ::
@@ -478,7 +483,7 @@
   ?<  (~(has in (sy children.q)) kid)
   =.  goals.p.pore  (~(put by goals.p.pore) kid k(parent (some pid)))
   =.  goals.p.pore  (~(put by goals.p.pore) pid q(children [kid children.q]))
-  =.  roots.p.pore  (find-and-oust kid roots.p.pore)
+  =.  roots.p.pore  (purge-from-list kid roots.p.pore)
   (yoke:pore [%held-yoke kid pid] mod)
 ::
 ++  move
