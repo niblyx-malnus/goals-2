@@ -110,6 +110,20 @@
     =.  pools.store  (~(put by pools.store) pid new)
     this
     ::
+      %restore-to-root
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pid)
+    =/  new=pool:gol  abet:(restore-to-root:(apex:pl old) gid mod)
+    =.  pools.store  (~(put by pools.store) pid new)
+    this
+    ::
+      %delete-from-archive
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pid)
+    =/  new=pool:gol  abet:(delete-from-archive:(apex:pl old) gid mod)
+    =.  pools.store  (~(put by pools.store) pid new)
+    this
+    ::
       %delete-goal
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)

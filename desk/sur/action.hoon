@@ -39,6 +39,8 @@
     +$  life-cycle
       $%  [%archive-goal =pid =gid]
           [%restore-goal =pid =gid]
+          [%restore-to-root =pid =gid]
+          [%delete-from-archive =pid =gid]
           [%delete-goal =pid =gid]
       ==
     +$  nexus

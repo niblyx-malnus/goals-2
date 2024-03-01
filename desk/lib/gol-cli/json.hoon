@@ -131,6 +131,8 @@
         [%create-goal-with-tag (ot ~[pid+pid upid+unit-id summary+so actionable+bo tag+so])]
         [%archive-goal (ot ~[pid+pid gid+gid])]
         [%restore-goal (ot ~[pid+pid gid+gid])]
+        [%restore-to-root (ot ~[pid+pid gid+gid])]
+        [%delete-from-archive (ot ~[pid+pid gid+gid])]
         [%delete-goal (ot ~[pid+pid gid+gid])]
         [%yoke (ot ~[pid+pid yoks+yoke-seq])]
         [%move (ot ~[pid+pid cid+gid upid+unit-id])]
