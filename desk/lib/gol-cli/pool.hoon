@@ -109,7 +109,6 @@
         (check-goal-master gid mod)
       (check-goal-edit-perm u.context mod)
   =.  goals.p  (~(uni by goals.p) (validate-goals:vd goals))
-  =.  roots.p  [gid roots.p]
   =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
   =/  new-list=(list gid:gol)  (find-and-oust gid old-list)
   =.  contexts.archive.p  (~(put by contexts.archive.p) context new-list)
@@ -460,7 +459,7 @@
   ?.  (check-move-to-root-perm gid mod)
     ~|("missing-move-to-root-perms" !!)
   =/  k  (~(got by goals.p) gid)  
-  ?~  parent.k  this :: already at root
+  ?~  parent.k  this
   =/  q  (~(got by goals.p) u.parent.k)
   ?>  (~(has in (sy children.q)) gid)
   =.  goals.p  (~(put by goals.p) gid k(parent ~))
@@ -473,12 +472,7 @@
   ^-  _this
   ?.  (check-move-to-goal-perm kid pid mod)
     ~|("missing-move-to-goal-perms" !!)
-  :: move to root first if necessary
-  ::
-  =/  pore
-    ?~  [parent:(~(got by goals.p) kid)]
-      this
-    (move-to-root kid host.pid.p) :: divine intervention (owner)
+  =/  pore  (move-to-root kid host.pid.p) :: divine intervention (owner)
   =/  k  (~(got by goals.p.pore) kid)
   =/  q  (~(got by goals.p.pore) pid)
   ?<  (~(has in (sy children.q)) kid)
