@@ -105,16 +105,23 @@
   ==
 ::
 +$  goal-view
-  $%  [%pool-roots =pid]   :: gid, summary, cmp, axn
+  $%  [%pool-roots =pid]
       [%pool-archive =pid]
-      [%goal-children =pid =gid] :: gid, summary, cmp, axn
+      [%goal-children =pid =gid]
+      [%archive-goal-children =pid rid=gid =gid]
       [%goal-borrowed =pid =gid]
+      [%archive-goal-borrowed =pid rid=gid =gid]
       [%goal-borrowed-by =pid =gid]
+      [%archive-goal-borrowed-by =pid rid=gid =gid]
       [%goal-lineage =pid =gid]
+      [%archive-goal-lineage =pid rid=gid =gid]
       [%goal-progress =pid =gid]
+      [%archive-goal-progress =pid rid=gid =gid]
       [%goal-archive =pid =gid]
       [%harvest type=harvest-type]     :: frontier
+      [%archive-goal-harvest =pid rid=gid =gid]
       [%empty-goals type=harvest-type]
+      [%archive-goal-empty-goals =pid rid=gid =gid]
       [%pool-tag-goals =pid tag=@t]
       [%pool-tag-harvest =pid tag=@t]
       [%pool-tag-note =pid tag=@t]

@@ -36,6 +36,99 @@
     %goal-view
   =+  !<(vyu=goal-view:axn vase)
   ?-    -.vyu
+      %archive-goal-children
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  contents        (~(got by contents.archive.pool) rid.vyu)
+    =/  =goal:gol       (~(got by goals.contents) gid.vyu)
+    (send-goal-data (turn children.goal (lead pid.vyu)))
+    ::
+      %archive-goal-borrowed
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  contents        (~(got by contents.archive.pool) rid.vyu)
+    =/  nd              ~(. gol-cli-node goals.contents)
+    =/  =goal:gol       (~(got by goals.contents) gid.vyu)
+    (send-goal-data (turn ~(tap in (nest-left:nd gid.vyu)) (lead pid.vyu)))
+    ::
+      %archive-goal-borrowed-by
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  contents        (~(got by contents.archive.pool) rid.vyu)
+    =/  nd              ~(. gol-cli-node goals.contents)
+    =/  =goal:gol       (~(got by goals.contents) gid.vyu)
+    (send-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (lead pid.vyu)))
+    ::
+      %archive-goal-progress
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  contents        (~(got by contents.archive.pool) rid.vyu)
+    =/  tv              ~(. gol-cli-traverse goals.contents)
+    =/  prog=(list gid:gol)  ~(tap in (progeny:tv gid.vyu))
+    =/  able=(list gid:gol)
+      %+  murn  prog
+      |=  =gid:gol
+      ?.  actionable:(~(got by goals.contents) gid)
+        ~
+      `gid
+    =/  comp=(list gid:gol)
+      %+  murn  able
+      |=  =gid:gol
+      ?.  done.i.status.end:(~(got by goals.contents) gid)
+        ~
+      `gid
+    %-  pure:m  !>
+    =,  enjs:format
+    %-  pairs
+    :~  [%complete (numb (lent comp))]
+        [%total (numb (lent able))]
+    ==
+    ::
+      %archive-goal-lineage
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  contents        (~(got by contents.archive.pool) rid.vyu)
+    =;  lineage=(list key:gol)
+      (send-goal-data lineage)
+    =/  =goal:gol  (~(got by goals.contents) gid.vyu)
+    |-
+    ?~  parent.goal
+      ~
+    =/  parent=goal:gol
+      (~(got by goals.contents) u.parent.goal)
+    :-  [pid.vyu u.parent.goal]
+    $(goal parent)
+    ::
+      %archive-goal-harvest
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  contents        (~(got by contents.archive.pool) rid.vyu)
+    =/  tv  ~(. gol-cli-traverse goals.contents)
+    =;  harvest=(list key:gol)
+      (send-goal-data harvest)
+    =/  order=(list gid:gol)
+      %+  murn  goal-order.local.store
+      |=  [=pid:gol =gid:gol]
+      ?.(=(pid pid.vyu) ~ `gid)
+    (turn (ordered-harvest:tv gid.vyu order) (lead pid.vyu))
+    ::
+      %archive-goal-empty-goals
+    =;  empty=(list key:gol)
+      (send-goal-data empty)
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  contents        (~(got by contents.archive.pool) rid.vyu)
+    =/  tv  ~(. gol-cli-traverse goals.contents)
+    =/  prog=(set gid:gol)  (progeny:tv gid.vyu)
+    =;  empty=(list gid:gol)
+      (turn empty (lead pid.vyu))
+    %+  murn  ~(tap by goals.contents)
+    |=  [=gid:gol =goal:gol]
+    ?.  (~(has in prog) gid)  ~
+    ?:  actionable.goal  ~
+    ?~  children.goal  [~ gid]
+    =/  children-all-complete
+      %+  roll
+        `(list gid:gol)`children.goal
+      |=  [kid=gid:gol acc=?]
+      &(acc done.i.status.end:(~(got by goals.contents) kid))
+    ?.  children-all-complete
+      ~
+    [~ gid]
+    ::
       %pool-archive
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     %-  send-archive-goal-data
