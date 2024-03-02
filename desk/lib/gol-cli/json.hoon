@@ -127,15 +127,15 @@
     :~  [%create-pool (ot ~[title+so])]
         [%delete-pool (ot ~[pid+pid])]
         [%set-pool-title (ot ~[pid+pid title+so])]
-        [%create-goal (ot ~[pid+pid upid+unit-id summary+so actionable+bo active+bo])]
-        [%create-goal-with-tag (ot ~[pid+pid upid+unit-id summary+so actionable+bo tag+so])]
+        [%create-goal (ot ~[pid+pid upid+unit-gid summary+so actionable+bo active+bo])]
+        [%create-goal-with-tag (ot ~[pid+pid upid+unit-gid summary+so actionable+bo tag+so])]
         [%archive-goal (ot ~[pid+pid gid+gid])]
         [%restore-goal (ot ~[pid+pid gid+gid])]
         [%restore-to-root (ot ~[pid+pid gid+gid])]
         [%delete-from-archive (ot ~[pid+pid gid+gid])]
         [%delete-goal (ot ~[pid+pid gid+gid])]
         [%yoke (ot ~[pid+pid yoks+yoke-seq])]
-        [%move (ot ~[pid+pid cid+gid upid+unit-id])]
+        [%move (ot ~[pid+pid cid+gid upid+unit-gid])]
         [%set-summary (ot ~[pid+pid gid+gid summary+so])]
         [%set-start (ot ~[pid+pid gid+gid start+unit-di])]
         [%set-end (ot ~[pid+pid gid+gid end+unit-di])]
@@ -147,6 +147,7 @@
         [%unmark-active (ot ~[pid+pid gid+gid])]
         [%reorder-roots (ot ~[pid+pid roots+(ar gid)])]
         [%reorder-children (ot ~[pid+pid gid+gid children+(ar gid)])]
+        [%reorder-archive (ot ~[pid+pid context+unit-gid archive+(ar gid)])]
         [%pools-slot-above (ot ~[dis+pid dat+pid])]
         [%pools-slot-below (ot ~[dis+pid dat+pid])]
         [%goals-slot-above (ot ~[dis+key dat+key])]
@@ -206,7 +207,7 @@
     ==
   ++  unit-di  |=(jon=json ?~(jon ~ (some (di jon))))
   ++  unit-date  |=(jon=json ?~(jon ~ (some (date jon))))
-  ++  unit-id  |=(jon=json ?~(jon ~ (some (gid jon))))
+  ++  unit-gid  |=(jon=json ?~(jon ~ (some (gid jon))))
   ++  key
     %+  cu
       |=  (pole knot)

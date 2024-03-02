@@ -57,6 +57,7 @@
           [%update-goal-perms =pid =gid chief=ship rec=_| =deputies]
           [%reorder-roots =pid roots=(list gid)]
           [%reorder-children =pid =gid children=(list gid)]
+          [%reorder-archive =pid context=(unit gid) archive=(list gid)]
       ==
     +$  hitch
       $%  [%update-goal-tags =key p=(each (set @t) (set @t))]

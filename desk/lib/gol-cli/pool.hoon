@@ -506,6 +506,16 @@
   ?>  =((sy children) (sy children.goal))
   this(goals.p (~(put by goals.p) gid goal(children children)))
 ::
+++  reorder-archive
+  |=  [context=(unit gid:gol) archive=(list gid:gol) mod=ship]
+  ^-  _this
+  ?>  ?~  context
+        (check-pool-edit-perm mod)
+      (check-goal-edit-perm u.context mod)
+  =/  old-list=(list gid:gol)  (~(got by contexts.archive.p) context)
+  ?>  =((sy archive) (sy old-list))
+  this(contexts.archive.p (~(put by contexts.archive.p) context archive))
+::
 ++  yoke-sequence
   |=  [yoks=(list exposed-yoke:act) mod=ship]
   ^-  _this

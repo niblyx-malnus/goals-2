@@ -65,6 +65,12 @@
     =/  new=pool:gol  abet:(reorder-children:(apex:pl old) gid children mod)
     this(pools.store (~(put by pools.store) pid new))
     ::
+      %reorder-archive
+    =+  axn
+    =/  old=pool:gol  (~(got by pools.store) pid)
+    =/  new=pool:gol  abet:(reorder-archive:(apex:pl old) context archive mod)
+    this(pools.store (~(put by pools.store) pid new))
+    ::
       %create-goal
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
