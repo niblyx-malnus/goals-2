@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiArchive, FiTag, FiInfo, FiCopy, FiPlus } from 'react-icons/fi';
+import { FaArrowsAlt } from 'react-icons/fa'; 
 import { TagIcon, ActionableIcon, ActiveIcon } from './CustomIcons';
 import AddTodoPanel from './Periods/AddTodoPanel';
 import LabelPanel from './Panels/LabelPanel';
 import TagPanel from './Panels/TagPanel';
+import MovePanel from './Panels/MovePanel';
+import InfoPanel from './Panels/InfoPanel';
 import { Goal } from '../types';
 import api from '../api';
 
@@ -26,12 +29,18 @@ const GoalActionBar: React.FC<{
   };
 
   const toggleAddTodoPanel = () => {
-    console.log("Opening add panel...");
-    console.log(goal);
     if (panel === 'add') {
       setPanel('');
     } else {
       setPanel('add');
+    }
+  };
+
+  const toggleMovePanel = () => {
+    if (panel === 'move') {
+      setPanel('');
+    } else {
+      setPanel('move');
     }
   };
 
@@ -64,15 +73,6 @@ const GoalActionBar: React.FC<{
     };
   }, [barRef]);
 
-  const InfoPanel = () => {
-    return (
-      <div>
-        <p>Info Panel</p>
-        {/* Place your info content here */}
-      </div>
-    );
-  };
-
   const copyToClipboard = () => {
     setPanel('');
     navigator.clipboard.writeText(goal.key);
@@ -95,6 +95,20 @@ const GoalActionBar: React.FC<{
       console.error(error);
     }
   };
+
+  const archiveGoal = async () => {
+    const isConfirmed = window.confirm("Are you sure you want to archive this goal?");
+  
+    // Only proceed if the user confirms
+    if (isConfirmed) {
+      try {
+        await api.archiveGoal(goal.key);
+        refresh();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
   
   return (
     <div ref={barRef} className="p-1 relative group bg-gray-200 flex items-center">
@@ -103,6 +117,12 @@ const GoalActionBar: React.FC<{
         onClick={copyToClipboard}
       >
         <FiCopy />
+      </button>
+      <button
+        className="p-2 rounded bg-gray-100"
+        onClick={toggleMovePanel}
+      >
+        <FaArrowsAlt style={{ color: "#3d3d3e" }} />
       </button>
       <button
         onClick={toggleAddTodoPanel}
@@ -150,6 +170,7 @@ const GoalActionBar: React.FC<{
       </button>
       <button
         className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+        onClick={archiveGoal}
       >
         <FiArchive />
       </button>
@@ -165,7 +186,8 @@ const GoalActionBar: React.FC<{
             { panel === 'add' && <AddTodoPanel goalKey={goal.key} exit={() => setPanel('')} /> }
             { panel === 'label' && <LabelPanel goal={goal} exit={() => setPanel('')} refresh={refresh}/> }
             { panel === 'tag' && <TagPanel goal={goal} exit={() => setPanel('')} refresh={refresh}/> }
-            { panel === 'info' && <InfoPanel /> }
+            { panel === 'info' && <InfoPanel goal={goal} /> }
+            { panel === 'move' && <MovePanel goalKey={goal.key} refresh={refresh} /> }
           </div>
         )}
       </div>

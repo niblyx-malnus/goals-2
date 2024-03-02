@@ -3,19 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import MarkdownEditor from './MarkdownEditor';
 import PoolTagGoalList from './LabelGoalList';
 import PoolTagHarvestList from './LabelHarvestList';
-import Harvest from './Harvest'; // Assuming this is the correct import
 import api from '../api';
 
 function LabelPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
   const poolId = `/${host}/${name}`;
   const [poolTagNote, setPoolTagNote] = useState<string>('');
-  const [selectedOperation, setSelectedOperation] = useState('some');
   const [newDescription, setNewDescription] = useState<string>('');
   const [refreshGoals, setRefreshGoals] = useState(false);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('Goals');
-  const [tagIsPublic, setTagIsPublic] = useState(false);
 
   const navigate = useNavigate();
 
@@ -47,13 +43,6 @@ function LabelPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
       setPoolTagNote(fetchedNote);
     } catch (error) {
       console.error(error);
-    }
-  };
-
-  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-      setTags([...tags, e.currentTarget.value.trim()]);
-      e.currentTarget.value = ''; // Clear the input
     }
   };
 

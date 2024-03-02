@@ -64,8 +64,7 @@ const TodoRow = ({
   
   const toggleComplete = async () => {
     try {
-      const isCompleted = await api.getGoalComplete(goal.key);
-      await api.setGoalComplete(goal.key, !isCompleted);
+      await api.setGoalComplete(goal.key, !goal.complete);
       refresh();
       // No need to update the local state for completion status, as it will be fetched dynamically
     } catch (error) {
@@ -106,7 +105,7 @@ const TodoRow = ({
   };
 
   return (
-    <div ref={rowRef} className={`flex justify-between items-center my-1 rounded ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200`}>
+    <div ref={rowRef} className={`flex justify-between items-center my-1 rounded ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200 ${goal.active ? 'hover:bg-gray-300 bg-gray-200' : 'opacity-60 bg-gray-200'}`}>
       <button
         className={`p-2 rounded bg-gray-${moveState ? "300" : "100"}`}
         onClick={toggleMove}

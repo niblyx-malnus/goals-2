@@ -13,6 +13,16 @@ export const pidFromKey = (key: string) => {
   return pid;
 }
 
+export const hostAndNameFromPid = (pid: string) => {
+  console.log(`Splitting pid: ${pid}`);
+  const parts = pid.split('/').filter(Boolean);
+  if (parts.length !== 2) {
+    throw new Error('pid must be in the format of /{host}/{name}');
+  }
+  const [host, name] = parts;
+  return { host: host, name: name };
+}
+
 export const gidFromKey = (key: string) => {
   const { gid } = goalKeyToPidGid(key);
   return gid;

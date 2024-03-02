@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import useStore from '../store';
 import MarkdownEditor from './MarkdownEditor';
-import GoalList from './GoalList';
 import ArchiveGoalList from './ArchiveGoalList';
-import GoalPageActionBar from './GoalPageActionBar';
+import RestorePanel from './Panels/RestorePanel';
+import ArchiveInfoPanel from './Panels/ArchiveInfoPanel';
 import TagSearchBar from './TagSearchBar';
 import api from '../api';
-import { FiX, FiSave, FiEdit } from 'react-icons/fi';
+import { FiInfo, FiCopy, FiRotateCcw, FiTrash } from 'react-icons/fi';
 import { FaListUl } from 'react-icons/fa';
-import { CompleteIcon, ActiveIcon } from './CustomIcons';
 import useCustomNavigation from './useCustomNavigation';
 import { Goal } from '../types';
-import { goalKeyToPidGid, gidFromKey } from '../utils';
+import { goalKeyToPidGid } from '../utils';
 
-function Subgoals({ goal }: { goal: Goal }) {
+function Subgoals({ goal, rid }: { goal: Goal, rid: string }) {
   const { pid, gid } = goalKeyToPidGid(goal.key);
 
-  const [activeNewGoal, setActiveNewGoal] = useState(true);
-  const [newSummary, setNewSummary] = useState<string>('');
   const [refreshChildren, setRefreshChildren] = useState(false);
   const [refreshBorrowed, setRefreshBorrowed] = useState(false);
   const [children, setChildren] = useState<Goal[]>([]);
@@ -30,7 +27,7 @@ function Subgoals({ goal }: { goal: Goal }) {
     const fetchChildren = async () => {
       try {
         setChildrenLoading(true);
-        const fetchedChildren = await api.getGoalChildren(pid, gid);
+        const fetchedChildren = await api.getArchiveGoalChildren(pid, rid, gid);
         setChildren(fetchedChildren);
         setChildrenLoading(false);
       } catch (error) {
@@ -38,13 +35,13 @@ function Subgoals({ goal }: { goal: Goal }) {
       }
     };
     fetchChildren();
-  }, [gid, pid, refreshChildren]);
+  }, [gid, rid, pid, refreshChildren]);
 
   useEffect(() => {
     const fetchBorrowed = async () => {
       try {
         setBorrowedLoading(true);
-        const fetchedBorrowed = await api.getGoalBorrowed(pid, gid);
+        const fetchedBorrowed = await api.getArchiveGoalBorrowed(pid, rid, gid);
         setBorrowed(fetchedBorrowed);
         setBorrowedLoading(false);
       } catch (error) {
@@ -52,7 +49,7 @@ function Subgoals({ goal }: { goal: Goal }) {
       }
     };
     fetchBorrowed();
-  }, [gid, pid, refreshBorrowed]);
+  }, [gid, rid, pid, refreshBorrowed]);
 
   const triggerRefreshChildren = () => {
     setRefreshChildren(!refreshChildren);
@@ -60,61 +57,6 @@ function Subgoals({ goal }: { goal: Goal }) {
 
   const triggerRefreshBorrowed = () => {
     setRefreshBorrowed(!refreshBorrowed);
-  };
-
-  const handleAddSummary = async () => {
-    if (newSummary.trim() !== '') {
-      try {
-        await api.createGoal(pid, gid, newSummary, true, activeNewGoal);
-      } catch (error) {
-        console.error(error);
-      }
-      setNewSummary('');
-      setRefreshChildren(!refreshChildren)
-    }
-  };
-
-  const moveGoal = (selectedGoalKey: string, aboveGoalKey: string | null, belowGoalKey: string | null) => {
-    if (selectedGoalKey !== null) {
-      let keys = children.map(goal => goal.key);
-      const currentIndex = keys.indexOf(selectedGoalKey);
-  
-      // Early exit if the goal isn't found
-      if (currentIndex === -1) return;
-
-      // if the below goal is above me, I'm moving up
-      const isMovingUp = (belowGoalKey && keys.indexOf(belowGoalKey) < currentIndex);
-      // if the above goal is below me, I'm moving down
-      const isMovingDown = (aboveGoalKey && keys.indexOf(aboveGoalKey) > currentIndex);
-  
-      const isMovingToSamePosition = 
-        (aboveGoalKey && currentIndex - 1 === keys.indexOf(aboveGoalKey)) ||
-        (aboveGoalKey && currentIndex === keys.indexOf(aboveGoalKey)) ||
-        (belowGoalKey && currentIndex + 1 === keys.indexOf(belowGoalKey)) ||
-        (belowGoalKey && currentIndex === keys.indexOf(belowGoalKey));
-      if (isMovingToSamePosition) { return; }
-
-      // Remove the selected goal from its current position
-      keys.splice(currentIndex, 1);
-
-      let newIndex = 0;
-      // If we're moving up, we go above the belowGoalKey
-      if (isMovingUp) {
-        newIndex = keys.indexOf(belowGoalKey);
-      // If we're moving down, we go below the aboveGoalKey
-      } else if (isMovingDown) {
-        newIndex = keys.indexOf(aboveGoalKey) + 1;
-      }
-  
-      // Insert the selected goal at the new position
-      keys.splice(newIndex, 0, selectedGoalKey);
-
-      api.reorderChildren(goal.key, keys.map(key => gidFromKey(key)))
-        .then(() => {
-          triggerRefreshChildren();
-        })
-        .catch(error => console.error("Failed to reorder children:", error));
-    }
   };
 
   return (
@@ -148,37 +90,12 @@ function Subgoals({ goal }: { goal: Goal }) {
           <div className="text-center mt-2 text-lg text-gray-600">
             Sub-goals which are owned and managed by this goal.
           </div>
-          <div className="pt-6 flex items-center mb-4">
-            <button
-              className="mr-2 bg-blue-500 text-white px-2 py-2 rounded hover:bg-blue-600 focus:outline-none"
-              onClick={() => setActiveNewGoal(!activeNewGoal)} 
-            >
-              {ActiveIcon(activeNewGoal)}
-            </button>
-            <input
-              type="text"
-              value={newSummary}
-              onChange={(e) => setNewSummary(e.target.value)}
-              onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddSummary();
-              }}
-              placeholder="Create a sub-goal..."
-              className="p-2 flex-grow border box-border rounded mr-2 w-full" // <-- Notice the flex-grow and w-full here
-            />
-            <button 
-              onClick={handleAddSummary} 
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none"
-              style={{maxWidth: '100px'}} // This ensures button never grows beyond 100px.
-            >
-              Add
-            </button>
-          </div>
-          <GoalList
+          <ArchiveGoalList
+            rid={rid}
             goals={children}
-            moveGoal={moveGoal}
             isLoading={childrenLoading}
             completeTab={true}
-            defaultCompleteTab={goal?.complete ? 'Complete' : 'Incomplete'}
+            defaultCompleteTab={goal.complete ? 'Complete' : 'Incomplete'}
             refresh={triggerRefreshChildren}
           />
         </div>
@@ -188,7 +105,8 @@ function Subgoals({ goal }: { goal: Goal }) {
           <div className="text-center mt-2 text-lg text-gray-600">
             Sub-goals of other goals which could also be considered sub-goals of this goal.
           </div>
-          <GoalList
+          <ArchiveGoalList
+            rid={rid}
             goals={borrowed}
             isLoading={borrowedLoading}
             completeTab={true}
@@ -200,7 +118,7 @@ function Subgoals({ goal }: { goal: Goal }) {
   );
 }
 
-function Archive({ goal }: { goal: Goal }) {
+function Archive({ goal, rid }: { goal: Goal, rid: string }) {
   const { pid, gid } = goalKeyToPidGid(goal.key);
 
   const [refresh, setRefresh] = useState(false);
@@ -224,49 +142,6 @@ function Archive({ goal }: { goal: Goal }) {
   const triggerRefresh = () => {
     setRefresh(!refresh);
   };
-  
-  const moveGoal = (selectedGoalKey: string, aboveGoalKey: string | null, belowGoalKey: string | null) => {
-    if (selectedGoalKey !== null) {
-      let keys = archive.map(goal => goal.key);
-      const currentIndex = keys.indexOf(selectedGoalKey);
-  
-      // Early exit if the goal isn't found
-      if (currentIndex === -1) return;
-  
-      // if the below goal is above me, I'm moving up
-      const isMovingUp = (belowGoalKey && keys.indexOf(belowGoalKey) < currentIndex);
-      // if the above goal is below me, I'm moving down
-      const isMovingDown = (aboveGoalKey && keys.indexOf(aboveGoalKey) > currentIndex);
-  
-      const isMovingToSamePosition = 
-        (aboveGoalKey && currentIndex - 1 === keys.indexOf(aboveGoalKey)) ||
-        (aboveGoalKey && currentIndex === keys.indexOf(aboveGoalKey)) ||
-        (belowGoalKey && currentIndex + 1 === keys.indexOf(belowGoalKey)) ||
-        (belowGoalKey && currentIndex === keys.indexOf(belowGoalKey));
-      if (isMovingToSamePosition) { return; }
-  
-      // Remove the selected goal from its current position
-      keys.splice(currentIndex, 1);
-  
-      let newIndex = 0;
-      // If we're moving up, we go above the belowGoalKey
-      if (isMovingUp) {
-        newIndex = keys.indexOf(belowGoalKey);
-      // If we're moving down, we go below the aboveGoalKey
-      } else if (isMovingDown) {
-        newIndex = keys.indexOf(aboveGoalKey) + 1;
-      }
-  
-      // Insert the selected goal at the new position
-      keys.splice(newIndex, 0, selectedGoalKey);
-  
-      api.reorderArchive(pid, gid, keys.map(key => gidFromKey(key)))
-        .then(() => {
-          triggerRefresh();
-        })
-        .catch(error => console.error("Failed to reorder children:", error));
-    }
-  };
 
   return (
     <div>
@@ -274,8 +149,8 @@ function Archive({ goal }: { goal: Goal }) {
         Sub-goals which have been archived.
       </div>
       <ArchiveGoalList
+        rid={rid}
         goals={archive}
-        moveGoal={moveGoal}
         isLoading={isLoading}
         refresh={triggerRefresh}
       />
@@ -283,7 +158,9 @@ function Archive({ goal }: { goal: Goal }) {
   );
 }
 
-function Harvest({ goal }: { goal: Goal }) {
+function Harvest({ goal, rid }: { goal: Goal, rid: string }) {
+  const { pid, gid } = goalKeyToPidGid(goal.key);
+
   const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [refreshEmptyGoals, setRefreshEmptyGoals] = useState(false);
   const [harvest, setHarvest] = useState<Goal[]>([]);
@@ -296,7 +173,7 @@ function Harvest({ goal }: { goal: Goal }) {
     const fetchHarvest = async () => {
       try {
         setHarvestLoading(true);
-        const fetchedHarvest = await api.goalHarvest(goal.key);
+        const fetchedHarvest = await api.getArchiveGoalHarvest(pid, rid, gid);
         setHarvest(fetchedHarvest);
         setHarvestLoading(false);
       } catch (error) {
@@ -304,13 +181,13 @@ function Harvest({ goal }: { goal: Goal }) {
       }
     };
     fetchHarvest();
-  }, [goal.key, refreshHarvest]);
+  }, [pid, rid, gid, refreshHarvest]);
 
   useEffect(() => {
     const fetchEmptyGoals = async () => {
       try {
         setEmptyGoalsLoading(true);
-        const fetchedEmptyGoals = await api.goalEmptyGoals(goal.key);
+        const fetchedEmptyGoals = await api.getArchiveGoalEmptyGoals(pid, rid, gid);
         setEmptyGoals(fetchedEmptyGoals);
         setEmptyGoalsLoading(false);
       } catch (error) {
@@ -318,7 +195,7 @@ function Harvest({ goal }: { goal: Goal }) {
       }
     };
     fetchEmptyGoals();
-  }, [goal.key, refreshEmptyGoals]);
+  }, [pid, rid, gid, refreshEmptyGoals]);
 
   const triggerRefreshHarvest = () => {
     setRefreshHarvest(!refreshHarvest);
@@ -359,7 +236,8 @@ function Harvest({ goal }: { goal: Goal }) {
           <div className="text-center mt-2 text-lg text-gray-600">
             The Frontier constitutes goals leading to this one which can be tackled immediately.
           </div>
-          <GoalList 
+          <ArchiveGoalList 
+            rid={rid}
             goals={harvest}
             isLoading={harvestLoading}
             refresh={triggerRefreshHarvest}
@@ -372,7 +250,8 @@ function Harvest({ goal }: { goal: Goal }) {
             Non-actionable goals with no children;
             goals which require elaboration.
           </div>
-          <GoalList
+          <ArchiveGoalList
+            rid={rid}
             goals={emptyGoals}
             isLoading={emptyGoalsLoading}
             refresh={triggerRefreshEmptyGoals}
@@ -383,14 +262,16 @@ function Harvest({ goal }: { goal: Goal }) {
   );
 }
 
-function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: string }) {
+function ArchiveGoalPage({ host, name, rootId, goalId }: { host: string, name: string, rootId: string, goalId: string }) {
   const key = `/${host}/${name}/${goalId}`;
   const pid = `/${host}/${name}`;
+  const rid = `/${rootId}`;
+  const gid = `/${goalId}`;
+  const [panel, setPanel] = useState('');
   const [goal, setGoal] = useState<Goal | null>(null);
+  const [context, setContext] = useState<string | null>(null);
   const [refreshGoal, setRefreshGoal] = useState(false);
   const [activeTab, setActiveTab] = useState<'Sub-goals' | 'Archive' | 'Harvest' | 'Note'>('Sub-goals');
-  const [isEditingSummary, setIsEditingSummary] = useState(false);
-  const [summary, setSummary] = useState('');
   const [goalLoading, setGoalLoading] = useState(true);
   const { navigateToPeriod, navigateToGoal, navigateToPool, navigateToPools } = useCustomNavigation();
   const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
@@ -399,66 +280,80 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
     const fetchGoal = async () => {
       try {
         setGoalLoading(true);
-        const goal: Goal | null = await api.getSingleGoal(key);
+        const response = await api.getSingleArchiveGoal(pid, rid, gid);
+        const goal: Goal | null = response.goal;
+        const context: string | null = response.context;
         setGoal(goal);
-        setSummary(goal ? goal.summary : '');
+        setContext(context);
         setGoalLoading(false);
       } catch (error) {
         console.error("Error fetching tags: ", error);
       }
     };
     fetchGoal();
-  }, [key, refreshGoal]);
+  }, [pid, rid, gid, refreshGoal]);
 
-  const handleSummaryEdit = () => {
-    setSummary(goal?.summary as string);
-    setIsEditingSummary(true);
-  };
-  
-  const handleSummarySave = async () => {
-    setIsEditingSummary(false);
-    await api.setGoalSummary(goal?.key as string, summary);
-  };
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(key);
+  }
 
-  const handleSummaryCancel = () => {
-    setIsEditingSummary(false);
-    setSummary(goal?.summary as string);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault(); // Prevent default Enter key behavior
-      handleSummarySave();
+  const toggleRestorePanel = () => {
+    console.log("setting panel to restore");
+    if (panel === 'restore') {
+      setPanel('');
+    } else {
+      setPanel('restore');
     }
+    console.log(panel);
   };
-  
-  const toggleComplete = async () => {
-    try {
-      await api.setGoalComplete(goal?.key as string, !goal?.complete);
-      setRefreshGoal(!refreshGoal);
-    } catch (error) {
-      console.error(error);
+
+  const toggleArchiveInfoPanel = () => {
+    if (panel === 'info') {
+      setPanel('');
+    } else {
+      setPanel('info');
     }
   };
 
-  const saveMarkdown = async (markdown: string) => {
-    try {
-      await api.editGoalNote(key, markdown);
-      setRefreshGoal(!refreshGoal);
-    } catch (error) {
-      console.error(error);
+  const handleRestoreClick = async () => {
+    if (context === null) {
+      try {
+        await api.restoreGoal(key);
+        navigateToPool(pid);
+      } catch (error) {
+        console.error("Error processing restore to root: ", error);
+      }
+    } else {
+      // TODO: should go to context page
+      toggleRestorePanel();
     }
   }
 
+  const deleteGoal = async () => {
+    // Show confirmation dialog
+    const isConfirmed = window.confirm("Deleting a goal is irreversible. Are you sure you want to delete this goal?");
+  
+    // Only proceed if the user confirms
+    if (isConfirmed && (rid === gid)) {
+      try {
+        await api.deleteFromArchive(key);
+        // TODO: should go to context page
+        navigateToPool(pid);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
   return (
-    <div className="bg-blue-300 h-full flex justify-center items-center h-screen">
+    <div className="bg-[#C4a484] h-full flex justify-center items-center h-screen">
       { goalLoading && (
         <div className="flex justify-center m-20">
           <div className="animate-spin rounded-full h-16 w-16 border-b-8 border-t-transparent border-blue-500"></div>
         </div>
       )}
       { !goalLoading && goal && (
-        <div className="bg-blue-300 p-6 rounded shadow-md w-full h-screen overflow-y-auto">
+        <div className="bg-[#C4a484] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <TagSearchBar poolId={pid} />
             <button
@@ -475,6 +370,22 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
             </button>
           </div>
           <div className="flex justify-between pb-2">
+            { (context !== null) && (
+              <div
+                className="cursor-pointer"
+                onClick={() => navigateToGoal(`${pid}/${context}`)}
+              >
+                <h2 className="text-blue-800">Context Goal</h2>
+              </div>
+            )}
+            { (context === null) && (
+              <div
+                className="cursor-pointer"
+                onClick={() => navigateToPool(pid)}
+              >
+                <h2 className="text-blue-800">Context Pool</h2>
+              </div>
+            )}
             {goal?.parent && (
               <div
                 className="cursor-pointer"
@@ -497,62 +408,57 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
             </div>
           </div>
           <div className={`p-1 rounded flex justify-between items-center bg-gray-200 ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } m-2 ${goal.active ? 'hover:bg-gray-300 bg-gray-200' : 'opacity-50 bg-gray-200'}`}>
-            <button
-              className="mr-1 p-2 rounded bg-gray-100 text-white"
-              onClick={toggleComplete}
-            >
-              <div className="text-white">
-                <CompleteIcon
-                  complete={goal?.complete as boolean}
-                  style={ { color: goal?.complete ? 'black' : goal?.active ? 'black' : 'gray' } }
-                />
-              </div>
-            </button>
-            {isEditingSummary ? (
-              <input
-                type="text"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                className="truncate text-center mr-1 text-3xl font-bold bg-white shadow rounded cursor-pointer flex-grow px-1"
-                onKeyDown={handleKeyDown}
-              />
-            ) : (
-              <div
-                className={`mr-1 text-center text-3xl font-bold bg-gray-100 rounded flex-grow p-1 ${goal?.complete ? 'line-through' : ''}`}
-                onDoubleClick={handleSummaryEdit}
+            <div className="relative group">
+              <button
+                className="mr-1 p-2 rounded bg-gray-100"
+                onClick={toggleArchiveInfoPanel}
               >
-                {goal?.summary}
+                <FiInfo />
+              </button>
+              {
+                panel === 'info' && (
+                  <div className="absolute left-0 top-full mt-2 w-64 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
+                    <ArchiveInfoPanel goal={goal} rid={ rid ? rid : gid } />
+                  </div>
+                )
+              }
+            </div>
+            <button
+              className="mr-1 p-2 rounded bg-gray-100"
+              onClick={copyToClipboard}
+            >
+              <FiCopy />
+            </button>
+            <div
+              className={`mr-1 text-center text-3xl font-bold bg-gray-100 rounded flex-grow p-1 ${goal?.complete ? 'line-through' : ''}`}
+            >
+              {goal?.summary}
+            </div>
+          { (rid === gid) && (
+            <div className="flex items-center">
+              <div className="relative group">
+                <button
+                  className="mr-1 p-2 rounded bg-gray-100"
+                  onClick={handleRestoreClick}
+                >
+                  <FiRotateCcw />
+                </button>
+                {
+                  (panel === 'restore') && (
+                    <div className="absolute right-0 top-full mt-2 w-44 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
+                      <RestorePanel goalKey={goal.key} refresh={() => navigateToPool(pid)} />
+                    </div>
+                  )
+                }
               </div>
-            )}
-            { !isEditingSummary && (
-              <>
-                <button
-                  className="p-2 rounded bg-gray-100"
-                  onClick={() => setIsEditingSummary(!isEditingSummary)}
-                >
-                  <FiEdit />
-                </button>
-              </>
-            )}
-            { isEditingSummary && (
-              <>
-                <button
-                  className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-                  onClick={handleSummarySave}
-                >
-                  <FiSave />
-                </button>
-                <button
-                  className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-                  onClick={handleSummaryCancel}
-                >
-                  <FiX />
-                </button>
-              </>
-            )}
-          </div>
-          <div className="mt-2 flex justify-center">
-            <GoalPageActionBar goal={goal as Goal} refresh={() => setRefreshGoal(!refreshGoal)} />
+              <button
+                className="p-2 rounded bg-gray-100"
+                onClick={deleteGoal}
+              >
+                <FiTrash />
+              </button>
+            </div>
+          )}
           </div>
           <div className="border-b">
             <ul className="flex justify-center -mb-px">
@@ -602,18 +508,17 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
             <div className="items-center mt-2 rounded">
               <MarkdownEditor
                 initialMarkdown={goal?.note as string}
-                onSave={saveMarkdown}
               />
             </div>
           )}
           {activeTab === 'Archive' && (
-            <Archive goal={goal} />
+            <Archive goal={goal} rid={rid} />
           )}
           {activeTab === 'Sub-goals' && (
-            <Subgoals goal={goal} />
+            <Subgoals goal={goal} rid={rid} />
           )}
           {activeTab === 'Harvest' && (
-            <Harvest goal={goal} />
+            <Harvest goal={goal} rid={rid}/>
           )}
         </div>
       )}
@@ -621,4 +526,4 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
   );
 }
 
-export default GoalPage;
+export default ArchiveGoalPage;

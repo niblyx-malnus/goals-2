@@ -19,6 +19,10 @@ const useCustomNavigation = () => {
     navigate(`/goal${key}`);
   };
 
+  const navigateToArchive = (pid: string, rid: string, gid: string) => {
+    navigate(`/archive${pid}${rid}${gid}`);
+  };
+
   const navigateToPool = (pid: string) => {
     navigate(`/pool${pid}`);
   };
@@ -32,6 +36,7 @@ const useCustomNavigation = () => {
     navigateToLabel,
     navigateToTag,
     navigateToGoal,
+    navigateToArchive,
     navigateToPool,
     navigateToPools,
   };

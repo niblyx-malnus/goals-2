@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiX, FiEdit, FiTrash, FiSave, FiMenu } from 'react-icons/fi';
-import { FaArrowsAlt } from 'react-icons/fa'; 
+import { FaArrowsAltV } from 'react-icons/fa'; 
 import { CompleteIcon } from './CustomIcons';
 import GoalActionBar from './GoalActionBar';
 import { Goal } from '../types';
@@ -104,13 +104,13 @@ const GoalRow: React.FC<{
   };
 
   return (
-    <div ref={rowRef} className={`flex justify-between items-center mt-2 rounded ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } hover:bg-gray-300 bg-gray-200`}>
+    <div ref={rowRef} className={`flex justify-between items-center mt-2 rounded ${goal.actionable ? 'border-4 border-gray-400 box-border' : 'p-1' } ${goal.active ? 'hover:bg-gray-300 bg-gray-200' : 'opacity-60 bg-gray-200'} `}>
       {toggleMove &&
         <button
           className={`p-2 rounded bg-gray-${moveState ? "300" : "100"}`}
           onClick={toggleMove}
         >
-          <FaArrowsAlt style={{ color: moveState ? "#f7fafc" : "gray" }} />
+          <FaArrowsAltV style={{ color: moveState ? "#f7fafc" : "gray" }} />
         </button>
       }
       <button
@@ -120,7 +120,7 @@ const GoalRow: React.FC<{
         <div className="text-white">
           <CompleteIcon
             complete={goal.complete}
-            style={ { color: goal.complete ? 'black' : goal.active ? 'black' : 'gray' } }
+            style={ { color: 'gray' } }
           />
         </div>
       </button>

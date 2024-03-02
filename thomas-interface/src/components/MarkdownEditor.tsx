@@ -4,7 +4,7 @@ import 'github-markdown-css/github-markdown.css';
 
 interface MarkdownEditorProps {
   initialMarkdown: string;
-  onSave: (markdown: string) => void;
+  onSave?: (markdown: string) => void;
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave }) => {
@@ -26,7 +26,9 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
   const handleSave = (): void => {
     setMarkdownText(tempText);
     setIsEditing(false);
-    onSave(tempText);
+    if (onSave) {
+      onSave(tempText);
+    }
   };
 
   const handleCancel = (): void => {
@@ -41,7 +43,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
 
   return (
     <div className="p-2 border rounded bg-white">
-      {isEditing ? (
+      {onSave && isEditing ? (
         <div>
           <div className="flex justify-center mt-2 mb-4">
             <button className="mr-2 bg-teal-100 pl-4 pr-4 p-2 rounded" onClick={handleSave}>
@@ -62,10 +64,15 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ initialMarkdown, onSave
       ) : (
         <div>
           <div className="flex justify-center">
-            <button className="bg-gray-300 p-2 pl-4 pr-4 rounded mt-2" onClick={handleEdit}>
-              Edit
-            </button>
+            { onSave && (
+              <button className="bg-gray-300 p-2 pl-4 pr-4 rounded mt-2" onClick={handleEdit}>
+                Edit
+              </button>
+            )}
           </div>
+          {!markdownText && (
+              <div className="text-center m-5 text-lg text-gray-600">Empty note.</div>
+          )}
           {markdownText && (
             <div className="p-6">
               <ReactMarkdown children={markdownText} />

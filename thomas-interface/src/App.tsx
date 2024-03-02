@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes, useParams, Link, Navigate } fro
 import Pools from './components/Pools';
 import PoolPage from './components/PoolPage';
 import GoalPage from './components/GoalPage';
+import ArchiveGoalPage from './components/ArchiveGoalPage';
 import LabelPage from './components/LabelPage';
 import TagPage from './components/TagPage';
 import FileSystem from './components/FileSystem/FileSystem';
@@ -58,7 +59,17 @@ function GoalPageWrapper() {
   return (
     <div>
       <BackToHome />
-      <GoalPage host={host} name={name} goalId={goalId} />
+      <GoalPage host={host as string} name={name as string} goalId={goalId as string} />
+    </div>
+  );
+}
+
+function ArchiveGoalPageWrapper() {
+  let { host, name, rootId, goalId } = useParams();
+  return (
+    <div>
+      <BackToHome />
+      <ArchiveGoalPage host={host as string} name={name as string} rootId={rootId as string} goalId={goalId as string} />
     </div>
   );
 }
@@ -112,6 +123,7 @@ function App() {
           <Route path="/pools" element={<div><BackToHome /><Pools /></div>} />
           <Route path="/pool/:host/:name" element={<PoolPageWrapper />} />
           <Route path="/goal/:host/:name/:goalId" element={<GoalPageWrapper />} />
+          <Route path="/archive/:host/:name/:rootId/:goalId" element={<ArchiveGoalPageWrapper />} />
           <Route path="/label/:host/:name/:tag" element={<LabelPageWrapper />} />
           <Route path="/tag/:tag" element={<TagPageWrapper />} />
           <Route path="/jsons" element={<div><BackToHome /><FileSystem /></div>} />

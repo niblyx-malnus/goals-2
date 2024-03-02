@@ -1,21 +1,117 @@
 import React, { useState, useEffect } from 'react';
 import PoolList from './PoolList';
+import GoalList from './GoalList';
 import useStore from '../store';
-import Harvest from './Harvest';
 import TagSearchBar from './TagSearchBar';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { Goal } from '../types';
 import api from '../api';
 import { FaListUl } from 'react-icons/fa';
 import useCustomNavigation from './useCustomNavigation';
 
+function Harvest() {
+  const [refreshHarvest, setRefreshHarvest] = useState(false);
+  const [refreshEmptyGoals, setRefreshEmptyGoals] = useState(false);
+  const [harvest, setHarvest] = useState<Goal[]>([]);
+  const [emptyGoals, setEmptyGoals] = useState<Goal[]>([]);
+  const [harvestLoading, setHarvestLoading] = useState(true);
+  const [emptyGoalsLoading, setEmptyGoalsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'Frontier' | 'Empty'>('Frontier');
+
+  useEffect(() => {
+    const fetchHarvest = async () => {
+      try {
+        setHarvestLoading(true);
+        const fetchedHarvest = await api.mainHarvest();
+        setHarvest(fetchedHarvest);
+        setHarvestLoading(false);
+      } catch (error) {
+        console.error("Error fetching goals: ", error);
+      }
+    };
+    fetchHarvest();
+  }, [refreshHarvest]);
+
+  useEffect(() => {
+    const fetchEmptyGoals = async () => {
+      try {
+        setEmptyGoalsLoading(true);
+        const fetchedEmptyGoals = await api.mainEmptyGoals();
+        setEmptyGoals(fetchedEmptyGoals);
+        setEmptyGoalsLoading(false);
+      } catch (error) {
+        console.error("Error fetching goals: ", error);
+      }
+    };
+    fetchEmptyGoals();
+  }, [refreshEmptyGoals]);
+
+  const triggerRefreshHarvest = () => {
+    setRefreshHarvest(!refreshHarvest);
+  };
+
+  const triggerRefreshEmptyGoals = () => {
+    setRefreshEmptyGoals(!refreshEmptyGoals);
+  };
+
+  return (
+    <div>
+      <div className="border-b">
+        <ul className="flex justify-center -mb-px">
+          <li className={`${activeTab === 'Frontier' ? 'border-blue-500' : ''}`}>
+            <button 
+              className={`inline-block p-4 text-md font-medium text-center cursor-pointer focus:outline-none ${
+                activeTab === 'Frontier' ? 'border-b-2 text-blue-600 border-blue-500' : 'text-gray-500 hover:text-gray-800 hover:border-gray-300'
+              }`} 
+              onClick={() => setActiveTab('Frontier')}
+            >
+              Frontier
+            </button>
+          </li>
+          <li className={`${activeTab === 'Empty' ? 'border-blue-500' : ''}`}>
+            <button 
+              className={`inline-block p-4 text-md font-medium text-center cursor-pointer focus:outline-none ${
+                activeTab === 'Empty' ? 'border-b-2 text-blue-600 border-blue-500' : 'text-gray-500 hover:text-gray-800 hover:border-gray-300'
+              }`} 
+              onClick={() => setActiveTab('Empty')}
+            >
+              Empty
+            </button>
+          </li>
+        </ul>
+      </div>
+      { activeTab === 'Frontier' && (
+        <div>
+          <div className="text-center mt-2 text-lg text-gray-600">
+            The Frontier constitutes goals from this pool which can be tackled immediately.
+          </div>
+          <GoalList 
+            goals={harvest}
+            isLoading={harvestLoading}
+            refresh={triggerRefreshHarvest}
+          />
+        </div>
+      )}
+      { activeTab === 'Empty' && (
+        <div>
+          <div className="text-center mt-2 text-lg text-gray-600">
+            Non-actionable goals with no children;
+            goals which require elaboration.
+          </div>
+          <GoalList
+            goals={emptyGoals}
+            isLoading={emptyGoalsLoading}
+            refresh={triggerRefreshEmptyGoals}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Pools() {
   const [newTitle, setNewTitle] = useState<string>('');
   const [refreshPools, setRefreshPools] = useState(false);
-  const [refreshHarvest, setRefreshHarvest] = useState(false);
-  const [tags, setTags] = useState<string[]>([]); // For managing Harvest tags
-  const [selectedOperation, setSelectedOperation] = useState('some'); // For managing the Harvest operation
   const [activeTab, setActiveTab] = useState('Pools'); // New state for active tab
-  const [tagIsPublic, setTagIsPublic] = useState(false);
   const [allLocalTags, setAllLocalTags] = useState<string[]>([]);
   const { navigateToPeriod, navigateToTag } = useCustomNavigation();
   const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
@@ -32,13 +128,8 @@ function Pools() {
     fetchTags();
   }, []);
 
-  // Function to toggle refreshFlag
   const triggerRefreshPools = () => {
     setRefreshPools(!refreshPools);
-  };
-
-  const triggerRefreshHarvest = () => {
-    setRefreshHarvest(!refreshHarvest);
   };
 
   const handleAddTitle = async () => {
@@ -51,19 +142,6 @@ function Pools() {
       }
       setNewTitle('');
     }
-  };
-
-  // Function to add a tag for Harvest
-  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-      setTags([...tags, e.currentTarget.value.trim()]);
-      e.currentTarget.value = ''; // Clear the input
-    }
-  };
-
-  // Function to remove a tag for Harvest
-  const handleRemoveTag = (index: number) => {
-    setTags(tags.filter((_, i) => i !== index));
   };
 
   return (
@@ -143,49 +221,7 @@ function Pools() {
           </>
         )}
         {activeTab === 'Harvest' && (
-          <div className="my-4">
-            <div className="flex flex-row justify-center items-center mb-4">
-              <select
-                className="p-2 border rounded mr-2"
-                value={selectedOperation}
-                onChange={(e) => setSelectedOperation(e.target.value)}
-              >
-                <option value="some">Some</option>
-                <option value="every">Every</option>
-              </select>
-              <button
-                onClick={() => setTagIsPublic(!tagIsPublic)}
-                className="p-2 mr-2 border border-gray-300 bg-gray-200 rounded hover:bg-gray-200 flex items-center justify-center"
-                style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
-              >
-                {tagIsPublic ? <FiEye /> : <FiEyeOff />}
-              </button>
-              <input
-                type="text"
-                placeholder="Enter tags..."
-                className="p-2 border box-border rounded"
-                onKeyDown={handleAddTag}
-              />
-            </div>
-            <div className="flex flex-wrap justify-center mb-4">
-              {tags.map((tag, index) => (
-                <div key={index} className="flex items-center bg-gray-200 rounded px-2 py-1 m-1">
-                  { false
-                    ?  <FiEye className="mr-2"/>
-                    : <FiEyeOff className="mr-2"/>
-                  }
-                  {tag}
-                  <button 
-                    className="ml-2 rounded-full bg-gray-300 hover:bg-gray-400"
-                    onClick={() => handleRemoveTag(index)}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-            <Harvest method={selectedOperation} tags={tags} host={null} name={null} goalId={null} refresh={triggerRefreshHarvest}/>
-          </div>
+          <Harvest />
         )}
       </div>
     </div>

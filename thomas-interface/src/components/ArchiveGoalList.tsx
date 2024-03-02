@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import GoalRow from './GoalRow';
+import ArchiveGoalRow from './ArchiveGoalRow';
 import { Goal } from '../types';
 import { TagFilter, filterGoalsByTags, getUniqueTags } from './TagFilter';
+import { arch } from 'os';
 
-function GoalList({
+function ArchiveGoalList({
   goals,
+  rid,
   moveGoal,
+  atPoolRoot,
   isLoading,
   refresh,
   completeTab = false,
   defaultCompleteTab = 'Incomplete',
 }: {
   goals: Goal[];
+  rid?: string,
   moveGoal?: (selectedGoalKey: string, aboveGoalKey: string | null, belowGoalKey: string | null) => void;
+  atPoolRoot?: boolean;
+  archivedAncestor?: boolean,
   isLoading: boolean;
   refresh: () => void;
   completeTab?: boolean;
@@ -112,7 +118,9 @@ function GoalList({
                   key={goal.key}
                   className="block text-current no-underline hover:no-underline"
                 >
-                  <GoalRow
+                  <ArchiveGoalRow
+                    atPoolRoot={atPoolRoot}
+                    rid={rid}
                     goal={goal}
                     refresh={refresh}
                     toggleMove={
@@ -151,4 +159,4 @@ function GoalList({
   );
 };
 
-export default GoalList;
+export default ArchiveGoalList;

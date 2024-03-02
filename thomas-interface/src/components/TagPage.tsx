@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MarkdownEditor from './MarkdownEditor';
-import LocalTagGoalList from './TagGoalList';
-import LocalTagHarvestList from './TagHarvestList';
-import Harvest from './Harvest'; // Assuming this is the correct import
+import TagGoalList from './TagGoalList';
+import TagHarvestList from './TagHarvestList';
 import api from '../api';
 
 function TagPage({ tag }: { tag: any; }) {
   const [localTagNote, setLocalTagNote] = useState<string>('');
-  const [selectedOperation, setSelectedOperation] = useState('some');
-  const [newDescription, setNewDescription] = useState<string>('');
   const [refreshGoals, setRefreshGoals] = useState(false);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('Goals');
-  const [tagIsPublic, setTagIsPublic] = useState(false);
 
   const navigate = useNavigate();
 
@@ -42,13 +37,6 @@ function TagPage({ tag }: { tag: any; }) {
       setLocalTagNote(fetchedNote);
     } catch (error) {
       console.error(error);
-    }
-  };
-
-  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
-      setTags([...tags, e.currentTarget.value.trim()]);
-      e.currentTarget.value = ''; // Clear the input
     }
   };
 
@@ -100,12 +88,12 @@ function TagPage({ tag }: { tag: any; }) {
         </div>
         {activeTab === 'Goals' && (
           <>
-            <LocalTagGoalList host={null} name={null} tag={tag} refresh={triggerRefreshRoots}/>
+            <TagGoalList host={null} name={null} tag={tag} refresh={triggerRefreshRoots}/>
           </>
         )}
         {activeTab === 'Harvest' && (
           <>
-            <LocalTagHarvestList host={null} name={null} tag={tag} refresh={triggerRefreshHarvest}/>
+            <TagHarvestList host={null} name={null} tag={tag} refresh={triggerRefreshHarvest}/>
           </>
         )}
         <div className="p-6 markdown-container all:unstyled overflow-y-auto">
