@@ -162,7 +162,8 @@
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
     (send-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (lead pid.vyu)))
     ::
-    %goal  (send-goal-datum [pid gid]:vyu)
+    %goal          (send-goal-datum [pid gid]:vyu)
+    %archive-goal  (send-archive-goal-datum [pid rid gid]:vyu)
     ::
       %harvest
     =;  harvest=(list key:gol)

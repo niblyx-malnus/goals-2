@@ -40,6 +40,7 @@
         [%pool-tag-note (ot ~[pid+pid tag+so])]
         [%local-tag-note (ot ~[tag+so])]
         [%goal (ot ~[pid+pid gid+gid])]
+        [%archive-goal (ot ~[pid+pid rid+gid gid+gid])]
         [%setting (ot ~[setting+so])]
         [%pool-tags (ot ~[pid+pid])]
         [%all-local-goal-tags ul]

@@ -132,6 +132,7 @@
       [%pool-title =pid]
       [%pool-note =pid]
       [%goal =pid =gid]
+      [%archive-goal =pid rid=gid =gid]
       [%setting setting=@t]
       [%pool-tags =pid]
       [%all-local-goal-tags ~]
