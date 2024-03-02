@@ -638,7 +638,15 @@
   =/  m  (strand ,vase)
   ^-  form:m
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
-  (pure:m !>(?~(datum=(get-archive-datum pid rid gid store) ~ (enjs-goal-datum u.datum))))
+  %-  pure:m  !>
+  ?~  datum=(get-archive-datum pid rid gid store)
+    ~
+  =/  =pool:gol  (~(got by pools.store) pid)
+  =+  (~(got by contents.archive.pool) rid)
+  %-  pairs:enjs:format
+  :~  [%goal (enjs-goal-datum u.datum)]
+      [%context ?~(context ~ s+u.context)]
+  ==
 ++  send-archive-goal-data
   |=  keys=(list [pid:gol gid:gol gid:gol])
   =/  m  (strand ,vase)
