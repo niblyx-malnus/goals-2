@@ -68,31 +68,33 @@ export const convertDay = (dateKey: string, newPeriod: periodType): string => {
 };
 
 export const getCurrentDayDateKey = (): string => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const day = today.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = (today.getMonth() + 1).toString().padStart(2, '0');
+  const day = today.getDate().toString().padStart(2, '0');
+  console.log({ year, month, day });
+  return `${year}-${month}-${day}`;
 };
 
 export const getCurrentPeriod = (periodType: periodType) => {
   return convertDay(getCurrentDayDateKey(), periodType);
-}
+};
 
 export const formatDateKeyDisplay = (periodType: string, dateKey: string): string => {
-    const [year, month, day] = dateKey.split('-').map(Number);
-
     switch (periodType) {
       case 'day':
-        const dateD = new Date(dateKey);
-        const dayName = getWeekDay(year, month, day);
+        const [yearD, monthD, dayD] = dateKey.split('-').map(Number);
+        const dateD = new Date(yearD, monthD -1, dayD);
+        const dayName = getWeekDay(yearD, monthD, dayD);
         return `${dayName} ${dateD.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})}`;
         // return `${dayName} ${formatDate(year, month, day)}`;
       case 'week':
-        const dateW = new Date(dateKey);
+        const [yearW, monthW, dayW] = dateKey.split('-').map(Number);
+        const dateW = new Date(yearW, monthW -1, dayW);
         return `Week of ${dateW.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})}`;
       case 'month':
-        return `${getMonthName(month)} ${year}`;
+        const [monthYear, month] = dateKey.split('-').map(Number);
+        return `${getMonthName(month)} ${monthYear}`;
       case 'quarter':
         const [quarterYear, quarter] = dateKey.split('-q');
         return `Q${quarter} of ${quarterYear}`;
@@ -115,16 +117,6 @@ const getWeekDay = (year: number, month: number, day: number): string => {
     const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
     return weekDays[dayOfWeek];
-};
-
-const getMonday = (year: number, month: number, day: number): { year: number, month: number, day: number } => {
-    const monday = new Date(Date.UTC(year, month - 1, day));
-    const mondayDate = monday.getUTCDate() - monday.getUTCDay() + (monday.getUTCDay() === 0 ? -6 : 1);
-    return { year: monday.getUTCFullYear(), month: monday.getUTCMonth() + 1, day: mondayDate };
-};
-
-const formatDate = (year: number, month: number, day: number): string => {
-    return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
 };
 
 // Utility function to check if a string is a periodType
