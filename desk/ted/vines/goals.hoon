@@ -349,13 +349,33 @@
       (pure:m !>(a+(turn ~(tap in tags) (lead %s))))
     $(vals t.vals, tags (~(uni in tags) i.vals))
     ::
-      %all-local-goal-tags
+      %local-goal-tags
     =/  vals  ~(val by tags.local.store)
     =|  tags=(set @t)
     |-
     ?~  vals
       (pure:m !>(a+(turn ~(tap in tags) (lead %s))))
     $(vals t.vals, tags (~(uni in tags) i.vals))
+    ::
+      %pool-fields
+    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
+    =,  enjs:format
+    %-  pure:m  !>
+    %-  pairs
+    %+  turn  ~(tap by ?~(pd ~ field-properties.u.pd))
+    |=  [f=@t p=(map @t @t)]
+    ^-  [@t json]
+    [f (pairs (turn ~(tap by p) |=([p=@t d=@t] [p s+d])))]
+    ::
+      %local-goal-fields
+    =,  enjs:format
+    %-  pure:m  !>
+    %-  pairs
+    %+  turn  ~(tap by field-properties.local.store)
+    |=  [f=@t p=(map @t @t)]
+    ^-  [@t json]
+    [f (pairs (turn ~(tap by p) |=([p=@t d=@t] [p s+d])))]
     ::
     %goal-data  (send-goal-data keys.vyu)
     ::
@@ -491,6 +511,8 @@
       tags=(list @t)   :: private
       inherited-labels=(list @t)
       inherited-tags=(list @t)
+      attributes=(list [@t @t]) :: pool-specific
+      fields=(list [@t @t])     :: private
       parent=(unit key:gol)
       active=?
       complete=?
@@ -507,6 +529,8 @@
       [%tags a+(turn tags (lead %s))]
       ['inheritedLabels' a+(turn inherited-labels (lead %s))]
       ['inheritedTags' a+(turn inherited-tags (lead %s))]
+      [%attributes (pairs (turn attributes |=([a=@t d=@t] [a s+d])))]
+      [%fields (pairs (turn fields |=([f=@t d=@t] [f s+d])))]
       [%parent ?~(parent ~ (enjs-key:goj u.parent))]
       [%active b+active]
       [%complete b+complete]
@@ -531,6 +555,8 @@
       ~(tap in (~(gut by tags.local.store) key ~))   :: tags (private)
       inherited-labels
       inherited-tags
+      ?~(pd ~ ~(tap in (~(gut by fields.u.pd) gid ~))) :: attributes (pool-specific)
+      ~(tap in (~(gut by fields.local.store) key ~))   :: fields (private)
       ?~(parent ~ `[pid.key u.parent])
       done.i.status.start
       done.i.status.end
@@ -589,6 +615,8 @@
       ~(tap in (~(gut by tags.local.store) [pid gid] ~))   :: tags (private)
       inherited-labels
       inherited-tags
+      ?~(pd ~ ~(tap in (~(gut by fields.u.pd) gid ~))) :: attributes (pool-specific)
+      ~(tap in (~(gut by fields.local.store) [pid gid] ~))   :: fields (private)
       ?~(parent ~ `[pid u.parent])
       done.i.status.start
       done.i.status.end

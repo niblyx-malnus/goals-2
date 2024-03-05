@@ -43,7 +43,9 @@
         [%archive-goal (ot ~[pid+pid rid+gid gid+gid])]
         [%setting (ot ~[setting+so])]
         [%pool-tags (ot ~[pid+pid])]
-        [%all-local-goal-tags ul]
+        [%pool-fields (ot ~[pid+pid])]
+        [%local-goal-tags ul]
+        [%local-goal-fields ul]
         [%goal-data (ot ~[keys+(ar key)])]
     ==
     ++  type

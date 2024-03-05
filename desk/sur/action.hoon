@@ -138,7 +138,9 @@
       [%archive-goal =pid rid=gid =gid]
       [%setting setting=@t]
       [%pool-tags =pid]
-      [%all-local-goal-tags ~]
+      [%pool-fields =pid]
+      [%local-goal-tags ~]
+      [%local-goal-fields ~]
       [%goal-data keys=(list key)]
   ==
 --
