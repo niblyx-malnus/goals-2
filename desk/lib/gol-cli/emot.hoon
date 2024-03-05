@@ -365,6 +365,17 @@
       ==
     this(tags.local.store (~(put by tags.local.store) key.axn tags))
     ::
+      %update-local-goal-field
+    =+  axn
+    ?>  =(src our):bowl
+    =/  fields=(map @t @t)  (~(gut by fields.local.store) key.axn ~)
+    =.  fields
+      ?-  -.p.axn
+        %&  (~(put by fields) p.p.axn)
+        %|  (~(del by fields) p.p.axn)
+      ==
+    this(fields.local.store (~(put by fields.local.store) key.axn fields))
+    ::
       %update-local-tag-property
     ?>  =(src our):bowl
     =/  properties  (~(gut by tag-properties.local.store) tag.axn ~)
@@ -375,6 +386,18 @@
       ==
     =.  tag-properties.local.store
       (~(put by tag-properties.local.store) tag.axn properties)
+    this
+    ::
+      %update-local-field-property
+    ?>  =(src our):bowl
+    =/  properties  (~(gut by field-properties.local.store) field.axn ~)
+    =.  properties
+      ?-  -.p.axn
+        %&  (~(put by properties) p.p.axn)
+        %|  (~(del by properties) p.p.axn)
+      ==
+    =.  field-properties.local.store
+      (~(put by field-properties.local.store) field.axn properties)
     this
     ::
       %create-pool

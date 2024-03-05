@@ -119,6 +119,15 @@
       (ot ~[tags+(as so)])
     (ot ~[tags+(as so)])
   ::
+  ++  pd-local-goal-field
+    |=  jon=json
+    ?>  ?=(%o -.jon)
+    :-  (key (~(got by p.jon) 'key'))
+    %.  o+(~(del by p.jon) 'key')
+    %+  (pd ,[@t @t] [@t])
+      (ot ~[field+so data+so])
+    (ot ~[field+so])
+  ::
   ++  action
     |=  jon=json
     ^-  action:act
@@ -162,6 +171,8 @@
         [%update-goal-field pd-goal-field]
         [%update-local-goal-tags ud-local-goal-tags]
         [%update-local-tag-property pd-local-tag-property]
+        [%update-local-goal-field pd-local-goal-field]
+        [%update-local-field-property pd-local-field-property]
         [%update-setting pd-setting]
     ==
   ::

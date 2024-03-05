@@ -8,6 +8,8 @@
       [%goals-slot-below dis=key dat=key]
       [%update-local-goal-tags =key p=(each (set @t) (set @t))]
       [%update-local-tag-property tag=@t p=(each [@t @t] @t)]
+      [%update-local-goal-field =key p=(each [@t @t] @t)]
+      [%update-local-field-property field=@t p=(each [@t @t] @t)]
       [%update-setting p=(each [@t @t] @t)]
       [%put-collection =path =collection]
       [%del-collection =path]
