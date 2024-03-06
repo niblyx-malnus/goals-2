@@ -513,6 +513,8 @@
       inherited-tags=(list @t)
       attributes=(list [@t @t]) :: pool-specific
       fields=(list [@t @t])     :: private
+      inherited-attributes=(list [@t @t])
+      inherited-fields=(list [@t @t])
       parent=(unit key:gol)
       active=?
       complete=?
@@ -531,6 +533,8 @@
       ['inheritedTags' a+(turn inherited-tags (lead %s))]
       [%attributes (pairs (turn attributes |=([a=@t d=@t] [a s+d])))]
       [%fields (pairs (turn fields |=([f=@t d=@t] [f s+d])))]
+      [%inherited-attributes (pairs (turn inherited-attributes |=([a=@t d=@t] [a s+d])))]
+      [%inherited-fields (pairs (turn inherited-fields |=([f=@t d=@t] [f s+d])))]
       [%parent ?~(parent ~ (enjs-key:goj u.parent))]
       [%active b+active]
       [%complete b+complete]
@@ -557,6 +561,8 @@
       inherited-tags
       ?~(pd ~ ~(tap in (~(gut by fields.u.pd) gid ~))) :: attributes (pool-specific)
       ~(tap in (~(gut by fields.local.store) key ~))   :: fields (private)
+      inherited-attributes
+      inherited-fields
       ?~(parent ~ `[pid.key u.parent])
       done.i.status.start
       done.i.status.end
@@ -584,6 +590,38 @@
     %+  weld
       ~(tap in (~(gut by tags.local.store) [pid.key u.parent] ~))   :: tags (private)
     $(parent parent.goal)
+  ++  inherited-attributes
+    =|  attributes=(map @t @t)
+    %~  tap  by
+    ^-  (map @t @t)
+    |-
+    ?~  parent
+      attributes
+    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
+    %=    $
+      parent  parent.goal
+        attributes
+      %-  ~(gas by attributes)
+      %+  murn  ~(tap by ?~(pd ~ (~(gut by fields.u.pd) u.parent ~)))
+      |=  [a=@t d=@t]
+      ?:((~(has by attributes) a) ~ [~ a d])
+    ==
+  ++  inherited-fields
+    =|  fields=(map @t @t)
+    %~  tap  by
+    ^-  (map @t @t)
+    |-
+    ?~  parent
+      fields
+    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
+    %=    $
+      parent  parent.goal
+        fields
+      %-  ~(gas by fields)
+      %+  murn  ~(tap by ?~(pd ~ (~(gut by fields.local.store) [pid.key u.parent] ~)))
+      |=  [a=@t d=@t]
+      ?:((~(has by fields) a) ~ [~ a d])
+    ==
   --
 ++  send-goal-datum
   |=  =key:gol
@@ -617,6 +655,8 @@
       inherited-tags
       ?~(pd ~ ~(tap in (~(gut by fields.u.pd) gid ~))) :: attributes (pool-specific)
       ~(tap in (~(gut by fields.local.store) [pid gid] ~))   :: fields (private)
+      inherited-attributes
+      inherited-fields
       ?~(parent ~ `[pid u.parent])
       done.i.status.start
       done.i.status.end
@@ -660,6 +700,40 @@
     %+  weld
       ~(tap in (~(gut by tags.local.store) [pid u.parent] ~))   :: tags (private)
     $(parent parent.goal)
+  ++  inherited-attributes
+    :: TODO: inherit from context like in labels/tags
+    =|  attributes=(map @t @t)
+    %~  tap  by
+    ^-  (map @t @t)
+    |-
+    ?~  parent
+      attributes
+    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
+    %=    $
+      parent  parent.goal
+        attributes
+      %-  ~(gas by attributes)
+      %+  murn  ~(tap by ?~(pd ~ (~(gut by fields.u.pd) u.parent ~)))
+      |=  [a=@t d=@t]
+      ?:((~(has by attributes) a) ~ [~ a d])
+    ==
+  ++  inherited-fields
+    :: TODO: inherit from context like in labels/tags
+    =|  fields=(map @t @t)
+    %~  tap  by
+    ^-  (map @t @t)
+    |-
+    ?~  parent
+      fields
+    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
+    %=    $
+      parent  parent.goal
+        fields
+      %-  ~(gas by fields)
+      %+  murn  ~(tap by ?~(pd ~ (~(gut by fields.local.store) [pid u.parent] ~)))
+      |=  [a=@t d=@t]
+      ?:((~(has by fields) a) ~ [~ a d])
+    ==
   --
 ++  send-archive-goal-datum
   |=  [=pid:gol rid=gid:gol =gid:gol]
