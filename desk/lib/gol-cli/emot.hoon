@@ -400,6 +400,12 @@
       (~(put by field-properties.local.store) field.axn properties)
     this
     ::
+      %del-local-tag
+    this(tag-properties.local.store (~(del by tag-properties.local.store) tag.axn))
+    ::
+      %del-local-field
+    this(field-properties.local.store (~(del by field-properties.local.store) field.axn))
+    ::
       %create-pool
     =+  axn
     ?>  =(src our):bowl

@@ -171,6 +171,8 @@
         [%update-goal-field pd-goal-field]
         [%update-local-goal-tags ud-local-goal-tags]
         [%update-local-tag-property pd-local-tag-property]
+        [%del-local-tag (ot ~[tag+so])]
+        [%del-local-field (ot ~[field+so])]
         [%update-local-goal-field pd-local-goal-field]
         [%update-local-field-property pd-local-field-property]
         [%update-setting pd-setting]

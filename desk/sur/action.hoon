@@ -10,6 +10,8 @@
       [%update-local-tag-property tag=@t p=(each [@t @t] @t)]
       [%update-local-goal-field =key p=(each [@t @t] @t)]
       [%update-local-field-property field=@t p=(each [@t @t] @t)]
+      [%del-local-tag tag=@t]
+      [%del-local-field field=@t]
       [%update-setting p=(each [@t @t] @t)]
       [%put-collection =path =collection]
       [%del-collection =path]
