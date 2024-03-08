@@ -358,7 +358,7 @@
   :: unmark the right goal actionable
   ::
   =?  this  &(=(-.n1 %e) =(-.n2 %e) actionable:(~(got by goals.p) gid.n2))
-    (unmark-actionable gid.n2 mod)
+    (set-actionable gid.n2 %| mod)
   :: n2 must not come before n1
   ::
   ?:  (check-path:tv n2 n1 %r)  ~|("before-n2-n1" !!)
@@ -623,20 +623,18 @@
 :: in other words if has actually or virtually nested goals
 ++  has-nested  |=(=gid:gol `?`(gth (lent ~(tap in (iflo:nd [%e gid]))) 1))
 ::
-++  mark-actionable
-  |=  [=gid:gol mod=ship]
+++  set-actionable
+  |=  [=gid:gol val=? mod=ship]
   ^-  _this
   ?>  (check-goal-edit-perm gid mod)
   =/  goal  (~(got by goals.p) gid)
-  ?:  (has-nested gid)  ~|("has-nested" !!)
-  this(goals.p (~(put by goals.p) gid goal(actionable %&)))
-::
-++  unmark-actionable
-  |=  [=gid:gol mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  =/  goal  (~(got by goals.p) gid)
-  this(goals.p (~(put by goals.p) gid goal(actionable %|)))
+  ?-    val
+    %|  this(goals.p (~(put by goals.p) gid goal(actionable %|)))
+    ::
+      %&
+    ?:  (has-nested gid)  ~|("has-nested" !!)
+    this(goals.p (~(put by goals.p) gid goal(actionable %&)))
+  ==
 ::
 ++  mark-done
   |=  [=nid:gol now=@da mod=ship]
@@ -759,4 +757,49 @@
     ~|("some ships in deputies are not in pool" !!)
   =/  goal  (~(got by goals.p) gid)
   this(goals.p (~(put by goals.p) gid goal(deputies deputies)))
+::
+++  update-pool-metadata-field
+  |=  [field=@t dif=(each [@t @t] @t) mod=ship]
+  ^-  _this
+  ?>  (check-pool-edit-perm mod)
+  =/  properties  (~(gut by metadata-properties.p) field ~)
+  =.  properties
+    ?-  -.dif
+      %&  (~(put by properties) p.dif)
+      %|  (~(del by properties) p.dif)
+    ==
+  %=    this
+      metadata-properties.p
+    (~(put by metadata-properties.p) field properties)
+  ==
+::
+++  delete-pool-metadata-field
+  |=  [field=@t mod=ship]
+  ^-  _this
+  ?>  (check-pool-edit-perm mod)
+  this(metadata-properties.p (~(del by metadata-properties.p) field))
+::
+++  update-pool-metadata
+  |=  [dif=(each [@t @t] @t) mod=ship]
+  ^-  _this
+  ?>  (check-pool-edit-perm mod)
+  %=    this
+      metadata.p
+    ?-  -.dif
+      %&  (~(put by metadata.p) p.dif)
+      %|  (~(del by metadata.p) p.dif)
+    ==
+  ==
+::
+++  update-goal-metadata
+  |=  [=gid:gol dif=(each [@t @t] @t) mod=ship]
+  ^-  _this
+  ?>  (check-goal-edit-perm gid mod)
+  =/  =goal:gol  (~(got by goals.p) gid)
+  =.  metadata.goal
+    ?-  -.dif
+      %&  (~(put by metadata.goal) p.dif)
+      %|  (~(del by metadata.goal) p.dif)
+    ==
+  this(goals.p (~(put by goals.p) gid goal))
 --

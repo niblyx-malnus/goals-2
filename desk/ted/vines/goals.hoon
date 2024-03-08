@@ -257,22 +257,24 @@
     ::
       %pool-tag-goals
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     =/  keys=(list key:gol)
-      %+  murn  ?~(pd ~ ~(tap by tags.u.pd))
-      |=  [=gid:gol tags=(set @t)]
-      ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
+      %+  murn  ~(tap by goals.pool)
+      |=  [=gid:gol =goal:gol]
+      =/  =@t  (~(gut by metadata.goal) 'labels' '[]')
+      =/  tags=(set @t)  ((as so):dejs:format (need (de:json:html t)))
+      ?.  (~(has in tags) tag.vyu)
         ~
       `[pid.vyu gid]
     (send-goal-data keys)
     ::
       %pool-tag-harvest
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
     =/  tag-goals=(list gid:gol)
-      %+  murn  ~(tap by ?~(pd ~ tags.u.pd))
-      |=  [=gid:gol tags=(set @t)]
-      ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
+      %+  murn  ~(tap by goals.pool)
+      |=  [=gid:gol =goal:gol]
+      =/  =@t  (~(gut by metadata.goal) 'labels' '[]')
+      =/  tags=(set @t)  ((as so):dejs:format (need (de:json:html t)))
+      ?.  (~(has in tags) tag.vyu)
         ~
       `gid
     =;  harvest=(list key:gol)
@@ -287,8 +289,10 @@
       %local-tag-goals
     =;  keys=(list key:gol)
       (send-goal-data keys)
-    %+  murn  ~(tap by tags.local.store)
-    |=  [[=pid:gol =gid:gol] tags=(set @t)]
+    %+  murn  ~(tap by goal-metadata.local.store)
+    |=  [[=pid:gol =gid:gol] metadata=(map @t @t)]
+    =/  =@t  (~(gut by metadata) 'labels' '[]')
+    =/  tags=(set @t)  ((as so):dejs:format (need (de:json:html t)))
     =/  =pool:gol       (~(got by pools.store) pid)
     ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
       ~
@@ -296,8 +300,10 @@
     ::
       %local-tag-harvest
     =/  tag-goals=(list gid:gol)
-      %+  murn  ~(tap by tags.local.store)
-      |=  [[=pid:gol =gid:gol] tags=(set @t)]
+      %+  murn  ~(tap by goal-metadata.local.store)
+      |=  [[=pid:gol =gid:gol] metadata=(map @t @t)]
+      =/  =@t  (~(gut by metadata) 'labels' '[]')
+      =/  tags=(set @t)  ((as so):dejs:format (need (de:json:html t)))
       =/  =pool:gol       (~(got by pools.store) pid)
       ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
         ~
@@ -323,26 +329,24 @@
     ::
       %pool-note
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
-    (pure:m !>(s+(~(gut by ?~(pd ~ properties.u.pd)) 'note' '')))
+    (pure:m !>(s+(~(gut by metadata.pool) 'note' '')))
     ::
       %pool-tag-note
-    =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
-    =/  properties      (~(gut by ?~(pd ~ tag-properties.u.pd)) tag.vyu ~)
-    (pure:m !>(s+(~(gut by properties) 'note' '')))
+    !!
     ::
       %local-tag-note
-    =/  properties  (~(gut by tag-properties.local.store) tag.vyu ~)
-    (pure:m !>(s+(~(gut by properties) 'note' '')))
+    !!
     ::
       %setting
     (pure:m !>(?~(s=(~(get by settings.local.store) setting.vyu) ~ s+u.s)))
     ::
       %pool-tags
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
-    =/  vals  ~(val by ?~(pd ~ tags.u.pd))
+    =/  vals=(list (set @t))
+      %+  turn  ~(val by goals.pool)
+      |=  =goal:gol
+      =/  =@t  (~(gut by metadata.goal) 'labels' '[]')
+      ((as so):dejs:format (need (de:json:html t)))
     =|  tags=(set @t)
     |-
     ?~  vals
@@ -350,7 +354,11 @@
     $(vals t.vals, tags (~(uni in tags) i.vals))
     ::
       %local-goal-tags
-    =/  vals  ~(val by tags.local.store)
+    =/  vals=(list (set @t))
+      %+  turn  ~(val by goal-metadata.local.store)
+      |=  metadata=(map @t @t)
+      =/  =@t  (~(gut by metadata) 'labels' '[]')
+      ((as so):dejs:format (need (de:json:html t)))
     =|  tags=(set @t)
     |-
     ?~  vals
@@ -358,24 +366,27 @@
     $(vals t.vals, tags (~(uni in tags) i.vals))
     ::
       %pool-fields
-    =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.vyu)
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
     =,  enjs:format
     %-  pure:m  !>
     %-  pairs
-    %+  turn  ~(tap by ?~(pd ~ field-properties.u.pd))
+    %+  murn  ~(tap by metadata-properties.pool)
     |=  [f=@t p=(map @t @t)]
-    ^-  [@t json]
-    [f (pairs (turn ~(tap by p) |=([p=@t d=@t] [p s+d])))]
+    ^-  (unit [@t json])
+    ?.  (~(has by p) 'attributeType')
+      ~
+    [~ f (pairs (turn ~(tap by p) |=([p=@t d=@t] [p s+d])))]
     ::
       %local-goal-fields
     =,  enjs:format
     %-  pure:m  !>
     %-  pairs
-    %+  turn  ~(tap by field-properties.local.store)
+    %+  murn  ~(tap by metadata-properties.local.store)
     |=  [f=@t p=(map @t @t)]
-    ^-  [@t json]
-    [f (pairs (turn ~(tap by p) |=([p=@t d=@t] [p s+d])))]
+    ^-  (unit [@t json])
+    ?.  (~(has by p) 'attributeType')
+      ~
+    [~ f (pairs (turn ~(tap by p) |=([p=@t d=@t] [p s+d])))]
     ::
     %goal-data  (send-goal-data keys.vyu)
     ::
@@ -481,6 +492,7 @@
       chief
       deputies
       open-to
+      metadata
   ==
 ++  all-goals
   |=  =store:gol
@@ -542,25 +554,63 @@
   ==
 ++  enjs-goal-data
   |=(goal-data=(list goal-datum) `json`a+(turn goal-data enjs-goal-datum))
+++  get-goal-labels
+  |=  [=key:gol =store:gol]
+  ^-  (list @t)
+  =/  =pool:gol  (~(got by pools.store) pid.key)
+  =/  =goal:gol  (~(got by goals.pool) gid.key)
+  =/  =@t  (~(gut by metadata.goal) 'labels' '[]')
+  ~(tap in ((as so):dejs:format (need (de:json:html t))))
+++  get-goal-tags :: private labels
+  |=  [=key:gol =store:gol]
+  ^-  (list @t)
+  =/  metadata=(map @t @t)
+    (~(gut by goal-metadata.local.store) key ~)
+  =/  =@t  (~(gut by metadata) 'labels' '[]')
+  ~(tap in ((as so):dejs:format (need (de:json:html t))))
+++  get-goal-attributes
+  |=  [=key:gol =store:gol]
+  ^-  (list [@t @t])
+  =/  =pool:gol  (~(got by pools.store) pid.key)
+  =/  =goal:gol  (~(got by goals.pool) gid.key)
+  %+  murn  ~(tap by metadata.goal)
+  |=  [k=@t v=@t]
+  ^-  (unit [@t @t])
+  =/  properties=(map @t @t)
+    (~(gut by metadata-properties.pool) k ~)
+  ?.  (~(has by properties) 'attributeType')
+    ~
+  [~ k v]
+++  get-goal-fields
+  |=  [=key:gol =store:gol]
+  ^-  (list [@t @t])
+  =/  metadata=(map @t @t)
+    (~(gut by goal-metadata.local.store) key ~)
+  %+  murn  ~(tap by metadata)
+  |=  [k=@t v=@t]
+  ^-  (unit [@t @t])
+  =/  properties=(map @t @t)
+    (~(gut by metadata-properties.local.store) k ~)
+  ?.  (~(has by properties) 'attributeType')
+    ~
+  [~ k v]
 ++  get-datum
   |=  [=key:gol =store:gol]
   ^-  (unit goal-datum)
   ?~  pul=(~(get by pools.store) pid.key)  ~
   ?~  get=(~(get by goals.u.pul) gid.key)  ~
-  =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid.key)
-  =/  fields=(map @t @t)  (~(gut by ?~(pd ~ fields.u.pd)) gid.key ~)
   =+  u.get
   |^
   :-  ~
   :*  key
       summary
-      (~(gut by fields) 'note' '')
-      ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~))) :: labels (pool-specific)
-      ~(tap in (~(gut by tags.local.store) key ~))   :: tags (private)
+      (~(gut by metadata) 'note' '')
+      (get-goal-labels key store) :: labels (pool-specific)
+      (get-goal-tags key store)   :: tags (private)
       inherited-labels
       inherited-tags
-      ?~(pd ~ ~(tap in (~(gut by fields.u.pd) gid ~))) :: attributes (pool-specific)
-      ~(tap in (~(gut by fields.local.store) key ~))   :: fields (private)
+      (get-goal-attributes key store) :: attributes (pool-specific)
+      (get-goal-fields key store)   :: fields (private)
       inherited-attributes
       inherited-fields
       ?~(parent ~ `[pid.key u.parent])
@@ -577,7 +627,7 @@
       ~
     =/  =goal:gol  (~(got by goals.u.pul) u.parent)
     %+  weld
-      ?~(pd ~ ~(tap in (~(gut by tags.u.pd) u.parent ~))) :: labels (pool-specific)
+      (get-goal-labels [pid.key u.parent] store) :: labels (pool-specific)
     $(parent parent.goal)
   ++  inherited-tags
     %~  tap  in
@@ -588,7 +638,7 @@
       ~
     =/  =goal:gol  (~(got by goals.u.pul) u.parent)
     %+  weld
-      ~(tap in (~(gut by tags.local.store) [pid.key u.parent] ~))   :: tags (private)
+      (get-goal-tags [pid.key u.parent] store) :: tags (private)
     $(parent parent.goal)
   ++  inherited-attributes
     =|  attributes=(map @t @t)
@@ -598,11 +648,13 @@
     ?~  parent
       attributes
     =/  =goal:gol  (~(got by goals.u.pul) u.parent)
+    =/  parent-attributes=(list [@t @t])
+      (get-goal-attributes [pid.key u.parent] store)
     %=    $
       parent  parent.goal
         attributes
       %-  ~(gas by attributes)
-      %+  murn  ~(tap by ?~(pd ~ (~(gut by fields.u.pd) u.parent ~)))
+      %+  murn  parent-attributes
       |=  [a=@t d=@t]
       ?:((~(has by attributes) a) ~ [~ a d])
     ==
@@ -614,11 +666,13 @@
     ?~  parent
       fields
     =/  =goal:gol  (~(got by goals.u.pul) u.parent)
+    =/  parent-fields=(list [@t @t])
+      (get-goal-fields [pid.key u.parent] store)
     %=    $
       parent  parent.goal
         fields
       %-  ~(gas by fields)
-      %+  murn  ~(tap by ?~(pd ~ (~(gut by fields.local.store) [pid.key u.parent] ~)))
+      %+  murn  parent-fields
       |=  [a=@t d=@t]
       ?:((~(has by fields) a) ~ [~ a d])
     ==
@@ -635,26 +689,46 @@
   ^-  form:m
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   (pure:m !>((enjs-goal-data (murn keys (curr get-datum store)))))
+++  get-archive-goal-labels
+  |=  [=pid:gol rid=gid:gol =gid:gol =store:gol]
+  ^-  (list @t)
+  =/  =pool:gol  (~(got by pools.store) pid)
+  =+  (~(got by contents.archive.pool) rid)
+  =/  =goal:gol  (~(got by goals) gid)
+  =/  =@t  (~(gut by metadata.goal) 'labels' '[]')
+  ~(tap in ((as so):dejs:format (need (de:json:html t))))
+++  get-archive-goal-attributes
+  |=  [=pid:gol rid=gid:gol =gid:gol =store:gol]
+  ^-  (list [@t @t])
+  =/  =pool:gol  (~(got by pools.store) pid)
+  =+  (~(got by contents.archive.pool) rid)
+  =/  =goal:gol  (~(got by goals) gid)
+  %+  murn  ~(tap by metadata.goal)
+  |=  [k=@t v=@t]
+  ^-  (unit [@t @t])
+  =/  properties=(map @t @t)
+    (~(gut by metadata-properties.pool) k ~)
+  ?.  (~(has by properties) 'attributeType')
+    ~
+  [~ k v]
 ++  get-archive-datum
   |=  [=pid:gol rid=gid:gol =gid:gol =store:gol]
   ^-  (unit goal-datum)
   ?~  pul=(~(get by pools.store) pid)  ~
   ?~  ten=(~(get by contents.archive.u.pul) rid)  ~
   ?~  get=(~(get by goals.u.ten) gid)  ~
-  =/  pd=(unit pool-data:gol)  (~(get by pool-info.store) pid)
-  =/  fields=(map @t @t)  (~(gut by ?~(pd ~ fields.u.pd)) gid ~)
   =+  u.get
   |^
   :-  ~
   :*  [pid gid]
       summary
-      (~(gut by fields) 'note' '')
-      ?~(pd ~ ~(tap in (~(gut by tags.u.pd) gid ~))) :: labels (pool-specific)
-      ~(tap in (~(gut by tags.local.store) [pid gid] ~))   :: tags (private)
+      (~(gut by metadata) 'note' '')
+      (get-archive-goal-labels pid rid gid store) :: labels (pool-specific)
+      (get-goal-tags [pid gid] store)               :: tags (private)
       inherited-labels
       inherited-tags
-      ?~(pd ~ ~(tap in (~(gut by fields.u.pd) gid ~))) :: attributes (pool-specific)
-      ~(tap in (~(gut by fields.local.store) [pid gid] ~))   :: fields (private)
+      (get-archive-goal-attributes pid rid gid store) :: attributes (pool-specific)
+      (get-goal-fields [pid gid] store)                 :: fields (private)
       inherited-attributes
       inherited-fields
       ?~(parent ~ `[pid u.parent])
@@ -675,11 +749,11 @@
         ~
       =/  =goal:gol  (~(got by goals.u.pul) u.parent)
       %+  weld
-        ?~(pd ~ ~(tap in (~(gut by tags.u.pd) u.parent ~))) :: labels (pool-specific)
+        (get-goal-labels [pid u.parent] store) :: labels (pool-specific)
       $(parent parent.goal)
     =/  =goal:gol  (~(got by goals.u.ten) u.parent)
     %+  weld
-      ?~(pd ~ ~(tap in (~(gut by tags.u.pd) u.parent ~))) :: labels (pool-specific)
+      (get-archive-goal-labels pid rid u.parent store) :: labels (pool-specific)
     $(parent parent.goal)
   ++  inherited-tags
     %~  tap  in
@@ -694,11 +768,11 @@
         ~
       =/  =goal:gol  (~(got by goals.u.pul) u.parent)
       %+  weld
-        ~(tap in (~(gut by tags.local.store) [pid u.parent] ~))   :: tags (private)
+        (get-goal-tags [pid u.parent] store) :: tags (private)
       $(parent parent.goal)
     =/  =goal:gol  (~(got by goals.u.ten) u.parent)
     %+  weld
-      ~(tap in (~(gut by tags.local.store) [pid u.parent] ~))   :: tags (private)
+      (get-goal-tags [pid u.parent] store) :: tags (private)
     $(parent parent.goal)
   ++  inherited-attributes
     :: TODO: inherit from context like in labels/tags
@@ -708,12 +782,14 @@
     |-
     ?~  parent
       attributes
-    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
+    =/  =goal:gol  (~(got by goals.u.ten) u.parent)
+    =/  parent-attributes=(list [@t @t])
+      (get-archive-goal-attributes pid rid u.parent store)
     %=    $
       parent  parent.goal
         attributes
       %-  ~(gas by attributes)
-      %+  murn  ~(tap by ?~(pd ~ (~(gut by fields.u.pd) u.parent ~)))
+      %+  murn  parent-attributes
       |=  [a=@t d=@t]
       ?:((~(has by attributes) a) ~ [~ a d])
     ==
@@ -725,14 +801,16 @@
     |-
     ?~  parent
       fields
-    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
+    =/  =goal:gol  (~(got by goals.u.ten) u.parent)
+    =/  parent-fields=(list [@t @t])
+      (get-goal-fields [pid u.parent] store)
     %=    $
       parent  parent.goal
         fields
       %-  ~(gas by fields)
-      %+  murn  ~(tap by ?~(pd ~ (~(gut by fields.local.store) [pid u.parent] ~)))
-      |=  [a=@t d=@t]
-      ?:((~(has by fields) a) ~ [~ a d])
+      %+  murn  parent-fields
+      |=  [f=@t d=@t]
+      ?:((~(has by fields) f) ~ [~ f d])
     ==
   --
 ++  send-archive-goal-datum

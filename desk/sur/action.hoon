@@ -6,15 +6,11 @@
       [%pools-slot-below dis=pid dat=pid]
       [%goals-slot-above dis=key dat=key]
       [%goals-slot-below dis=key dat=key]
-      [%update-local-goal-tags =key p=(each (set @t) (set @t))]
-      [%update-local-tag-property tag=@t p=(each [@t @t] @t)]
-      [%update-local-goal-field =key p=(each [@t @t] @t)]
-      [%update-local-field-property field=@t p=(each [@t @t] @t)]
-      [%del-local-tag tag=@t]
-      [%del-local-field field=@t]
+      [%update-local-goal-metadata =key p=(each [@t @t] @t)]
+      [%update-local-pool-metadata =pid p=(each [@t @t] @t)]
+      [%update-local-metadata-field field=@t p=(each [@t @t] @t)]
+      [%delete-local-metadata-field field=@t]
       [%update-setting p=(each [@t @t] @t)]
-      [%put-collection =path =collection]
-      [%del-collection =path]
   ==
 ++  pool-action
   $%  [%create-pool title=@t]
@@ -22,11 +18,9 @@
       [%yoke =pid yoks=(list plex)]
       [%set-pool-title =pid title=@t]
       [%update-pool-perms =pid new=perms]
-      [%update-pool-property =pid p=(each [@t @t] @t)]
-      [%update-pool-tag-property =pid tag=@t p=(each [@t @t] @t)]
-      [%update-pool-field-property =pid field=@t p=(each [@t @t] @t)]
-      [%put-module =pid module=@t uuid=@t parent=(unit gid) version=@ud body=json]
-      [%del-module =pid module=@t uuid=@t]
+      [%update-pool-metadata =pid p=(each [@t @t] @t)]
+      [%update-pool-metadata-field =pid field=@t p=(each [@t @t] @t)]
+      [%delete-pool-metadata-field =pid field=@t]
   ==
 ++  goal-action
   =<  goal-action
@@ -34,12 +28,11 @@
   +$  goal-action  $%(create mutate)
   +$  create
     $%  [%create-goal =pid upid=(unit gid) summary=@t actionable=? active=?]
-        [%create-goal-with-tag =pid upid=(unit gid) summary=@t actionable=? tag=@t]
     ==
   ++  mutate
     =<  mutate
     |%
-    +$  mutate  $%(life-cycle nexus hitch)
+    +$  mutate  $%(life-cycle nexus)
     +$  life-cycle
       $%  [%archive-goal =pid =gid]
           [%restore-goal =pid =gid]
@@ -52,20 +45,14 @@
           [%set-start =pid =gid start=(unit @da)]
           [%set-end =pid =gid end=(unit @da)]
           [%set-summary =pid =gid summary=@t]
-          [%mark-actionable =pid =gid]
-          [%unmark-actionable =pid =gid]
-          [%mark-complete =pid =gid]
-          [%unmark-complete =pid =gid]
-          [%mark-active =pid =gid]
-          [%unmark-active =pid =gid]
+          [%set-actionable =pid =gid val=?]
+          [%set-complete =pid =gid val=?]
+          [%set-active =pid =gid val=?]
           [%update-goal-perms =pid =gid chief=ship rec=_| =deputies]
           [%reorder-roots =pid roots=(list gid)]
           [%reorder-children =pid =gid children=(list gid)]
           [%reorder-archive =pid context=(unit gid) archive=(list gid)]
-      ==
-    +$  hitch
-      $%  [%update-goal-tags =key p=(each (set @t) (set @t))]
-          [%update-goal-field =pid =gid p=(each [@t @t] @t)]
+          [%update-goal-metadata =pid =gid p=(each [@t @t] @t)]
       ==
     --
   --

@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) [state-5-28:gs =trace:gol]]
+|_  [=bowl:gall cards=(list card:agent:gall) state-5-29:gs]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)
@@ -31,7 +31,7 @@
   :*  (unique-pin own now)
       title
       (~(put by *perms:gol) own %owner)
-      ~  ~  [~ ~]
+      ~  ~  [~ ~]  ~  ~
   ==
 ::
 ++  clone-pool
@@ -82,25 +82,9 @@
     :: mark the goal started if active.axn and if possible
     ::
     ?.  active  this
-    ?~  dis=(mole |.((handle-action:this [%mark-active pid gid])))
+    ?~  dis=(mole |.((handle-action:this [%set-active pid gid %&])))
       this
     u.dis
-    ::
-      %create-goal-with-tag
-    !!
-    :: =+  axn
-    :: =/  old=pool:gol  (~(got by pools.store) pid)
-    :: =/  =gid:gol  (unique-id:gols pid now.bowl)
-    :: :: edit permissions implied in the success of spawn-goal
-    :: :: mark the goal started if possible
-    :: =/  new=pool:gol
-    ::   abet:(create-goal:(apex:pl old) gid upid summary now.bowl mod)
-    :: =.  goal-order.local.store  [[pid gid] goal-order.local.store]
-    :: :: add the pool tag
-    :: =/  data=pool-data:gol  (~(gut by pool-info.store) pid *pool-data:gol)
-    :: =.  tags.data           (~(put by tags.data) gid (sy ~[tag]))
-    :: =.  pool-info.store     (~(put by pool-info.store) pid data)
-    :: this(pools.store (~(put by pools.store) pid new))
     ::
       %archive-goal
     =+  axn
@@ -153,83 +137,80 @@
     =.  pools.store   (~(put by pools.store) pid new)
     this
     ::
-      %mark-actionable
+      %set-actionable
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
-    =/  new=pool:gol  abet:(mark-actionable:(apex:pl old) gid mod)
+    =/  new=pool:gol  abet:(set-actionable:(apex:pl old) gid val mod)
     =.  pools.store   (~(put by pools.store) pid new)
     this
     ::
-      %unmark-actionable
+      %set-complete
     =+  axn
-    =/  old=pool:gol  (~(got by pools.store) pid)
-    =/  new=pool:gol  abet:(unmark-actionable:(apex:pl old) gid mod)
-    =.  pools.store  (~(put by pools.store) pid new)
-    this
-    ::
-      %mark-complete
-    =+  axn
-    =.  this  (handle-action [%mark-active pid gid])
-    =/  old=pool:gol  (~(got by pools.store) pid)
-    ~&  %marking-complete
-    =/  pore
-      ?:  done.i.status.start:(~(got by goals.old) gid)
-        (apex:pl old)
-      (mark-done:(apex:pl old) s+gid now.bowl mod)
-    =/  new=pool:gol  abet:(mark-done:pore e+gid now.bowl mod)
-    =.  pools.store  (~(put by pools.store) pid new)
-    :: automatically complete parent if all its children are complete
-    ::
-    =/  parent=(unit gid:gol)  parent:(~(got by goals.new) gid)
-    ?~  parent  this
-    ?.  %-  ~(all in (~(young nd goals.new) u.parent))
-        |=(=gid:gol done.i.status:(~(got-node nd goals.new) e+gid))
-      this
-    :: TODO: make this only occur if has permissions on ancestors...
-    :: owner responsible for resulting completions
-    =.  src.bowl  our.bowl
-    (handle-action:this [%mark-complete pid u.parent])
-    ::
-      %unmark-complete
-    =+  axn
-    =/  old=pool:gol  (~(got by pools.store) pid)
-    ~&  %unmarking-complete
-    =/  pore  (unmark-done:(apex:pl old) e+gid now.bowl mod)
-    =/  new=pool:gol
-      :: Unmark start done if possible
-      =/  mul  (mule |.((unmark-done:pore s+gid now.bowl mod)))
-      ?-  -.mul
-        %&  abet:p.mul
-        %|  ((slog p.mul) abet:pore)
-      ==
-    this(pools.store (~(put by pools.store) pid new))
-    ::
-      %mark-active
-    =+  axn
-    :: automatically mark parent active if possible
-    =/  parent=(unit gid:gol)
-      parent:(~(got by goals:(~(got by pools.store) pid)) gid)
-    =?  this  ?=(^ parent)
-      (handle-action:this [%mark-active pid u.parent])
-    ~&  %marking-active
-    =/  old=pool:gol  (~(got by pools.store) pid)
-    =/  new=pool:gol  abet:(mark-done:(apex:pl old) s+gid now.bowl mod)
-    this(pools.store (~(put by pools.store) pid new))
-    ::
-      %unmark-active
-    =+  axn
-    :: automatically unmark child active if possible
-    =/  children=(list gid:gol)
-      children:(~(got by goals:(~(got by pools.store) pid)) gid)
-    =.  this
-      |-
-      ?~  children
+    ?-    val
+        %&
+      =.  this  (handle-action [%set-active pid gid %&])
+      =/  old=pool:gol  (~(got by pools.store) pid)
+      ~&  %marking-complete
+      =/  pore
+        ?:  done.i.status.start:(~(got by goals.old) gid)
+          (apex:pl old)
+        (mark-done:(apex:pl old) s+gid now.bowl mod)
+      =/  new=pool:gol  abet:(mark-done:pore e+gid now.bowl mod)
+      =.  pools.store  (~(put by pools.store) pid new)
+      :: automatically complete parent if all its children are complete
+      ::
+      =/  parent=(unit gid:gol)  parent:(~(got by goals.new) gid)
+      ?~  parent  this
+      ?.  %-  ~(all in (~(young nd goals.new) u.parent))
+          |=(=gid:gol done.i.status:(~(got-node nd goals.new) e+gid))
         this
-      (handle-action:this [%unmark-active pid i.children])
-    ~&  %unmarking-active
-    =/  old=pool:gol  (~(got by pools.store) pid)
-    =/  new=pool:gol  abet:(unmark-done:(apex:pl old) s+gid now.bowl mod)
-    this(pools.store (~(put by pools.store) pid new))
+      :: TODO: make this only occur if has permissions on ancestors...
+      :: owner responsible for resulting completions
+      =.  src.bowl  our.bowl
+      (handle-action:this [%set-complete pid u.parent %&])
+      ::
+        %|
+      =/  old=pool:gol  (~(got by pools.store) pid)
+      ~&  %unmarking-complete
+      =/  pore  (unmark-done:(apex:pl old) e+gid now.bowl mod)
+      =/  new=pool:gol
+        :: Unmark start done if possible
+        =/  mul  (mule |.((unmark-done:pore s+gid now.bowl mod)))
+        ?-  -.mul
+          %&  abet:p.mul
+          %|  ((slog p.mul) abet:pore)
+        ==
+      this(pools.store (~(put by pools.store) pid new))
+    ==
+    ::
+      %set-active
+    =+  axn
+    ?-    val
+        %&
+      :: automatically mark parent active if possible
+      =/  parent=(unit gid:gol)
+        parent:(~(got by goals:(~(got by pools.store) pid)) gid)
+      =?  this  ?=(^ parent)
+        (handle-action:this [%set-active pid u.parent %&])
+      ~&  %marking-active
+      =/  old=pool:gol  (~(got by pools.store) pid)
+      =/  new=pool:gol  abet:(mark-done:(apex:pl old) s+gid now.bowl mod)
+      this(pools.store (~(put by pools.store) pid new))
+      ::
+        %|
+      :: automatically unmark child active if possible
+      =/  children=(list gid:gol)
+        children:(~(got by goals:(~(got by pools.store) pid)) gid)
+      =.  this
+        |-
+        ?~  children
+          this
+        (handle-action:this [%set-active pid i.children %|])
+      ~&  %unmarking-active
+      =/  old=pool:gol  (~(got by pools.store) pid)
+      =/  new=pool:gol  abet:(unmark-done:(apex:pl old) s+gid now.bowl mod)
+      this(pools.store (~(put by pools.store) pid new))
+    ==
     ::
       %set-summary
     =+  axn
@@ -291,30 +272,6 @@
     =.  goal-order.local.store  (into goal-order.local.store +(u.idx) dis)
     this
     ::
-      %put-collection
-    =/  cos=(map @ta collection:gol)
-      (fall (~(get of collections.local.store) (snip path.axn)) ~)
-    =.  cos  (~(put by cos) (rear path.axn) collection.axn)
-    =.  collections.local.store
-      (~(put of collections.local.store) (snip path.axn) cos)
-    this
-    ::
-      %del-collection
-    =/  cos=(map @ta collection:gol)
-      (fall (~(get of collections.local.store) (snip path.axn)) ~)
-    =.  cos  (~(del by cos) (rear path.axn))
-    =.  collections.local.store
-      ?~  cos
-        (~(del of collections.local.store) (snip path.axn))
-      (~(put of collections.local.store) (snip path.axn) cos)
-    this
-    ::
-      %put-module
-    !!
-    ::
-      %del-module
-    !!
-    ::
       %update-pool-perms
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
@@ -354,57 +311,59 @@
     =.  pools.store  (~(put by pools.store) pid new)
     this
     ::
-      %update-local-goal-tags
-    =+  axn
+      %update-local-goal-metadata
     ?>  =(src our):bowl
-    =/  tags=(set @t)  (~(gut by tags.local.store) key.axn ~)
-    =.  tags
+    =/  goal-metadata=(map @t @t)  (~(gut by goal-metadata.local.store) key.axn ~)
+    =.  goal-metadata
       ?-  -.p.axn
-        %&  (~(uni in tags) p.p.axn)
-        %|  (~(dif in tags) p.p.axn)
+        %&  (~(put by goal-metadata) p.p.axn)
+        %|  (~(del by goal-metadata) p.p.axn)
       ==
-    this(tags.local.store (~(put by tags.local.store) key.axn tags))
+    this(goal-metadata.local.store (~(put by goal-metadata.local.store) key.axn goal-metadata))
     ::
-      %update-local-goal-field
-    =+  axn
+      %update-local-pool-metadata
     ?>  =(src our):bowl
-    =/  fields=(map @t @t)  (~(gut by fields.local.store) key.axn ~)
-    =.  fields
+    =/  pool-metadata=(map @t @t)  (~(gut by pool-metadata.local.store) pid.axn ~)
+    =.  pool-metadata
       ?-  -.p.axn
-        %&  (~(put by fields) p.p.axn)
-        %|  (~(del by fields) p.p.axn)
+        %&  (~(put by pool-metadata) p.p.axn)
+        %|  (~(del by pool-metadata) p.p.axn)
       ==
-    this(fields.local.store (~(put by fields.local.store) key.axn fields))
+    this(pool-metadata.local.store (~(put by pool-metadata.local.store) pid.axn pool-metadata))
     ::
-      %update-local-tag-property
+      %update-local-metadata-field
     ?>  =(src our):bowl
-    =/  properties  (~(gut by tag-properties.local.store) tag.axn ~)
+    =/  properties  (~(gut by metadata-properties.local.store) field.axn ~)
     =.  properties
       ?-  -.p.axn
         %&  (~(put by properties) p.p.axn)
         %|  (~(del by properties) p.p.axn)
       ==
-    =.  tag-properties.local.store
-      (~(put by tag-properties.local.store) tag.axn properties)
-    this
+    %=    this
+        metadata-properties.local.store
+      (~(put by metadata-properties.local.store) field.axn properties)
+    ==
     ::
-      %update-local-field-property
-    ?>  =(src our):bowl
-    =/  properties  (~(gut by field-properties.local.store) field.axn ~)
-    =.  properties
-      ?-  -.p.axn
-        %&  (~(put by properties) p.p.axn)
-        %|  (~(del by properties) p.p.axn)
-      ==
-    =.  field-properties.local.store
-      (~(put by field-properties.local.store) field.axn properties)
-    this
+      %delete-local-metadata-field
+    this(metadata-properties.local.store (~(del by metadata-properties.local.store) field.axn))
     ::
-      %del-local-tag
-    this(tag-properties.local.store (~(del by tag-properties.local.store) tag.axn))
+      %update-pool-metadata
+    =/  old=pool:gol  (~(got by pools.store) pid.axn)
+    =/  new=pool:gol
+      abet:(update-pool-metadata:(apex:pl old) p.axn mod)
+    this(pools.store (~(put by pools.store) pid.axn new))
     ::
-      %del-local-field
-    this(field-properties.local.store (~(del by field-properties.local.store) field.axn))
+      %update-pool-metadata-field
+    =/  old=pool:gol  (~(got by pools.store) pid.axn)
+    =/  new=pool:gol
+      abet:(update-pool-metadata-field:(apex:pl old) field.axn p.axn mod)
+    this(pools.store (~(put by pools.store) pid.axn new))
+    ::
+      %delete-pool-metadata-field
+    =/  old=pool:gol  (~(got by pools.store) pid.axn)
+    =/  new=pool:gol
+      abet:(delete-pool-metadata-field:(apex:pl old) field.axn mod)
+    this(pools.store (~(put by pools.store) pid.axn new))
     ::
       %create-pool
     =+  axn
@@ -424,72 +383,14 @@
     =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
     this
     ::
-      %update-pool-property
+      %update-goal-metadata
     =/  old=pool:gol  (~(got by pools.store) pid.axn)
-    ?>  (check-pool-edit-perm:(apex:pl old) mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pid.axn *pool-data:gol)
-    =.  properties.data
-      ?-  -.p.axn
-        %&  (~(put by properties.data) p.p.axn)
-        %|  (~(del by properties.data) p.p.axn)
-      ==
-    this(pool-info.store (~(put by pool-info.store) pid.axn data))
-    ::
-      %update-pool-tag-property
-    =/  old=pool:gol  (~(got by pools.store) pid.axn)
-    ?>  (check-pool-edit-perm:(apex:pl old) mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pid.axn *pool-data:gol)
-    =/  properties  (~(gut by tag-properties.data) tag.axn ~)
-    =.  properties
-      ?-  -.p.axn
-        %&  (~(put by properties) p.p.axn)
-        %|  (~(del by properties) p.p.axn)
-      ==
-    =.  tag-properties.data
-      (~(put by tag-properties.data) tag.axn properties)
-    this(pool-info.store (~(put by pool-info.store) pid.axn data))
-    ::
-      %update-pool-field-property
-    =/  old=pool:gol  (~(got by pools.store) pid.axn)
-    ?>  (check-pool-edit-perm:(apex:pl old) mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pid.axn *pool-data:gol)
-    =/  properties  (~(gut by field-properties.data) field.axn ~)
-    =.  properties
-      ?-  -.p.axn
-        %&  (~(put by properties) p.p.axn)
-        %|  (~(del by properties) p.p.axn)
-      ==
-    =.  field-properties.data
-      (~(put by field-properties.data) field.axn properties)
-    this(pool-info.store (~(put by pool-info.store) pid.axn data))
-    ::
-      %update-goal-field
-    =/  old=pool:gol  (~(got by pools.store) pid.axn)
-    ?>  (check-goal-edit-perm:(apex:pl old) gid.axn mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pid.axn *pool-data:gol)
-    =/  fields=(map @t @t)  (~(gut by fields.data) gid.axn ~)
-    =.  fields
-      ?-  -.p.axn
-        %&  (~(put by fields) p.p.axn)
-        %|  (~(del by fields) p.p.axn)
-      ==
-    =.  fields.data         (~(put by fields.data) gid.axn fields)
-    this(pool-info.store (~(put by pool-info.store) pid.axn data))
-    ::
-      %update-goal-tags
-    =/  old=pool:gol  (~(got by pools.store) pid.key.axn)
-    ?>  (check-goal-edit-perm:(apex:pl old) gid.key.axn mod)
-    =/  data=pool-data:gol  (~(gut by pool-info.store) pid.key.axn *pool-data:gol)
-    =/  tags=(set @t)       (~(gut by tags.data) gid.key.axn ~)
-    =.  tags
-      ?-  -.p.axn
-        %&  (~(uni in tags) p.p.axn)
-        %|  (~(dif in tags) p.p.axn)
-      ==
-    =.  tags.data           (~(put by tags.data) gid.key.axn tags)
-    this(pool-info.store (~(put by pool-info.store) pid.key.axn data))
+    =/  new=pool:gol
+      abet:(update-goal-metadata:(apex:pl old) gid.axn p.axn mod)
+    this(pools.store (~(put by pools.store) pid.axn new))
     ::
       %update-setting
+    ?>  =(src our):bowl
     =,  local.store
     ?-  -.p.axn
       %&  this(settings.local.store (~(put by settings) p.p.axn))

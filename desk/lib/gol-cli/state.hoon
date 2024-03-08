@@ -5,15 +5,15 @@
 |%
 +$  card  card:agent:gall
 ::
-+$  state-5-28  [%'5-28' =store]
-+$  state-5-27  [%'5-27' =store:old-goals]
++$  state-5-29  [%'5-29' =store]
++$  state-5-28  [%'5-28' =store:old-goals]
 +$  versioned-state
-  $%  state-5-27
-      state-5-28
+  $%  state-5-28
+      state-5-29
   ==
 ::
 ++  upgrade-io
-  |=  [new=state-5-28 =bowl:gall]
+  |=  [new=state-5-29 =bowl:gall]
   |^  ^-  (list card)
   :: TODO: Follow all pools and prompt others to refollow?
   ;:  weld
@@ -35,10 +35,10 @@
 ::
 ++  convert-to-latest
   |=  old=versioned-state
-  ^-  state-5-28
+  ^-  state-5-29
   ?-  -.old
-    %'5-27'  (convert-5-27-to-5-28 old)
-      %'5-28'
+    %'5-28'  (convert-5-28-to-5-29 old)
+      %'5-29'
     %=    old
         pools.store
       %-  ~(gas by *pools)
@@ -71,21 +71,66 @@
   ==
 :: Development states
 ::
-++  convert-5-27-to-5-28
-  |=  =state-5-27
-  ^-  state-5-28
+++  convert-5-28-to-5-29
+  |=  =state-5-28
+  ^-  state-5-29
   =/  pools
     %-  ~(gas by *pools)
-    %+  turn  ~(tap by pools.store.state-5-27)
+    %+  turn  ~(tap by pools.store.state-5-28)
     |=  [=pid =pool:old-goals]
     ^-  [^pid ^pool]
+    =/  pd  (~(get by pool-info.store.state-5-28) pid)
+    =/  =goals
+      %-  ~(gas by *goals)
+      %+  turn  ~(tap by goals.pool)
+      |=  [=gid =goal:old-goals]
+      ^-  [^gid ^goal]
+      =/  tags=(set @t)  (~(gut by ?~(pd ~ tags.u.pd)) gid ~)
+      =/  metadata=(map @t @t)
+        %+  ~(put by *(map @t @t))
+          'labels'
+        %-  en:json:html
+        a+(turn ~(tap in tags) (lead %s))
+      :-  gid
+      :*  gid.goal
+          summary.goal
+          parent.goal
+          children.goal
+          start.goal
+          end.goal
+          actionable.goal
+          chief.goal
+          deputies.goal
+          open-to.goal
+          metadata
+      ==
     :-  pid
     :*  pid.pool
         title.pool
         perms.pool
-        goals.pool
+        goals
         roots.pool
-        [~ ~]
+        [~ ~] :: archive.pool (no important archived goals)
+        ~ :: metadata related to pool
+        ~ :: metadata-properties
     ==
-  [%'5-28' pools [local pool-info json-tree]:store:state-5-27]
+  =/  goal-metadata=(map key (map @t @t))
+    %-  ~(gas by *(map key (map @t @t)))
+    %+  turn  ~(tap by tags.local.store.state-5-28)
+    |=  [=key tags=(set @t)]
+    ^-  [^key (map @t @t)]
+    :-  key
+    %+  ~(put by *(map @t @t))
+      'labels'
+    %-  en:json:html
+    a+(turn ~(tap in tags) (lead %s))
+  =/  =local
+    :*  goal-order.local.store.state-5-28
+        pool-order.local.store.state-5-28
+        goal-metadata
+        ~ :: pool-metadata
+        ~ :: metadata-properties
+        settings.local.store.state-5-28
+    ==
+  [%'5-29' pools local json-tree.store.state-5-28]
 --

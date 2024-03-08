@@ -13,7 +13,7 @@
       outflow=(set nid)
   ==
 +$  deputies  (map ship ?(%edit %create))
-+$  open-to   (unit ?(%admins %deputies %viewers)) :: who can claim goal
++$  open-to   (unit ?(%admins %deputies %viewers)) :: who can claim the goal
 +$  goal
   $:  =gid
       summary=@t         :: (140 character summary of a goal)
@@ -25,6 +25,7 @@
       chief=ship         :: sole person responsible
       =deputies          :: %edit can edit but not move
       =open-to
+      :: [*] metadata=(map @t @t)
       :: labels=(set @t)
       :: attributes=(map @t @t)
   ==
@@ -33,7 +34,10 @@
 +$  role     ?(%owner %admin %creator %viewer)
 +$  perms    (map ship role)
 ::
-+$  archive  (map gid [par=(unit gid) =goals])
++$  archive
+  $:  contexts=(map (unit gid) (list gid))
+      contents=(map gid [context=(unit gid) =goals])
+  ==
 ::
 +$  pool
   $:  =pid
@@ -42,6 +46,8 @@
       =goals
       roots=(list gid)
       =archive
+      :: [*] metadata=(map @t @t)
+      :: [*] metadata-properties=(map @t (map @t @t))
       :: label-properties=(map @t (map @t @t))
       :: attribute-properties=(map @t (map @t @t))
   ==
@@ -68,7 +74,10 @@
 ::
 +$  local
   $:  goal-order=(list key)
-      pool-order=(list pid) :: order of pools
+      pool-order=(list pid)
+      :: goal-metadata=(map key (map @t @t))
+      :: pool-metadata=(map pid (map @t @t))
+      :: metadata-properties=(map @t (map @t @t))
       tags=(map key (set @t))
       fields=(map key (map @t @t))
       tag-properties=(map @t (map @t @t))

@@ -13,7 +13,6 @@
 /=  x  /ted/test
 ::
 |%
-+$  inflated-state  [state-5-28:gs =trace:gol] 
 +$  card     card:agent:gall
 ++  non-cab
   %+  cook
@@ -22,7 +21,7 @@
 ++  cab-split  (most cab non-cab)
 --
 ::
-=|  inflated-state
+=|  state-5-29:gs
 =*  state  -
 ::
 %+  verb  |
@@ -45,9 +44,9 @@
   ^-  (quip card _this)
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-28:gs   (convert-to-latest:gs old)
+  =/  new=state-5-29:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
-  [cards this(-.state new, trace *trace:gol)]
+  [cards this(state new)]
 ::
 ++  on-poke
   |=  [=mark =vase]
@@ -157,17 +156,6 @@
     :: =/  host=@p  (slav %p host.gid)
     :: [%& json+!>((enjs-goal-local:gol-cli-json (~(got by goals.local.store) [[host name.gid] key.gid])))]
     ::
-      [%'pool_info' ~]
-    :-  %|  :_  ~
-    %+  turn  ~(tap in ~(key by pool-info.store))
-    |=  =pid:gol
-    :_  %json
-    (rap 3 (scot %p host.pid) '_' name.pid ~)
-    ::
-      [%'pool_info' pid=@ta %json ~]
-    =+  ;;  pid=[host=@t name=@t ~]  (rash pid.pole cab-split)
-    =/  host=@p  (slav %p host.pid)
-    [%& json+!>((enjs-pool-data:gol-cli-json (~(got by pool-info.store) [host name.pid])))]
   ==
 ::
 ++  on-leave  on-leave:def

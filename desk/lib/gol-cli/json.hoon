@@ -44,7 +44,7 @@
       (ot ~[setting+so contents+so])
     (ot ~[setting+so])
   ::
-  ++  pd-goal-field
+  ++  pd-goal-metadata
     |=  jon=json
     ?>  ?=(%o -.jon)
     :-  (pid (~(got by p.jon) 'pid'))
@@ -54,7 +54,7 @@
       (ot ~[field+so data+so])
     (ot ~[field+so])
   ::
-  ++  pd-pool-property
+  ++  pd-pool-metadata
     |=  jon=json
     ?>  ?=(%o -.jon)
     :-  (pid (~(got by p.jon) 'pid'))
@@ -63,17 +63,7 @@
       (ot ~[property+so data+so])
     (ot ~[property+so])
   ::
-  ++  pd-pool-tag-property
-    |=  jon=json
-    ?>  ?=(%o -.jon)
-    :-  (pid (~(got by p.jon) 'pid'))
-    :-  (so (~(got by p.jon) 'tag'))
-    %.  o+(~(del by (~(del by p.jon) 'pid')) 'tag')
-    %+  (pd ,[@t @t] [@t])
-      (ot ~[property+so data+so])
-    (ot ~[property+so])
-  ::
-  ++  pd-pool-field-property
+  ++  pd-pool-metadata-field
     |=  jon=json
     ?>  ?=(%o -.jon)
     :-  (pid (~(got by p.jon) 'pid'))
@@ -83,16 +73,7 @@
       (ot ~[property+so data+so])
     (ot ~[property+so])
   ::
-  ++  pd-local-tag-property
-    |=  jon=json
-    ?>  ?=(%o -.jon)
-    :-  (so (~(got by p.jon) 'tag'))
-    %.  o+(~(del by p.jon) 'tag')
-    %+  (pd ,[@t @t] [@t])
-      (ot ~[property+so data+so])
-    (ot ~[property+so])
-  ::
-  ++  pd-local-field-property
+  ++  pd-local-metadata-field
     |=  jon=json
     ?>  ?=(%o -.jon)
     :-  (so (~(got by p.jon) 'field'))
@@ -101,29 +82,20 @@
       (ot ~[property+so data+so])
     (ot ~[property+so])
   ::
-  ++  ud-goal-tags
+  ++  pd-local-goal-metadata
     |=  jon=json
     ?>  ?=(%o -.jon)
     :-  (key (~(got by p.jon) 'key'))
     %.  o+(~(del by p.jon) 'key')
-    %+  (ud (set @t) (set @t))
-      (ot ~[tags+(as so)])
-    (ot ~[tags+(as so)])
+    %+  (pd ,[@t @t] [@t])
+      (ot ~[field+so data+so])
+    (ot ~[field+so])
   ::
-  ++  ud-local-goal-tags
+  ++  pd-local-pool-metadata
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (key (~(got by p.jon) 'key'))
-    %.  o+(~(del by p.jon) 'key')
-    %+  (ud (set @t) (set @t))
-      (ot ~[tags+(as so)])
-    (ot ~[tags+(as so)])
-  ::
-  ++  pd-local-goal-field
-    |=  jon=json
-    ?>  ?=(%o -.jon)
-    :-  (key (~(got by p.jon) 'key'))
-    %.  o+(~(del by p.jon) 'key')
+    :-  (pid (~(got by p.jon) 'pid'))
+    %.  o+(~(del by p.jon) 'pid')
     %+  (pd ,[@t @t] [@t])
       (ot ~[field+so data+so])
     (ot ~[field+so])
@@ -137,7 +109,6 @@
         [%delete-pool (ot ~[pid+pid])]
         [%set-pool-title (ot ~[pid+pid title+so])]
         [%create-goal (ot ~[pid+pid upid+unit-gid summary+so actionable+bo active+bo])]
-        [%create-goal-with-tag (ot ~[pid+pid upid+unit-gid summary+so actionable+bo tag+so])]
         [%archive-goal (ot ~[pid+pid gid+gid])]
         [%restore-goal (ot ~[pid+pid gid+gid])]
         [%restore-to-root (ot ~[pid+pid gid+gid])]
@@ -148,12 +119,9 @@
         [%set-summary (ot ~[pid+pid gid+gid summary+so])]
         [%set-start (ot ~[pid+pid gid+gid start+unit-di])]
         [%set-end (ot ~[pid+pid gid+gid end+unit-di])]
-        [%mark-actionable (ot ~[pid+pid gid+gid])]
-        [%unmark-actionable (ot ~[pid+pid gid+gid])]
-        [%mark-complete (ot ~[pid+pid gid+gid])]
-        [%unmark-complete (ot ~[pid+pid gid+gid])]
-        [%mark-active (ot ~[pid+pid gid+gid])]
-        [%unmark-active (ot ~[pid+pid gid+gid])]
+        [%set-actionable (ot ~[pid+pid gid+gid val+bo])]
+        [%set-complete (ot ~[pid+pid gid+gid val+bo])]
+        [%set-active (ot ~[pid+pid gid+gid val+bo])]
         [%reorder-roots (ot ~[pid+pid roots+(ar gid)])]
         [%reorder-children (ot ~[pid+pid gid+gid children+(ar gid)])]
         [%reorder-archive (ot ~[pid+pid context+unit-gid archive+(ar gid)])]
@@ -161,26 +129,17 @@
         [%pools-slot-below (ot ~[dis+pid dat+pid])]
         [%goals-slot-above (ot ~[dis+key dat+key])]
         [%goals-slot-below (ot ~[dis+key dat+key])]
-        [%put-collection (ot ~[path+pa collection+collection])]
-        [%del-collection (ot ~[path+pa])]
         [%update-pool-perms (ot ~[pid+pid new+perms])]
-        [%update-pool-property pd-pool-property]
-        [%update-pool-tag-property pd-pool-tag-property]
-        [%update-pool-field-property pd-pool-field-property]
-        [%update-goal-tags ud-goal-tags]
-        [%update-goal-field pd-goal-field]
-        [%update-local-goal-tags ud-local-goal-tags]
-        [%update-local-tag-property pd-local-tag-property]
-        [%del-local-tag (ot ~[tag+so])]
-        [%del-local-field (ot ~[field+so])]
-        [%update-local-goal-field pd-local-goal-field]
-        [%update-local-field-property pd-local-field-property]
+        [%update-pool-metadata pd-pool-metadata]
+        [%update-pool-metadata-field pd-pool-metadata-field]
+        [%delete-pool-metadata-field (ot ~[pid+pid field+so])]
+        [%update-goal-metadata pd-goal-metadata]
+        [%update-local-goal-metadata pd-local-goal-metadata]
+        [%update-local-pool-metadata pd-local-pool-metadata]
+        [%update-local-metadata-field pd-local-metadata-field]
+        [%delete-local-metadata-field (ot ~[field+so])]
         [%update-setting pd-setting]
     ==
-  ::
-  ++  collection  (ot ~[keys+(ar key) themes+(as so)])
-  ::
-  ++  tag  (ot ~[text+so color+so private+bo])
   ::
   ++  field-type
     |=  jon=json
@@ -348,12 +307,6 @@
   |=  settings=(map @t @t)
   ^-  json
   s+'Hello! I am your goals settings!'
-::
-++  enjs-pool-data
-  =,  enjs:format
-  |=  =pool-data
-  ^-  json
-  s+'Hello! I am some pool info!'
 ::
 ++  enjs-perms
   =,  enjs:format
