@@ -37,11 +37,12 @@
     emot  ~(. gol-cli-emot bowl ~ state)
 ::
 ++  on-init   on-init:def
-++  on-save   !>(-.state)
+++  on-save   !>(state)
 ::
 ++  on-load
   |=  =old=vase
   ^-  (quip card _this)
+  ?:  %&  [~ this]
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
   =/  new=state-5-29:gs   (convert-to-latest:gs old)
@@ -97,6 +98,7 @@
   ?+    pole  (on-peek:def pole)
     [%x %store ~]  ``noun+!>(store)
     [%x %pools ~]  ``json+!>((enjs-pools:gol-cli-json pools.store))
+    [%x %local ~]  ``json+!>((enjs-local:gol-cli-json local.store))
   ==
 ::
 ++  on-watch
@@ -134,13 +136,13 @@
     ~[%goals]
     ::
       [%local %order %json ~]
-    [%& json+!>((enjs-goal-order:gol-cli-json goal-order.local.store))]
+    !!
     ::
       [%local %pools %json ~]
-    [%& json+!>((enjs-pool-order:gol-cli-json pool-order.local.store))]
+    !!
     ::
       [%local %settings %json ~]
-    [%& json+!>((enjs-settings:gol-cli-json settings.local.store))]
+    !!
     ::
       [%local %goals ~]
     !!

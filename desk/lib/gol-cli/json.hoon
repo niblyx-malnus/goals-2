@@ -272,81 +272,39 @@
       [%title s+title.pool]
       [%perms (enjs-perms perms.pool)]
       [%goals (enjs-goals goals.pool)]
+      [%roots a+(turn roots.pool enjs-gid)]
       [%archive (enjs-archive archive.pool)]
+      [%metadata (enjs-metadata metadata.pool)]
+      [%metadata-properties (enjs-metadata-properties metadata-properties.pool)]
   ==
-  :: |=  =npool
-  :: %-  pairs
-  :: :~  [%perms (enjs-pool-perms perms.nexus.npool)]
-  ::     [%nexus (enjs-pool-nexus nexus.npool)]
-  ::     [%trace (enjs-pool-trace trace.npool)]
-  :: ==
 ::
-:: ++  enjs-pool-froze
-::   =,  enjs:format
-::   |=  [froze=pool-froze owner=^ship]
-::   ^-  json
-::   %-  pairs
-::   :~  [%owner (ship owner)]
-::       [%birth (numb (unm:chrono:userlib birth.froze))]
-::       [%creator (ship creator.froze)]
-::   ==
-++  enjs-goal-order
+++  enjs-metadata
   =,  enjs:format
-  |=  order=(list key)
-  ^-  json
-  s+'Hello! I am your goal order!'
+  |=  metadata=(map @t @t)
+  %-  pairs
+  %+  turn  ~(tap by metadata)
+  |=([f=@t v=@t] [f s+v])
 ::
-++  enjs-pool-order
+++  enjs-metadata-properties
   =,  enjs:format
-  |=  order=(list pid)
-  ^-  json
-  s+'Hello! I am your pool order!'
-::
-++  enjs-settings
-  =,  enjs:format
-  |=  settings=(map @t @t)
-  ^-  json
-  s+'Hello! I am your goals settings!'
+  |=  metadata-properties=(map @t (map @t @t))
+  %-  pairs
+  %+  turn
+    ~(tap by metadata-properties)
+  |=  [f=@t p=(map @t @t)]
+  [f (enjs-metadata p)]
 ::
 ++  enjs-perms
   =,  enjs:format
   |=  =perms
   ^-  json
-  :-  %a  %+  turn  ~(tap by perms) 
+  :-  %a
+  %+  turn  ~(tap by perms) 
   |=  [=@p =role] 
   %-  pairs
   :~  [%ship s+(scot %p p)]
       [%role s+role]
   ==
-::
-:: ++  enjs-pool-nexus
-::   =,  enjs:format
-::   |=  nexus=pool-nexus
-::   ^-  json
-::   %-  pairs
-::   :~  [%goals (enjs-goals goals.nexus)]
-::       [%cache (enjs-goals cache.nexus)]
-::   ==
-:: ::
-:: ++  enjs-pool-hitch
-::   =,  enjs:format
-::   |=  ph=pool-hitch
-::   ^-  json
-::   %-  pairs
-::   :~  [%title s+title.ph]
-::       [%note s+note.ph]
-::       :: [%fields (enjs-field-types fields.ph)]
-::   ==
-::
-:: ++  enjs-field-types
-::   =,  enjs:format
-::   |=  fields=(map @t field-type)
-::   ^-  json
-::   %-  pairs
-::   %+  turn  ~(tap by fields)
-::   |=  [field=@t =field-type]
-::   ^-  [@t json]
-::   [field (enjs-field-type field-type)]
 ::
 ++  enjs-yoke
   =,  enjs:format
@@ -367,33 +325,38 @@
   ^-  [@t json]
   [gid (enjs-goal goal)]
 ::
-:: ++  enjs-pex  enjs-pool-trace
-:: ::
-:: ++  enjs-pool-trace
-::   =,  enjs:format
-::   |=  trace=pool-trace
-::   ^-  json
-::   %-  pairs
-::   :~  [%roots a+(turn roots.trace enjs-gid)]
-::       [%roots-by-precedence a+(turn roots-by-precedence.trace enjs-gid)]
-::       [%roots-by-start a+(turn roots-by-start.trace enjs-gid)]
-::       [%roots-by-end a+(turn roots-by-end.trace enjs-gid)]
-::       [%cache-roots a+(turn cache-roots.trace enjs-gid)]
-::       [%cache-roots-by-precedence a+(turn cache-roots-by-precedence.trace enjs-gid)]
-::       [%cache-roots-by-start a+(turn cache-roots-by-start.trace enjs-gid)]
-::       [%cache-roots-by-end a+(turn cache-roots-by-end.trace enjs-gid)]
-::   ==
+++  enjs-local
+  =,  enjs:format
+  |=  local
+  ^-  json
+  %-  pairs
+  :~  [%goal-order a+(turn goal-order enjs-key)]
+      [%pool-order a+(turn pool-order (cork enjs-pid (lead %s)))]
+      [%goal-metadata (enjs-goal-metadata goal-metadata)]
+      [%pool-metadata (enjs-pool-metadata pool-metadata)]
+      [%metadata-properties (enjs-metadata-properties metadata-properties)]
+      [%settings (enjs-metadata settings)]
+  ==
 ::
-:: ++  enjs-nex
-::   =,  enjs:format
-::   |=  =nex
-::   ^-  json
-::   :-  %a  %+  turn  ~(tap by nex) 
-::   |=  [=gid nexus=goal-nexus trace=goal-trace] 
-::   %-  pairs
-::   :~  [%gid (enjs-gid gid)]
-::       [%goal (enjs-goal-nexus-trace nexus trace)]
-::   ==
+++  enjs-goal-metadata
+  =,  enjs:format
+  |=  goal-metadata=(map key (map @t @t))
+  ^-  json
+  %-  pairs
+  %+  turn  ~(tap by goal-metadata)
+  |=  [=key metadata=(map @t @t)]
+  :-  +:(enjs-key key)
+  (enjs-metadata metadata)
+::
+++  enjs-pool-metadata
+  =,  enjs:format
+  |=  pool-metadata=(map pid (map @t @t))
+  ^-  json
+  %-  pairs
+  %+  turn  ~(tap by pool-metadata)
+  |=  [=pid metadata=(map @t @t)]
+  :-  (enjs-pid pid)
+  (enjs-metadata metadata)
 ::
 ++  enjs-gid-v
   =,  enjs:format
@@ -403,36 +366,6 @@
   :~  [%gid (enjs-gid gid)]
       [%virtual b+v]
   ==
-::
-:: ++  enjs-goal-nexus-trace
-::   =,  enjs:format
-::   |=  nexus=[goal-nexus goal-trace]
-::   ^-  json
-::   %-  pairs
-::   :~  [%par ?~(par.nexus ~ (enjs-gid u.par.nexus))]
-::       [%kids a+(turn ~(tap in kids.nexus) enjs-gid)]
-::       [%start (enjs-node start.nexus)]
-::       [%end (enjs-node end.nexus)]
-::       [%complete b+complete.nexus]
-::       [%actionable b+actionable.nexus]
-::       [%chief (ship chief.nexus)]
-::       [%deputies a+(turn ~(tap in deputies.nexus) ship)]
-::       [%tags a+(turn ~(tap in tags.nexus) (lead %s))]
-::       [%fields (enjs-fields fields.nexus)]
-::       [%stock (enjs-stock stock.nexus)]
-::       [%ranks (enjs-ranks ranks.nexus)]
-::       [%young a+(turn young.nexus enjs-gid-v)]
-::       [%young-by-precedence a+(turn young-by-precedence.nexus enjs-gid-v)]
-::       [%young-by-start a+(turn young-by-start.nexus enjs-gid-v)]
-::       [%young-by-end a+(turn young-by-end.nexus enjs-gid-v)]
-::       [%progress (enjs-progress progress.nexus)]
-::       [%prio-left a+(turn ~(tap in prio-left.nexus) enjs-gid)]
-::       [%prio-ryte a+(turn ~(tap in prio-ryte.nexus) enjs-gid)]
-::       [%prec-left a+(turn ~(tap in prec-left.nexus) enjs-gid)]
-::       [%prec-ryte a+(turn ~(tap in prec-ryte.nexus) enjs-gid)]
-::       [%nest-left a+(turn ~(tap in nest-left.nexus) enjs-gid)]
-::       [%nest-ryte a+(turn ~(tap in nest-ryte.nexus) enjs-gid)]
-::   ==
 ::
 ++  enjs-stock
   =,  enjs:format
@@ -479,6 +412,8 @@
       [%actionable b+actionable.goal]
       [%chief s+(scot %p chief.goal)]
       [%deputies (pairs (turn ~(tap by deputies.goal) |=([=@p =@t] [(scot %p p) s+t])))]
+      [%open-to ?~(open-to.goal ~ s+u.open-to.goal)]
+      [%metadata (enjs-metadata metadata.goal)]
   ==
 ::
 ++  enjs-archive-contexts
