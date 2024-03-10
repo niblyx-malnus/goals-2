@@ -313,7 +313,7 @@
     ::
       %update-local-goal-metadata
     ?>  =(src our):bowl
-    =/  goal-metadata=(map @t @t)  (~(gut by goal-metadata.local.store) key.axn ~)
+    =/  goal-metadata=(map @t json)  (~(gut by goal-metadata.local.store) key.axn ~)
     =.  goal-metadata
       ?-  -.p.axn
         %&  (~(put by goal-metadata) p.p.axn)
@@ -323,7 +323,7 @@
     ::
       %update-local-pool-metadata
     ?>  =(src our):bowl
-    =/  pool-metadata=(map @t @t)  (~(gut by pool-metadata.local.store) pid.axn ~)
+    =/  pool-metadata=(map @t json)  (~(gut by pool-metadata.local.store) pid.axn ~)
     =.  pool-metadata
       ?-  -.p.axn
         %&  (~(put by pool-metadata) p.p.axn)

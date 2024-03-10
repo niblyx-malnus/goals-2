@@ -6,11 +6,11 @@
       [%pools-slot-below dis=pid dat=pid]
       [%goals-slot-above dis=key dat=key]
       [%goals-slot-below dis=key dat=key]
-      [%update-local-goal-metadata =key p=(each [@t @t] @t)]
-      [%update-local-pool-metadata =pid p=(each [@t @t] @t)]
-      [%update-local-metadata-field field=@t p=(each [@t @t] @t)]
+      [%update-local-goal-metadata =key p=(each [@t json] @t)]
+      [%update-local-pool-metadata =pid p=(each [@t json] @t)]
+      [%update-local-metadata-field field=@t p=(each [@t json] @t)]
       [%delete-local-metadata-field field=@t]
-      [%update-setting p=(each [@t @t] @t)]
+      [%update-setting p=(each [@t json] @t)]
   ==
 ++  pool-action
   $%  [%create-pool title=@t]
@@ -18,8 +18,8 @@
       [%yoke =pid yoks=(list plex)]
       [%set-pool-title =pid title=@t]
       [%update-pool-perms =pid new=perms]
-      [%update-pool-metadata =pid p=(each [@t @t] @t)]
-      [%update-pool-metadata-field =pid field=@t p=(each [@t @t] @t)]
+      [%update-pool-metadata =pid p=(each [@t json] @t)]
+      [%update-pool-metadata-field =pid field=@t p=(each [@t json] @t)]
       [%delete-pool-metadata-field =pid field=@t]
   ==
 ++  goal-action
@@ -52,7 +52,7 @@
           [%reorder-roots =pid roots=(list gid)]
           [%reorder-children =pid =gid children=(list gid)]
           [%reorder-archive =pid context=(unit gid) archive=(list gid)]
-          [%update-goal-metadata =pid =gid p=(each [@t @t] @t)]
+          [%update-goal-metadata =pid =gid p=(each [@t json] @t)]
       ==
     --
   --

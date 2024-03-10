@@ -40,8 +40,8 @@
   ++  ud  (each-method %uni %dif)
   ::
   ++  pd-setting
-    %+  (pd ,[@t @t] @t)
-      (ot ~[setting+so contents+so])
+    %+  (pd ,[@t json] @t)
+      (ot ~[setting+so contents+same])
     (ot ~[setting+so])
   ::
   ++  pd-goal-metadata
@@ -50,8 +50,8 @@
     :-  (pid (~(got by p.jon) 'pid'))
     :-  (gid (~(got by p.jon) 'gid'))
     %.  o+(~(del by (~(del by p.jon) 'pid')) 'gid')
-    %+  (pd ,[@t @t] [@t])
-      (ot ~[field+so data+so])
+    %+  (pd ,[@t json] [@t])
+      (ot ~[field+so data+same])
     (ot ~[field+so])
   ::
   ++  pd-pool-metadata
@@ -59,8 +59,8 @@
     ?>  ?=(%o -.jon)
     :-  (pid (~(got by p.jon) 'pid'))
     %.  o+(~(del by p.jon) 'pid')
-    %+  (pd ,[@t @t] [@t])
-      (ot ~[property+so data+so])
+    %+  (pd ,[@t json] [@t])
+      (ot ~[property+so data+same])
     (ot ~[property+so])
   ::
   ++  pd-pool-metadata-field
@@ -69,8 +69,8 @@
     :-  (pid (~(got by p.jon) 'pid'))
     :-  (so (~(got by p.jon) 'field'))
     %.  o+(~(del by (~(del by p.jon) 'pid')) 'field')
-    %+  (pd ,[@t @t] [@t])
-      (ot ~[property+so data+so])
+    %+  (pd ,[@t json] [@t])
+      (ot ~[property+so data+same])
     (ot ~[property+so])
   ::
   ++  pd-local-metadata-field
@@ -78,8 +78,8 @@
     ?>  ?=(%o -.jon)
     :-  (so (~(got by p.jon) 'field'))
     %.  o+(~(del by p.jon) 'field')
-    %+  (pd ,[@t @t] [@t])
-      (ot ~[property+so data+so])
+    %+  (pd ,[@t json] [@t])
+      (ot ~[property+so data+same])
     (ot ~[property+so])
   ::
   ++  pd-local-goal-metadata
@@ -87,8 +87,8 @@
     ?>  ?=(%o -.jon)
     :-  (key (~(got by p.jon) 'key'))
     %.  o+(~(del by p.jon) 'key')
-    %+  (pd ,[@t @t] [@t])
-      (ot ~[field+so data+so])
+    %+  (pd ,[@t json] [@t])
+      (ot ~[field+so data+same])
     (ot ~[field+so])
   ::
   ++  pd-local-pool-metadata
@@ -96,8 +96,8 @@
     ?>  ?=(%o -.jon)
     :-  (pid (~(got by p.jon) 'pid'))
     %.  o+(~(del by p.jon) 'pid')
-    %+  (pd ,[@t @t] [@t])
-      (ot ~[field+so data+so])
+    %+  (pd ,[@t json] [@t])
+      (ot ~[field+so data+same])
     (ot ~[field+so])
   ::
   ++  action
@@ -140,28 +140,6 @@
         [%delete-local-metadata-field (ot ~[field+so])]
         [%update-setting pd-setting]
     ==
-  ::
-  ++  field-type
-    |=  jon=json
-    !!
-    :: ^-  ^field-type
-    :: %.  jon
-    :: %-  of
-    :: :~  [%ct (as so)]
-    ::     [%ud ul]
-    ::     [%rd ul]
-    :: ==
-  ::
-  ++  field-data
-    |=  jon=json
-    !!
-    :: ^-  ^field-data
-    :: %.  jon
-    :: %-  of
-    :: :~  [%ct (ot ~[d+so])]
-    ::     [%ud (ot ~[d+(cu |=(=@t (slav %ud t)) so)])]
-    ::     [%rd (ot ~[d+(cu |=(=@t (slav %rd t)) so)])]
-    :: ==
   ::
   ++  perms
     |=  jon=json
@@ -274,25 +252,18 @@
       [%goals (enjs-goals goals.pool)]
       [%roots a+(turn roots.pool enjs-gid)]
       [%archive (enjs-archive archive.pool)]
-      [%metadata (enjs-metadata metadata.pool)]
+      [%metadata o+metadata.pool]
       [%metadata-properties (enjs-metadata-properties metadata-properties.pool)]
   ==
 ::
-++  enjs-metadata
-  =,  enjs:format
-  |=  metadata=(map @t @t)
-  %-  pairs
-  %+  turn  ~(tap by metadata)
-  |=([f=@t v=@t] [f s+v])
-::
 ++  enjs-metadata-properties
   =,  enjs:format
-  |=  metadata-properties=(map @t (map @t @t))
+  |=  metadata-properties=(map @t (map @t json))
   %-  pairs
   %+  turn
     ~(tap by metadata-properties)
-  |=  [f=@t p=(map @t @t)]
-  [f (enjs-metadata p)]
+  |=  [f=@t p=(map @t json)]
+  [f o+p]
 ::
 ++  enjs-perms
   =,  enjs:format
@@ -335,28 +306,26 @@
       [%goal-metadata (enjs-goal-metadata goal-metadata)]
       [%pool-metadata (enjs-pool-metadata pool-metadata)]
       [%metadata-properties (enjs-metadata-properties metadata-properties)]
-      [%settings (enjs-metadata settings)]
+      [%settings o+settings]
   ==
 ::
 ++  enjs-goal-metadata
   =,  enjs:format
-  |=  goal-metadata=(map key (map @t @t))
+  |=  goal-metadata=(map key (map @t json))
   ^-  json
   %-  pairs
   %+  turn  ~(tap by goal-metadata)
-  |=  [=key metadata=(map @t @t)]
-  :-  +:(enjs-key key)
-  (enjs-metadata metadata)
+  |=  [=key metadata=(map @t json)]
+  [+:(enjs-key key) o+metadata]
 ::
 ++  enjs-pool-metadata
   =,  enjs:format
-  |=  pool-metadata=(map pid (map @t @t))
+  |=  pool-metadata=(map pid (map @t json))
   ^-  json
   %-  pairs
   %+  turn  ~(tap by pool-metadata)
-  |=  [=pid metadata=(map @t @t)]
-  :-  (enjs-pid pid)
-  (enjs-metadata metadata)
+  |=  [=pid metadata=(map @t json)]
+  [(enjs-pid pid) o+metadata]
 ::
 ++  enjs-gid-v
   =,  enjs:format
@@ -413,7 +382,7 @@
       [%chief s+(scot %p chief.goal)]
       [%deputies (pairs (turn ~(tap by deputies.goal) |=([=@p =@t] [(scot %p p) s+t])))]
       [%open-to ?~(open-to.goal ~ s+u.open-to.goal)]
-      [%metadata (enjs-metadata metadata.goal)]
+      [%metadata o+metadata.goal]
   ==
 ::
 ++  enjs-archive-contexts
@@ -449,16 +418,6 @@
   :~  contexts+(enjs-archive-contexts contexts.archive)
       contents+(enjs-archive-contents contents.archive)
   ==
-::
-++  enjs-fields
-  =,  enjs:format
-  |=  fields=(map @t @t)
-  ^-  json
-  %-  pairs
-  %+  turn  ~(tap by fields)
-  |=  [field=@t data=@t]
-  ^-  [@t json]
-  [field s+data]
 ::
 ++  enjs-node
   =,  enjs:format

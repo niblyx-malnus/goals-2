@@ -759,7 +759,7 @@
   this(goals.p (~(put by goals.p) gid goal(deputies deputies)))
 ::
 ++  update-pool-metadata-field
-  |=  [field=@t dif=(each [@t @t] @t) mod=ship]
+  |=  [field=@t dif=(each [@t json] @t) mod=ship]
   ^-  _this
   ?>  (check-pool-edit-perm mod)
   =/  properties  (~(gut by metadata-properties.p) field ~)
@@ -780,7 +780,7 @@
   this(metadata-properties.p (~(del by metadata-properties.p) field))
 ::
 ++  update-pool-metadata
-  |=  [dif=(each [@t @t] @t) mod=ship]
+  |=  [dif=(each [@t json] @t) mod=ship]
   ^-  _this
   ?>  (check-pool-edit-perm mod)
   %=    this
@@ -792,7 +792,7 @@
   ==
 ::
 ++  update-goal-metadata
-  |=  [=gid:gol dif=(each [@t @t] @t) mod=ship]
+  |=  [=gid:gol dif=(each [@t json] @t) mod=ship]
   ^-  _this
   ?>  (check-goal-edit-perm gid mod)
   =/  =goal:gol  (~(got by goals.p) gid)

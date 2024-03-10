@@ -74,5 +74,5 @@
 ++  convert-5-29-to-5-30
   |=  =state-5-29
   ^-  state-5-30
-  [%'5-30' [pools local]:store.state-5-29]
+  !!
 --

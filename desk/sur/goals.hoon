@@ -15,16 +15,16 @@
 +$  open-to   (unit ?(%admins %deputies %viewers)) :: who can claim the goal
 +$  goal
   $:  =gid
-      summary=@t         :: (140 character summary of a goal)
+      summary=@t             :: (140 character summary of a goal)
       parent=(unit gid)
       children=(list gid)
       start=node
       end=node
       actionable=?
-      chief=ship         :: sole person responsible
-      =deputies          :: %edit can edit but not move
+      chief=ship             :: sole person responsible
+      =deputies              :: %edit can edit but not move
       =open-to
-      metadata=(map @t @t)
+      metadata=(map @t json) :: arbitrary goal metadata
   ==
 +$  goals    (map gid goal)
 ::
@@ -43,8 +43,8 @@
       =goals
       roots=(list gid)
       =archive
-      metadata=(map @t @t)
-      metadata-properties=(map @t (map @t @t))
+      metadata=(map @t json)
+      metadata-properties=(map @t (map @t json))
   ==
 ::
 +$  pools  (map pid pool)
@@ -52,10 +52,10 @@
 +$  local
   $:  goal-order=(list key)
       pool-order=(list pid)
-      goal-metadata=(map key (map @t @t))
-      pool-metadata=(map pid (map @t @t))
-      metadata-properties=(map @t (map @t @t))
-      settings=(map @t @t)
+      goal-metadata=(map key (map @t json))
+      pool-metadata=(map pid (map @t json))
+      metadata-properties=(map @t (map @t json))
+      settings=(map @t json)
   ==
 ::
 +$  store  
