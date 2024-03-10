@@ -1,4 +1,3 @@
-/-  jot=json-tree
 |%
 +$  moment    (unit @da)
 +$  pid       [host=ship name=term]

@@ -1,4 +1,4 @@
-/-  gol=goals, act=action, jot=json-tree
+/-  gol=goals, act=action
 /+  vent, bout, dbug, default-agent, verb,
     tree=filetree, gol-cli-emot, gs=gol-cli-state, gol-cli-node,
 :: import during development to force compilation
