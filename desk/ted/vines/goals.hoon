@@ -812,8 +812,4 @@
   :~  [%pid s+(enjs-pid:goj pid)]
       [%title s+title]
   ==
-++  enjs-jsons
-  =,  enjs:format
-  |=  jsons=(map ^path ^json)
-  o/(malt (turn ~(tap by jsons) |=([=^path =^json] [(spat path) json])))
 --

@@ -1,5 +1,5 @@
 /-  *json-tree
-/+  vent, bout, dbug, default-agent, verb,
+/+  vent, bout, dbug, default-agent, verb
 :: import during development to force compilation
 ::
 /=  x  /mar/json-tree-action
@@ -39,7 +39,7 @@
   ~&  "%json-tree app: receiving mark {(trip mark)}"
   ?+    mark  (on-poke:def mark vase)
       %json-tree-transition
-    =+  !<(tan=transition:jot vase)
+    =+  !<(tan=transition vase)
     ~&  "%json-tree app: receiving transition {(trip -.tan)}"
     ?-    -.tan
         %put
@@ -68,8 +68,14 @@
     ==
   ==
 ::
+++  on-peek
+  |=  =(pole knot)
+  ^-  (unit (unit cage))
+  ?+    pole  (on-peek:def pole)
+    [%x %json-tree ~]  ``noun+!>(json-tree)
+  ==
+::
 ++  on-watch  on-watch:def
-++  on-peek   on-peek:def
 ++  on-leave  on-leave:def
 ++  on-agent  on-agent:def
 ++  on-arvo   on-arvo:def
