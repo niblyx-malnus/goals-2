@@ -2,7 +2,7 @@
 /+  *gol-cli-util, pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
      gol-cli-goals, gs=gol-cli-state
 ::
-|_  [=bowl:gall cards=(list card:agent:gall) state-5-29:gs]
+|_  [=bowl:gall cards=(list card:agent:gall) state-5-30:gs]
 +*  this   .
     state  +<+>
     gols   ~(. gol-cli-goals store)

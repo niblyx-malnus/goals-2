@@ -62,7 +62,6 @@
 +$  store  
   $:  =pools
       =local
-      =json-tree:jot
   ==
 ::
 +$  stock  (list [=gid chief=ship]) :: lineage; youngest to oldest

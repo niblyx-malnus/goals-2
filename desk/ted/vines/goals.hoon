@@ -1,4 +1,4 @@
-/-  gol=goals, axn=action, pyk=peek, spider, jot=json-tree
+/-  gol=goals, axn=action, pyk=peek, spider
 /+  *ventio, tree=filetree, gol-cli-traverse, gol-cli-node,
     goj=gol-cli-json
 =,  strand=strand:spider
@@ -425,41 +425,6 @@
     :~  [%complete (numb (lent comp))]
         [%total (numb (lent able))]
     ==
-  ==
-  ::
-    %json-tree-action
-  =+  !<(act=action:jot vase)
-  ~&  "%goals vine: receiving action {(trip -.act)}"
-  ?-    -.act
-      %put
-    ;<  ~  bind:m  (poke [our dap]:gowl json-tree-transition+!>(act))
-    (pure:m !>(~))
-    ::
-      %del
-    ;<  ~  bind:m  (poke [our dap]:gowl json-tree-transition+!>(act))
-    (pure:m !>(~))
-    ::
-      %read
-    =|  jsons=(map path json)
-    |-
-    ?~  paths.act
-      (pure:m !>((enjs-jsons jsons)))
-    =/  jons=(map @ta json)
-      (fall (~(get of json-tree.store) (snip i.paths.act)) ~)
-    =/  =json  (~(got by jons) (rear i.paths.act))
-    %=  $
-      paths.act  t.paths.act
-      jsons      (~(put by jsons) i.paths.act json)
-    ==
-    ::
-      %tree
-    =;  paths=(list path)
-      (pure:m !>(a+(turn paths |=(=path s+(spat path)))))
-    %-  zing
-    %+  turn  ~(tap of (~(dip of json-tree.store) path.act))
-    |=  [=path =(map @ta json)]
-    %+  turn  ~(tap in ~(key by map))
-    |=(=@ta (weld path ~[ta]))
   ==
 ==
 ::

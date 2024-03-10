@@ -6,9 +6,6 @@
     gol-cli-json
 /=  x  /mar/goal/action
 /=  x  /mar/goal/view
-/=  x  /mar/json-tree-action
-/=  x  /mar/json-tree-transition
-/=  x  /mar/mimex
 /=  x  /ted/vines/goals
 /=  x  /ted/test
 ::
@@ -21,7 +18,7 @@
 ++  cab-split  (most cab non-cab)
 --
 ::
-=|  state-5-29:gs
+=|  state-5-30:gs
 =*  state  -
 ::
 %+  verb  |
@@ -42,10 +39,9 @@
 ++  on-load
   |=  =old=vase
   ^-  (quip card _this)
-  ?:  %&  [~ this]
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-29:gs   (convert-to-latest:gs old)
+  =/  new=state-5-30:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   [cards this(state new)]
 ::
@@ -61,35 +57,6 @@
     =^  cards  state
       abet:(handle-action:emot axn)
     [cards this]
-    ::
-      %json-tree-transition
-    =+  !<(tan=transition:jot vase)
-    ~&  "%goals app: receiving transition {(trip -.tan)}"
-    ?-    -.tan
-        %put
-      |-
-      ?~  paths.tan
-        `this
-      =/  jons=(map @ta json)
-        (fall (~(get of json-tree.store) (snip path.i.paths.tan)) ~)
-      =.  jons  (~(put by jons) (rear path.i.paths.tan) json.i.paths.tan)
-      =.  json-tree.store
-        (~(put of json-tree.store) (snip path.i.paths.tan) jons)
-      $(paths.tan t.paths.tan)
-      ::
-        %del
-      |-
-      ?~  paths.tan
-        `this
-      =/  jons=(map @ta json)
-        (fall (~(get of json-tree.store) (snip i.paths.tan)) ~)
-      =.  jons  (~(del by jons) (rear i.paths.tan))
-      =.  json-tree.store
-        ?~  jons
-          (~(del of json-tree.store) (snip i.paths.tan))
-        (~(put of json-tree.store) (snip i.paths.tan) jons)
-      $(paths.tan t.paths.tan)
-    ==
   ==
 ::
 ++  on-peek
