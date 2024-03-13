@@ -222,6 +222,21 @@
   ?|  (check-pool-edit-perm mod)
       =(mod chief:(stock-root gid))
   ==
+::
+++  get-ancestral-deputies
+  |=  =gid:gol
+  ^-  deputies:gol 
+  :: ignore self; only ancestors
+  =/  =stock:gol  ?~(get=(get-stock:tv gid) ~ t.get)
+  =|  =deputies:gol
+  |-
+  ?~  stock
+    deputies
+  =/  =goal:gol  (~(got by goals.p) gid.i.stock)
+  %=  $
+    stock     t.stock
+    deputies  (~(uni by deputies) deputies.goal)
+  ==
 :: can edit pool (owner or admin)
 :: or is ranking member on goal
 ::
@@ -230,6 +245,7 @@
   ^-  ?
   ?|  (check-pool-edit-perm mod)
       ?=(^ (get-rank:tv mod gid))
+      ?=([~ %edit] (~(get by (get-ancestral-deputies gid)) mod))
   ==
 :: can edit pool (owner or admin)
 :: or is ranking member on goal
@@ -241,15 +257,14 @@
   ?|  (check-goal-super gid mod)
       ?=([~ %edit] (~(get by deputies:(~(got by goals.p) gid)) mod))
   ==
-:: can edit pool (owner or admin)
-:: or is ranking member on goal
-:: or is a deputy on the goal
+:: can edit goal
+:: or is a deputy with create permissions
 ::
 ++  check-goal-create-perm
   |=  [=gid:gol mod=ship]
   ^-  ?
-  ?|  (check-goal-super gid mod)
-      (~(has by deputies:(~(got by goals.p) gid)) mod)
+  ?|  (check-goal-edit-perm gid mod)
+      ?=([~ %create] (~(get by deputies:(~(got by goals.p) gid)) mod))
   ==
 ::
 ++  check-move-to-root-perm
@@ -257,6 +272,25 @@
   ^-  ?
   ?&  (check-goal-master gid mod)
       (check-root-create-perm mod)
+  ==
+::
+++  nearest-common-ancestor
+  |=  [a=gid:gol b=gid:gol]
+  ^-  (unit gid:gol)
+  =/  a-flock=stock:gol  (flop (get-stock:tv a))
+  =/  b-flock=stock:gol  (flop (get-stock:tv b))
+  =|  anc=(unit gid:gol)
+  |-
+  ?~  a-flock
+    anc
+  ?~  b-flock
+    anc
+  ?.  =(gid.i.a-flock gid.i.b-flock)
+    anc
+  %=  $
+    anc      [~ gid.i.a-flock]
+    a-flock  t.a-flock
+    b-flock  t.b-flock
   ==
 :: checks if mod can move kid under pid
 ::
@@ -266,12 +300,12 @@
   ?|  (check-pool-edit-perm mod)
       :: permissions on a goal which contains both goals
       ::
-      =/  k-rank  (get-rank:tv mod kid)
-      =/  p-rank  (get-rank:tv mod pid)
-      &(?=(^ k-rank) ?=(^ p-rank) =(k-rank p-rank))
-      :: if chief of stock-root of kid and permissions on pid
+      ?~  nec=(nearest-common-ancestor kid pid)
+        %|
+      (check-goal-edit-perm u.nec mod)
+      :: if master of kid and edit permissions on pid
       ::
-      ?&  =(mod chief:(stock-root kid))
+      ?&  (check-goal-master kid mod)
           (check-goal-edit-perm pid mod)
   ==  ==
 :: checks if mod can modify ship's pool permissions
