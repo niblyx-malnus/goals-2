@@ -208,6 +208,29 @@
   ?|  =(mod host.pid.p)
       ?=([~ ?(%admin %creator)] (~(got by perms.p) mod))
   ==
+:: most senior ancestor
+::
+++  stock-root
+  |=  =gid:gol
+  ^-  [=gid:gol chief=ship]
+  (snag 0 (flop (get-stock:tv gid)))
+:: owner, admin, or chief of stock-root (most senior ancestor)
+::
+++  check-goal-master
+  |=  [=gid:gol mod=ship]
+  ^-  ?
+  ?|  (check-pool-edit-perm mod)
+      =(mod chief:(stock-root gid))
+  ==
+:: can edit pool (owner or admin)
+:: or is ranking member on goal
+::
+++  check-goal-super
+  |=  [=gid:gol mod=ship]
+  ^-  ?
+  ?|  (check-pool-edit-perm mod)
+      ?=(^ (get-rank:tv mod gid))
+  ==
 :: can edit pool (owner or admin)
 :: or is ranking member on goal
 :: or is a deputy with edit permissions
@@ -215,32 +238,18 @@
 ++  check-goal-edit-perm
   |=  [=gid:gol mod=ship]
   ^-  ?
-  ?|  (check-pool-edit-perm mod)
-      ?=(^ (get-rank:tv mod gid))
+  ?|  (check-goal-super gid mod)
       ?=([~ %edit] (~(get by deputies:(~(got by goals.p) gid)) mod))
   ==
-:: can edit goal (owner, admin or ranking member on goal)
+:: can edit pool (owner or admin)
+:: or is ranking member on goal
 :: or is a deputy on the goal
 ::
 ++  check-goal-create-perm
   |=  [=gid:gol mod=ship]
   ^-  ?
-  ?|  (check-goal-edit-perm gid mod)
+  ?|  (check-goal-super gid mod)
       (~(has by deputies:(~(got by goals.p) gid)) mod)
-  ==
-:: most senior ancestor
-::
-++  stock-root
-  |=  =gid:gol
-  ^-  [=gid:gol chief=ship]
-  (snag 0 (flop (get-stock:tv gid)))
-:: owner, admin, or chief of stock-root
-::
-++  check-goal-master
-  |=  [=gid:gol mod=ship]
-  ^-  ?
-  ?|  (check-pool-edit-perm mod)
-      =(mod chief:(stock-root gid))
   ==
 ::
 ++  check-move-to-root-perm
@@ -257,9 +266,9 @@
   ?|  (check-pool-edit-perm mod)
       :: permissions on a goal which contains both goals
       ::
-      =/  krank  (get-rank:tv mod kid)
-      =/  prank  (get-rank:tv mod pid)
-      &(?=(^ krank) ?=(^ prank) =(krank prank))
+      =/  k-rank  (get-rank:tv mod kid)
+      =/  p-rank  (get-rank:tv mod pid)
+      &(?=(^ k-rank) ?=(^ p-rank) =(k-rank p-rank))
       :: if chief of stock-root of kid and permissions on pid
       ::
       ?&  =(mod chief:(stock-root kid))
@@ -279,6 +288,26 @@
       ==
     ~|("Must be owner or self to modify admin perms." !!)
   %&
+::
+++  check-open-to
+  |=  [=gid:gol mod=ship]
+  ^-  ?
+  =/  =goal:gol  (~(got by goals.p) gid)
+  ?+    open-to.goal  %|
+    [~ %admins]    (check-pool-edit-perm mod)
+    [~ %deputies]  (check-goal-edit-perm gid mod)
+    [~ %viewers]   (~(has by perms.p) mod)
+  ==
+:: Check that I can modify the goal chief
+::
+++  check-goal-chief-mod-perm
+  |=  [=gid:gol mod=ship]
+  ^-  ?
+  ?|  (check-goal-super gid mod)
+      (check-open-to gid mod)
+  ==
+::
+++  check-goal-deputies-mod-perm  check-goal-super
 ::
 ++  check-in-pool  |=(=ship |(=(ship host.pid.p) (~(has by perms.p) ship)))
 :: replace all chiefs of goals whose chiefs have been kicked
@@ -731,12 +760,13 @@
   this(perms.p (~(put by perms.p) ship u.role))
 ::
 :: set the chief of a goal or optionally all its subgoals
-:: TODO: incorporate open-to.goal
 ++  set-chief
   |=  [=gid:gol chief=ship rec=?(%.y %.n) mod=ship]
   ^-  _this
-  ?.  (check-goal-edit-perm gid mod)  ~|("missing goal perms" !!)
-  ?.  (check-in-pool chief)  ~|("chief not in pool" !!)
+  ?.  (check-goal-chief-mod-perm gid mod)
+    ~|("missing goal perms" !!)
+  ?.  (check-in-pool chief)
+    ~|("chief not in pool" !!)
   =/  ids  ?.(rec ~[gid] ~(tap in (progeny:tv gid)))
   %=  this
     goals.p
@@ -747,12 +777,13 @@
       =/  goal  (~(got by goals.p) gid)
       [gid goal(chief chief)]
   ==
-::
 :: replace the deputies of a goal with new deputies
+::
 ++  replace-deputies
   |=  [=gid:gol =deputies:gol mod=ship]
   ^-  _this
-  ?.  (check-goal-edit-perm gid mod)  ~|("missing goal perms" !!)
+  ?.  (check-goal-deputies-mod-perm gid mod)
+    ~|("missing goal perms" !!)
   ?.  (~(all in ~(key by deputies)) check-in-pool)
     ~|("some ships in deputies are not in pool" !!)
   =/  goal  (~(got by goals.p) gid)
