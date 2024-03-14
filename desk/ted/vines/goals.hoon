@@ -354,12 +354,19 @@
     |=(=pid:gol [pid title:(~(got by pools.store) pid)])
     ::
       %pool-title
-    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
     (pure:m !>(s+title.pool))
     ::
       %pool-note
-    =/  =pool:gol       (~(got by pools.store) pid.vyu)
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
     (pure:m !>((~(gut by metadata.pool) 'note' s+'')))
+    ::
+      %pool-perms
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    %-  pure:m  !>
+    %-  pairs:enjs:format
+    %+  turn  ~(tap by perms.pool)
+    |=([=@p =@t] [(scot %p p) s+t])
     ::
       %pool-tag-note
     !!

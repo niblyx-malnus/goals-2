@@ -37,6 +37,7 @@
         [%pools-index ul]
         [%pool-title (ot ~[pid+pid])]
         [%pool-note (ot ~[pid+pid])]
+        [%pool-perms (ot ~[pid+pid])]
         [%pool-tag-note (ot ~[pid+pid tag+so])]
         [%local-tag-note (ot ~[tag+so])]
         [%goal (ot ~[pid+pid gid+gid])]
