@@ -67,4 +67,14 @@
 +$  ranks  (map ship gid) :: map of ship to highest ranking goal gid
 +$  edge   (pair nid nid)
 +$  edges  (set edge)
+::
++$  sub-event
+  $%  [%kick ~]
+      [%leave ~]
+      [%watch-ack p=(unit tang)]
+  ==
+:: should incorporate kicks
+::
++$  sub-history    (list [timestamp=@da =sub-event])
++$  sub-histories  (map pid sub-history)
 --

@@ -132,4 +132,12 @@
       [%local-goal-fields ~]
       [%goal-data keys=(list key)]
   ==
+::
++$  membership-action
+  $%  [%join =pid]
+  ==
+::
++$  membership-transition
+  $%  [%pool-sub-event =pid =sub-event]
+  ==
 --

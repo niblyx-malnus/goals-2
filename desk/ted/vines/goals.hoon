@@ -16,7 +16,34 @@
   "%goals: moon access from {(scow %p src.gowl)}"
 ~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+~&  remote-moon+(bo:dejs:format (~(gut by settings.local.store) 'remoteMoon' b+|))
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
+  :: 
+    %membership-action
+  =+  !<(act=membership-action:axn vase)
+  ?-    -.act
+      %join
+    :: watch the pool path
+    ::
+    ;<  p=(unit tang)  bind:m
+      %:  agent-watch-path-soft
+        %goals
+        /(scot %p host.pid.act)/[name.pid.act]
+        [host.pid.act %goals]
+        /(scot %p host.pid.act)/[name.pid.act]
+      ==
+    :: update subscription history
+    ::
+    =/  =cage
+      membership-transition+!>([%pool-sub-event pid.act %watch-ack p])
+    ;<  ~  bind:m  (poke [our.gowl %goals-members] cage)
+    :: return or fail
+    ::
+    ?~  p
+      (pure:m !>(~))
+    (strand-fail %pool-subscription-fail u.p)
+  ==
+  ::
     %goal-action
   =+  !<(act=action:axn vase)
   ?+    -.act  (just-poke [our dap]:gowl mark vase)

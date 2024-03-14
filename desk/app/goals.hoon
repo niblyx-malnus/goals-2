@@ -52,7 +52,7 @@
   ~&  "%goals app: receiving mark {(trip mark)}"
   ?+    mark  (on-poke:def mark vase)
       %goal-action
-    =/  axn=action:act  !<(action:act vase)
+    =+  !<(axn=action:act vase)
     ~&  received-axn+axn
     =^  cards  state
       abet:(handle-action:emot axn)

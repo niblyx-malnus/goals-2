@@ -217,9 +217,9 @@
   (agent-send-cards dude ~[card])
 :: watch from an agent (goes into wex.bowl)
 ::
-++  agent-watch-path
+++  agent-watch-path-soft
   |=  [=dude:gall =wire =dock =path]
-  =/  m  (strand ,~)
+  =/  m  (strand ,(unit tang))
   ^-  form:m
   |^
   :: watch dude for on-agent updates
@@ -236,7 +236,7 @@
   ?>  ?=(%watch-ack -.sign)
   ?~  p.sign
     (pure:m ~)
-  (strand-fail %agent-watch-ack-fail u.p.sign)
+  (pure:m p.sign)
   ::
   ++  take-watch-ack
     %-  %^    take-special-fact
@@ -246,6 +246,12 @@
     |=  [=bowl:gall wyre=^wire =sign:agent:gall]
     &(=(wyre wire) ?=(%watch-ack -.sign))
   --
+++  agent-watch-path
+  |=  [=dude:gall =wire =dock =path]
+  =/  m  (strand ,~)
+  ^-  form:m
+  ;<  p=(unit tang)  bind:m  (agent-watch-path-soft dude wire dock path)
+  ?~(p (pure:m ~) (strand-fail %agent-watch-ack-fail u.p))
 ::
 ++  take-special-fact
   |*  [=wire =mark =mold]
