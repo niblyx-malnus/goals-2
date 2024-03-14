@@ -528,6 +528,8 @@
       inherited-attributes=(list [@t json])
       inherited-fields=(list [@t json])
       parent=(unit key:gol)
+      chief=ship
+      deputies=(list [ship @t])
       active=?
       complete=?
       actionable=?
@@ -548,6 +550,8 @@
       ['inheritedAttributes' (pairs inherited-attributes)]
       ['inheritedFields' (pairs inherited-fields)]
       [%parent ?~(parent ~ (enjs-key:goj u.parent))]
+      [%chief s+(scot %p chief)]
+      [%deputies (pairs (turn deputies |=([=@p =@t] [(scot %p p) s+t])))]
       [%active b+active]
       [%complete b+complete]
       [%actionable b+actionable]
@@ -612,6 +616,8 @@
       inherited-attributes
       inherited-fields
       ?~(parent ~ `[pid.key u.parent])
+      chief
+      ~(tap by deputies)
       done.i.status.start
       done.i.status.end
       actionable
@@ -729,6 +735,8 @@
       inherited-attributes
       inherited-fields
       ?~(parent ~ `[pid u.parent])
+      chief
+      ~(tap by deputies)
       done.i.status.start
       done.i.status.end
       actionable
