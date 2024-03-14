@@ -48,9 +48,8 @@
 :: ============================================================================
 ::
 ++  handle-action
-  |=  axn=action:act
+  |=  [mod=ship axn=action:act]
   ^-  _this
-  =/  mod  src.bowl
   ?-    -.axn
       %reorder-roots
     =+  axn
@@ -82,7 +81,7 @@
     :: mark the goal started if active.axn and if possible
     ::
     ?.  active  this
-    ?~  dis=(mole |.((handle-action:this [%set-active pid gid %&])))
+    ?~  dis=(mole |.((handle-action:this mod [%set-active pid gid %&])))
       this
     u.dis
     ::
@@ -148,7 +147,7 @@
     =+  axn
     ?-    val
         %&
-      =.  this  (handle-action [%set-active pid gid %&])
+      =.  this  (handle-action mod [%set-active pid gid %&])
       =/  old=pool:gol  (~(got by pools.store) pid)
       ~&  %marking-complete
       =/  pore
@@ -166,8 +165,7 @@
         this
       :: TODO: make this only occur if has permissions on ancestors...
       :: owner responsible for resulting completions
-      =.  src.bowl  our.bowl
-      (handle-action:this [%set-complete pid u.parent %&])
+      (handle-action:this our.bowl [%set-complete pid u.parent %&])
       ::
         %|
       =/  old=pool:gol  (~(got by pools.store) pid)
@@ -191,7 +189,7 @@
       =/  parent=(unit gid:gol)
         parent:(~(got by goals:(~(got by pools.store) pid)) gid)
       =?  this  ?=(^ parent)
-        (handle-action:this [%set-active pid u.parent %&])
+        (handle-action:this mod [%set-active pid u.parent %&])
       ~&  %marking-active
       =/  old=pool:gol  (~(got by pools.store) pid)
       =/  new=pool:gol  abet:(mark-done:(apex:pl old) s+gid now.bowl mod)
@@ -205,7 +203,7 @@
         |-
         ?~  children
           this
-        (handle-action:this [%set-active pid i.children %|])
+        (handle-action:this mod [%set-active pid i.children %|])
       ~&  %unmarking-active
       =/  old=pool:gol  (~(got by pools.store) pid)
       =/  new=pool:gol  abet:(unmark-done:(apex:pl old) s+gid now.bowl mod)

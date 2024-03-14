@@ -13,10 +13,12 @@
 ^-  form:m
 ?>  |(=(our src):gowl (moon:title [our src]:gowl))
 ~?  >>  (moon:title [our src]:gowl)
-  "%goals: moon access from {(scow %p src.gowl)}"
+  "%goals vine: moon access from {(scow %p src.gowl)}"
+=?  src.gowl  (moon:title [our src]:gowl)
+  ~&  >>  "moon-as-planet=True"
+  our.gowl
 ~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
-~&  remote-moon+(bo:dejs:format (~(gut by settings.local.store) 'remoteMoon' b+|))
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
   :: 
     %membership-action
@@ -46,12 +48,13 @@
   ::
     %goal-action
   =+  !<(act=action:axn vase)
-  ?+    -.act  (just-poke [our dap]:gowl mark vase)
+  =/  gam  %goal-action-and-mod
+  ?+    -.act  (just-poke [our dap]:gowl gam !>([src.gowl act]))
       %create-goal
     :: Hacky way to get new id
     ::
     =/  old=(set gid:gol)  ~(key by goals:(~(got by pools.store) pid.act))
-    ;<  ~  bind:m  (poke [our dap]:gowl mark vase)
+    ;<  ~  bind:m  (poke [our dap]:gowl gam !>([src.gowl act]))
     ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
     =/  new=(set gid:gol)  ~(key by goals:(~(got by pools.store) pid.act))
     =/  gid-list=(list gid:gol)  ~(tap in (~(dif in new) old))

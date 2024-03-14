@@ -26,7 +26,7 @@
 %-  agent:dbug
 %-  agent:vent
 ^-  agent:gall
-%-  agent:tree
+:: %-  agent:tree
 |_  =bowl:gall
 +*  this    .
     def   ~(. (default-agent this %.n) bowl)
@@ -51,11 +51,11 @@
   ?>  =(src our):bowl
   ~&  "%goals app: receiving mark {(trip mark)}"
   ?+    mark  (on-poke:def mark vase)
-      %goal-action
-    =+  !<(axn=action:act vase)
+      %goal-action-and-mod
+    =+  !<([mod=ship axn=action:act] vase)
     ~&  received-axn+axn
     =^  cards  state
-      abet:(handle-action:emot axn)
+      abet:(handle-action:emot mod axn)
     [cards this]
   ==
 ::
@@ -75,57 +75,7 @@
     [%settings ~]  ?>(=(src our):bowl `this)
   ==
 ::
-++  on-tree
-  |=  =(pole knot)
-  ?+    pole  (on-tree:det pole)
-      ~
-    :+  %|  ~
-    ~['pools' 'local' 'pool_info']
-    ::
-      [%pools ~]
-    :-  %|  :_  ~
-    %+  turn  ~(tap in ~(key by pools.store))
-    |=  =pid:gol
-    :_  %json
-    (rap 3 (scot %p host.pid) '_' name.pid ~)
-    ::
-      [%pools pid=@ta %json ~]
-    =+  ;;  pid=[host=@t name=@t ~]  (rash pid.pole cab-split)
-    =/  host=@p  (slav %p host.pid)
-    [%& json+!>((enjs-pool:gol-cli-json (~(got by pools.store) [host name.pid])))]
-    ::
-      [%local ~]
-    :+  %|
-      :~  [%order %json]
-          [%pools %json]
-          [%settings %json]
-      ==
-    ~[%goals]
-    ::
-      [%local %order %json ~]
-    !!
-    ::
-      [%local %pools %json ~]
-    !!
-    ::
-      [%local %settings %json ~]
-    !!
-    ::
-      [%local %goals ~]
-    !!
-    :: :-  %|  :_  ~
-    :: %+  turn  ~(tap in ~(key by goals.local.store))
-    :: |=  =gid:gol
-    :: :_  %json
-    :: (rap 3 (scot %p host.pid.gid) '_' name.pid.gid '_' key.gid ~)
-    ::
-      [%local %goals gid=@ta %json ~]
-    !!
-    :: =+  ;;  gid=[host=@t name=@t key=@t ~]  (rash gid.pole cab-split)
-    :: =/  host=@p  (slav %p host.gid)
-    :: [%& json+!>((enjs-goal-local:gol-cli-json (~(got by goals.local.store) [[host name.gid] key.gid])))]
-    ::
-  ==
+:: ++  on-tree   on-tree:det
 ::
 ++  on-leave  on-leave:def
 ++  on-agent  on-agent:def
