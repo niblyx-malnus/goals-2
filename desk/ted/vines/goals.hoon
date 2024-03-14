@@ -530,6 +530,7 @@
       parent=(unit key:gol)
       chief=ship
       deputies=(list [ship @t])
+      open-to=(unit @t)
       active=?
       complete=?
       actionable=?
@@ -552,6 +553,7 @@
       [%parent ?~(parent ~ (enjs-key:goj u.parent))]
       [%chief s+(scot %p chief)]
       [%deputies (pairs (turn deputies |=([=@p =@t] [(scot %p p) s+t])))]
+      ['openTo' ?~(open-to ~ s+u.open-to)]
       [%active b+active]
       [%complete b+complete]
       [%actionable b+actionable]
@@ -618,6 +620,7 @@
       ?~(parent ~ `[pid.key u.parent])
       chief
       ~(tap by deputies)
+      open-to
       done.i.status.start
       done.i.status.end
       actionable
@@ -737,6 +740,7 @@
       ?~(parent ~ `[pid u.parent])
       chief
       ~(tap by deputies)
+      open-to
       done.i.status.start
       done.i.status.end
       actionable

@@ -215,6 +215,8 @@
   ^-  [=gid:gol chief=ship]
   (snag 0 (flop (get-stock:tv gid)))
 :: owner, admin, or chief of stock-root (most senior ancestor)
+:: goal master can edit and re-assign the goal
+:: and move it anywhere they can create a goal
 ::
 ++  check-goal-master
   |=  [=gid:gol mod=ship]
@@ -239,6 +241,7 @@
   ==
 :: can edit pool (owner or admin)
 :: or is ranking member on goal
+:: goal super can edit and re-assign the goal
 ::
 ++  check-goal-super
   |=  [=gid:gol mod=ship]
@@ -295,18 +298,18 @@
 :: checks if mod can move kid under pid
 ::
 ++  check-move-to-goal-perm
-  |=  [kid=gid:gol pid=gid:gol mod=ship]
+  |=  [kid=gid:gol dad=gid:gol mod=ship]
   ^-  ?
   ?|  (check-pool-edit-perm mod)
       :: permissions on a goal which contains both goals
       ::
-      ?~  nec=(nearest-common-ancestor kid pid)
+      ?~  nec=(nearest-common-ancestor kid dad)
         %|
       (check-goal-edit-perm u.nec mod)
-      :: if master of kid and edit permissions on pid
+      :: if master of kid and edit permissions on dad
       ::
       ?&  (check-goal-master kid mod)
-          (check-goal-edit-perm pid mod)
+          (check-goal-create-perm dad mod)
   ==  ==
 :: checks if mod can modify ship's pool permissions
 ::
@@ -328,7 +331,7 @@
   ^-  ?
   =/  =goal:gol  (~(got by goals.p) gid)
   ?+    open-to.goal  %|
-    [~ %admins]    (check-pool-edit-perm mod)
+    [~ %supers]    (check-pool-edit-perm mod)
     [~ %deputies]  (check-goal-edit-perm gid mod)
     [~ %viewers]   (~(has by perms.p) mod)
   ==
@@ -536,18 +539,18 @@
   (yoke [%held-rend gid u.parent.k] mod)
 ::
 ++  move-to-goal
-  |=  [kid=gid:gol pid=gid:gol mod=ship]
+  |=  [kid=gid:gol dad=gid:gol mod=ship]
   ^-  _this
-  ?.  (check-move-to-goal-perm kid pid mod)
+  ?.  (check-move-to-goal-perm kid dad mod)
     ~|("missing-move-to-goal-perms" !!)
   =/  pore  (move-to-root kid host.pid.p) :: divine intervention (owner)
   =/  k  (~(got by goals.p.pore) kid)
-  =/  q  (~(got by goals.p.pore) pid)
+  =/  q  (~(got by goals.p.pore) dad)
   ?<  (~(has in (sy children.q)) kid)
-  =.  goals.p.pore  (~(put by goals.p.pore) kid k(parent (some pid)))
-  =.  goals.p.pore  (~(put by goals.p.pore) pid q(children [kid children.q]))
+  =.  goals.p.pore  (~(put by goals.p.pore) kid k(parent (some dad)))
+  =.  goals.p.pore  (~(put by goals.p.pore) dad q(children [kid children.q]))
   =.  roots.p.pore  (purge-from-list kid roots.p.pore)
-  (yoke:pore [%held-yoke kid pid] mod)
+  (yoke:pore [%held-yoke kid dad] mod)
 ::
 ++  move
   |=  [kid=gid:gol upid=(unit gid:gol) mod=ship]

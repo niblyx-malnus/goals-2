@@ -11,8 +11,9 @@
       inflow=(set nid)
       outflow=(set nid)
   ==
-+$  deputies  (map ship ?(%edit %create))
-+$  open-to   (unit ?(%admins %deputies %viewers)) :: who can claim the goal
++$  deputies    (map ship ?(%edit %create))
++$  goal-perms  ?(%master %super %editor %creator %viewer) 
++$  open-to     (unit ?(%supers %deputies %viewers)) :: who can claim the goal
 +$  goal
   $:  =gid
       summary=@t             :: (140 character summary of a goal)
