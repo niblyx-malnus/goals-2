@@ -120,6 +120,7 @@
         [%set-start (ot ~[pid+pid gid+gid start+unit-di])]
         [%set-end (ot ~[pid+pid gid+gid end+unit-di])]
         [%set-chief (ot ~[pid+pid gid+gid chief+ship rec+bo])]
+        [%set-open-to (ot ~[pid+pid gid+gid open-to+open-to])]
         [%set-actionable (ot ~[pid+pid gid+gid val+bo])]
         [%set-complete (ot ~[pid+pid gid+gid val+bo])]
         [%set-active (ot ~[pid+pid gid+gid val+bo])]
@@ -147,7 +148,9 @@
     ^-  (map ^ship ^role)
     %-  ~(gas by *(map ^ship ^role))
     %.(jon (ar (ot ~[ship+ship role+role])))
-
+  ::
+  ++  open-to  |=(jon=json ;;(^open-to ?~(jon ~ [~ (so jon)])))
+  ::
   ++  role
     %-  su
     ;~  pose
