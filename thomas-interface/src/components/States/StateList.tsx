@@ -151,13 +151,13 @@ const StateList = () => {
       }
     };
     loadStatesFromServer();
-  }, [getAllTags, setState]);
+  }, [getAllTags, selectedOperation, setState, states, tags]);
 
   useEffect(() => {
     const sortedArray = Object.entries(filterStatesByTags(states, tags, selectedOperation))
       .sort(([keyA, stateA], [keyB, stateB]) => sortStates(stateA, stateB));
     setDisplayList(sortedArray);
-  }, [states, triggerRerender]); // Listen to changes in states and triggerRerender
+  }, [selectedOperation, states, tags, triggerRerender]); // Listen to changes in states and triggerRerender
 
 
   const addState = async () => {

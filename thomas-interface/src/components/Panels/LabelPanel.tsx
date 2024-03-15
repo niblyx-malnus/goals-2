@@ -22,7 +22,7 @@ const LabelPanel: React.FC<{
     try {
       // Logic to remove the label from the goal
       // For example, update the labels array and send a request to the backend
-      await api.delGoalLabel(`${goal.key}`, labelToRemove);
+      await api.delGoalLabel(`${goal.key}`, labelToRemove, goal.labels);
       refresh();
     } catch (error) {
       console.error("Error removing label: ", error);
@@ -33,7 +33,7 @@ const LabelPanel: React.FC<{
     console.log("adding new label");
     try {
       if (newLabel.trim() !== '') {
-        await api.addGoalLabel(`${goal.key}`, newLabel);
+        await api.addGoalLabel(`${goal.key}`, newLabel, goal.labels);
         setNewLabel('');
         refresh();
       }

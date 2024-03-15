@@ -21,7 +21,7 @@ const TagPanel: React.FC<{
     try {
       // Logic to remove the tag from the goal
       // For example, update the tags array and send a request to the backend
-      await api.delGoalTag(`${goal.key}`, tagToRemove);
+      await api.delGoalTag(`${goal.key}`, tagToRemove, goal.tags);
       refresh();
     } catch (error) {
       console.error("Error removing tag: ", error);
@@ -32,7 +32,7 @@ const TagPanel: React.FC<{
     console.log("adding new tag");
     try {
       if (newTag.trim() !== '') {
-        await api.addGoalTag(`${goal.key}`, newTag);
+        await api.addGoalTag(`${goal.key}`, newTag, goal.tags);
         setNewTag('');
         refresh();
       }

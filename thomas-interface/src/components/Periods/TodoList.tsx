@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import TodoRow from './TodoRow';
 import { FaSitemap } from 'react-icons/fa';
 import { ActiveIcon } from '../CustomIcons';
-import { TagFilter, filterGoalsByTags, getUniqueTags } from '../TagFilter';
+import { GoalFilter } from '../GoalFilter';
 
 const TodoList: React.FC<{
   periodType: periodType,
@@ -18,17 +18,13 @@ const TodoList: React.FC<{
   periodType,
   dateKey
 }) => {
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [input, setInput] = useState('');
   const [themeInput, setThemeInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [selectedGoalKey, setSelectedGoalKey] = useState<string | null>(null);
-  const [tags, setTags] = useState<string[]>([]);
-  const [selectedOperation, setSelectedOperation] = useState<'some' | 'every'>('every');
-  const [includeInherited, setIncludeInherited] = useState(true);
-  const [tagOrLabel, setTagOrLabel] = useState<'both' | 'tag' | 'label'>('both');
   const [displayList, setDisplayList] = useState<Goal[]>([]);
-  const [uniqueTags, setUniqueTags] = useState<string[]>([]);
   const [activeNewGoal, setActiveNewGoal] = useState(true);
 
   const { collections, setCollection, getCurrentTreePage } = useStore(state => state);
@@ -58,22 +54,18 @@ const TodoList: React.FC<{
       try {
         const data = await api.jsonRead(jsonPath);
         const goals = await api.getGoalData(data.keys);
-        const uniqueTags = getUniqueTags(goals, includeInherited, tagOrLabel);
-        setUniqueTags(uniqueTags);
+        setGoals(goals);
         setCollection(jsonPath, { themes: data.themes, goals });
-        const filteredArray = filterGoalsByTags(tagOrLabel, goals, tags, selectedOperation, includeInherited);
-        setDisplayList(filteredArray);
       } catch (error) {
         console.error("Failed to fetch data:", error);
         setCollection(jsonPath, { goals: [], themes: [] });
-        setUniqueTags([]);
-        setDisplayList([]);
+        setGoals([]);
       }
       setIsLoading(false);
     };
   
     fetchDataAndUpdateState();
-  }, [periodType, setCollection, refresh, jsonPath, tags, selectedOperation, tagOrLabel, includeInherited]);
+  }, [periodType, setCollection, refresh, jsonPath]);
 
   const moveGoal = (aboveGoalKey: string | null, belowGoalKey: string | null) => {
     if (selectedGoalKey !== null) {
@@ -327,16 +319,9 @@ const TodoList: React.FC<{
         />
         <button onClick={handleCreate} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r">Add</button>
       </div>
-      <TagFilter
-        uniqueTags={uniqueTags}
-        tags={tags}
-        setTags={setTags}
-        tagOrLabel={tagOrLabel}
-        setTagOrLabel={setTagOrLabel}
-        selectedOperation={selectedOperation}
-        setSelectedOperation={setSelectedOperation}
-        includeInherited={includeInherited}
-        setIncludeInherited={setIncludeInherited}
+      <GoalFilter
+        goals={goals}
+        setFiltered={setDisplayList}
       />
       { isLoading && (
         <div className="flex justify-center mt-10">

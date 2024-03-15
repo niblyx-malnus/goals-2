@@ -4,11 +4,12 @@ import MarkdownEditor from './MarkdownEditor';
 import GoalList from './GoalList';
 import ArchiveGoalList from './ArchiveGoalList';
 import GoalPageActionBar from './GoalPageActionBar';
+import AttributeModal from './Panels/AttributeModal';
 import TagSearchBar from './TagSearchBar';
 import api from '../api';
 import { FiX, FiSave, FiEdit } from 'react-icons/fi';
 import { FaListUl } from 'react-icons/fa';
-import { CompleteIcon, ActiveIcon } from './CustomIcons';
+import { CompleteIcon, ActiveIcon, AttributeIcon } from './CustomIcons';
 import useCustomNavigation from './useCustomNavigation';
 import { Goal } from '../types';
 import { goalKeyToPidGid, gidFromKey } from '../utils';
@@ -395,6 +396,12 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
   const { navigateToPeriod, navigateToGoal, navigateToPool, navigateToPools } = useCustomNavigation();
   const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
 
+  const [isAttributeModalOpen, setIsAttributeModalOpen] = useState(false);
+
+  const toggleAttributeModal = () => {
+    setIsAttributeModalOpen(!isAttributeModalOpen);
+  };
+
   useEffect(() => {
     const fetchGoal = async () => {
       try {
@@ -461,6 +468,20 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
         <div className="bg-blue-300 p-6 rounded shadow-md w-full h-screen overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <TagSearchBar poolId={pid} />
+            <button
+              onClick={toggleAttributeModal}
+              className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
+              style={{ height: '2rem', width: '2rem' }}
+            >
+              <AttributeIcon />
+            </button>
+
+            { isAttributeModalOpen &&
+              <div className="m-2">
+                <AttributeModal isOpen={isAttributeModalOpen} toggleModal={toggleAttributeModal} />
+              </div>
+            }
+
             <button
               onClick={
                 () => {

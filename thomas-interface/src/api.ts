@@ -68,9 +68,9 @@ const api = {
       return result;
     }
   },
-  goalView: async (json: any) => {
+  goalView: async (ship: string, json: any) => {
     return await api.vent({
-      ship: live ? (window as any).ship : ship,
+      ship: ship,
       dude: 'goals', // the agent to poke
       inputDesk: 'goals', // where does the input mark live
       inputMark: 'goal-view', // name of input mark
@@ -93,7 +93,7 @@ const api = {
   jsonTreeAction: async (json: any) => {
     return await api.vent({
       ship: live ? (window as any).ship : ship,
-      dude: 'goals', // the agent to poke
+      dude: 'json-tree', // the agent to poke
       inputDesk: 'goals', // where does the input mark live
       inputMark: 'json-tree-action', // name of input mark
       outputDesk: 'goals', // where does the output mark live
@@ -126,37 +126,43 @@ const api = {
     const json = {
       'empty-goals': { type: { main: null } }
     };
-    return await api.goalView(json);
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, json);
   },
   poolEmptyGoals: async (pid: string) => {
     const json = {
       'empty-goals': { type: { pool: pid } }
     };
-    return await api.goalView(json);
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, json);
   },
   goalEmptyGoals: async (key: string) => {
     const json = {
       'empty-goals': { type: { goal: key } }
     };
-    return await api.goalView(json);
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, json);
   },
   mainHarvest: async () => {
     const json = {
       harvest: { type: { main: null } }
     };
-    return await api.goalView(json);
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, json);
   },
   poolHarvest: async (pid: string) => {
     const json = {
       harvest: { type: { pool: pid } }
     };
-    return await api.goalView(json);
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, json);
   },
   goalHarvest: async (key: string) => {
     const json = {
       harvest: { type: { goal: key } }
     };
-    return await api.goalView(json);
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, json);
   },
   createPool: async (title: string) => {
     const json = { 'create-pool': { title: title } };
@@ -202,46 +208,52 @@ const api = {
       };
     return await api.goalAction(json);
   },
-  addGoalLabel: async (key: string, label: string) => {
-    console.log(key);
+  addGoalLabel: async (key: string, label: string, labels: string[]) => {
+    const { pid, gid } = goalKeyToPidGid(key);
     const json = {
-        'update-goal-tags': {
-          key: key,
-          method: 'uni',
-          tags: [label]
+        'update-goal-metadata': {
+          pid: pid,
+          gid: gid,
+          method: 'put',
+          field: 'labels',
+          data: JSON.stringify([label, ...labels]),
         }
       }
     return await api.goalAction(json);
   },
-  addGoalTag: async (key: string, tag: string) => {
+  addGoalTag: async (key: string, tag: string, tags: string[]) => {
     console.log(key);
     const json = {
-        'update-local-goal-tags': {
+        'update-local-goal-metadata': {
           key: key,
-          method: 'uni',
-          tags: [tag]
+          method: 'put',
+          field: 'labels',
+          data: JSON.stringify([tag, ...tags]),
         }
       }
     return await api.goalAction(json);
   },
-  delGoalLabel: async (key: string, label: string) => {
-    console.log(key);
+  delGoalLabel: async (key: string, label: string, labels: string[]) => {
+    const { pid, gid } = goalKeyToPidGid(key);
     const json = {
-        'update-goal-tags': {
-          key: key,
-          method: 'dif',
-          tags: [label]
+        'update-goal-metadata': {
+          pid: pid,
+          gid: gid,
+          method: 'put',
+          field: 'labels',
+          data: JSON.stringify(labels.filter(l => l !== label)),
         }
       }
     return await api.goalAction(json);
   },
-  delGoalTag: async (key: string, tag: string) => {
+  delGoalTag: async (key: string, tag: string, tags: string[]) => {
     console.log(key);
     const json = {
-        'update-local-goal-tags': {
+        'update-local-goal-metadata': {
           key: key,
-          method: 'dif',
-          tags: [tag]
+          method: 'put',
+          field: 'labels',
+          data: JSON.stringify(tags.filter(t => t !== tag)),
         }
       }
     return await api.goalAction(json);
@@ -334,6 +346,109 @@ const api = {
       };
     return await api.goalAction(json);
   },
+  addLocalFieldProperty: async (field: string, property: string, data: any) => {
+    const json = {
+        'update-local-metadata-field': {
+          field: field,
+          method: 'put',
+          property: property,
+          data: data,
+        }
+      };
+    return await api.goalAction(json);
+  },
+  putLocalFieldProperty: async (field: string, property: string, data: any) => {
+    const json = {
+        'update-local-metadata-field': {
+          field: field,
+          method: 'put',
+          property: property,
+          data: data,
+        }
+      };
+    return await api.goalAction(json);
+  },
+  delLocalFieldProperty: async (field: string, property: string) => {
+    const json = {
+        'update-local-metadata-field': {
+          field: field,
+          method: 'del',
+          property: property,
+        }
+      };
+    return await api.goalAction(json);
+  },
+  putPoolFieldProperty: async (field: string, property: string, data: any) => {
+    const json = {
+        'update-pool-field-property': {
+          field: field,
+          method: 'put',
+          property: property,
+          data: data,
+        }
+      };
+    return await api.goalAction(json);
+  },
+  delPoolFieldProperty: async (field: string, property: string) => {
+    const json = {
+        'update-pool-field-property': {
+          field: field,
+          method: 'del',
+          property: property,
+        }
+      };
+    return await api.goalAction(json);
+  },
+  putLocalGoalField: async (key: string, field: string, data: any) => {
+    const json = {
+        'update-local-goal-metadata': {
+          key: key,
+          method: 'put',
+          field: field,
+          data: data,
+        }
+      };
+    return await api.goalAction(json);
+  },
+  delLocalGoalField: async (key: string, field: string) => {
+    const json = {
+        'update-local-goal-metadata': {
+          key: key,
+          method: 'del',
+          field: field,
+        }
+      };
+    return await api.goalAction(json);
+  },
+  delLocalField: async (field: string) => {
+    const json = { 'delete-local-metadata-field': { field: field, } };
+    return await api.goalAction(json);
+  },
+  putGoalField: async (key: string, field: string, data: any) => {
+    const { pid, gid } = goalKeyToPidGid(key);
+    const json = {
+        'update-goal-metadata': {
+          pid: pid,
+          gid: gid,
+          method: 'put',
+          field: field,
+          data: data,
+        }
+      };
+    return await api.goalAction(json);
+  },
+  delGoalField: async (key: string, field: string) => {
+    const { pid, gid } = goalKeyToPidGid(key);
+    const json = {
+        'update-goal-metadata': {
+          pid: pid,
+          gid: gid,
+          method: 'del',
+          field: field,
+        }
+      };
+    return await api.goalAction(json);
+  },
   editGoalNote: async (key: string, note: string) => {
     const { pid, gid } = goalKeyToPidGid(key);
     const json = {
@@ -349,23 +464,17 @@ const api = {
   },
   setGoalComplete: async (key: string, complete: boolean) => {
     const { pid, gid } = goalKeyToPidGid(key);
-    const json = complete
-      ? { 'mark-complete': { pid: pid, gid: gid } }
-      : { 'unmark-complete': { pid: pid, gid: gid } }
+    const json = { 'set-complete': { pid: pid, gid: gid, val: complete } };
     return await api.goalAction(json);
   },
   setGoalActive: async (key: string, active: boolean) => {
     const { pid, gid } = goalKeyToPidGid(key);
-    const json = active
-      ? { 'mark-active': { pid: pid, gid: gid } }
-      : { 'unmark-active': { pid: pid, gid: gid } }
+    const json = { 'set-active': { pid: pid, gid: gid, val: active } };
     return await api.goalAction(json);
   },
   setGoalActionable: async (key: string, actionable: boolean) => {
     const { pid, gid } = goalKeyToPidGid(key);
-    const json = actionable
-      ? { 'mark-actionable': {pid: pid, gid: gid } }
-      : { 'unmark-actionable': { pid: pid, gid: gid } }
+    const json = { 'set-actionable': {pid: pid, gid: gid, val: actionable } };
     return await api.goalAction(json);
   },
   archiveGoal: async (key: string) => {
@@ -476,108 +585,153 @@ const api = {
     return await api.goalAction(json);
   },
   getGoalData: async (keys: string[]) => {
-    return await api.goalView({ "goal-data": { "keys": keys } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal-data": { "keys": keys } });
   },
   getSingleGoal: async (key: string) => {
     const { pid, gid } = goalKeyToPidGid(key);
-    return await api.goalView({ "goal": {pid: pid, gid: gid} })
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal": {pid: pid, gid: gid} })
   },
   getSingleArchiveGoal: async (pid: string, rid: string, gid: string) => {
-    return await api.goalView({ "archive-goal": {pid: pid, rid: rid, gid: gid} })
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "archive-goal": {pid: pid, rid: rid, gid: gid} })
   },
   getCollections: async () => {
-    return await api.goalView({ "collections": null });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "collections": null });
   },
   getCollection: async (path: string) => {
-    return await api.goalView({ "path": path });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "path": path });
   },
   getPoolsIndex: async () => {
-    return await api.goalView({ "pools-index": null });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pools-index": null });
   },
   getPoolRoots: async (pid: string) => {
-    return await api.goalView({ "pool-roots": { pid: pid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-roots": { pid: pid } });
   },
   getPoolArchive: async (pid: string) => {
-    return await api.goalView({ "pool-archive": { pid: pid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-archive": { pid: pid } });
   },
   getArchiveGoalChildren: async (pid:string, rid: string, gid: string) => {
-    return await api.goalView({ "archive-goal-children": { pid: pid, rid: rid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "archive-goal-children": { pid: pid, rid: rid, gid: gid } });
   },
   getArchiveGoalBorrowed: async (pid:string, rid: string, gid: string) => {
-    return await api.goalView({ "archive-goal-borrowed": { pid: pid, rid: rid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "archive-goal-borrowed": { pid: pid, rid: rid, gid: gid } });
   },
   getArchiveGoalBorrowedBy: async (pid:string, rid: string, gid: string) => {
-    return await api.goalView({ "archive-goal-borrowed-by": { pid: pid, rid: rid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "archive-goal-borrowed-by": { pid: pid, rid: rid, gid: gid } });
   },
   getArchiveGoalLineage: async (pid:string, rid: string, gid: string) => {
-    return await api.goalView({ "archive-goal-lineage": { pid: pid, rid: rid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "archive-goal-lineage": { pid: pid, rid: rid, gid: gid } });
   },
   getArchiveGoalProgress: async (pid:string, rid: string, gid: string) => {
-    return await api.goalView({ "archive-goal-progress": { pid: pid, rid: rid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "archive-goal-progress": { pid: pid, rid: rid, gid: gid } });
   },
   getArchiveGoalHarvest: async (pid:string, rid: string, gid: string) => {
-    return await api.goalView({ "archive-goal-harvest": { pid: pid, rid: rid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "archive-goal-harvest": { pid: pid, rid: rid, gid: gid } });
   },
   getArchiveGoalEmptyGoals: async (pid:string, rid: string, gid: string) => {
-    return await api.goalView({ "archive-goal-empty-goals": { pid: pid, rid: rid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "archive-goal-empty-goals": { pid: pid, rid: rid, gid: gid } });
   },
   getGoalChildren: async (pid:string, gid: string) => {
-    return await api.goalView({ "goal-children": { pid: pid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal-children": { pid: pid, gid: gid } });
   },
   goalLineage: async (key: string) => {
     const { pid, gid } = goalKeyToPidGid(key);
-    return await api.goalView({ "goal-lineage": { pid: pid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal-lineage": { pid: pid, gid: gid } });
   },
   goalProgress: async (key: string) => {
     const { pid, gid } = goalKeyToPidGid(key);
-    return await api.goalView({ "goal-progress": { pid: pid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal-progress": { pid: pid, gid: gid } });
   },
   getGoalBorrowed: async (pid:string, gid: string) => {
-    return await api.goalView({ "goal-borrowed": { pid: pid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal-borrowed": { pid: pid, gid: gid } });
   },
   getGoalArchive: async (pid:string, gid: string) => {
-    return await api.goalView({ "goal-archive": { pid: pid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal-archive": { pid: pid, gid: gid } });
   },
   getGoalBorrowedBy: async (pid:string, gid: string) => {
-    return await api.goalView({ "goal-borrowed-by": { pid: pid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal-borrowed-by": { pid: pid, gid: gid } });
   },
   getLabelGoals: async (pid: string, label: string) => {
-    return await api.goalView({ "pool-tag-goals": { pid: pid, tag: label } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-tag-goals": { pid: pid, tag: label } });
   },
   getLabelHarvest: async (pid: string, label: string) => {
-    return await api.goalView({ "pool-tag-harvest": { pid: pid, tag: label } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-tag-harvest": { pid: pid, tag: label } });
   },
   getTagGoals: async (tag: string) => {
-    return await api.goalView({ "local-tag-goals": { tag: tag } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "local-tag-goals": { tag: tag } });
   },
   getTagHarvest: async (tag: string) => {
-    return await api.goalView({ "local-tag-harvest": { tag: tag } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "local-tag-harvest": { tag: tag } });
   },
   getPoolTitle: async (pid: string) => {
-    return await api.goalView({ "pool-title": { pid: pid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-title": { pid: pid } });
   },
   getPoolNote: async (pid: string) => {
-    return await api.goalView({ "pool-note": { pid: pid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-note": { pid: pid } });
+  },
+  getPoolPerms: async (pid: string) => {
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-perms": { pid: pid } });
   },
   getLabelNote: async (pid: string, label: string) => {
-    return await api.goalView({ "pool-tag-note": { pid: pid, tag: label } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-tag-note": { pid: pid, tag: label } });
   },
   getTagNote: async (tag: string) => {
-    return await api.goalView({ "local-tag-note": { tag: tag } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "local-tag-note": { tag: tag } });
   },
   getGoalParent: async (key: string) => {
     const { pid, gid } = goalKeyToPidGid(key);
-    return await api.goalView({ "goal-parent": { pid: pid, gid: gid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "goal-parent": { pid: pid, gid: gid } });
   },
   getSetting: async (setting: string) => {
     console.log(`getting setting: ${setting}`)
-    return await api.goalView({ "setting": { setting: setting } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "setting": { setting: setting } });
   },
   getPoolLabels: async (pid: string) => {
-    return await api.goalView({ "pool-tags": { pid: pid } });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-tags": { pid: pid } });
+  },
+  getPoolAttributes: async (pid: string) => {
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "pool-tags": { pid: pid } });
   },
   getAllTags: async () => {
-    return await api.goalView({ "all-local-goal-tags": null });
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "local-goal-tags": null });
+  },
+  getAllFields: async () => {
+    const patp = live ? (window as any).ship : ship;
+    return await api.goalView(patp, { "local-goal-fields": null });
   },
 };
 

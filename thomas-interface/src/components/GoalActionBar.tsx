@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiArchive, FiTag, FiInfo, FiCopy, FiPlus } from 'react-icons/fi';
-import { FaArrowsAlt } from 'react-icons/fa'; 
-import { TagIcon, ActionableIcon, ActiveIcon } from './CustomIcons';
+import { FiArchive, FiTag, FiInfo, FiCopy, FiPlus, FiUsers } from 'react-icons/fi';
+import { FaArrowsAlt, FaTable } from 'react-icons/fa'; 
+import { TagIcon, AttributeIcon, ActionableIcon, ActiveIcon } from './CustomIcons';
 import AddTodoPanel from './Periods/AddTodoPanel';
 import LabelPanel from './Panels/LabelPanel';
 import TagPanel from './Panels/TagPanel';
+import FieldsPanel from './Panels/FieldsPanel';
 import MovePanel from './Panels/MovePanel';
 import InfoPanel from './Panels/InfoPanel';
 import { Goal } from '../types';
@@ -57,6 +58,14 @@ const GoalActionBar: React.FC<{
       setPanel('');
     } else {
       setPanel('tag');
+    }
+  };
+
+  const toggleFieldsPanel = () => {
+    if (panel === 'attribute') {
+      setPanel('');
+    } else {
+      setPanel('attribute');
     }
   };
 
@@ -114,6 +123,12 @@ const GoalActionBar: React.FC<{
     <div ref={barRef} className="p-1 relative group bg-gray-200 flex items-center">
       <button
         className="p-2 rounded bg-gray-100"
+        onClick={() => console.log()}
+      >
+        <FiUsers />
+      </button>
+      <button
+        className="p-2 rounded bg-gray-100"
         onClick={copyToClipboard}
       >
         <FiCopy />
@@ -156,6 +171,21 @@ const GoalActionBar: React.FC<{
           )}
         </button>
       </div>
+      <div className="relative group">
+        <button
+          className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+          onClick={toggleFieldsPanel}
+        >
+          <AttributeIcon />
+        </button>
+      </div>
+      <div className="relative group">
+        <button
+          className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
+        >
+          <FaTable style={{ color: "#3d3d3e" }} />
+        </button>
+      </div>
       <button
         className="p-2 rounded bg-gray-100 relative justify-center flex items-center"
         onClick={toggleActionable}
@@ -188,6 +218,7 @@ const GoalActionBar: React.FC<{
             { panel === 'tag' && <TagPanel goal={goal} exit={() => setPanel('')} refresh={refresh}/> }
             { panel === 'info' && <InfoPanel goal={goal} /> }
             { panel === 'move' && <MovePanel goalKey={goal.key} refresh={refresh} /> }
+            { panel === 'attribute' && <FieldsPanel goal={goal} exit={() => setPanel('')} refresh={refresh}/> }
           </div>
         )}
       </div>

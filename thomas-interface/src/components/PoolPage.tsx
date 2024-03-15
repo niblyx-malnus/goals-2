@@ -5,8 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import GoalList from './GoalList';
 import ArchiveGoalList from './ArchiveGoalList';
 import TagSearchBar from './TagSearchBar';
+import PoolUsersPanel from './Panels/PoolUsersPanel';
 import api from '../api';
-import { FiX, FiSave, FiEdit, FiTrash } from 'react-icons/fi';
+import { FiUsers, FiX, FiSave, FiEdit, FiTrash } from 'react-icons/fi';
 import { ActiveIcon } from './CustomIcons';
 import { FaListUl } from 'react-icons/fa';
 import { Goal } from '../types';
@@ -213,6 +214,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [activeNewGoal, setActiveNewGoal] = useState(true);
   const { navigateToPeriod, navigateToLabel } = useCustomNavigation();
   const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
+  const [showUsersPanel, setShowUsersPanel] = useState(false);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -375,6 +377,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
     }
   };
 
+  const toggleUsersPanel = () => setShowUsersPanel(!showUsersPanel);
 
   return (
     <div className="bg-[#FAF3DD] flex justify-center items-center h-screen">
@@ -407,6 +410,21 @@ function Pool({ host, name }: { host: any; name: any; }) {
             <h2 className="text-blue-800">All Pools</h2>
           </div>
           <div className={`p-1 rounded flex justify-between items-center bg-gray-200 p-1 m-2`}>
+            <div className="relative group">
+              <button
+                className="mr-1 p-2 rounded bg-gray-100"
+                onClick={toggleUsersPanel}
+              >
+                <FiUsers />
+              </button>
+              {/* Conditionally render the PoolUsersPanel */}
+              {showUsersPanel && (
+                <PoolUsersPanel
+                  pid={pid}
+                  exit={() => setShowUsersPanel(false)}
+                />
+              )}
+            </div>
             {isEditingSummary ? (
               <input
                 type="text"

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiArchive, FiTag, FiInfo, FiCopy, FiPlus, FiTrash } from 'react-icons/fi';
+import { FiUsers, FiArchive, FiTag, FiInfo, FiCopy, FiPlus, FiTrash } from 'react-icons/fi';
 import { FaArrowsAlt } from 'react-icons/fa'; 
 import { TagIcon, ActionableIcon, ActiveIcon } from './CustomIcons';
 import AddTodoPanel from './Periods/AddTodoPanel';
@@ -7,6 +7,7 @@ import LabelPanel from './Panels/LabelPanel';
 import TagPanel from './Panels/TagPanel';
 import MovePanel from './Panels/MovePanel';
 import InfoPanel from './Panels/InfoPanel';
+import GoalUsersPanel from './Panels/GoalUsersPanel';
 import { Goal } from '../types';
 import api from '../api';
 
@@ -19,6 +20,9 @@ const GoalPageActionBar: React.FC<{
   }) => {
   const [panel, setPanel] = useState('');
   const barRef = useRef<HTMLDivElement>(null);
+  const [showGoalUsersPanel, setShowGoalUsersPanel] = useState(false);
+
+  const toggleGoalUsersPanel = () => setShowGoalUsersPanel(!showGoalUsersPanel);
 
   const toggleInfoPanel = () => {
     if (panel === 'info') {
@@ -129,6 +133,18 @@ const GoalPageActionBar: React.FC<{
   
   return (
     <div ref={barRef} className="p-1 relative group bg-gray-200 flex items-center">
+      <div className="relative group">
+        <button
+          className="p-2 rounded bg-gray-100"
+          onClick={toggleGoalUsersPanel}
+        >
+          <FiUsers />
+        </button>
+        {/* Conditionally render the GoalUsersPanel */}
+        {showGoalUsersPanel && (
+          <GoalUsersPanel goal={goal} exit={() => setShowGoalUsersPanel(false)} />
+        )}
+      </div>
       <button
         className="p-2 rounded bg-gray-100"
         onClick={copyToClipboard}

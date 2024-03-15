@@ -12,11 +12,13 @@ const GoalRow: React.FC<{
     refresh: () => void,
     toggleMove?: () => void,
     moveState?: boolean,
+    truncate?: boolean
   }> = ({
     goal,
     refresh,
     toggleMove,
     moveState = false,
+    truncate = true,
   }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newSummary, setNewSummary] = useState(goal.summary);
@@ -129,12 +131,12 @@ const GoalRow: React.FC<{
           type="text" 
           value={newSummary}
           onChange={(e) => setNewSummary(e.target.value)}
-          className="truncate bg-white shadow rounded cursor-pointer flex-grow p-1"
+          className={`${truncate ? "truncate" : ""} bg-white shadow rounded cursor-pointer flex-grow p-1`}
           onKeyDown={handleKeyDown}
         />
       ) : (
         <div
-          className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-1 ${goal.complete ? 'line-through' : ''}`}
+          className={`${truncate ? "truncate" : ""} bg-gray-100 rounded cursor-pointer flex-grow p-1 ${goal.complete ? 'line-through' : ''}`}
           onClick={() => navigate(`/goal${goal.key}`)}
           onDoubleClick={toggleEdit}
         >

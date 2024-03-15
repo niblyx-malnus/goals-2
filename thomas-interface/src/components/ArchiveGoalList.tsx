@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ArchiveGoalRow from './ArchiveGoalRow';
 import { Goal } from '../types';
-import { TagFilter, filterGoalsByTags, getUniqueTags } from './TagFilter';
-import { arch } from 'os';
+import { GoalFilter } from './GoalFilter';
 
 function ArchiveGoalList({
   goals,
@@ -25,28 +24,8 @@ function ArchiveGoalList({
   defaultCompleteTab?: 'Incomplete' | 'Complete';
 }) {
   const [selectedGoalKey, setSelectedGoalKey] = useState<string | null>(null);
-  const [tags, setTags] = useState<string[]>([]);
-  const [selectedOperation, setSelectedOperation] = useState<'some' | 'every'>('every');
-  const [includeInherited, setIncludeInherited] = useState(true);
-  const [tagOrLabel, setTagOrLabel] = useState<'both' | 'tag' | 'label'>('both');
   const [displayList, setDisplayList] = useState<Goal[]>([]);
-  const [uniqueTags, setUniqueTags] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'Incomplete' | 'Complete'>(defaultCompleteTab);
-
-  useEffect(() => {
-    const uniqueTags = getUniqueTags(goals, includeInherited, tagOrLabel);
-    setUniqueTags(uniqueTags);
-    let filteredArray = filterGoalsByTags(tagOrLabel, goals, tags, selectedOperation, includeInherited);
-    switch (activeTab) {
-      case 'Incomplete':
-        filteredArray = filteredArray.filter(goal => !goal.complete);
-        break;
-      case 'Complete':
-        filteredArray = filteredArray.filter(goal => goal.complete);
-        break;
-    }
-    setDisplayList(filteredArray);
-  }, [activeTab, goals, includeInherited, selectedOperation, tagOrLabel, tags]);
 
   return (
       <div>
@@ -82,16 +61,9 @@ function ArchiveGoalList({
           </div>
         )}
         { !isLoading && goals.length > 0 && (
-          <TagFilter
-            uniqueTags={uniqueTags}
-            tags={tags}
-            setTags={setTags}
-            tagOrLabel={tagOrLabel}
-            setTagOrLabel={setTagOrLabel}
-            selectedOperation={selectedOperation}
-            setSelectedOperation={setSelectedOperation}
-            includeInherited={includeInherited}
-            setIncludeInherited={setIncludeInherited}
+          <GoalFilter
+            goals={goals}
+            setFiltered={setDisplayList}
           />
         )}
         {!isLoading && displayList.length === 0 && (
@@ -99,7 +71,9 @@ function ArchiveGoalList({
         )}
         { !isLoading && displayList.length > 0 && (
           <ul>
-            {displayList.map((goal, index) => (
+            {displayList
+              .filter(goal => (activeTab === 'Incomplete') ? !goal.complete : goal.complete)
+              .map((goal, index) => (
               <React.Fragment key={index}>
                 {/* Insert separator before the first goal for moving to the start */}
                 {selectedGoalKey !== null && index === 0 && (
