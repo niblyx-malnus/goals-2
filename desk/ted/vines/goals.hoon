@@ -1,5 +1,5 @@
 /-  gol=goals, axn=action, pyk=peek, spider
-/+  *ventio, tree=filetree, gol-cli-traverse, gol-cli-node,
+/+  *ventio, tree=filetree, gol-cli-traverse, gol-cli-node, gol-cli-pool,
     goj=gol-cli-json
 =,  strand=strand:spider
 ^-  thread:spider
@@ -70,21 +70,21 @@
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
     =/  =goal:gol       (~(got by goals.contents) gid.vyu)
-    (send-archive-goal-data (turn children.goal (corl (lead pid.vyu) (lead rid.vyu))))
+    (send-archive-goal-data (turn children.goal (corl (lead pid.vyu) (lead rid.vyu))) src.gowl)
     ::
       %archive-goal-borrowed
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
     =/  nd              ~(. gol-cli-node goals.contents)
     =/  =goal:gol       (~(got by goals.contents) gid.vyu)
-    (send-archive-goal-data (turn ~(tap in (nest-left:nd gid.vyu)) (corl (lead pid.vyu) (lead rid.vyu))))
+    (send-archive-goal-data (turn ~(tap in (nest-left:nd gid.vyu)) (corl (lead pid.vyu) (lead rid.vyu))) src.gowl)
     ::
       %archive-goal-borrowed-by
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
     =/  nd              ~(. gol-cli-node goals.contents)
     =/  =goal:gol       (~(got by goals.contents) gid.vyu)
-    (send-archive-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (corl (lead pid.vyu) (lead rid.vyu))))
+    (send-archive-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (corl (lead pid.vyu) (lead rid.vyu))) src.gowl)
     ::
       %archive-goal-progress
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
@@ -114,7 +114,7 @@
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
     =;  lineage=(list [pid:gol gid:gol gid:gol])
-      (send-archive-goal-data lineage)
+      (send-archive-goal-data lineage src.gowl)
     =/  =goal:gol  (~(got by goals.contents) gid.vyu)
     |-
     ?~  parent.goal
@@ -129,7 +129,7 @@
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
     =/  tv  ~(. gol-cli-traverse goals.contents)
     =;  harvest=(list [pid:gol gid:gol gid:gol])
-      (send-archive-goal-data harvest)
+      (send-archive-goal-data harvest src.gowl)
     =/  order=(list gid:gol)
       %+  murn  goal-order.local.store
       |=  [=pid:gol =gid:gol]
@@ -138,7 +138,7 @@
     ::
       %archive-goal-empty-goals
     =;  empty=(list [pid:gol gid:gol gid:gol])
-      (send-archive-goal-data empty)
+      (send-archive-goal-data empty src.gowl)
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
     =/  tv  ~(. gol-cli-traverse goals.contents)
@@ -161,43 +161,45 @@
     ::
       %pool-archive
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    %-  send-archive-goal-data
-    %+  turn  (~(gut by contexts.archive.pool) ~ ~)
-    |=(=gid:gol [pid.vyu gid gid])
+    %+  send-archive-goal-data
+      %+  turn  (~(gut by contexts.archive.pool) ~ ~)
+      |=(=gid:gol [pid.vyu gid gid])
+    src.gowl
     ::
       %goal-archive
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    %-  send-archive-goal-data
-    %+  turn  (~(gut by contexts.archive.pool) `gid.vyu ~)
-    |=(=gid:gol [pid.vyu gid gid])
+    %+  send-archive-goal-data
+      %+  turn  (~(gut by contexts.archive.pool) `gid.vyu ~)
+      |=(=gid:gol [pid.vyu gid gid])
+    src.gowl
     ::
       %pool-roots
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    (send-goal-data (turn roots.pool (lead pid.vyu)))
+    (send-goal-data (turn roots.pool (lead pid.vyu)) src.gowl)
     ::
       %goal-children
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (send-goal-data (turn children.goal (lead pid.vyu)))
+    (send-goal-data (turn children.goal (lead pid.vyu)) src.gowl)
     ::
       %goal-borrowed
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  nd              ~(. gol-cli-node goals.pool)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (send-goal-data (turn ~(tap in (nest-left:nd gid.vyu)) (lead pid.vyu)))
+    (send-goal-data (turn ~(tap in (nest-left:nd gid.vyu)) (lead pid.vyu)) src.gowl)
     ::
       %goal-borrowed-by
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  nd              ~(. gol-cli-node goals.pool)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
-    (send-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (lead pid.vyu)))
+    (send-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (lead pid.vyu)) src.gowl)
     ::
-    %goal          (send-goal-datum [pid gid]:vyu)
-    %archive-goal  (send-archive-goal-datum [pid rid gid]:vyu)
+    %goal          (send-goal-datum [pid gid]:vyu src.gowl)
+    %archive-goal  (send-archive-goal-datum pid.vyu rid.vyu gid.vyu src.gowl)
     ::
       %harvest
     =;  harvest=(list key:gol)
-      (send-goal-data harvest)
+      (send-goal-data harvest src.gowl)
     ?-    -.type.vyu
         %main
       =/  all-goals=goals:gol  (all-goals store)
@@ -227,7 +229,7 @@
     ::
       %empty-goals
     =;  empty=(list key:gol)
-      (send-goal-data empty)
+      (send-goal-data empty src.gowl)
     ?-    -.type.vyu
         %main
       =/  all-goals=goals:gol  (all-goals store)
@@ -295,7 +297,7 @@
       ?.  (~(has in tags) tag.vyu)
         ~
       `[pid.vyu gid]
-    (send-goal-data keys)
+    (send-goal-data keys src.gowl)
     ::
       %pool-tag-harvest
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
@@ -308,7 +310,7 @@
         ~
       `gid
     =;  harvest=(list key:gol)
-      (send-goal-data harvest)
+      (send-goal-data harvest src.gowl)
     =/  tv  ~(. gol-cli-traverse goals.pool)
     =/  order=(list gid:gol)
       %+  murn  goal-order.local.store
@@ -318,7 +320,7 @@
     ::
       %local-tag-goals
     =;  keys=(list key:gol)
-      (send-goal-data keys)
+      (send-goal-data keys src.gowl)
     %+  murn  ~(tap by goal-metadata.local.store)
     |=  [[=pid:gol =gid:gol] metadata=(map @t json)]
     =/  tags=(set @t)
@@ -339,7 +341,7 @@
         ~
       `(encode-key pid gid)
     =;  harvest=(list key:gol)
-      (send-goal-data harvest)
+      (send-goal-data harvest src.gowl)
     =/  tv  ~(. gol-cli-traverse (all-goals store))
     =/  key-order=(list gid:gol)
       (turn goal-order.local.store encode-key)
@@ -423,12 +425,12 @@
       ~
     [~ f o+p]
     ::
-    %goal-data  (send-goal-data keys.vyu)
+    %goal-data  (send-goal-data keys.vyu src.gowl)
     ::
       %goal-lineage
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     =;  lineage=(list key:gol)
-      (send-goal-data lineage)
+      (send-goal-data lineage src.gowl)
     =/  =goal:gol  (~(got by goals.pool) gid.vyu)
     |-
     ?~  parent.goal
@@ -528,6 +530,7 @@
       inherited-attributes=(list [@t json])
       inherited-fields=(list [@t json])
       parent=(unit key:gol)
+      src-perms=@t
       chief=ship
       deputies=(list [ship @t])
       open-to=(unit @t)
@@ -551,6 +554,7 @@
       ['inheritedAttributes' (pairs inherited-attributes)]
       ['inheritedFields' (pairs inherited-fields)]
       [%parent ?~(parent ~ (enjs-key:goj u.parent))]
+      ['yourPerms' s+src-perms]
       [%chief s+(scot %p chief)]
       [%deputies (pairs (turn deputies |=([=@p =@t] [(scot %p p) s+t])))]
       ['openTo' ?~(open-to ~ s+u.open-to)]
@@ -599,7 +603,7 @@
     ~
   [~ k v]
 ++  get-datum
-  |=  [=key:gol =store:gol]
+  |=  [=key:gol =store:gol src=ship]
   ^-  (unit goal-datum)
   ?~  pul=(~(get by pools.store) pid.key)  ~
   ?~  get=(~(get by goals.u.pul) gid.key)  ~
@@ -618,6 +622,7 @@
       inherited-attributes
       inherited-fields
       ?~(parent ~ `[pid.key u.parent])
+      (get-goal-permission-level:(apex:gol-cli-pool u.pul) gid.key src)
       chief
       ~(tap by deputies)
       open-to
@@ -685,17 +690,17 @@
     ==
   --
 ++  send-goal-datum
-  |=  =key:gol
+  |=  [=key:gol src=ship]
   =/  m  (strand ,vase)
   ^-  form:m
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
-  (pure:m !>(?~(datum=(get-datum key store) ~ (enjs-goal-datum u.datum))))
+  (pure:m !>(?~(datum=(get-datum key store src) ~ (enjs-goal-datum u.datum))))
 ++  send-goal-data
-  |=  keys=(list key:gol)
+  |=  [keys=(list key:gol) src=ship]
   =/  m  (strand ,vase)
   ^-  form:m
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
-  (pure:m !>((enjs-goal-data (murn keys (curr get-datum store)))))
+  (pure:m !>((enjs-goal-data (murn keys (curr get-datum [store src])))))
 ++  get-archive-goal-labels
   |=  [=pid:gol rid=gid:gol =gid:gol =store:gol]
   ^-  (list @t)
@@ -718,7 +723,7 @@
     ~
   [~ k v]
 ++  get-archive-datum
-  |=  [=pid:gol rid=gid:gol =gid:gol =store:gol]
+  |=  [=pid:gol rid=gid:gol =gid:gol =store:gol src=ship]
   ^-  (unit goal-datum)
   ?~  pul=(~(get by pools.store) pid)  ~
   ?~  ten=(~(get by contents.archive.u.pul) rid)  ~
@@ -730,14 +735,15 @@
       summary
       (so:dejs:format (~(gut by metadata) 'note' s+''))
       (get-archive-goal-labels pid rid gid store) :: labels (pool-specific)
-      (get-goal-tags [pid gid] store)               :: tags (private)
+      (get-goal-tags [pid gid] store)             :: tags (private)
       inherited-labels
       inherited-tags
       (get-archive-goal-attributes pid rid gid store) :: attributes (pool-specific)
-      (get-goal-fields [pid gid] store)                 :: fields (private)
+      (get-goal-fields [pid gid] store)               :: fields (private)
       inherited-attributes
       inherited-fields
       ?~(parent ~ `[pid u.parent])
+      (get-goal-permission-level:(apex:gol-cli-pool u.pul) gid src)
       chief
       ~(tap by deputies)
       open-to
@@ -823,12 +829,12 @@
     ==
   --
 ++  send-archive-goal-datum
-  |=  [=pid:gol rid=gid:gol =gid:gol]
+  |=  [=pid:gol rid=gid:gol =gid:gol src=ship]
   =/  m  (strand ,vase)
   ^-  form:m
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   %-  pure:m  !>
-  ?~  datum=(get-archive-datum pid rid gid store)
+  ?~  datum=(get-archive-datum pid rid gid store src)
     ~
   =/  =pool:gol  (~(got by pools.store) pid)
   =+  (~(got by contents.archive.pool) rid)
@@ -837,7 +843,7 @@
       [%context ?~(context ~ s+u.context)]
   ==
 ++  send-archive-goal-data
-  |=  keys=(list [pid:gol gid:gol gid:gol])
+  |=  [keys=(list [pid:gol gid:gol gid:gol]) src=ship]
   =/  m  (strand ,vase)
   ^-  form:m
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
@@ -845,7 +851,7 @@
   %-  enjs-goal-data
   %+  murn  keys
   |=  [=pid:gol rid=gid:gol =gid:gol]
-  (get-archive-datum pid rid gid store)
+  (get-archive-datum pid rid gid store src)
 ++  enjs-pools-index
   =,  enjs:format
   |=  pools-index=(list [pid:gol @])

@@ -345,6 +345,16 @@
   ==
 ::
 ++  check-goal-deputies-mod-perm  check-goal-super
+++  check-goal-open-to-mod-perm   check-goal-super
+::
+++  get-goal-permission-level
+  |=  [=gid:gol mod=ship]
+  ^-  goal-perms:gol
+  ?:  (check-goal-master gid mod)       %master
+  ?:  (check-goal-super gid mod)        %super
+  ?:  (check-goal-edit-perm gid mod)    %editor
+  ?:  (check-goal-create-perm gid mod)  %creator
+  %viewer
 ::
 ++  check-in-pool  |=(=ship |(=(ship host.pid.p) (~(has by perms.p) ship)))
 :: replace all chiefs of goals whose chiefs have been kicked
@@ -820,11 +830,19 @@
   |=  [=gid:gol =deputies:gol mod=ship]
   ^-  _this
   ?.  (check-goal-deputies-mod-perm gid mod)
-    ~|("missing goal perms" !!)
+    ~|("missing super perms" !!)
   ?.  (~(all in ~(key by deputies)) check-in-pool)
     ~|("some ships in deputies are not in pool" !!)
-  =/  goal  (~(got by goals.p) gid)
+  =/  =goal:gol  (~(got by goals.p) gid)
   this(goals.p (~(put by goals.p) gid goal(deputies deputies)))
+::
+++  set-open-to
+  |=  [=gid:gol =open-to:gol mod=ship]
+  ^-  _this
+  ?.  (check-goal-open-to-mod-perm gid mod)
+    ~|("missing super perms" !!)
+  =/  =goal:gol  (~(got by goals.p) gid)
+  this(goals.p (~(put by goals.p) gid goal(open-to open-to)))
 ::
 ++  update-pool-metadata-field
   |=  [field=@t dif=(each [@t json] @t) mod=ship]
