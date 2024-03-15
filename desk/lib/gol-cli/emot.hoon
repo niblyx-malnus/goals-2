@@ -300,6 +300,11 @@
       |=(=ship [ship ~])
     --
     ::
+      %set-chief
+    =/  old=pool:gol  (~(got by pools.store) pid.axn)
+    =/  new=pool:gol  abet:(set-chief:(apex:pl old) gid.axn chief.axn rec.axn mod)
+    this(pools.store (~(put by pools.store) pid new))
+    ::
       %update-goal-perms
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)

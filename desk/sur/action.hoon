@@ -45,6 +45,7 @@
           [%set-start =pid =gid start=(unit @da)]
           [%set-end =pid =gid end=(unit @da)]
           [%set-summary =pid =gid summary=@t]
+          [%set-chief =pid =gid chief=ship rec=?]
           [%set-actionable =pid =gid val=?]
           [%set-complete =pid =gid val=?]
           [%set-active =pid =gid val=?]

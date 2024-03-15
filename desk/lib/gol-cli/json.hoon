@@ -119,6 +119,7 @@
         [%set-summary (ot ~[pid+pid gid+gid summary+so])]
         [%set-start (ot ~[pid+pid gid+gid start+unit-di])]
         [%set-end (ot ~[pid+pid gid+gid end+unit-di])]
+        [%set-chief (ot ~[pid+pid gid+gid chief+ship rec+bo])]
         [%set-actionable (ot ~[pid+pid gid+gid val+bo])]
         [%set-complete (ot ~[pid+pid gid+gid val+bo])]
         [%set-active (ot ~[pid+pid gid+gid val+bo])]
