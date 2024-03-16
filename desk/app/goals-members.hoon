@@ -4,6 +4,7 @@
 |%
 +$  state-0
   $:  %0
+      moon-as-planet=?
       =sub-histories
   ==
 +$  card     card:agent:gall
@@ -37,6 +38,12 @@
   ?>  =(src our):bowl
   ~&  "%goals-members app: receiving mark {(trip mark)}"
   ?+    mark  (on-poke:def mark vase)
+      %noun
+    ?>  =(%moon q.vase)
+    =.  moon-as-planet  !moon-as-planet
+    ~&  moon-as-planet+moon-as-planet
+    [~ this]
+    ::
       %membership-transition
     =+  !<(tan=membership-transition vase)
     ~&  "%goals-members app: receiving transition {(trip -.tan)}"
@@ -50,10 +57,22 @@
     ==
   ==
 ::
-++  on-peek   on-peek:def
+++  on-peek
+  |=  =(pole knot)
+  ^-  (unit (unit cage))
+  ?+    pole  (on-peek:def pole)
+    [%x %moon-as-planet ~]  ``noun+!>(moon-as-planet)
+  ==
+::
 ++  on-watch  on-watch:def
 ++  on-leave  on-leave:def
 ++  on-agent  on-agent:def
 ++  on-arvo   on-arvo:def
 ++  on-fail   on-fail:def
 --
+:: An invite means we are prepared to auto-accept you to the whitelist
+:: when you make a request and after which you can subscribe.
+:: for each pool we 
+:: (ma
+:: A request is a request to be added to the whitelist after which you can
+:: subscribe  

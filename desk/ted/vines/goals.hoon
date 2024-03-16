@@ -14,9 +14,9 @@
 ?>  |(=(our src):gowl (moon:title [our src]:gowl))
 ~?  >>  (moon:title [our src]:gowl)
   "%goals vine: moon access from {(scow %p src.gowl)}"
-=?  src.gowl  (moon:title [our src]:gowl)
-  ~&  >>  "moon-as-planet=True"
-  our.gowl
+;<  moon-as-planet=?  bind:m  (scry-hard ,? /gx/goals-members/moon-as-planet/noun)
+~&  >>  moon-as-planet+moon-as-planet
+=?  src.gowl  &(moon-as-planet (moon:title [our src]:gowl))  our.gowl
 ~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
