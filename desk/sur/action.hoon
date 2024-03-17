@@ -134,13 +134,18 @@
       [%local-goal-tags ~]
       [%local-goal-fields ~]
       [%goal-data keys=(list key)]
+      [%outgoing-invites =pid]
+      [%incoming-invites ~]
   ==
 ::
 +$  membership-action
   $%  [%join =pid]
+      [%send-invite invitee=ship =pid]
   ==
 ::
 +$  membership-transition
   $%  [%pool-sub-event =pid =sub-event]
+      [%add-incoming-invite =pid from=ship]
+      [%add-outgoing-invite =pid from=ship to=ship]
   ==
 --

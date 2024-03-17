@@ -20,32 +20,6 @@
 ~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
-  :: 
-    %membership-action
-  =+  !<(act=membership-action:axn vase)
-  ?-    -.act
-      %join
-    :: watch the pool path
-    ::
-    ;<  p=(unit tang)  bind:m
-      %:  agent-watch-path-soft
-        %goals
-        /(scot %p host.pid.act)/[name.pid.act]
-        [host.pid.act %goals]
-        /(scot %p host.pid.act)/[name.pid.act]
-      ==
-    :: update subscription history
-    ::
-    =/  =cage
-      membership-transition+!>([%pool-sub-event pid.act %watch-ack p])
-    ;<  ~  bind:m  (poke [our.gowl %goals-members] cage)
-    :: return or fail
-    ::
-    ?~  p
-      (pure:m !>(~))
-    (strand-fail %pool-subscription-fail u.p)
-  ==
-  ::
     %goal-action
   =+  !<(act=action:axn vase)
   =/  gam  %goal-action-and-mod
@@ -462,6 +436,28 @@
     :~  [%complete (numb (lent comp))]
         [%total (numb (lent able))]
     ==
+    ::
+      %outgoing-invites
+    ;<  outgoing-invites=(map pid:gol [ship ship])  bind:m
+      (scry-hard ,(map pid:gol [ship ship]) /gx/goals-members/outgoing-invites/noun)
+    =/  [from=ship to=ship]  (~(got by outgoing-invites) pid.vyu)
+    %-  pure:m  !>
+    =,  enjs:format
+    %-  pairs
+    :~  [%from s+(scot %p from)]
+        [%to s+(scot %p to)]
+    ==
+    ::
+      %incoming-invites
+    ;<  incoming-invites=(map pid:gol ship)  bind:m
+      (scry-hard ,(map pid:gol ship) /gx/goals-members/incoming-invites/noun)
+    %-  pure:m  !>
+    =,  enjs:format
+    %-  pairs
+    %+  turn  ~(tap by incoming-invites)
+    |=  [=pid:gol from=@p]
+    ^-  [@t json]
+    [(enjs-pid:goj pid) s+(scot %p from)]
   ==
 ==
 ::

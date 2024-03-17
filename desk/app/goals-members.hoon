@@ -1,11 +1,15 @@
 /-  *action
 /+  vent, bout, dbug, default-agent, verb
+/=  x  /ted/vines/goals
+/=  x  /mar/membership-action
 ::
 |%
 +$  state-0
   $:  %0
       moon-as-planet=?
       =sub-histories
+      incoming-invites=(map pid ship)
+      outgoing-invites=(map pid [from=ship to=ship])
   ==
 +$  card     card:agent:gall
 --
@@ -30,6 +34,7 @@
   ^-  (quip card _this)
   :: =/  old  !<(state-0 old-vase)
   :: [~ this(state old)]
+  ~&  %nuking-goals-members-agent
   [~ this(state *state-0)]
 ::
 ++  on-poke
@@ -54,6 +59,17 @@
       =.  sub-history    [[now.bowl sub-event.tan] sub-history]
       =.  sub-histories  (~(put by sub-histories) pid.tan sub-history)
       [~ this]
+      ::
+        %add-incoming-invite
+      ?>  =(src.bowl host.pid.tan)
+      =.  incoming-invites  (~(put by incoming-invites) [pid from]:tan)
+      [~ this]
+      ::
+        %add-outgoing-invite
+      ?>  =(src our):bowl
+      ?>  =(our.bowl host.pid.tan)
+      =.  outgoing-invites  (~(put by outgoing-invites) [pid from to]:tan)
+      [~ this]
     ==
   ==
 ::
@@ -62,6 +78,8 @@
   ^-  (unit (unit cage))
   ?+    pole  (on-peek:def pole)
     [%x %moon-as-planet ~]  ``noun+!>(moon-as-planet)
+    [%x %outgoing-invites ~]  ``noun+!>(outgoing-invites)
+    [%x %incoming-invites ~]  ``noun+!>(incoming-invites)
   ==
 ::
 ++  on-watch  on-watch:def
