@@ -41,10 +41,10 @@
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
-  ?>  =(src our):bowl
   ~&  "%goals-members app: receiving mark {(trip mark)}"
   ?+    mark  (on-poke:def mark vase)
       %noun
+    ?>  =(src our):bowl
     ?>  =(%moon q.vase)
     =.  moon-as-planet  !moon-as-planet
     ~&  moon-as-planet+moon-as-planet
