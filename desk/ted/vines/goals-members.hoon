@@ -6,7 +6,6 @@
 =<
 ::
 %-  vine-thread
-%-  vine:tree
 |=  [=gowl vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m

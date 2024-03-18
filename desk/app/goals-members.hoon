@@ -1,6 +1,6 @@
 /-  *action
 /+  vent, bout, dbug, default-agent, verb
-/=  x  /ted/vines/goals
+/=  x  /ted/vines/goals-members
 /=  x  /mar/membership-action
 ::
 |%
@@ -88,9 +88,3 @@
 ++  on-arvo   on-arvo:def
 ++  on-fail   on-fail:def
 --
-:: An invite means we are prepared to auto-accept you to the whitelist
-:: when you make a request and after which you can subscribe.
-:: for each pool we 
-:: (ma
-:: A request is a request to be added to the whitelist after which you can
-:: subscribe  
