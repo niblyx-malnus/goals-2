@@ -141,11 +141,14 @@
 +$  membership-action
   $%  [%join =pid]
       [%send-invite invitee=ship =pid]
+      [%cancel-invite invitee=ship =pid]
   ==
 ::
 +$  membership-transition
   $%  [%pool-sub-event =pid =sub-event]
       [%add-incoming-invite =pid from=ship]
+      [%del-incoming-invite =pid]
       [%add-outgoing-invite =pid from=ship to=ship]
+      [%del-outgoing-invite =pid to=ship]
   ==
 --

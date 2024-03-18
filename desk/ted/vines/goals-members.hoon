@@ -60,6 +60,24 @@
       %+  poke  [our.gowl %goals-members]
       membership-transition+!>([%add-outgoing-invite pid.act src.gowl invitee.act])
     (pure:m !>(~))
+    ::
+      %cancel-invite
+    ?>  =(our.gowl host.pid.act)
+    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    ;<  pok=(unit ~)  bind:m
+      %+  (set-soft-timeout ,~)  ~s30
+      %+  poke  [invitee.act %goals-members]
+      membership-transition+!>([%del-incoming-invite pid.act])
+    ;<  ~  bind:m
+      %+  poke  [our.gowl %goals-members]
+      membership-transition+!>([%del-outgoing-invite pid.act invitee.act])
+    ?~  pok
+      %-  send-warning
+      :~  [%type s+%invite-cancel-timeout]
+          [%to s+(scot %p invitee.act)]
+          [%lag s+'30 seconds']
+      ==
+    (pure:m !>(~))
   ==
 ==
 ::
@@ -70,5 +88,10 @@
   =,  enjs:format
   %-  pure:m  !>
   (pairs [error+(pairs data) ~])
+++  send-warning
+  |=  data=(list [@t json])
+  =/  m  (strand ,vase)
+  =,  enjs:format
+  %-  pure:m  !>
+  (pairs [warning+(pairs data) ~])
 --
-

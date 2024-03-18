@@ -76,6 +76,19 @@
       =.  pool-invites  (~(put by pool-invites) [to from]:tan)
       =.  outgoing-invites  (~(put by outgoing-invites) pid.tan pool-invites)
       [~ this]
+      ::
+        %del-incoming-invite
+      ?>  =(src.bowl host.pid.tan)
+      =.  incoming-invites  (~(del by incoming-invites) pid.tan)
+      [~ this]
+      ::
+        %del-outgoing-invite
+      ?>  =(src our):bowl
+      ?>  =(our.bowl host.pid.tan)
+      =/  pool-invites=(map ship invite)  (~(gut by outgoing-invites) pid.tan ~)
+      =.  pool-invites  (~(del by pool-invites) to.tan)
+      =.  outgoing-invites  (~(put by outgoing-invites) pid.tan pool-invites)
+      [~ this]
     ==
   ==
 ::

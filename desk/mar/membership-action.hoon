@@ -13,6 +13,7 @@
     ^-  $-(json membership-action)
     %-  of
     :~  [%send-invite (ot ~[invitee+(su fed:ag) pid+pid])]
+        [%cancel-invite (ot ~[invitee+(su fed:ag) pid+pid])]
     ==
   --
 ++  grad  %noun
