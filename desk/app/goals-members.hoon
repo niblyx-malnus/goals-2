@@ -72,7 +72,7 @@
         %add-outgoing-invite
       ?>  =(src our):bowl
       ?>  =(our.bowl host.pid.tan)
-      =/  pool-invites=(map ship invite)  (~(got by outgoing-invites) pid.tan)
+      =/  pool-invites=(map ship invite)  (~(gut by outgoing-invites) pid.tan ~)
       =.  pool-invites  (~(put by pool-invites) [to from]:tan)
       =.  outgoing-invites  (~(put by outgoing-invites) pid.tan pool-invites)
       [~ this]
