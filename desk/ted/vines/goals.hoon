@@ -440,7 +440,7 @@
       %outgoing-invites
     ;<  outgoing-invites=(map pid:gol (map ship ship))  bind:m
       (scry-hard ,(map pid:gol (map ship ship)) /gx/goals-members/outgoing-invites/noun)
-    =/  invites=(map ship ship)  (~(got by outgoing-invites) pid.vyu)
+    =/  invites=(map ship ship)  (~(gut by outgoing-invites) pid.vyu ~)
     %-  pure:m  !>
     =,  enjs:format
     %-  pairs
