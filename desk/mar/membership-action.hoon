@@ -1,9 +1,9 @@
 /-  *action
 /+  j=gol-cli-json
-|_  mem=membership-action
+|_  act=membership-action
 ++  grow
   |%
-  ++  noun  mem
+  ++  noun  act
   --
 ++  grab
   |%

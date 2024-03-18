@@ -2,6 +2,7 @@
 /+  vent, bout, dbug, default-agent, verb
 /=  x  /ted/vines/goals-members
 /=  x  /mar/membership-action
+/=  x  /mar/membership-transition
 ::
 |%
 +$  state-0
