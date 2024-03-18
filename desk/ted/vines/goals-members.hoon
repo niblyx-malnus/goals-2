@@ -46,9 +46,12 @@
       %send-invite
     ?>  =(our.gowl host.pid.act)
     :: TODO: assert src.gowl has appropriate permissions wrt pool
-    ;<  ~  bind:m
+    ;<  pok=(unit ~)  bind:m
+      %+  (set-soft-timeout ,~)  ~s30
       %+  poke  [invitee.act %goals-members]
       membership-transition+!>([%add-incoming-invite pid.act src.gowl])
+    ?~  pok
+      (pure:m !>(s+%timeout))
     ;<  ~  bind:m
       %+  poke  [our.gowl %goals-members]
       membership-transition+!>([%add-outgoing-invite pid.act src.gowl invitee.act])
