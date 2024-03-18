@@ -5,12 +5,15 @@
 /=  x  /mar/membership-transition
 ::
 |%
++$  invite
+  $:  from=ship
+  ==
 +$  state-0
   $:  %0
       moon-as-planet=?
       =sub-histories
-      incoming-invites=(map pid ship)
-      outgoing-invites=(map pid [from=ship to=ship])
+      incoming-invites=(map pid invite)
+      outgoing-invites=(map pid (map ship invite))
   ==
 +$  card     card:agent:gall
 --
@@ -69,7 +72,9 @@
         %add-outgoing-invite
       ?>  =(src our):bowl
       ?>  =(our.bowl host.pid.tan)
-      =.  outgoing-invites  (~(put by outgoing-invites) [pid from to]:tan)
+      =/  pool-invites=(map ship invite)  (~(got by outgoing-invites) pid.tan)
+      =.  pool-invites  (~(put by pool-invites) [to from]:tan)
+      =.  outgoing-invites  (~(put by outgoing-invites) pid.tan pool-invites)
       [~ this]
     ==
   ==

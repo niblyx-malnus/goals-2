@@ -438,15 +438,16 @@
     ==
     ::
       %outgoing-invites
-    ;<  outgoing-invites=(map pid:gol [ship ship])  bind:m
-      (scry-hard ,(map pid:gol [ship ship]) /gx/goals-members/outgoing-invites/noun)
-    =/  [from=ship to=ship]  (~(got by outgoing-invites) pid.vyu)
+    ;<  outgoing-invites=(map pid:gol (map ship ship))  bind:m
+      (scry-hard ,(map pid:gol (map ship ship)) /gx/goals-members/outgoing-invites/noun)
+    =/  invites=(map ship ship)  (~(got by outgoing-invites) pid.vyu)
     %-  pure:m  !>
     =,  enjs:format
     %-  pairs
-    :~  [%from s+(scot %p from)]
-        [%to s+(scot %p to)]
-    ==
+    %+  turn  ~(tap by invites)
+    |=  [to=@p from=@p]
+    ^-  [@t json]
+    [(scot %p to) s+(scot %p from)]
     ::
       %incoming-invites
     ;<  incoming-invites=(map pid:gol ship)  bind:m
