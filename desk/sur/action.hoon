@@ -146,9 +146,9 @@
 ::
 +$  membership-transition
   $%  [%pool-sub-event =pid =sub-event]
-      [%add-incoming-invite =pid from=ship]
+      [%add-incoming-invite =pid invite=json]
       [%del-incoming-invite =pid]
-      [%add-outgoing-invite =pid from=ship to=ship]
-      [%del-outgoing-invite =pid to=ship]
+      [%add-outgoing-invite =pid invite=json invitee=ship]
+      [%del-outgoing-invite =pid invitee=ship]
   ==
 --

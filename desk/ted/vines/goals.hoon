@@ -438,27 +438,27 @@
     ==
     ::
       %outgoing-invites
-    ;<  outgoing-invites=(map pid:gol (map ship ship))  bind:m
-      (scry-hard ,(map pid:gol (map ship ship)) /gx/goals-members/outgoing-invites/noun)
-    =/  invites=(map ship ship)  (~(gut by outgoing-invites) pid.vyu ~)
+    ;<  outgoing-invites=(map pid:gol (map ship json))  bind:m
+      (scry-hard ,(map pid:gol (map ship json)) /gx/goals-members/outgoing-invites/noun)
+    =/  invites=(map ship json)  (~(gut by outgoing-invites) pid.vyu ~)
     %-  pure:m  !>
     =,  enjs:format
     %-  pairs
     %+  turn  ~(tap by invites)
-    |=  [to=@p from=@p]
+    |=  [to=@p jon=json]
     ^-  [@t json]
-    [(scot %p to) s+(scot %p from)]
+    [(scot %p to) jon]
     ::
       %incoming-invites
-    ;<  incoming-invites=(map pid:gol ship)  bind:m
-      (scry-hard ,(map pid:gol ship) /gx/goals-members/incoming-invites/noun)
+    ;<  incoming-invites=(map pid:gol json)  bind:m
+      (scry-hard ,(map pid:gol json) /gx/goals-members/incoming-invites/noun)
     %-  pure:m  !>
     =,  enjs:format
     %-  pairs
     %+  turn  ~(tap by incoming-invites)
-    |=  [=pid:gol from=@p]
+    |=  [=pid:gol jon=json]
     ^-  [@t json]
-    [(enjs-pid:goj pid) s+(scot %p from)]
+    [(enjs-pid:goj pid) jon]
   ==
 ==
 ::

@@ -5,9 +5,7 @@
 /=  x  /mar/membership-transition
 ::
 |%
-+$  invite
-  $:  from=ship
-  ==
++$  invite  json
 +$  state-0
   $:  %0
       moon-as-planet=?
@@ -66,14 +64,14 @@
       ::
         %add-incoming-invite
       ?>  =(src.bowl host.pid.tan)
-      =.  incoming-invites  (~(put by incoming-invites) [pid from]:tan)
+      =.  incoming-invites  (~(put by incoming-invites) [pid invite]:tan)
       [~ this]
       ::
         %add-outgoing-invite
       ?>  =(src our):bowl
       ?>  =(our.bowl host.pid.tan)
       =/  pool-invites=(map ship invite)  (~(gut by outgoing-invites) pid.tan ~)
-      =.  pool-invites  (~(put by pool-invites) [to from]:tan)
+      =.  pool-invites  (~(put by pool-invites) [invitee invite]:tan)
       =.  outgoing-invites  (~(put by outgoing-invites) pid.tan pool-invites)
       [~ this]
       ::
@@ -86,7 +84,7 @@
       ?>  =(src our):bowl
       ?>  =(our.bowl host.pid.tan)
       =/  pool-invites=(map ship invite)  (~(gut by outgoing-invites) pid.tan ~)
-      =.  pool-invites  (~(del by pool-invites) to.tan)
+      =.  pool-invites  (~(del by pool-invites) invitee.tan)
       =.  outgoing-invites  (~(put by outgoing-invites) pid.tan pool-invites)
       [~ this]
     ==

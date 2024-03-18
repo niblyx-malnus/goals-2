@@ -46,10 +46,16 @@
       %send-invite
     ?>  =(our.gowl host.pid.act)
     :: TODO: assert src.gowl has appropriate permissions wrt pool
+    =/  =pool:gol  (~(got by pools.store) pid.act)
+    =/  invite=json
+      %-  pairs:enjs:format
+      :~  [%from s+(scot %p src.gowl)]
+          [%title s+title.pool]
+      ==
     ;<  pok=(unit ~)  bind:m
       %+  (set-soft-timeout ,~)  ~s30
       %+  poke  [invitee.act %goals-members]
-      membership-transition+!>([%add-incoming-invite pid.act src.gowl])
+      membership-transition+!>([%add-incoming-invite pid.act invite])
     ?~  pok
       %-  send-error
       :~  [%type s+%invite-timeout]
@@ -58,7 +64,7 @@
       ==
     ;<  ~  bind:m
       %+  poke  [our.gowl %goals-members]
-      membership-transition+!>([%add-outgoing-invite pid.act src.gowl invitee.act])
+      membership-transition+!>([%add-outgoing-invite pid.act invite invitee.act])
     (pure:m !>(~))
     ::
       %cancel-invite
