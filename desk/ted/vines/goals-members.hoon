@@ -51,7 +51,11 @@
       %+  poke  [invitee.act %goals-members]
       membership-transition+!>([%add-incoming-invite pid.act src.gowl])
     ?~  pok
-      (pure:m !>(s+%timeout))
+      %-  send-error
+      :~  [%type s+%invite-timeout]
+          [%to s+(scot %p invitee.act)]
+          [%lag s+'30 seconds']
+      ==
     ;<  ~  bind:m
       %+  poke  [our.gowl %goals-members]
       membership-transition+!>([%add-outgoing-invite pid.act src.gowl invitee.act])
@@ -60,6 +64,11 @@
 ==
 ::
 |%
-++  stub  ~
+++  send-error
+  |=  data=(list [@t json])
+  =/  m  (strand ,vase)
+  =,  enjs:format
+  %-  pure:m  !>
+  (pairs [error+(pairs data) ~])
 --
 
