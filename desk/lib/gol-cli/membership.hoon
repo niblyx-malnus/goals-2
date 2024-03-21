@@ -1,5 +1,5 @@
 /-  gol=goals, axn=action, p=pools, spider
-/+  *ventio
+/+  *ventio, pools
 |_  =gowl
 ++  handle-membership-action
   =,  strand=strand:spider
@@ -36,7 +36,7 @@
     =/  =pool:gol  (~(got by pools.store) pid.act)
     =/  =invite:p
       %-  ~(gas by *invite:p)
-      :~  [%goals-invite ~]
+      :~  ['goalsPool' s+(id-string:enjs:pools pid.act)]
           [%from s+(scot %p src.gowl)]
           [%title s+title.pool]
       ==

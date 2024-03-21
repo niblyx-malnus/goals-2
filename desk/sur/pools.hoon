@@ -35,7 +35,7 @@
   ==
 +$  state-0
   $:  %0
-      moon-as-planet=?
+      moon-as-planet=$~(| ?)
       =pools
       =incoming-invites
       =outgoing-requests
