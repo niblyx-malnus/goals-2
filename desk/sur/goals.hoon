@@ -1,10 +1,11 @@
+/-  p=pools
 |%
-+$  moment    (unit @da)
-+$  pid       [host=ship name=term]
++$  pid       id:p
 +$  gid       @ta
 +$  nid       [?(%s %e) =gid] :: node gid
 +$  key       [=pid =gid]
 +$  status    (lest [timestamp=@da done=?])
++$  moment    (unit @da)
 +$  node
   $:  =status
       =moment

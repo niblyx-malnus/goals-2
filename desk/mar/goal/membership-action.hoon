@@ -12,8 +12,8 @@
     =,  dejs:j
     ^-  $-(json membership-action)
     %-  of
-    :~  [%send-invite (ot ~[invitee+(su fed:ag) pid+pid])]
-        [%cancel-invite (ot ~[invitee+(su fed:ag) pid+pid])]
+    :~  [%extend-invite (ot ~[pid+pid invitee+(su fed:ag)])]
+        [%cancel-invite (ot ~[pid+pid invitee+(su fed:ag)])]
     ==
   --
 ++  grad  %noun

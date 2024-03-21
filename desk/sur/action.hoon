@@ -1,5 +1,10 @@
 /-  *goals
 |%
++$  transition
+  $%  [%create-pool =pid title=@t]
+      [%delete-pool =pid]
+  ==
+::
 +$  action  $%(local-action pool-action goal-action)
 ++  local-action
   $%  [%pools-slot-above dis=pid dat=pid]
@@ -140,15 +145,9 @@
 ::
 +$  membership-action
   $%  [%join =pid]
-      [%send-invite invitee=ship =pid]
-      [%cancel-invite invitee=ship =pid]
-  ==
-::
-+$  membership-transition
-  $%  [%pool-sub-event =pid =sub-event]
-      [%add-incoming-invite =pid invite=json]
-      [%del-incoming-invite =pid]
-      [%add-outgoing-invite =pid invite=json invitee=ship]
-      [%del-outgoing-invite =pid invitee=ship]
+      [%extend-invite =pid invitee=ship]
+      [%cancel-invite =pid invitee=ship]
+      [%accept-invite =pid]
+      [%reject-invite =pid]
   ==
 --

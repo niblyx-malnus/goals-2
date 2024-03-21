@@ -474,33 +474,19 @@
   =/  =mite  (fall (de-mite type.u.full-file) /text/plain)
   (pure:m [response-header `[mite data.u.full-file]])
 ::
-++  set-soft-timeout
+++  soften
   |*  computation-result=mold
   =/  m  (strand ,computation-result)
-  |=  [time=@dr computation=form:m]
-  =/  n  (strand ,(unit computation-result))
+  |=  computation=form:m
+  =/  n  (strand ,(each computation-result goof))
   ^-  form:n
-  ;<  now=@da  bind:n  get-time
-  =/  when  (add now time)
-  =/  =card:agent:gall
-    [%pass /timeout/(scot %da when) %arvo %b %wait when]
-  ;<  ~        bind:n  (send-raw-card card)
   |=  tin=strand-input:strand
-  =*  loop  $
-  ?:  ?&  ?=([~ %sign [%timeout @ ~] %behn %wake *] in.tin)
-          =((scot %da when) i.t.wire.u.in.tin)
-      ==
-    `[%done ~]
   =/  c-res  (computation tin)
   ?:  ?=(%cont -.next.c-res)
-    c-res(self.next ..loop(computation self.next.c-res))
+    c-res(self.next ..$(computation self.next.c-res))
   ?:  ?=(%done -.next.c-res)
-    =/  =card:agent:gall
-      [%pass /timeout/(scot %da when) %arvo %b %rest when]
-    [[card cards.c-res] [%done `value.next.c-res]]
+    c-res(value.next &+value.next.c-res)
   ?:  ?=(%fail -.next.c-res)
-    =/  =card:agent:gall
-      [%pass /timeout/(scot %da when) %arvo %b %rest when]
-    c-res(cards [card cards.c-res])
+    c-res(next [%done |+err.next.c-res])
   c-res
 --

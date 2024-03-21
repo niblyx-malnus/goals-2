@@ -17,18 +17,11 @@
 ::
 :: ============================================================================
 ::
-++  unique-pin
-  |=  [own=ship now=@da]
-  ^-  pid:gol
-  =/  =pid:gol  [own (scot %da now)]
-  ?.  (~(has by pools.store) pid)
-    pid
-  $(now (add now ~s0..0001))
-::
 ++  create-pool
-  |=  [own=ship now=@da title=@t]
+  |=  [=pid:gol own=ship title=@t]
   ^-  pool:gol
-  :*  (unique-pin own now)
+  ?<  (~(has by pools.store) pid)
+  :*  pid
       title
       (~(put by *perms:gol) own %owner)
       ~  ~  [~ ~]  ~  ~
@@ -46,6 +39,27 @@
 :: UPDATES
 ::
 :: ============================================================================
+::
+++  handle-transition
+  |=  tan=transition:act
+  ^-  _this
+  ?>  =(src our):bowl
+  ?-    -.tan
+      %create-pool
+    ?>  =(our.bowl host.pid.tan)
+    =/  =pool:gol    (create-pool pid.tan src.bowl title.tan)
+    =.  pools.store  (~(put by pools.store) pid.tan pool)
+    =.  pool-order.local.store  [pid.tan pool-order.local.store]
+    this
+    ::
+      %delete-pool
+    :: TODO: purge locals; purge order
+    ?>  =(our.bowl host.pid.tan)
+    =.  pools.store  (~(del by pools.store) pid.tan)
+    ?~  idx=(find [pid.tan]~ pool-order.local.store)  this
+    =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
+    this
+  ==
 ::
 ++  handle-action
   |=  [mod=ship axn=action:act]
@@ -373,23 +387,8 @@
       abet:(delete-pool-metadata-field:(apex:pl old) field.axn mod)
     this(pools.store (~(put by pools.store) pid.axn new))
     ::
-      %create-pool
-    =+  axn
-    ?>  =(src our):bowl
-    =/  =pool:gol    (create-pool src.bowl now.bowl title)
-    =.  pools.store  (~(put by pools.store) pid.pool pool)
-    =.  pool-order.local.store  [pid.pool pool-order.local.store]
-    this
-    ::
-      %delete-pool
-    :: TODO: purge locals; purge order
-    =+  axn
-    ?>  =(src our):bowl
-    ?>  =(src.bowl host.pid)
-    =.  pools.store  (~(del by pools.store) pid)
-    ?~  idx=(find [pid]~ pool-order.local.store)  this
-    =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
-    this
+    %create-pool  !!
+    %delete-pool  !!
     ::
       %update-goal-metadata
     =/  old=pool:gol  (~(got by pools.store) pid.axn)

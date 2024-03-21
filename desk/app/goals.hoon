@@ -6,6 +6,7 @@
     gol-cli-json
 /=  x  /mar/goal/action
 /=  x  /mar/goal/view
+/=  x  /mar/goal/membership-action
 /=  x  /ted/vines/goals
 /=  x  /ted/test
 ::
@@ -56,6 +57,13 @@
     ~&  received-axn+axn
     =^  cards  state
       abet:(handle-action:emot mod axn)
+    [cards this]
+    ::
+      %goals-transition
+    =+  !<(tan=transition:act vase)
+    ~&  received-transition+tan
+    =^  cards  state
+      abet:(handle-transition:emot tan)
     [cards this]
   ==
 ::

@@ -1,22 +1,29 @@
-/-  gol=goals, axn=action, pyk=peek, spider
-/+  *ventio, tree=filetree, gol-cli-traverse, gol-cli-node, gol-cli-pool,
+/-  p=pools, gol=goals, axn=action, pyk=peek, spider
+/+  *ventio, pools, tree=filetree,
+    gol-cli-membership,
+    gol-cli-traverse, gol-cli-node, gol-cli-pool,
     goj=gol-cli-json
 =,  strand=strand:spider
 ^-  thread:spider
 ::
-=<
+=<  =*  helper-core  .
 ::
 %-  vine-thread
 %-  vine:tree
-|=  [=gowl vid=vent-id =mark =vase]
+|=  [gowl=bowl:gall vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m
+::
 ?>  |(=(our src):gowl (moon:title [our src]:gowl))
 ~?  >>  (moon:title [our src]:gowl)
   "%goals vine: moon access from {(scow %p src.gowl)}"
-;<  moon-as-planet=?  bind:m  (scry-hard ,? /gx/goals-members/moon-as-planet/noun)
+;<  moon-as-planet=?  bind:m  (scry-hard ,? /gx/pools/moon-as-planet/noun)
 ~&  >>  moon-as-planet+moon-as-planet
 =?  src.gowl  &(moon-as-planet (moon:title [our src]:gowl))  our.gowl
+::
+=*  hc   ~(. helper-core gowl)
+=*  mem  ~(. gol-cli-membership gowl)
+::
 ~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
@@ -24,6 +31,25 @@
   =+  !<(act=action:axn vase)
   =/  gam  %goal-action-and-mod
   ?+    -.act  (just-poke [our dap]:gowl gam !>([src.gowl act]))
+      %create-pool
+    :: only we can create a pool under our name
+    ::
+    ?>  =(src our):gowl
+    =/  data-fields  [%public [%title ~ s+title.act]~]~
+    ;<  =id:p  bind:m  (create-pools-pool:hc ~ data-fields)
+    =/  data-fields  [%private [%goals-pool ~ s+(id-string:enjs:pools id)]~]~
+    ;<  ~  bind:m  (update-pool-data:hc id data-fields)
+    ;<  ~  bind:m  (create-goals-pool:hc id title.act)
+    (pure:m !>(s+(id-string:enjs:pools id)))
+    ::
+      %delete-pool
+    :: only we can delete a pool under our name
+    ::
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (delete-goals-pool:hc pid.act)
+    ;<  ~  bind:m  (delete-pools-pool:hc pid.act)
+    (pure:m !>(~))
+    ::
       %create-goal
     :: Hacky way to get new id
     ::
@@ -438,31 +464,42 @@
     ==
     ::
       %outgoing-invites
-    ;<  outgoing-invites=(map pid:gol (map ship json))  bind:m
-      (scry-hard ,(map pid:gol (map ship json)) /gx/goals-members/outgoing-invites/noun)
-    =/  invites=(map ship json)  (~(gut by outgoing-invites) pid.vyu ~)
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =pool:p  (~(got by pools) pid.vyu)
     %-  pure:m  !>
     =,  enjs:format
     %-  pairs
-    %+  turn  ~(tap by invites)
-    |=  [to=@p jon=json]
+    %+  turn  ~(tap by outgoing-invites.pool)
+    |=  [to=@p =invite:p status=(unit ?)]
     ^-  [@t json]
-    [(scot %p to) jon]
+    :-  (scot %p to)
+    %-  pairs
+    :~  [%invite o+invite]
+        [%status ?~(status ~ b+u.status)]
+    ==
     ::
       %incoming-invites
-    ;<  incoming-invites=(map pid:gol json)  bind:m
-      (scry-hard ,(map pid:gol json) /gx/goals-members/incoming-invites/noun)
+    ;<  =incoming-invites:p  bind:m
+      (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
+    :: TODO: filter for goals-pool field
     %-  pure:m  !>
     =,  enjs:format
     %-  pairs
     %+  turn  ~(tap by incoming-invites)
-    |=  [=pid:gol jon=json]
+    |=  [=pid:gol =invite:p status=(unit ?)]
     ^-  [@t json]
-    [(enjs-pid:goj pid) jon]
+    :-  (enjs-pid:goj pid)
+    %-  pairs
+    :~  [%invite o+invite]
+        [%status ?~(status ~ b+u.status)]
+    ==
   ==
+  ::
+    %memmbership-action
+  (handle-membership-action:mem !<(membership-action:axn vase))
 ==
 ::
-|%
+|_  =gowl
 ++  encode-key  |=(key:gol (rap 3 (enjs-pid:goj pid) '/' gid ~))
 ++  decode-key
   |=  =cord
@@ -859,4 +896,42 @@
   :~  [%pid s+(enjs-pid:goj pid)]
       [%title s+title]
   ==
+::
+++  create-goals-pool
+  |=  [=pid:gol title=@t]
+  =/  m  (strand ,~)
+  ^-  form:m
+  (poke [our dap]:gowl goals-transition+!>([%create-pool pid title]))
+::
+++  delete-goals-pool
+  |=  =pid:gol
+  =/  m  (strand ,~)
+  ^-  form:m
+  (poke [our dap]:gowl goals-transition+!>([%delete-pool pid]))
+::
+++  create-pools-pool
+  |=  $:  graylist-fields=(list graylist-field:p)
+          pool-data-fields=(list pool-data-field:p)
+      ==
+  =/  m  (strand ,id:p)
+  ^-  form:m
+  ;<  jon=json  bind:m
+    %+  (vent ,json)  [our.gowl %pools]
+    pools-action+[%create-pool graylist-fields pool-data-fields]
+  (pure:m (id:dejs:pools jon))
+::
+++  delete-pools-pool
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  (poke [our.gowl %pools] pools-transition+!>([%delete-pool id]))
+::
+++  update-pool-data
+  |=  [=id:p fields=(list pool-data-field:p)]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  poke  [our.gowl %pools]
+  :-  %pools-transition  !>
+  :+  %update-pool  id
+  [%update-pool-data fields]
 --
