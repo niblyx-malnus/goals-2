@@ -161,6 +161,7 @@
       ==
       ::
         %update-outgoing-invite-response
+      ~&  invitee+invitee.pan
       =/  [=invite *]  (~(got by outgoing-invites.old) invitee.pan)
       %=    old
           outgoing-invites

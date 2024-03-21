@@ -140,6 +140,7 @@
     (pure:m !>(~))
     ::
       %accept-invite
+    ~&  pools-accept-invite+src.gowl
     ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-invite-response id.act [~ & metadata.act])
     (pure:m !>(~))

@@ -51,6 +51,7 @@
     ::
       %accept-invite
     ?>  =(src our):gowl
+    ~&  membership-accept-invite+src.gowl
     ;<  ~  bind:m  (accept-invite pid.act)
     (pure:m !>(~))
     ::
