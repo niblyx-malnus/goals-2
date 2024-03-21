@@ -1,7 +1,8 @@
 /+  p=pools, vent, bout, dbug, default-agent, verb
 /=  x  /ted/vines/pools
-/=  x  /mar/pools/action
 /=  x  /mar/pools/transition
+/=  x  /mar/pools/gesture
+/=  x  /mar/pools/action
 ::
 |%
 +$  card     card:agent:gall
