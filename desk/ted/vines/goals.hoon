@@ -495,7 +495,7 @@
     ==
   ==
   ::
-    %goal-memmbership-action
+    %goal-membership-action
   (handle-membership-action:mem !<(membership-action:axn vase))
 ==
 ::
