@@ -278,8 +278,8 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
-  %+  poke  [invitee dap.gowl]
-  :-  %pools-gesture  !>
+  %+  (vent ,~)  [invitee dap.gowl]
+  :-  %pools-gesture
   [%invite id invite]
 ::
 ++  give-invite-response-gesture
@@ -287,8 +287,8 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
-  %+  poke  [host.id dap.gowl]
-  :-  %pools-gesture  !>
+  %+  (vent ,~)  [host.id dap.gowl]
+  :-  %pools-gesture
   [%invite-response id response]
 ::
 ++  give-request-gesture
@@ -296,8 +296,8 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
-  %+  poke  [host.id dap.gowl]
-  :-  %pools-gesture  !>
+  %+  (vent ,~)  [host.id dap.gowl]
+  :-  %pools-gesture
   [%request id request]
 ::
 ++  give-request-response-gesture
@@ -305,7 +305,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
-  %+  poke  [requestee dap.gowl]
-  :-  %pools-gesture  !>
+  %+  (vent ,~)  [requestee dap.gowl]
+  :-  %pools-gesture
   [%request-response id response]
 --

@@ -78,31 +78,31 @@
   |=  [=id:p invitee=ship =invite:p]
   =/  m  (strand ,~)
   ^-  form:m
-  %+  poke  [our.gowl %pools]
-  :-  %pools-action  !>
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
   [%extend-invite id invitee invite]
 ::
 ++  cancel-invite
   |=  [=id:p invitee=ship]
   =/  m  (strand ,~)
   ^-  form:m
-  %+  poke  [our.gowl %pools]
-  :-  %pools-action  !>
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
   [%cancel-invite id invitee]
 ::
 ++  accept-invite
   |=  =id:p
   =/  m  (strand ,~)
   ^-  form:m
-  %+  poke  [our.gowl %pools]
-  :-  %pools-action  !>
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
   [%accept-invite id]
 ::
 ++  reject-invite
   |=  =id:p
   =/  m  (strand ,~)
   ^-  form:m
-  %+  poke  [our.gowl %pools]
-  :-  %pools-action  !>
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
   [%reject-invite id]
 --
