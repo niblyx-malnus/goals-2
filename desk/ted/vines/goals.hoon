@@ -37,7 +37,7 @@
     ?>  =(src our):gowl
     =/  data-fields  [%public [%title ~ s+title.act]~]~
     ;<  =id:p  bind:m  (create-pools-pool:hc ~ data-fields)
-    =/  data-fields  [%private [%goals-pool ~ s+(id-string:enjs:pools id)]~]~
+    =/  data-fields  [%private ['goalsPool' ~ s+(id-string:enjs:pools id)]~]~
     ;<  ~  bind:m  (update-pool-data:hc id data-fields)
     ;<  ~  bind:m  (create-goals-pool:hc id title.act)
     (pure:m !>(s+(id-string:enjs:pools id)))
@@ -487,13 +487,15 @@
       %incoming-invites
     ;<  =incoming-invites:p  bind:m
       (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
-    :: TODO: filter for goals-pool field
     %-  pure:m  !>
     =,  enjs:format
     %-  pairs
-    %+  turn  ~(tap by incoming-invites)
+    %+  murn  ~(tap by incoming-invites)
     |=  [=pid:gol =invite:p =status:p]
-    ^-  [@t json]
+    ^-  (unit [@t json])
+    ?.  (~(has by invite) 'goalsPool')
+      ~
+    :-  ~
     :-  (enjs-pid:goj pid)
     %-  pairs
     :~  [%invite o+invite]
