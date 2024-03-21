@@ -1,14 +1,15 @@
 |%
 +$  id                 [host=ship name=term]
 +$  dude               dude:gall
++$  dudes              (set dude)
 +$  rank               rank:title
 +$  role               term
 +$  roles              (set role)
 +$  members            (map ship roles)
 +$  metadata           (map @t json)
-+$  invite             metadata :: eventually deal with timestamps?
-+$  request            metadata :: eventually deal with timestamps?
-+$  status             (unit [response=? =metadata]) :: eventually deal with timestamps?
++$  invite             [=dudes =metadata] :: dudes handle resolution
++$  request            [=dudes =metadata] :: dudes handle resolution
++$  status             (unit [response=? =metadata])
 +$  outgoing-invites   (map ship [=invite =status])
 +$  incoming-requests  (map ship [=request =status])
 +$  incoming-invites   (map id [=invite =status])
@@ -95,5 +96,13 @@
       [%invite-response =id =status]
       [%request =id request=(unit request)]
       [%request-response =id =status]
+  ==
+:: allows you to do things based on invite/request metadata
+:: on invite/request resolution
+:: e.g. update roles based on "invited as %admin"
+::
++$  on-resolution
+  $%  [%add-from-invite =id invitee=ship =metadata]
+      [%add-from-request =id requestee=ship =metadata]
   ==
 --

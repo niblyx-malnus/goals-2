@@ -475,7 +475,11 @@
     ^-  [@t json]
     :-  (scot %p to)
     %-  pairs
-    :~  [%invite o+invite]
+    :~  :-  %invite
+        %-  pairs
+        :~  [%dudes a+(turn ~(tap in dudes.invite) (lead %s))]
+            [%metadata o+metadata.invite]
+        ==
         :-  %status
         ?~  status
           ~
@@ -493,12 +497,16 @@
     %+  murn  ~(tap by incoming-invites)
     |=  [=pid:gol =invite:p =status:p]
     ^-  (unit [@t json])
-    ?.  (~(has by invite) 'goalsPool')
+    ?.  (~(has in dudes.invite) dap.gowl)
       ~
     :-  ~
     :-  (enjs-pid:goj pid)
     %-  pairs
-    :~  [%invite o+invite]
+    :~  :-  %invite
+        %-  pairs
+        :~  [%dudes a+(turn ~(tap in dudes.invite) (lead %s))]
+            [%metadata o+metadata.invite]
+        ==
         :-  %status
         ?~  status
           ~
