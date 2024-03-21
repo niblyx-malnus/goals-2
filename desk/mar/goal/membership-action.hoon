@@ -14,6 +14,8 @@
     %-  of
     :~  [%extend-invite (ot ~[pid+pid invitee+(su fed:ag)])]
         [%cancel-invite (ot ~[pid+pid invitee+(su fed:ag)])]
+        [%accept-invite (ot ~[pid+pid])]
+        [%reject-invite (ot ~[pid+pid])]
     ==
   --
 ++  grad  %noun
