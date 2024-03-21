@@ -10,7 +10,6 @@
 =/  m  (strand ,^vase)
 ^-  form:m
 ::
-?>  |(=(our src):gowl (moon:title [our src]:gowl))
 ~?  >>  (moon:title [our src]:gowl)
   "%pools vine: moon access from {(scow %p src.gowl)}"
 ;<  moon-as-planet=?  bind:m  (scry-hard ,? /gx/pools/moon-as-planet/noun)
