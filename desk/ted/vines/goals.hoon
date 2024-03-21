@@ -47,7 +47,8 @@
     ::
     ?>  =(src our):gowl
     ;<  ~  bind:m  (delete-goals-pool:hc pid.act)
-    ;<  ~  bind:m  (delete-pools-pool:hc pid.act)
+    :: don't crash if pool-pool deletion fails
+    ;<  *  bind:m  ((soften ,~) (delete-pools-pool:hc pid.act))
     (pure:m !>(~))
     ::
       %create-goal
@@ -470,12 +471,17 @@
     =,  enjs:format
     %-  pairs
     %+  turn  ~(tap by outgoing-invites.pool)
-    |=  [to=@p =invite:p status=(unit ?)]
+    |=  [to=@p =invite:p =status:p]
     ^-  [@t json]
     :-  (scot %p to)
     %-  pairs
     :~  [%invite o+invite]
-        [%status ?~(status ~ b+u.status)]
+        :-  %status
+        ?~  status
+          ~
+        %-  pairs
+        :-  ['inviteResponse' b+response.u.status]
+        ~(tap by metadata.u.status)
     ==
     ::
       %incoming-invites
@@ -486,12 +492,17 @@
     =,  enjs:format
     %-  pairs
     %+  turn  ~(tap by incoming-invites)
-    |=  [=pid:gol =invite:p status=(unit ?)]
+    |=  [=pid:gol =invite:p =status:p]
     ^-  [@t json]
     :-  (enjs-pid:goj pid)
     %-  pairs
     :~  [%invite o+invite]
-        [%status ?~(status ~ b+u.status)]
+        :-  %status
+        ?~  status
+          ~
+        %-  pairs
+        :-  ['inviteResponse' b+response.u.status]
+        ~(tap by metadata.u.status)
     ==
   ==
   ::

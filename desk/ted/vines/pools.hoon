@@ -89,7 +89,7 @@
     ::
       %invite-response
     ?>  =(our.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-invite-response id.ges src.gowl response.ges)
+    ;<  ~  bind:m  (update-outgoing-invite-response id.ges src.gowl status.ges)
     :: TODO: If a response is affirmative, add to members
     (pure:m !>(~))
     ::
@@ -100,7 +100,7 @@
     ::
       %request-response
     ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-request-response id.ges response.ges)
+    ;<  ~  bind:m  (update-outgoing-request-response id.ges status.ges)
     (pure:m !>(~))
   ==
 ::
@@ -140,13 +140,13 @@
     (pure:m !>(~))
     ::
       %accept-invite
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ &])
-    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ &])
+    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ & metadata.act])
     (pure:m !>(~))
     ::
       %reject-invite
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ |])
-    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ |])
+    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ | metadata.act])
+    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ | metadata.act])
     (pure:m !>(~))
     ::
       %extend-request
@@ -161,15 +161,15 @@
     ::
       %accept-request
     ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ &])
-    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ &])
+    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ & metadata.act])
     :: TODO: add to members
     (pure:m !>(~))
     ::
       %reject-request
     ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ |])
-    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ |])
+    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ | metadata.act])
+    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ | metadata.act])
     (pure:m !>(~))
   ==
 ::
@@ -177,13 +177,19 @@
   |=  =id:p
   =/  m  (strand ,~)
   ^-  form:m
-  (poke [our dap]:gowl pools-transition+!>([%create-pool id]))
+  %+  poke  [our dap]:gowl
+  :-  %pools-transition  !>
+  ^-  transition:p
+  [%create-pool id]
 ::
 ++  delete-pool
   |=  =id:p
   =/  m  (strand ,~)
   ^-  form:m
-  (poke [our dap]:gowl pools-transition+!>([%delete-pool id]))
+  %+  poke  [our dap]:gowl
+  :-  %pools-transition  !>
+  ^-  transition:p
+  [%delete-pool id]
 ::
 ++  update-graylist
   |=  [=id:p fields=(list graylist-field:p)]
@@ -191,6 +197,7 @@
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   :+  %update-pool  id
   [%update-graylist fields]
 ::
@@ -200,6 +207,7 @@
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   :+  %update-pool  id
   [%update-pool-data fields]
 ::
@@ -209,6 +217,7 @@
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   :+  %update-pool  id
   [%update-members member roles]
 ::
@@ -218,17 +227,19 @@
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   :+  %update-pool  id
   [%update-outgoing-invites invitee invite]
 ::
 ++  update-outgoing-invite-response
-  |=  [=id:p invitee=ship =response:p]
+  |=  [=id:p invitee=ship =status:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   :+  %update-pool  id
-  [%update-outgoing-invite-response invitee response]
+  [%update-outgoing-invite-response invitee status]
 ::
 ++  update-incoming-requests
   |=  [=id:p requestee=ship request=(unit request:p)]
@@ -236,17 +247,19 @@
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   :+  %update-pool  id
   [%update-incoming-requests requestee request]
 ::
 ++  update-incoming-request-response
-  |=  [=id:p requestee=ship =response:p]
+  |=  [=id:p requestee=ship =status:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   :+  %update-pool  id
-  [%update-incoming-request-response requestee response]
+  [%update-incoming-request-response requestee status]
 ::
 ++  update-incoming-invites
   |=  [=id:p invite=(unit invite:p)]
@@ -254,15 +267,17 @@
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   [%update-incoming-invites id invite]
 ::
 ++  update-incoming-invite-response
-  |=  [=id:p =response:p]
+  |=  [=id:p =status:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
-  [%update-incoming-invite-response id response]
+  ^-  transition:p
+  [%update-incoming-invite-response id status]
 ::
 ++  update-outgoing-requests
   |=  [=id:p request=(unit request:p)]
@@ -270,15 +285,17 @@
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
+  ^-  transition:p
   [%update-outgoing-requests id request]
 ::
 ++  update-outgoing-request-response
-  |=  [=id:p =response:p]
+  |=  [=id:p =status:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
-  [%update-outgoing-request-response id response]
+  ^-  transition:p
+  [%update-outgoing-request-response id status]
 ::
 ++  timeout  ~s15
 ::
@@ -291,16 +308,18 @@
   ~&  dap+dap.gowl
   %+  (vent ,~)  [invitee dap.gowl]
   :-  %pools-gesture
+  ^-  gesture:p
   [%invite id invite]
 ::
 ++  give-invite-response-gesture
-  |=  [=id:p =response:p]
+  |=  [=id:p =status:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [host.id dap.gowl]
-  :-  %pools-gesture
-  [%invite-response id response]
+   :-  %pools-gesture
+  ^-  gesture:p
+  [%invite-response id status]
 ::
 ++  give-request-gesture
   |=  [=id:p request=(unit request:p)]
@@ -309,14 +328,16 @@
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [host.id dap.gowl]
   :-  %pools-gesture
+  ^-  gesture:p
   [%request id request]
 ::
 ++  give-request-response-gesture
-  |=  [=id:p requestee=ship =response:p]
+  |=  [=id:p requestee=ship =status:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [requestee dap.gowl]
   :-  %pools-gesture
-  [%request-response id response]
+  ^-  gesture:p
+  [%request-response id status]
 --

@@ -80,6 +80,7 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
+  ^-  action:p
   [%extend-invite id invitee invite]
 ::
 ++  cancel-invite
@@ -88,6 +89,7 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
+  ^-  action:p
   [%cancel-invite id invitee]
 ::
 ++  accept-invite
@@ -96,7 +98,8 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
-  [%accept-invite id]
+  ^-  action:p
+  [%accept-invite id ~]
 ::
 ++  reject-invite
   |=  =id:p
@@ -104,5 +107,6 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
-  [%reject-invite id]
+  ^-  action:p
+  [%reject-invite id ~]
 --

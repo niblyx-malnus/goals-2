@@ -6,10 +6,9 @@
 +$  roles              (set role)
 +$  members            (map ship roles)
 +$  metadata           (map @t json)
-+$  response           (unit ?)
-+$  invite             metadata :: eventually deal with timestamps
-+$  request            metadata :: eventually deal with timestamps
-+$  status             response :: eventually deal with timestamps
++$  invite             metadata :: eventually deal with timestamps?
++$  request            metadata :: eventually deal with timestamps?
++$  status             (unit [response=? =metadata]) :: eventually deal with timestamps?
 +$  outgoing-invites   (map ship [=invite =status])
 +$  incoming-requests  (map ship [=request =status])
 +$  incoming-invites   (map id [=invite =status])
@@ -49,8 +48,8 @@
   $%  [%update-blocked p=(each blocked blocked)] :: %&: uni; %|: dif
       [%update-incoming-invites =id invite=(unit invite)]
       [%update-outgoing-requests =id request=(unit request)]
-      [%update-incoming-invite-response =id =response]
-      [%update-outgoing-request-response =id =response]
+      [%update-incoming-invite-response =id =status]
+      [%update-outgoing-request-response =id =status]
       [%update-pool =id p=pool-transition]
       [%create-pool =id]
       [%delete-pool =id]
@@ -60,8 +59,8 @@
   $%  [%update-members member=ship roles=(unit (each roles roles))]
       [%update-outgoing-invites invitee=ship invite=(unit invite)]
       [%update-incoming-requests requestee=ship request=(unit request)]
-      [%update-outgoing-invite-response invitee=ship =response]
-      [%update-incoming-request-response requestee=ship =response]
+      [%update-outgoing-invite-response invitee=ship =status]
+      [%update-incoming-request-response requestee=ship =status]
       [%update-graylist fields=(list graylist-field)]
       [%update-pool-data fields=(list pool-data-field)]
   ==
@@ -83,18 +82,18 @@
       [%delete-pool =id]
       [%extend-invite =id invitee=ship =invite]
       [%cancel-invite =id invitee=ship]
-      [%accept-invite =id]
-      [%reject-invite =id]
+      [%accept-invite =id =metadata]
+      [%reject-invite =id =metadata]
       [%extend-request =id =request]
       [%cancel-request =id]
-      [%accept-request =id requestee=ship]
-      [%reject-request =id requestee=ship]
+      [%accept-request =id requestee=ship =metadata]
+      [%reject-request =id requestee=ship =metadata]
   ==
 ::
 +$  gesture
   $%  [%invite =id invite=(unit invite)]
-      [%invite-response =id =response]
+      [%invite-response =id =status]
       [%request =id request=(unit request)]
-      [%request-response =id =response]
+      [%request-response =id =status]
   ==
 --

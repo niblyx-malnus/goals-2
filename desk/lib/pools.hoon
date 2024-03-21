@@ -39,7 +39,7 @@
     ::
     ?<  (~(has in pools.blocked) id.tan)
     ?<  (~(has in hosts.blocked) host.id.tan)
-    :: the status of the current invite response must be undecided
+    :: the status of the current invite status must be undecided
     ::
     =/  [* =status]  (~(gut by incoming-invites) id.tan [~ ~])
     ?>  ?=(~ status)
@@ -55,7 +55,7 @@
       :: if request is null, delete request
       ::
       this(outgoing-requests (~(del by outgoing-requests) id.tan))
-    :: the status of the current request response must be undecided
+    :: the status of the current request status must be undecided
     ::
     =/  [* =status]  (~(gut by outgoing-requests) id.tan [~ ~])
     ?>  ?=(~ status)
@@ -72,7 +72,7 @@
         incoming-invites
       %+  ~(put by incoming-invites)
         id.tan
-      [invite response.tan]
+      [invite status.tan]
     ==
     ::
       %update-outgoing-request-response
@@ -81,7 +81,7 @@
         outgoing-requests
       %+  ~(put by outgoing-requests)
         id.tan
-      [request response.tan]
+      [request status.tan]
     ==
     ::
       %create-pool
@@ -133,7 +133,7 @@
         :: if invite is null, delete invite
         ::
         old(outgoing-invites (~(del by outgoing-invites.old) invitee.pan))
-      :: the status of the current invite response must be undecided
+      :: the status of the current invite status must be undecided
       ::
       =/  [* =status]  (~(gut by outgoing-invites.old) invitee.pan [~ ~])
       ?>  ?=(~ status)
@@ -149,7 +149,7 @@
         :: if request is null, delete request
         ::
         old(incoming-requests (~(del by incoming-requests.old) requestee.pan))
-      :: the status of the current request response must be undecided
+      :: the status of the current request status must be undecided
       ::
       =/  [* =status]  (~(gut by incoming-requests.old) requestee.pan [~ ~])
       ?>  ?=(~ status)
@@ -166,7 +166,7 @@
           outgoing-invites
         %+  ~(put by outgoing-invites.old)
           invitee.pan
-        [invite response.pan]
+        [invite status.pan]
       ==
       ::
         %update-incoming-request-response
@@ -175,7 +175,7 @@
           incoming-requests
         %+  ~(put by incoming-requests.old)
           requestee.pan
-        [request response.pan]
+        [request status.pan]
       ==
       ::
         %update-graylist
