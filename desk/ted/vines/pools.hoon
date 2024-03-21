@@ -23,6 +23,7 @@
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
     %pools-gesture
   =+  !<(ges=gesture:p vase)
+  ~&  "%pools vine: receiving gesture {(trip -.ges)}"
   ?-    -.ges
       %invite
     ?>  =(src.gowl host.id.ges)
@@ -51,6 +52,7 @@
   ::
   ?>  =(src our):gowl
   =+  !<(act=action:p vase)
+  ~&  "%pools vine: receiving action {(trip -.act)}"
   ?-    -.act
       %create-pool
     =/  title=@t  (extract-pool-title:hc pool-data-fields.act)
@@ -278,6 +280,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
+  ~&  invitee+invitee
   %+  (vent ,~)  [invitee dap.gowl]
   :-  %pools-gesture
   [%invite id invite]
