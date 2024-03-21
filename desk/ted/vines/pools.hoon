@@ -3,7 +3,7 @@
 =,  strand=strand:spider
 ^-  thread:spider
 ::
-=<  =*  helper-core  .
+=;  helper-core
 ::
 %-  vine-thread
 |=  [gowl=bowl:gall vid=vent-id =mark =vase]
@@ -20,99 +20,9 @@
 =*  hc  ~(. helper-core gowl)
 ::
 ~&  "%pools vine: receiving mark {(trip mark)}"
-?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
-    %pools-gesture
-  =+  !<(ges=gesture:p vase)
-  ~&  "%pools vine: receiving gesture {(trip -.ges)}"
-  ?-    -.ges
-      %invite
-    ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-incoming-invites id.ges invite.ges)
-    (pure:m !>(~))
-    ::
-      %invite-response
-    ?>  =(our.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-invite-response id.ges src.gowl response.ges)
-    :: TODO: If a response is affirmative, add to members
-    (pure:m !>(~))
-    ::
-      %request
-    ?>  =(our.gowl host.id.ges)
-    ;<  ~  bind:m  (update-incoming-requests id.ges src.gowl request.ges)
-    (pure:m !>(~))
-    ::
-      %request-response
-    ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-request-response id.ges response.ges)
-    (pure:m !>(~))
-  ==
-  ::
-    %pools-action
-  :: only we can perform actions on our %pools agent
-  ::
-  ?>  =(src our):gowl
-  =+  !<(act=action:p vase)
-  ~&  "%pools vine: receiving action {(trip -.act)}"
-  ?-    -.act
-      %create-pool
-    =/  title=@t  (extract-pool-title:hc pool-data-fields.act)
-    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-    =/  =id:p     ((unique-id:hc ~(key by pools)) title)
-    ;<  ~  bind:m  (create-pool:hc id)
-    ;<  ~  bind:m  (update-graylist:hc id graylist-fields.act)
-    ;<  ~  bind:m  (update-pool-data:hc id pool-data-fields.act)
-    ;<  ~  bind:m  (update-members:hc id our.gowl ~ &+(sy ~[%host]))
-    (pure:m !>(s+(id-string:enjs:lib id)))
-    ::
-      %delete-pool
-    ;<  ~  bind:m  (delete-pool:hc id.act)
-    (pure:m !>(~))
-    ::
-      %extend-invite
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-invite-gesture [id invitee ~ invite]:act)
-    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~ invite.act)
-    (pure:m !>(~))
-    ::
-      %cancel-invite
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-invite-gesture [id invitee ~]:act)
-    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~)
-    (pure:m !>(~))
-    ::
-      %accept-invite
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ &])
-    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ &])
-    (pure:m !>(~))
-    ::
-      %reject-invite
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ |])
-    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ |])
-    (pure:m !>(~))
-    ::
-      %extend-request
-    ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
-    ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
-    (pure:m !>(~))
-    ::
-      %cancel-request
-    ;<  ~  bind:m  (give-request-gesture [id ~]:act)
-    ;<  ~  bind:m  (update-outgoing-requests id.act ~)
-    (pure:m !>(~))
-    ::
-      %accept-request
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ &])
-    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ &])
-    :: TODO: add to members
-    (pure:m !>(~))
-    ::
-      %reject-request
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ |])
-    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ |])
-    (pure:m !>(~))
-  ==
+?+  mark  (just-poke [our dap]:gowl mark vase) :: poke normally
+  %pools-gesture  (handle-pools-gesture:hc !<(gesture:p vase))
+  %pools-action   (handle-pools-action:hc !<(action:p vase))
 ==
 ::
 |_  =gowl
@@ -165,6 +75,103 @@
       title
     (fall (so:dejs-soft:format u.val) title)
   $(p.i.fields t.p.i.fields)
+::
+++  handle-pools-gesture
+  |=  ges=gesture:p
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ~&  "%pools vine: receiving gesture {(trip -.ges)}"
+  ?-    -.ges
+      %invite
+    ?>  =(src.gowl host.id.ges)
+    ;<  ~  bind:m  (update-incoming-invites id.ges invite.ges)
+    (pure:m !>(~))
+    ::
+      %invite-response
+    ?>  =(our.gowl host.id.ges)
+    ;<  ~  bind:m  (update-outgoing-invite-response id.ges src.gowl response.ges)
+    :: TODO: If a response is affirmative, add to members
+    (pure:m !>(~))
+    ::
+      %request
+    ?>  =(our.gowl host.id.ges)
+    ;<  ~  bind:m  (update-incoming-requests id.ges src.gowl request.ges)
+    (pure:m !>(~))
+    ::
+      %request-response
+    ?>  =(src.gowl host.id.ges)
+    ;<  ~  bind:m  (update-outgoing-request-response id.ges response.ges)
+    (pure:m !>(~))
+  ==
+::
+++  handle-pools-action
+  |=  act=action:p
+  =/  m  (strand ,vase)
+  ^-  form:m
+  :: only we can perform actions on our %pools agent
+  ::
+  ?>  =(src our):gowl
+  ~&  "%pools vine: receiving action {(trip -.act)}"
+  ?-    -.act
+      %create-pool
+    =/  title=@t  (extract-pool-title pool-data-fields.act)
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =id:p     ((unique-id ~(key by pools)) title)
+    ;<  ~  bind:m  (create-pool id)
+    ;<  ~  bind:m  (update-graylist id graylist-fields.act)
+    ;<  ~  bind:m  (update-pool-data id pool-data-fields.act)
+    ;<  ~  bind:m  (update-members id our.gowl ~ &+(sy ~[%host]))
+    (pure:m !>(s+(id-string:enjs:lib id)))
+    ::
+      %delete-pool
+    ;<  ~  bind:m  (delete-pool id.act)
+    (pure:m !>(~))
+    ::
+      %extend-invite
+    ?>  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-invite-gesture [id invitee ~ invite]:act)
+    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~ invite.act)
+    (pure:m !>(~))
+    ::
+      %cancel-invite
+    ?>  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-invite-gesture [id invitee ~]:act)
+    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~)
+    (pure:m !>(~))
+    ::
+      %accept-invite
+    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ &])
+    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ &])
+    (pure:m !>(~))
+    ::
+      %reject-invite
+    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ |])
+    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ |])
+    (pure:m !>(~))
+    ::
+      %extend-request
+    ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
+    ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
+    (pure:m !>(~))
+    ::
+      %cancel-request
+    ;<  ~  bind:m  (give-request-gesture [id ~]:act)
+    ;<  ~  bind:m  (update-outgoing-requests id.act ~)
+    (pure:m !>(~))
+    ::
+      %accept-request
+    ?>  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ &])
+    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ &])
+    :: TODO: add to members
+    (pure:m !>(~))
+    ::
+      %reject-request
+    ?>  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ |])
+    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ |])
+    (pure:m !>(~))
+  ==
 ::
 ++  create-pool
   |=  =id:p
@@ -281,6 +288,7 @@
   ^-  form:m
   %+  (set-timeout ,~)  timeout
   ~&  invitee+invitee
+  ~&  dap+dap.gowl
   %+  (vent ,~)  [invitee dap.gowl]
   :-  %pools-gesture
   [%invite id invite]
