@@ -83,7 +83,12 @@
       %invite-response
     ?>  =(our.gowl host.id.ges)
     ;<  ~  bind:m  (update-outgoing-invite-response id.ges src.gowl status.ges)
-    :: TODO: If a response is affirmative, add to members
+    ?~  status.ges
+      (pure:m !>(~))
+    ?.  response.u.status.ges
+      (pure:m !>(~))
+    ;<  ~  bind:m  (update-members id.ges src.gowl ~ &+(sy ~[%viewer]))
+    :: TODO: on-resolution
     (pure:m !>(~))
     ::
       %request
@@ -157,7 +162,8 @@
     ?>  =(our.gowl host.id.act)
     ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ & metadata.act])
-    :: TODO: add to members
+    ;<  ~  bind:m  (update-members id.act requestee.act ~ &+(sy ~[%viewer]))
+    :: TODO: on-resolution
     (pure:m !>(~))
     ::
       %reject-request
