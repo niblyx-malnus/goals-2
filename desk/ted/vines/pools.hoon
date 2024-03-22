@@ -10,12 +10,6 @@
 =/  m  (strand ,^vase)
 ^-  form:m
 ::
-~?  >>  (moon:title [our src]:gowl)
-  "%pools vine: moon access from {(scow %p src.gowl)}"
-;<  moon-as-planet=?  bind:m  (scry-hard ,? /gx/pools/moon-as-planet/noun)
-~&  >>  moon-as-planet+moon-as-planet
-=?  src.gowl  &(moon-as-planet (moon:title [our src]:gowl))  our.gowl
-::
 =*  hc  ~(. helper-core gowl)
 ::
 ~&  "%pools vine: receiving mark {(trip mark)}"

@@ -14,12 +14,7 @@
 =/  m  (strand ,^vase)
 ^-  form:m
 ::
-?>  |(=(our src):gowl (moon:title [our src]:gowl))
-~?  >>  (moon:title [our src]:gowl)
-  "%goals vine: moon access from {(scow %p src.gowl)}"
-;<  moon-as-planet=?  bind:m  (scry-hard ,? /gx/pools/moon-as-planet/noun)
-~&  >>  moon-as-planet+moon-as-planet
-=?  src.gowl  &(moon-as-planet (moon:title [our src]:gowl))  our.gowl
+?>  =(our src):gowl
 ::
 =*  hc   ~(. helper-core gowl)
 =*  mem  ~(. gol-cli-membership gowl)

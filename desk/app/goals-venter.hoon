@@ -6,8 +6,10 @@
 :: improves vent performance when using /ted/vent.hoon
 :: https://github.com/tinnus-napbus/tube-warmer
 ::
+:: %venter also maintains data about who can "pilot" this ship's venting
+::
 |%
-+$  state-0    [%0 =vents:vio tube-verb=_|]
++$  state-0    [%0 =pilots:vio =vents:vio tube-verb=$~(| ?)]
 +$  card       card:agent:gall
 +$  vent-id    vent-id:vio
 --
@@ -46,6 +48,18 @@
   ?>  =(src our):bowl
   ?+    mark  (on-poke:def mark vase)
     %noun  `this(tube-verb (tail !<([%verb ?] vase)))
+    ::
+    %moons  ~&(pilot-moons+!moons.pilots `this(moons.pilots !moons.pilots))
+    ::
+      %uni-ships
+    =+  !<(ships=(set ship) vase)
+    ~&  pilot-ships+(~(uni in ships.pilots) ships)
+    `this(ships.pilots (~(uni in ships.pilots) ships))
+    ::
+      %dif-ships
+    =+  !<(ships=(set ship) vase)
+    ~&  pilot-ships+(~(dif in ships.pilots) ships)
+    `this(ships.pilots (~(dif in ships.pilots) ships))
     ::
       %tally-vent
     :: ~&  %venter-tallying
@@ -94,7 +108,8 @@
   |=  =(pole knot)
   ^-  (unit (unit cage))
   ?+    pole  (on-peek:def pole)
-    [%x %vents ~]  ``noun+!>(vents)
+    [%x %vents ~]   ``noun+!>(vents)
+    [%x %pilots ~]  ``noun+!>(pilots)
   ==
 ::
 ++  on-watch

@@ -11,7 +11,8 @@
     =,  dejs:format
     |^  ^-  $-(json package)
     %-  ot
-    :~  [%dock (ot ~[ship+(su fed:ag) dude+san])]
+    :~  [%as-pilot bo]
+        [%dock (ot ~[ship+(su fed:ag) dude+san])]
         [%input (ot ~[desk+san mark+san])]
         [%output (ot ~[desk+san mark+san])]
         [%body same]

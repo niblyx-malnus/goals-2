@@ -40,7 +40,6 @@
 +$  remote-pools  (set id)
 +$  state-0
   $:  %0
-      moon-as-planet=$~(| ?)
       =pools
       =remote-pools :: eventually will go into pools + synced via subs
       =incoming-invites

@@ -6,10 +6,11 @@
 ::
 +$  request  (pair vent-id page)
 +$  package
-  $:  =dock     :: destination ship/agent
+  $:  as-pilot=?           :: if %.y, dock interprets as a local request
+      =dock                :: destination ship/agent
       input=[=desk =mark]  :: mark of input and its location
       output=[=desk =mark] :: mark of output and its location
-      body=json :: actual data to send to agent in vent-request
+      body=json            :: actual data to send to agent in vent-request
   ==
 :: track your vents so you can make unique vent-ids
 ::
@@ -32,6 +33,8 @@
   ^-  vent-id
   =+  ;;([%vent p=@ta q=@ta r=@ta ~] path)
   [(slav %p p.-) q.- (slav %da r.-)]
+::
++$  pilots     [moons=$~(| ?) ships=(set ship)]
 :: translates poke-ack to vent for regular poke
 ::
 ++  just-poke
@@ -157,10 +160,11 @@
   ^-  form:m
   =/  pak=(unit package)  !<((unit package) arg)
   ?~  pak  (strand-fail %no-arg ~)
-  =+  u.pak :: expose dock, input, output, and body
+  =+  u.pak :: expose as-pilot, dock, input, output, and body
   ;<  =page       bind:m  (unpackage body input)
+  =?  page  as-pilot  vent-as-pilot+page
   ;<  =vase       bind:m  ((vent-as-mark output) dock page)
-  :: convert to json - this allows for generic
+  :: convert to json - this allows for the generic
   :: /spider/realm/venter-package/vent/json thread format
   ::
   ;<  =tube:clay  bind:m  (build-our-tube desk.output mark.output %json)
@@ -178,7 +182,17 @@
   ?~  req  (strand-fail %no-arg ~)
   =/  [=gowl vid=vent-id =mark =noun]  u.req
   ;<  =vase  bind:m  (unpage mark noun)
-  (vine gowl vid mark vase)
+  ?.  ?=(%vent-as-pilot mark)
+    (vine gowl vid mark vase)
+  ;<  vap=dude:gall  bind:m  get-vap :: get local venter agent
+  ;<  =pilots  bind:m  (scry pilots /gx/[vap]/pilots/noun)
+  ?.  ?|  =(our src):gowl
+          (~(has in ships.pilots) src.gowl)
+          &(moons.pilots (moon:title [our src]:gowl))
+      ==
+    ~&(>>> "%{(trip dap.gowl)} vine: invalid pilot permissions for {(scow %p src.gowl)}" !!)
+  ~&  >>  "%{(trip dap.gowl)} vine: pilot access by {(scow %p src.gowl)}"
+  (vent-raw [our dap]:gowl !<(page vase))
 :: miscellaneous utils
 ::
 +$  gowl     bowl:gall   :: gall bowl alias

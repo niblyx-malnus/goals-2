@@ -36,13 +36,6 @@
   ?>  =(src our):bowl
   ~&  "%pools app: receiving mark {(trip mark)}"
   ?+    mark  (on-poke:def mark vase)
-      %noun
-    ?>  =(src our):bowl
-    ?>  =(%moon q.vase)
-    =.  moon-as-planet  !moon-as-planet
-    ~&  moon-as-planet+moon-as-planet
-    [~ this]
-    ::
       %pools-transition
     =+  !<(tan=transition:p vase)
     ~&  received-transition+tan
@@ -58,7 +51,6 @@
     [%x %state ~]  ``noun+!>(state)
     [%x %pools ~]  ``noun+!>(pools)
     [%x %incoming-invites ~]  ``noun+!>(incoming-invites)
-    [%x %moon-as-planet ~]  ``noun+!>(moon-as-planet)
   ==
 ::
 ++  on-watch  on-watch:def
