@@ -34,10 +34,15 @@
       hosts=(set ship) :: block invites
       peers=(set ship) :: block pool list requests
   ==
+:: don't subscribe to foreign pools during development
+:: state-syncing is time-wasting tedium; vent-views only to start
+::
++$  remote-pools  (set id)
 +$  state-0
   $:  %0
       moon-as-planet=$~(| ?)
       =pools
+      =remote-pools :: eventually will go into pools + synced via subs
       =incoming-invites
       =outgoing-requests
       =blocked

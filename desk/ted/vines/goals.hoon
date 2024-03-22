@@ -365,11 +365,15 @@
     (pure:m !>((~(gut by metadata.pool) 'note' s+'')))
     ::
       %pool-perms
-    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =pool:p  (~(got by pools) pid.vyu)
     %-  pure:m  !>
     %-  pairs:enjs:format
-    %+  turn  ~(tap by perms.pool)
-    |=([=@p =@t] [(scot %p p) s+t])
+    %+  turn  ~(tap by members.pool)
+    |=  [=@p =roles:p]
+    =/  roles  ~(tap in roles)
+    ?>  (gte 1 (lent roles))
+    [(scot %p p) s+?~(roles 'EMPTY!' i.roles)]
     ::
       %pool-tag-note
     !!
