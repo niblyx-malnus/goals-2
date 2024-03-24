@@ -35,9 +35,9 @@
     :: TODO: assert src.gowl has appropriate permissions wrt pool
     =/  =pool:gol  (~(got by pools.store) pid.act)
     =/  =invite:p
-      :-  (sy ~[%goals])
       %-  ~(gas by *metadata:p)
-      :~  [%from s+(scot %p src.gowl)]
+      :~  [%dudes a+~[s+%goals]]
+          [%from s+(scot %p src.gowl)]
           [%title s+title.pool]
       ==
     ;<  ~  bind:m  (extend-invite pid.act invitee.act invite)

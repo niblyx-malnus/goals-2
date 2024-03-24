@@ -148,15 +148,15 @@
       ?~  request.pan
         :: if request is null, delete request
         ::
-        old(incoming-requests (~(del by incoming-requests.old) requestee.pan))
+        old(incoming-requests (~(del by incoming-requests.old) requester.pan))
       :: the status of the current request status must be undecided
       ::
-      =/  [* =status]  (~(gut by incoming-requests.old) requestee.pan [~ ~])
+      =/  [* =status]  (~(gut by incoming-requests.old) requester.pan [~ ~])
       ?>  ?=(~ status)
       %=    old
           incoming-requests
         %+  ~(put by incoming-requests.old)
-          requestee.pan
+          requester.pan
         [u.request.pan ~]
       ==
       ::
@@ -171,11 +171,11 @@
       ==
       ::
         %update-incoming-request-response
-      =/  [=request *]  (~(got by incoming-requests.old) requestee.pan)
+      =/  [=request *]  (~(got by incoming-requests.old) requester.pan)
       %=    old
           incoming-requests
         %+  ~(put by incoming-requests.old)
-          requestee.pan
+          requester.pan
         [request status.pan]
       ==
       ::
@@ -191,30 +191,30 @@
         |-
         ?~  p.i.fields.pan
           ^$(fields.pan t.fields.pan)
-        =/  [=ship gray=(unit ?)]  i.p.i.fields.pan
-        ?~  gray
+        =/  [=ship auto=(unit auto)]  i.p.i.fields.pan
+        ?~  auto
           %=  $
             p.i.fields.pan     t.p.i.fields.pan
             ship.graylist.old  (~(del by ship.graylist.old) ship)
           ==
         %=  $
           p.i.fields.pan     t.p.i.fields.pan
-          ship.graylist.old  (~(put by ship.graylist.old) ship u.gray)
+          ship.graylist.old  (~(put by ship.graylist.old) ship u.auto)
         ==
         ::
           %rank
         |-
         ?~  p.i.fields.pan
           ^$(fields.pan t.fields.pan)
-        =/  [=rank gray=(unit ?)]  i.p.i.fields.pan
-        ?~  gray
+        =/  [=rank auto=(unit auto)]  i.p.i.fields.pan
+        ?~  auto
           %=  $
             p.i.fields.pan     t.p.i.fields.pan
             rank.graylist.old  (~(del by rank.graylist.old) rank)
           ==
         %=  $
           p.i.fields.pan     t.p.i.fields.pan
-          rank.graylist.old  (~(put by rank.graylist.old) rank u.gray)
+          rank.graylist.old  (~(put by rank.graylist.old) rank u.auto)
         ==
       ==
       ::

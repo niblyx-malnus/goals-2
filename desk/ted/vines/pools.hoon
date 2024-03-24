@@ -19,14 +19,130 @@
 ==
 ::
 |_  =gowl
+++  handle-pools-gesture
+  |=  ges=gesture:p
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ~&  "%pools vine: receiving gesture {(trip -.ges)}"
+  ?-    -.ges
+      %invite
+    ?>  =(src.gowl host.id.ges)
+    ;<  ~  bind:m  (update-incoming-invites id.ges invite.ges)
+    (pure:m !>(~))
+    ::
+      %invite-response
+    ?>  =(our.gowl host.id.ges)
+    ;<  ~  bind:m  (update-outgoing-invite-response id.ges src.gowl status.ges)
+    ?~  status.ges
+      (pure:m !>(~))
+    ?.  response.u.status.ges
+      (pure:m !>(~))
+    ;<  ~  bind:m  (update-members id.ges src.gowl ~ &+(sy ~[%viewer]))
+    :: experiment: notify dudes of new addition
+    ;<  *  bind:m  (delegate-add-from-invite id.ges src.gowl)
+    (pure:m !>(~))
+    ::
+      %request
+    ?>  =(our.gowl host.id.ges)
+    ?~  request.ges
+      ;<  ~  bind:m  (update-incoming-requests id.ges src.gowl ~)
+      (pure:m !>(~))
+    ;<  auto=(unit auto:p)  bind:m
+      (graylist-resolution id.ges src.gowl u.request.ges)
+    ?:  ?=([~ %|] auto)
+      (strand-fail %request-fail ~)
+    ;<  ~  bind:m  (update-incoming-requests id.ges src.gowl request.ges)
+    ?~  auto
+      (pure:m !>(~))
+    ;<  ~  bind:m  (accept-request id.ges src.gowl metadata.u.auto)
+    (pure:m !>(~))
+    ::
+      %request-response
+    ?>  =(src.gowl host.id.ges)
+    ;<  ~  bind:m  (update-outgoing-request-response id.ges status.ges)
+    (pure:m !>(~))
+  ==
+::
+++  handle-pools-action
+  |=  act=action:p
+  =/  m  (strand ,vase)
+  ^-  form:m
+  :: only we can perform actions on our %pools agent
+  ::
+  ?>  =(src our):gowl
+  ~&  "%pools vine: receiving action {(trip -.act)}"
+  ?-    -.act
+      %create-pool
+    =/  title=@t  (extract-pool-title pool-data-fields.act)
+    ;<  =id:p  bind:m  (unique-id title)
+    ;<  ~      bind:m  (create-pool id)
+    ;<  ~      bind:m  (update-graylist id graylist-fields.act)
+    ;<  ~      bind:m  (update-pool-data id pool-data-fields.act)
+    ;<  ~      bind:m  (update-members id our.gowl ~ &+(sy ~[%host]))
+    (pure:m !>(s+(id-string:enjs:lib id)))
+    ::
+      %delete-pool
+    ;<  ~  bind:m  (delete-pool id.act)
+    (pure:m !>(~))
+    ::
+      %extend-invite
+    ?>  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-invite-gesture [id invitee ~ invite]:act)
+    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~ invite.act)
+    (pure:m !>(~))
+    ::
+      %cancel-invite
+    ?>  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-invite-gesture [id invitee ~]:act)
+    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~)
+    (pure:m !>(~))
+    ::
+      %accept-invite
+    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ & metadata.act])
+    (pure:m !>(~))
+    ::
+      %reject-invite
+    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ | metadata.act])
+    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ | metadata.act])
+    (pure:m !>(~))
+    ::
+      %extend-request
+    ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
+    ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
+    (pure:m !>(~))
+    ::
+      %cancel-request
+    ;<  ~  bind:m  (give-request-gesture [id ~]:act)
+    ;<  ~  bind:m  (update-outgoing-requests id.act ~)
+    (pure:m !>(~))
+    ::
+      %accept-request
+    ?>  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-request-response-gesture id.act requester.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-incoming-request-response id.act requester.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-members id.act requester.act ~ &+(sy ~[%viewer]))
+    :: experiment: notify dudes of new addition
+    ;<  *  bind:m  (delegate-add-from-request id.act requester.act)
+    (pure:m !>(~))
+    ::
+      %reject-request
+    ?>  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-request-response-gesture id.act requester.act [~ | metadata.act])
+    ;<  ~  bind:m  (update-incoming-request-response id.act requester.act [~ | metadata.act])
+    (pure:m !>(~))
+  ==
+::
 ++  unique-id
-  |=  pools=(set id:p)
   |=  name=@t
-  |^  `id:p`(uniquify (tasify name))
+  =/  m  (strand ,id:p)
+  ^-  form:m
+  ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+  |^  (pure:m (uniquify (tasify name)))
   ++  uniquify
     |=  =term
     ^-  id:p
-    ?.  (~(has in pools) [our.gowl term])
+    ?.  (~(has by pools) [our.gowl term])
       [our.gowl term]
     =/  num=@t  (numb (end 4 eny.gowl))
     $(term (rap 3 term '-' num ~)) :: add random number to end
@@ -69,109 +185,35 @@
     (fall (so:dejs-soft:format u.val) title)
   $(p.i.fields t.p.i.fields)
 ::
-++  handle-pools-gesture
-  |=  ges=gesture:p
-  =/  m  (strand ,vase)
+++  graylist-resolution
+  |=  [=id:p requester=ship =request:p]
+  =/  m  (strand ,(unit auto:p))
   ^-  form:m
-  ~&  "%pools vine: receiving gesture {(trip -.ges)}"
-  ?-    -.ges
-      %invite
-    ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-incoming-invites id.ges invite.ges)
-    (pure:m !>(~))
+  ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+  =/  =graylist:p  graylist:(~(got by pools) id)
+  ?~  dude.graylist
+    :: if we don't delegate to an agent, defer to local graylist
     ::
-      %invite-response
-    ?>  =(our.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-invite-response id.ges src.gowl status.ges)
-    ?~  status.ges
-      (pure:m !>(~))
-    ?.  response.u.status.ges
-      (pure:m !>(~))
-    ;<  ~  bind:m  (update-members id.ges src.gowl ~ &+(sy ~[%viewer]))
-    :: TODO: on-resolution
-    (pure:m !>(~))
-    ::
-      %request
-    ?>  =(our.gowl host.id.ges)
-    ;<  ~  bind:m  (update-incoming-requests id.ges src.gowl request.ges)
-    (pure:m !>(~))
-    ::
-      %request-response
-    ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-request-response id.ges status.ges)
-    (pure:m !>(~))
-  ==
-::
-++  handle-pools-action
-  |=  act=action:p
-  =/  m  (strand ,vase)
-  ^-  form:m
-  :: only we can perform actions on our %pools agent
+    (local-graylist graylist requester)
+  :: try to delegate white/blacklisting to an agent
   ::
-  ?>  =(src our):gowl
-  ~&  "%pools vine: receiving action {(trip -.act)}"
-  ?-    -.act
-      %create-pool
-    =/  title=@t  (extract-pool-title pool-data-fields.act)
-    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-    =/  =id:p     ((unique-id ~(key by pools)) title)
-    ;<  ~  bind:m  (create-pool id)
-    ;<  ~  bind:m  (update-graylist id graylist-fields.act)
-    ;<  ~  bind:m  (update-pool-data id pool-data-fields.act)
-    ;<  ~  bind:m  (update-members id our.gowl ~ &+(sy ~[%host]))
-    (pure:m !>(s+(id-string:enjs:lib id)))
-    ::
-      %delete-pool
-    ;<  ~  bind:m  (delete-pool id.act)
-    (pure:m !>(~))
-    ::
-      %extend-invite
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-invite-gesture [id invitee ~ invite]:act)
-    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~ invite.act)
-    (pure:m !>(~))
-    ::
-      %cancel-invite
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-invite-gesture [id invitee ~]:act)
-    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~)
-    (pure:m !>(~))
-    ::
-      %accept-invite
-    ~&  pools-accept-invite+src.gowl
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ & metadata.act])
-    (pure:m !>(~))
-    ::
-      %reject-invite
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ | metadata.act])
-    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ | metadata.act])
-    (pure:m !>(~))
-    ::
-      %extend-request
-    ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
-    ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
-    (pure:m !>(~))
-    ::
-      %cancel-request
-    ;<  ~  bind:m  (give-request-gesture [id ~]:act)
-    ;<  ~  bind:m  (update-outgoing-requests id.act ~)
-    (pure:m !>(~))
-    ::
-      %accept-request
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-members id.act requestee.act ~ &+(sy ~[%viewer]))
-    :: TODO: on-resolution
-    (pure:m !>(~))
-    ::
-      %reject-request
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-response-gesture id.act requestee.act [~ | metadata.act])
-    ;<  ~  bind:m  (update-incoming-request-response id.act requestee.act [~ | metadata.act])
-    (pure:m !>(~))
-  ==
+  ;<  p=(each auto=(unit auto:p) goof)  bind:m
+    %-  (soften ,(unit auto:p))
+    (delegate-graylist u.dude.graylist id requester request)
+  ?:  ?=(%& -.p)
+    (pure:m p.p)
+  :: if delegation failed, defer to local graylist
+  ::
+  (local-graylist graylist requester)
+::
+++  local-graylist
+  |=  [=graylist:p requester=ship]
+  =/  m  (strand ,(unit auto:p))
+  ^-  form:m
+  %-  pure:m
+  ?^  auto=(~(get by ship.graylist) requester)  auto
+  ?^  auto=(~(get by rank.graylist) (clan:title requester))  auto
+  rest.graylist
 ::
 ++  create-pool
   |=  =id:p
@@ -242,24 +284,24 @@
   [%update-outgoing-invite-response invitee status]
 ::
 ++  update-incoming-requests
-  |=  [=id:p requestee=ship request=(unit request:p)]
+  |=  [=id:p requester=ship request=(unit request:p)]
   =/  m  (strand ,~)
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
   ^-  transition:p
   :+  %update-pool  id
-  [%update-incoming-requests requestee request]
+  [%update-incoming-requests requester request]
 ::
 ++  update-incoming-request-response
-  |=  [=id:p requestee=ship =status:p]
+  |=  [=id:p requester=ship =status:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  poke  [our dap]:gowl
   :-  %pools-transition  !>
   ^-  transition:p
   :+  %update-pool  id
-  [%update-incoming-request-response requestee status]
+  [%update-incoming-request-response requester status]
 ::
 ++  update-incoming-invites
   |=  [=id:p invite=(unit invite:p)]
@@ -332,12 +374,102 @@
   [%request id request]
 ::
 ++  give-request-response-gesture
-  |=  [=id:p requestee=ship =status:p]
+  |=  [=id:p requester=ship =status:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [requestee dap.gowl]
+  %+  (vent ,~)  [requester dap.gowl]
   :-  %pools-gesture
   ^-  gesture:p
   [%request-response id status]
+::
+++  accept-request
+  |=  [=id:p requester=ship =metadata:p]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-action
+  ^-  action:p
+  [%accept-request id requester metadata]
+::
+++  reject-request
+  |=  [=id:p requester=ship =metadata:p]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-action
+  ^-  action:p
+  [%reject-request id requester metadata]
+::
+++  delegate-graylist
+  |=  [=dude:gall =id:p requester=ship =request:p]
+  =/  m  (strand ,(unit auto:p))
+  ^-  form:m
+  %+  (vent ,(unit auto:p))
+    [our.gowl dude]
+  :-  %pools-delegation
+  ^-  delegation:p
+  [%graylist id requester request]
+::
+++  get-outgoing-invite
+  |=  [=id:p invitee=ship]
+  =/  m  (strand ,invite:p)
+  ^-  form:m
+  ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+  =/  =pool:p   (~(got by pools) id)
+  (pure:m invite:(~(got by outgoing-invites.pool) invitee))
+::
+++  delegate-add-from-invite
+  |=  [=id:p invitee=ship]
+  =/  m  (strand ,(map dude:gall goof))
+  ^-  form:m
+  =|  goofs=(map dude:gall goof)
+  ;<  =invite:p  bind:m  (get-outgoing-invite id invitee)
+  =/  dudes  ((ar so):dejs:format (~(gut by invite) 'dudes' a+~))
+  |-
+  ?~  dudes
+    (pure:m goofs)
+  ;<  del=(each ~ goof)  bind:m
+    %-  (soften ,~)
+    %+  (set-timeout ,~)  timeout
+    %+  (vent ,~)
+      [our.gowl i.dudes]
+    :-  %pools-delegation
+    ^-  delegation:p
+    [%add-from-invite id invitee invite]
+  %=  $
+    dudes  t.dudes
+    goofs  ?-(-.del %& goofs, %| (~(put by goofs) i.dudes p.del))
+  ==
+::
+++  get-incoming-request
+  |=  [=id:p requester=ship]
+  =/  m  (strand ,request:p)
+  ^-  form:m
+  ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+  =/  =pool:p   (~(got by pools) id)
+  (pure:m request:(~(got by incoming-requests.pool) requester))
+::
+++  delegate-add-from-request
+  |=  [=id:p requester=ship]
+  =/  m  (strand ,(map dude:gall goof))
+  ^-  form:m
+  =|  goofs=(map dude:gall goof)
+  ;<  =request:p  bind:m  (get-incoming-request id requester)
+  =/  dudes  ((ar so):dejs:format (~(gut by request) 'dudes' a+~))
+  |-
+  ?~  dudes
+    (pure:m goofs)
+  ;<  del=(each ~ goof)  bind:m
+    %-  (soften ,~)
+    %+  (set-timeout ,~)  timeout
+    %+  (vent ,~)
+      [our.gowl i.dudes]
+    :-  %pools-delegation
+    ^-  delegation:p
+    [%add-from-request id requester request]
+  %=  $
+    dudes  t.dudes
+    goofs  ?-(-.del %& goofs, %| (~(put by goofs) i.dudes p.del))
+  ==
 --

@@ -474,11 +474,7 @@
     ^-  [@t json]
     :-  (scot %p to)
     %-  pairs
-    :~  :-  %invite
-        %-  pairs
-        :~  [%dudes a+(turn ~(tap in dudes.invite) (lead %s))]
-            [%metadata o+metadata.invite]
-        ==
+    :~  [%invite o+invite]
         :-  %status
         ?~  status
           ~
@@ -496,16 +492,13 @@
     %+  murn  ~(tap by incoming-invites)
     |=  [=pid:gol =invite:p =status:p]
     ^-  (unit [@t json])
-    ?.  (~(has in dudes.invite) dap.gowl)
+    =/  dudes  ((as so):dejs:format (~(gut by invite) 'dudes' a+~))
+    ?.  (~(has in dudes) dap.gowl)
       ~
     :-  ~
     :-  (enjs-pid:goj pid)
     %-  pairs
-    :~  :-  %invite
-        %-  pairs
-        :~  [%dudes a+(turn ~(tap in dudes.invite) (lead %s))]
-            [%metadata o+metadata.invite]
-        ==
+    :~  [%invite o+invite]
         :-  %status
         ?~  status
           ~

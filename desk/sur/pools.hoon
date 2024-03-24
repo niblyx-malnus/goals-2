@@ -1,25 +1,26 @@
 |%
 +$  id                 [host=ship name=term]
 +$  dude               dude:gall
-+$  dudes              (set dude)
 +$  rank               rank:title
 +$  role               term
 +$  roles              (set role)
 +$  members            (map ship roles)
 +$  metadata           (map @t json)
-+$  invite             [=dudes =metadata] :: dudes handle resolution
-+$  request            [=dudes =metadata] :: dudes handle resolution
++$  invite             metadata
++$  request            metadata
 +$  status             (unit [response=? =metadata])
 +$  outgoing-invites   (map ship [=invite =status])
 +$  incoming-requests  (map ship [=request =status])
 +$  incoming-invites   (map id [=invite =status])
 +$  outgoing-requests  (map id [=request =status])
 +$  pool-data          [private=metadata public=metadata]
+:: disallow or auto-accept requests
++$  auto               $@(%| [%& =metadata])
 +$  graylist
-  $:  ship=(map ship ?) :: black/whitelisted ships
-      rank=(map rank ?) :: black/whitelisted ranks (i.e. banning comets)
-      rest=(unit ?)     :: auto-accept/reject remaining
-      dude=(unit dude)  :: optional outsource graylist
+  $:  ship=(map ship auto) :: black/whitelisted ships
+      rank=(map rank auto) :: black/whitelisted ranks (i.e. banning comets)
+      rest=(unit auto)     :: black/whitelist remaining
+      dude=(unit dude)     :: optional outsource graylist
   ==
 +$  pool
   $:  =members  :: already joined (includes host)
@@ -63,17 +64,17 @@
 +$  pool-transition
   $%  [%update-members member=ship roles=(unit (each roles roles))]
       [%update-outgoing-invites invitee=ship invite=(unit invite)]
-      [%update-incoming-requests requestee=ship request=(unit request)]
+      [%update-incoming-requests requester=ship request=(unit request)]
       [%update-outgoing-invite-response invitee=ship =status]
-      [%update-incoming-request-response requestee=ship =status]
+      [%update-incoming-request-response requester=ship =status]
       [%update-graylist fields=(list graylist-field)]
       [%update-pool-data fields=(list pool-data-field)]
   ==
 ::
 +$  graylist-field
-  $%  [%ship p=(list [ship (unit ?)])]
-      [%rank p=(list [rank (unit ?)])]
-      [%rest p=(unit ?)]
+  $%  [%ship p=(list [ship (unit auto)])]
+      [%rank p=(list [rank (unit auto)])]
+      [%rest p=(unit auto)]
       [%dude p=(unit dude)]
   ==
 ::
@@ -91,8 +92,8 @@
       [%reject-invite =id =metadata]
       [%extend-request =id =request]
       [%cancel-request =id]
-      [%accept-request =id requestee=ship =metadata]
-      [%reject-request =id requestee=ship =metadata]
+      [%accept-request =id requester=ship =metadata]
+      [%reject-request =id requester=ship =metadata]
   ==
 ::
 +$  gesture
@@ -105,8 +106,14 @@
 :: on invite/request resolution
 :: e.g. update roles based on "invited as %admin"
 ::
-+$  on-resolution
-  $%  [%add-from-invite =id invitee=ship =metadata]
-      [%add-from-request =id requestee=ship =metadata]
++$  delegation
+  $%  [%graylist =id requester=ship =request]
+      [%add-from-invite =id invitee=ship =invite]
+      [%add-from-request =id requester=ship =request]
+  ==
+::
++$  view
+  $%  [%pools ~] :: gets pools visible to src.gowl and public metadata
+      [%public-data =id]
   ==
 --
