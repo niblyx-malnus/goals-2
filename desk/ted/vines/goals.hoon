@@ -528,6 +528,50 @@
         :-  ['inviteResponse' b+response.u.status]
         ~(tap by metadata.u.status)
     ==
+    ::
+      %incoming-requests
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =pool:p  (~(got by pools) pid.vyu)
+    %-  pure:m  !>
+    =,  enjs:format
+    %-  pairs
+    %+  turn  ~(tap by incoming-requests.pool)
+    |=  [to=@p =request:p =status:p]
+    ^-  [@t json]
+    :-  (scot %p to)
+    %-  pairs
+    :~  [%request o+request]
+        :-  %status
+        ?~  status
+          ~
+        %-  pairs
+        :-  ['inviteResponse' b+response.u.status]
+        ~(tap by metadata.u.status)
+    ==
+    ::
+      %outgoing-requests
+    ;<  =outgoing-requests:p  bind:m
+      (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
+    %-  pure:m  !>
+    =,  enjs:format
+    %-  pairs
+    %+  murn  ~(tap by outgoing-requests)
+    |=  [=pid:gol =request:p =status:p]
+    ^-  (unit [@t json])
+    =/  dudes  ((as so):dejs:format (~(gut by request) 'dudes' a+~))
+    ?.  (~(has in dudes) dap.gowl)
+      ~
+    :-  ~
+    :-  (enjs-pid:goj pid)
+    %-  pairs
+    :~  [%request o+request]
+        :-  %status
+        ?~  status
+          ~
+        %-  pairs
+        :-  ['inviteResponse' b+response.u.status]
+        ~(tap by metadata.u.status)
+    ==
   ==
   ::
     %goal-membership-action

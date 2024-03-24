@@ -50,7 +50,9 @@
         [%local-goal-fields ul]
         [%goal-data (ot ~[keys+(ar key)])]
         [%outgoing-invites (ot ~[pid+pid])]
+        [%incoming-requests (ot ~[pid+pid])]
         [%incoming-invites ul]
+        [%outgoing-requests ul]
     ==
     ++  type
       %-  of

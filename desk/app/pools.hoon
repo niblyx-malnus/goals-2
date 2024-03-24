@@ -50,7 +50,8 @@
   ?+    pole  (on-peek:def pole)
     [%x %state ~]  ``noun+!>(state)
     [%x %pools ~]  ``noun+!>(pools)
-    [%x %incoming-invites ~]  ``noun+!>(incoming-invites)
+    [%x %incoming-invites ~]   ``noun+!>(incoming-invites)
+    [%x %outgoing-requests ~]  ``noun+!>(outgoing-requests)
   ==
 ::
 ++  on-watch  on-watch:def

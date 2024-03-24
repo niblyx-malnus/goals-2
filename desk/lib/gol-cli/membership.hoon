@@ -51,13 +51,36 @@
     ::
       %accept-invite
     ?>  =(src our):gowl
-    ~&  membership-accept-invite+src.gowl
     ;<  ~  bind:m  (accept-invite pid.act)
     (pure:m !>(~))
     ::
       %reject-invite
     ?>  =(src our):gowl
     ;<  ~  bind:m  (reject-invite pid.act)
+    (pure:m !>(~))
+    ::
+      %extend-request
+    ?>  =(our src):gowl
+    =/  =request:p
+      %-  ~(gas by *metadata:p)
+      :~  [%dudes a+~[s+%goals]]
+      ==
+    ;<  ~  bind:m  (extend-request pid.act request)
+    (pure:m !>(~))
+    ::
+      %cancel-request
+    ?>  =(our src):gowl
+    ;<  ~  bind:m  (cancel-request pid.act)
+    (pure:m !>(~))
+    ::
+      %accept-request
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (accept-request pid.act requester.act)
+    (pure:m !>(~))
+    ::
+      %reject-request
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (reject-request pid.act requester.act)
     (pure:m !>(~))
   ==
 ::
@@ -110,4 +133,40 @@
   :-  %pools-action
   ^-  action:p
   [%reject-invite id ~]
+::
+++  extend-request
+  |=  [=id:p =request:p]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
+  ^-  action:p
+  [%extend-request id request]
+::
+++  cancel-request
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
+  ^-  action:p
+  [%cancel-request id]
+::
+++  accept-request
+  |=  [=id:p requester=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
+  ^-  action:p
+  [%accept-request id requester ~]
+::
+++  reject-request
+  |=  [=id:p requester=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
+  ^-  action:p
+  [%reject-request id requester ~]
 --

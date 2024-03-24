@@ -141,7 +141,9 @@
       [%local-goal-fields ~]
       [%goal-data keys=(list key)]
       [%outgoing-invites =pid]
+      [%incoming-requests =pid]
       [%incoming-invites ~]
+      [%outgoing-requests ~]
   ==
 ::
 +$  membership-action
@@ -150,5 +152,9 @@
       [%cancel-invite =pid invitee=ship]
       [%accept-invite =pid]
       [%reject-invite =pid]
+      [%extend-request =pid]
+      [%cancel-request =pid]
+      [%accept-request =pid requester=ship]
+      [%reject-request =pid requester=ship]
   ==
 --
