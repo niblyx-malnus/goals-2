@@ -143,6 +143,7 @@
     ::
       %kick-member
     ?>  =(our.gowl host.id.act)
+    ?<  =(our.gowl member.act)
     ;<  *  bind:m  ((soften ,~) (cancel-invite id.act member.act))
     ;<  *  bind:m  ((soften ,~) (delete-request id.act member.act))
     ;<  *  bind:m  ((soften ,~) (give-kick-gesture id.act member.act))
@@ -150,6 +151,7 @@
     (pure:m !>(~))
     ::
       %leave-pool
+    ?<  =(our.gowl host.id.act)
     ;<  *  bind:m  ((soften ,~) (cancel-request id.act))
     ;<  *  bind:m  ((soften ,~) (delete-invite id.act))
     ;<  *  bind:m  ((soften ,~) (give-leave-gesture id.act))
@@ -158,6 +160,7 @@
     ::
       %extend-invite
     ?>  =(our.gowl host.id.act)
+    ?<  =(our.gowl invitee.act)
     ;<  ~  bind:m  (give-invite-gesture [id invitee ~ invite]:act)
     ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~ invite.act)
     (pure:m !>(~))
@@ -184,6 +187,7 @@
     (pure:m !>(~))
     ::
       %extend-request
+    ?<  =(our.gowl host.id.act)
     ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
     ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
     (pure:m !>(~))
