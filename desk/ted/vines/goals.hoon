@@ -370,6 +370,28 @@
     ?>  (gte 1 (lent roles))
     [(scot %p p) s+?~(roles 'EMPTY!' i.roles)]
     ::
+      %pool-graylist
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =pool:p  (~(got by pools) pid.vyu)
+    %-  pure:m  !>
+    %-  pairs:enjs:format
+    :~  :-  %ship
+        %-  pairs:enjs:format
+        %+  turn  ~(tap by ship.graylist.pool)
+        |=  [=ship =auto:p]
+        :-  (scot %p ship)
+        (auto:enjs:^pools auto)
+        :-  %rank
+        %-  pairs:enjs:format
+        %+  turn  ~(tap by rank.graylist.pool)
+        |=  [=rank:title =auto:p]
+        [rank (auto:enjs:^pools auto)]
+        :-  %rest
+        ?~  rest.graylist.pool
+          ~
+        (auto:enjs:^pools u.rest.graylist.pool)
+    ==
+    ::
       %pool-tag-note
     !!
     ::

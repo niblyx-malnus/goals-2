@@ -260,6 +260,15 @@
   =,  enjs:format
   |%
   ++  id-string  |=(=id (rap 3 '/' (scot %p host.id) '/' name.id ~))
+  ++  auto
+    |=  =^auto
+    ^-  json
+    ?@  auto
+      (pairs ~[response+b/|])
+    %-  pairs
+    :~  [%response b+&]
+        [%metadata o+metadata.auto]
+    ==
   --
 ::
 ++  dejs

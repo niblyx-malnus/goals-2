@@ -102,9 +102,6 @@
       [%request =id request=(unit request)]
       [%request-response =id =status]
   ==
-:: allows you to do things based on invite/request metadata
-:: on invite/request resolution
-:: e.g. update roles based on "invited as %admin"
 ::
 +$  delegation
   $%  [%graylist =id requester=ship =request]

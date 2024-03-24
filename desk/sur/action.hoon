@@ -131,6 +131,7 @@
       [%pool-title =pid]
       [%pool-note =pid]
       [%pool-perms =pid]
+      [%pool-graylist =pid]
       [%goal =pid =gid]
       [%archive-goal =pid rid=gid =gid]
       [%setting setting=@t]
