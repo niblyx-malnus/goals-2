@@ -164,7 +164,7 @@
     ::
       %cancel-invite
     ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-invite-gesture [id invitee ~]:act)
+    ;<  *  bind:m  ((soften ,~) (give-invite-gesture [id invitee ~]:act))
     ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~)
     (pure:m !>(~))
     ::
@@ -189,7 +189,7 @@
     (pure:m !>(~))
     ::
       %cancel-request
-    ;<  ~  bind:m  (give-request-gesture [id ~]:act)
+    ;<  *  bind:m  ((soften ,~) (give-request-gesture [id ~]:act))
     ;<  ~  bind:m  (update-outgoing-requests id.act ~)
     (pure:m !>(~))
     ::
