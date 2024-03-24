@@ -86,21 +86,29 @@
 +$  action
   $%  [%create-pool graylist-fields=(list graylist-field) pool-data-fields=(list pool-data-field)]
       [%delete-pool =id]
+      [%kick-member =id member=ship]
+      [%leave-pool =id]
       [%extend-invite =id invitee=ship =invite]
       [%cancel-invite =id invitee=ship]
       [%accept-invite =id =metadata]
       [%reject-invite =id =metadata]
+      [%delete-invite =id]
       [%extend-request =id =request]
       [%cancel-request =id]
       [%accept-request =id requester=ship =metadata]
       [%reject-request =id requester=ship =metadata]
+      [%delete-request =id requester=ship]
   ==
 ::
 +$  gesture
-  $%  [%invite =id invite=(unit invite)]
+  $%  [%kick =id]
+      [%leave =id]
+      [%invite =id invite=(unit invite)]
       [%invite-response =id =status]
+      [%delete-invite =id]
       [%request =id request=(unit request)]
       [%request-response =id =status]
+      [%delete-request =id]
   ==
 ::
 +$  delegation

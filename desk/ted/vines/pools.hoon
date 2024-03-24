@@ -65,6 +65,15 @@
   ^-  form:m
   ~&  "%pools vine: receiving gesture {(trip -.ges)}"
   ?-    -.ges
+      %kick
+    ?>  =(src.gowl host.id.ges)
+    ;<  ~  bind:m  (update-members id.ges src.gowl ~)
+    (pure:m !>(~))
+    ::
+      %leave
+    :: TODO: remote-pools
+    (pure:m !>(~))
+    ::
       %invite
     ?>  =(src.gowl host.id.ges)
     ;<  ~  bind:m  (update-incoming-invites id.ges invite.ges)
@@ -77,9 +86,11 @@
       (pure:m !>(~))
     ?.  response.u.status.ges
       (pure:m !>(~))
-    ;<  ~  bind:m  (update-members id.ges src.gowl ~ &+(sy ~[%viewer]))
-    :: experiment: notify dudes of new addition
-    ;<  *  bind:m  (delegate-add-from-invite id.ges src.gowl)
+    ;<  ~  bind:m  (update-members id.ges src.gowl ~ &+~)
+    (pure:m !>(~))
+    ::
+      %delete-invite
+    ;<  ~  bind:m  (update-outgoing-invites id.ges src.gowl ~)
     (pure:m !>(~))
     ::
       %request
@@ -100,6 +111,11 @@
       %request-response
     ?>  =(src.gowl host.id.ges)
     ;<  ~  bind:m  (update-outgoing-request-response id.ges status.ges)
+    (pure:m !>(~))
+    ::
+      %delete-request
+    ?>  =(src.gowl host.id.ges)
+    ;<  ~  bind:m  (update-outgoing-requests id.ges ~)
     (pure:m !>(~))
   ==
 ::
@@ -125,6 +141,21 @@
     ;<  ~  bind:m  (delete-pool id.act)
     (pure:m !>(~))
     ::
+      %kick-member
+    ?>  =(our.gowl host.id.act)
+    ;<  *  bind:m  ((soften ,~) (cancel-invite id.act member.act))
+    ;<  *  bind:m  ((soften ,~) (delete-request id.act member.act))
+    ;<  *  bind:m  ((soften ,~) (give-kick-gesture id.act member.act))
+    ;<  ~  bind:m  (update-members id.act member.act ~)
+    (pure:m !>(~))
+    ::
+      %leave-pool
+    ;<  *  bind:m  ((soften ,~) (cancel-request id.act))
+    ;<  *  bind:m  ((soften ,~) (delete-invite id.act))
+    ;<  *  bind:m  ((soften ,~) (give-leave-gesture id.act))
+    :: TODO: remote-pools
+    (pure:m !>(~))
+    ::
       %extend-invite
     ?>  =(our.gowl host.id.act)
     ;<  ~  bind:m  (give-invite-gesture [id invitee ~ invite]:act)
@@ -147,6 +178,11 @@
     ;<  ~  bind:m  (update-incoming-invite-response id.act [~ | metadata.act])
     (pure:m !>(~))
     ::
+      %delete-invite
+    ;<  *  bind:m  ((soften ,~) (give-delete-invite-gesture id.act))
+    ;<  ~  bind:m  (update-incoming-invites id.act ~)
+    (pure:m !>(~))
+    ::
       %extend-request
     ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
     ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
@@ -161,15 +197,19 @@
     ?>  =(our.gowl host.id.act)
     ;<  ~  bind:m  (give-request-response-gesture id.act requester.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-request-response id.act requester.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-members id.act requester.act ~ &+(sy ~[%viewer]))
-    :: experiment: notify dudes of new addition
-    ;<  *  bind:m  (delegate-add-from-request id.act requester.act)
+    ;<  ~  bind:m  (update-members id.act requester.act ~ &+~)
     (pure:m !>(~))
     ::
       %reject-request
     ?>  =(our.gowl host.id.act)
     ;<  ~  bind:m  (give-request-response-gesture id.act requester.act [~ | metadata.act])
     ;<  ~  bind:m  (update-incoming-request-response id.act requester.act [~ | metadata.act])
+    (pure:m !>(~))
+    ::
+      %delete-request
+    ?>  =(our.gowl host.id.act)
+    ;<  *  bind:m  ((soften ,~) (give-delete-request-gesture [id requester]:act))
+    ;<  ~  bind:m  (update-incoming-requests id.act requester.act ~)
     (pure:m !>(~))
   ==
 ::
@@ -381,13 +421,31 @@
 ::
 ++  timeout  ~s15
 ::
+++  give-kick-gesture
+  |=  [=id:p member=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (set-timeout ,~)  timeout
+  %+  (vent ,~)  [member dap.gowl]
+  :-  %pools-gesture
+  ^-  gesture:p
+  [%kick id]
+::
+++  give-leave-gesture
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (set-timeout ,~)  timeout
+  %+  (vent ,~)  [host.id dap.gowl]
+  :-  %pools-gesture
+  ^-  gesture:p
+  [%leave id]
+::
 ++  give-invite-gesture
   |=  [=id:p invitee=ship invite=(unit invite:p)]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (set-timeout ,~)  timeout
-  ~&  invitee+invitee
-  ~&  dap+dap.gowl
   %+  (vent ,~)  [invitee dap.gowl]
   :-  %pools-gesture
   ^-  gesture:p
@@ -402,6 +460,16 @@
    :-  %pools-gesture
   ^-  gesture:p
   [%invite-response id status]
+::
+++  give-delete-invite-gesture
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (set-timeout ,~)  timeout
+  %+  (vent ,~)  [host.id dap.gowl]
+  :-  %pools-gesture
+  ^-  gesture:p
+  [%delete-invite id]
 ::
 ++  give-request-gesture
   |=  [=id:p request=(unit request:p)]
@@ -423,6 +491,16 @@
   ^-  gesture:p
   [%request-response id status]
 ::
+++  give-delete-request-gesture
+  |=  [=id:p requester=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (set-timeout ,~)  timeout
+  %+  (vent ,~)  [requester dap.gowl]
+  :-  %pools-gesture
+  ^-  gesture:p
+  [%delete-request id]
+::
 ++  accept-request
   |=  [=id:p requester=ship =metadata:p]
   =/  m  (strand ,~)
@@ -441,6 +519,42 @@
   ^-  action:p
   [%reject-request id requester metadata]
 ::
+++  cancel-invite
+  |=  [=id:p invitee=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-action
+  ^-  action:p
+  [%cancel-invite id invitee]
+::
+++  delete-invite
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-action
+  ^-  action:p
+  [%delete-invite id]
+::
+++  cancel-request
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-action
+  ^-  action:p
+  [%cancel-request id]
+::
+++  delete-request
+  |=  [=id:p requester=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-action
+  ^-  action:p
+  [%delete-request id requester]
+::
 ++  delegate-graylist
   |=  [=dude:gall =id:p requester=ship =request:p]
   =/  m  (strand ,(unit auto:p))
@@ -451,65 +565,65 @@
   ^-  delegation:p
   [%graylist id requester request]
 ::
-++  get-outgoing-invite
-  |=  [=id:p invitee=ship]
-  =/  m  (strand ,invite:p)
-  ^-  form:m
-  ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-  =/  =pool:p   (~(got by pools) id)
-  (pure:m invite:(~(got by outgoing-invites.pool) invitee))
+:: ++  get-outgoing-invite
+::   |=  [=id:p invitee=ship]
+::   =/  m  (strand ,invite:p)
+::   ^-  form:m
+::   ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+::   =/  =pool:p   (~(got by pools) id)
+::   (pure:m invite:(~(got by outgoing-invites.pool) invitee))
 ::
-++  delegate-add-from-invite
-  |=  [=id:p invitee=ship]
-  =/  m  (strand ,(map dude:gall goof))
-  ^-  form:m
-  =|  goofs=(map dude:gall goof)
-  ;<  =invite:p  bind:m  (get-outgoing-invite id invitee)
-  =/  dudes  ((ar so):dejs:format (~(gut by invite) 'dudes' a+~))
-  |-
-  ?~  dudes
-    (pure:m goofs)
-  ;<  del=(each ~ goof)  bind:m
-    %-  (soften ,~)
-    %+  (set-timeout ,~)  timeout
-    %+  (vent ,~)
-      [our.gowl i.dudes]
-    :-  %pools-delegation
-    ^-  delegation:p
-    [%add-from-invite id invitee invite]
-  %=  $
-    dudes  t.dudes
-    goofs  ?-(-.del %& goofs, %| (~(put by goofs) i.dudes p.del))
-  ==
+:: ++  delegate-add-from-invite
+::   |=  [=id:p invitee=ship]
+::   =/  m  (strand ,(map dude:gall goof))
+::   ^-  form:m
+::   =|  goofs=(map dude:gall goof)
+::   ;<  =invite:p  bind:m  (get-outgoing-invite id invitee)
+::   =/  dudes  ((ar so):dejs:format (~(gut by invite) 'dudes' a+~))
+::   |-
+::   ?~  dudes
+::     (pure:m goofs)
+::   ;<  del=(each ~ goof)  bind:m
+::     %-  (soften ,~)
+::     %+  (set-timeout ,~)  timeout
+::     %+  (vent ,~)
+::       [our.gowl i.dudes]
+::     :-  %pools-delegation
+::     ^-  delegation:p
+::     [%add-from-invite id invitee invite]
+::   %=  $
+::     dudes  t.dudes
+::     goofs  ?-(-.del %& goofs, %| (~(put by goofs) i.dudes p.del))
+::   ==
 ::
-++  get-incoming-request
-  |=  [=id:p requester=ship]
-  =/  m  (strand ,request:p)
-  ^-  form:m
-  ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-  =/  =pool:p   (~(got by pools) id)
-  (pure:m request:(~(got by incoming-requests.pool) requester))
+:: ++  get-incoming-request
+::   |=  [=id:p requester=ship]
+::   =/  m  (strand ,request:p)
+::   ^-  form:m
+::   ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+::   =/  =pool:p   (~(got by pools) id)
+::   (pure:m request:(~(got by incoming-requests.pool) requester))
 ::
-++  delegate-add-from-request
-  |=  [=id:p requester=ship]
-  =/  m  (strand ,(map dude:gall goof))
-  ^-  form:m
-  =|  goofs=(map dude:gall goof)
-  ;<  =request:p  bind:m  (get-incoming-request id requester)
-  =/  dudes  ((ar so):dejs:format (~(gut by request) 'dudes' a+~))
-  |-
-  ?~  dudes
-    (pure:m goofs)
-  ;<  del=(each ~ goof)  bind:m
-    %-  (soften ,~)
-    %+  (set-timeout ,~)  timeout
-    %+  (vent ,~)
-      [our.gowl i.dudes]
-    :-  %pools-delegation
-    ^-  delegation:p
-    [%add-from-request id requester request]
-  %=  $
-    dudes  t.dudes
-    goofs  ?-(-.del %& goofs, %| (~(put by goofs) i.dudes p.del))
-  ==
+:: ++  delegate-add-from-request
+::   |=  [=id:p requester=ship]
+::   =/  m  (strand ,(map dude:gall goof))
+::   ^-  form:m
+::   =|  goofs=(map dude:gall goof)
+::   ;<  =request:p  bind:m  (get-incoming-request id requester)
+::   =/  dudes  ((ar so):dejs:format (~(gut by request) 'dudes' a+~))
+::   |-
+::   ?~  dudes
+::     (pure:m goofs)
+::   ;<  del=(each ~ goof)  bind:m
+::     %-  (soften ,~)
+::     %+  (set-timeout ,~)  timeout
+::     %+  (vent ,~)
+::       [our.gowl i.dudes]
+::     :-  %pools-delegation
+::     ^-  delegation:p
+::     [%add-from-request id requester request]
+::   %=  $
+::     dudes  t.dudes
+::     goofs  ?-(-.del %& goofs, %| (~(put by goofs) i.dudes p.del))
+::   ==
 --
