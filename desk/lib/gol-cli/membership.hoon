@@ -30,6 +30,17 @@
     ::   (pure:m !>(~))
     :: (strand-fail %pool-subscription-fail u.p)
     ::
+      %kick-member
+    ?>  =(our.gowl host.pid.act)
+    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    ;<  ~  bind:m  (kick-member [pid member]:act)
+    (pure:m !>(~))
+    ::
+      %leave-pool
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (leave-pool pid.act)
+    (pure:m !>(~))
+    ::
       %extend-invite
     ?>  =(our.gowl host.pid.act)
     :: TODO: assert src.gowl has appropriate permissions wrt pool
@@ -59,6 +70,11 @@
     ;<  ~  bind:m  (reject-invite pid.act)
     (pure:m !>(~))
     ::
+      %delete-invite
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (delete-invite pid.act)
+    (pure:m !>(~))
+    ::
       %extend-request
     ?>  =(our src):gowl
     =/  =request:p
@@ -74,13 +90,21 @@
     (pure:m !>(~))
     ::
       %accept-request
-    ?>  =(src our):gowl
+    ?>  =(our.gowl host.pid.act)
+    :: TODO: assert src.gowl has appropriate permissions wrt pool
     ;<  ~  bind:m  (accept-request pid.act requester.act)
     (pure:m !>(~))
     ::
       %reject-request
-    ?>  =(src our):gowl
+    ?>  =(our.gowl host.pid.act)
+    :: TODO: assert src.gowl has appropriate permissions wrt pool
     ;<  ~  bind:m  (reject-request pid.act requester.act)
+    (pure:m !>(~))
+    ::
+      %delete-request
+    ?>  =(our.gowl host.pid.act)
+    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    ;<  ~  bind:m  (delete-request [pid requester]:act)
     (pure:m !>(~))
   ==
 ::
@@ -97,6 +121,24 @@
   =,  enjs:format
   %-  pure:m  !>
   (pairs [warning+(pairs data) ~])
+::
+++  kick-member
+  |=  [=id:p member=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
+  ^-  action:p
+  [%kick-member id member]
+::
+++  leave-pool
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
+  ^-  action:p
+  [%leave-pool id]
 ::
 ++  extend-invite
   |=  [=id:p invitee=ship =invite:p]
@@ -134,6 +176,15 @@
   ^-  action:p
   [%reject-invite id ~]
 ::
+++  delete-invite
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
+  ^-  action:p
+  [%delete-invite id]
+::
 ++  extend-request
   |=  [=id:p =request:p]
   =/  m  (strand ,~)
@@ -169,4 +220,13 @@
   :-  %pools-action
   ^-  action:p
   [%reject-request id requester ~]
+::
+++  delete-request
+  |=  [=id:p requester=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-action
+  ^-  action:p
+  [%delete-request id requester]
 --

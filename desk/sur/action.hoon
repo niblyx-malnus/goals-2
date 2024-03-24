@@ -148,13 +148,17 @@
 ::
 +$  membership-action
   $%  [%join =pid]
+      [%kick-member =pid member=ship]
+      [%leave-pool =pid]
       [%extend-invite =pid invitee=ship]
       [%cancel-invite =pid invitee=ship]
       [%accept-invite =pid]
       [%reject-invite =pid]
+      [%delete-invite =pid]
       [%extend-request =pid]
       [%cancel-request =pid]
       [%accept-request =pid requester=ship]
       [%reject-request =pid requester=ship]
+      [%delete-request =pid requester=ship]
   ==
 --
