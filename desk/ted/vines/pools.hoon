@@ -14,11 +14,51 @@
 ::
 ~&  "%pools vine: receiving mark {(trip mark)}"
 ?+  mark  (just-poke [our dap]:gowl mark vase) :: poke normally
+  %pools-view     (handle-pools-view:hc !<(view:p vase))
   %pools-gesture  (handle-pools-gesture:hc !<(gesture:p vase))
   %pools-action   (handle-pools-action:hc !<(action:p vase))
 ==
 ::
 |_  =gowl
+++  handle-pools-view
+  |=  vyu=view:p
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ~&  "%pools vine: receiving view {(trip -.vyu)}"
+  ?-    -.vyu
+      %pools
+    :: return pools and public data that src.gowl isn't blacklisted from
+    ::
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  pools-list  `(list [=id:p =pool:p])`~(tap by pools)
+    =|  discovered=(list [id:p metadata:p])
+    |-
+    ?~  pools-list
+      %-  pure:m  !>
+      %-  pairs:enjs:format
+      %+  turn  discovered
+      |=  [=id:p public=metadata:p]
+      [(id-string:enjs:lib id) o+public]
+    ;<  auto=(unit auto:p)  bind:m
+      (graylist-resolution id.i.pools-list src.gowl metadata.vyu)
+    ?:  ?=([~ %|] auto)
+      $(pools-list t.pools-list)
+    %=  $
+      pools-list  t.pools-list
+      discovered  [[id public.pool-data.pool]:i.pools-list discovered]
+    ==
+    ::
+      %public-data
+    :: return public data for the pool if src.gowl isn't blacklisted
+    ::
+    ;<  auto=(unit auto:p)  bind:m
+      (graylist-resolution id.vyu src.gowl metadata.vyu)
+    ?:  ?=([~ %|] auto)
+      (strand-fail %view-public-data-fail ~)
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    (pure:m !>(o+public.pool-data:(~(got by pools) id.vyu)))
+  ==
+::
 ++  handle-pools-gesture
   |=  ges=gesture:p
   =/  m  (strand ,vase)

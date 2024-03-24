@@ -113,7 +113,7 @@
   ==
 ::
 +$  view
-  $%  [%pools ~] :: gets pools visible to src.gowl and public metadata
-      [%public-data =id]
+  $%  [%pools =metadata]
+      [%public-data =id =metadata]
   ==
 --
