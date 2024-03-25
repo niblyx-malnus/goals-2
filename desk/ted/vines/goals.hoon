@@ -545,7 +545,7 @@
         ?~  status
           ~
         %-  pairs
-        :-  ['inviteResponse' b+response.u.status]
+        :-  ['response' b+response.u.status]
         ~(tap by metadata.u.status)
     ==
     ::
@@ -569,7 +569,7 @@
         ?~  status
           ~
         %-  pairs
-        :-  ['inviteResponse' b+response.u.status]
+        :-  ['response' b+response.u.status]
         ~(tap by metadata.u.status)
     ==
   ==
