@@ -32,9 +32,9 @@
     ++  ud-blocked
       =,  dejs:j
       =,  dejs:format
-      %+  (ud ,blocked:p blocked:p)
-        (ot ~[pools+(as pid) hosts+(as ship)])
-      (ot ~[pools+(as pid) hosts+(as ship)])
+      %+  (ud blocked:p blocked:p)
+        (ot ~[pools+(as pid) hosts+(as (su fed:ag))])
+      (ot ~[pools+(as pid) hosts+(as (su fed:ag))])
     --
   --
 ++  grad  %noun
