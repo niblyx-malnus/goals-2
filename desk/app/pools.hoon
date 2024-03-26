@@ -51,6 +51,7 @@
     [%x %state ~]              ``noun+!>(state)
     [%x %pools ~]              ``noun+!>(pools)
     [%x %blocked ~]            ``noun+!>(blocked)
+    [%x %remote-pools ~]       ``noun+!>(remote-pools)
     [%x %incoming-invites ~]   ``noun+!>(incoming-invites)
     [%x %outgoing-requests ~]  ``noun+!>(outgoing-requests)
   ==

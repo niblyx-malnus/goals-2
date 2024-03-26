@@ -456,6 +456,16 @@
         [%hosts a+(turn ~(tap in hosts.blocked) |=(=@p s+(scot %p p)))]
     ==
     ::
+      %remote-pools
+    ;<  =remote-pools:p  bind:m  (scry-hard ,remote-pools:p /gx/pools/remote-pools/noun)
+    %-  pure:m  !>
+    :-  %a
+    %+  turn
+      %+  turn
+        ~(tap in remote-pools)
+      id-string:enjs:pools
+    (lead %s)
+    ::
     %goal-data  (send-goal-data keys.vyu src.gowl)
     ::
       %goal-lineage

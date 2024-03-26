@@ -56,6 +56,7 @@
       [%update-outgoing-requests =id request=(unit request)]
       [%update-incoming-invite-response =id =status]
       [%update-outgoing-request-response =id =status]
+      [%update-remote-pools p=(each (set id) (set id))]
       [%update-pool =id p=pool-transition]
       [%create-pool =id]
       [%delete-pool =id]

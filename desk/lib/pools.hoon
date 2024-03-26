@@ -96,6 +96,17 @@
     ?>  =(our.bowl host.id.tan)
     this(pools (~(del by pools) id.tan))
     ::
+      %update-remote-pools
+    ?-    -.p.tan
+        %&
+      ?>  (~(all in p.p.tan) |=(id !=(our.bowl host)))
+      this(remote-pools (~(uni in remote-pools) p.p.tan))
+      ::
+        %|
+      ?>  (~(all in p.p.tan) |=(id !=(our.bowl host)))
+      this(remote-pools (~(dif in remote-pools) p.p.tan))
+    ==
+    ::
       %update-pool
     :: we must be the host of the given pool
     ::

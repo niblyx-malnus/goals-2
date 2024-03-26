@@ -49,6 +49,7 @@
         [%local-goal-tags ul]
         [%local-goal-fields ul]
         [%local-blocked ul]
+        [%remote-pools ul]
         [%goal-data (ot ~[keys+(ar key)])]
         [%outgoing-invites (ot ~[pid+pid])]
         [%incoming-requests (ot ~[pid+pid])]
