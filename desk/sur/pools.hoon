@@ -30,10 +30,10 @@
       =pool-data
   ==
 +$  pools  (map id pool)
+:: block unwanted invites
 +$  blocked
-  $:  pools=(set id)   :: block invites
-      hosts=(set ship) :: block invites
-      peers=(set ship) :: block pool list requests
+  $:  pools=(set id)
+      hosts=(set ship)
   ==
 :: don't subscribe to foreign pools during development
 :: state-syncing is time-wasting tedium; vent-views only to start

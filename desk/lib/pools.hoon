@@ -19,14 +19,12 @@
       %=  this
         pools.blocked  (~(uni in pools.blocked) pools.p.p.tan)
         hosts.blocked  (~(uni in hosts.blocked) hosts.p.p.tan)
-        peers.blocked  (~(uni in peers.blocked) peers.p.p.tan)
       ==
       ::
         %|
       %=  this
         pools.blocked  (~(dif in pools.blocked) pools.p.p.tan)
         hosts.blocked  (~(dif in hosts.blocked) hosts.p.p.tan)
-        peers.blocked  (~(dif in peers.blocked) peers.p.p.tan)
       ==
     ==
     ::
