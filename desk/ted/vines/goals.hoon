@@ -447,6 +447,16 @@
       ~
     [~ f o+p]
     ::
+      %local-blocked
+    ;<  =blocked:p  bind:m  (scry-hard ,blocked:p /gx/pools/blocked/noun)
+    =,  enjs:format
+    %-  pure:m  !>
+    %-  pairs
+    :~  [%pools a+(turn (turn ~(tap in pools.blocked) id-string:enjs:pools) (lead %s))] 
+        [%hosts a+(turn ~(tap in hosts.blocked) |=(=@p s+(scot %p p)))]
+        [%peers a+(turn ~(tap in peers.blocked) |=(=@p s+(scot %p p)))]
+    ==
+    ::
     %goal-data  (send-goal-data keys.vyu src.gowl)
     ::
       %goal-lineage

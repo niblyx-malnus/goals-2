@@ -48,8 +48,9 @@
   |=  =(pole knot)
   ^-  (unit (unit cage))
   ?+    pole  (on-peek:def pole)
-    [%x %state ~]  ``noun+!>(state)
-    [%x %pools ~]  ``noun+!>(pools)
+    [%x %state ~]              ``noun+!>(state)
+    [%x %pools ~]              ``noun+!>(pools)
+    [%x %blocked ~]            ``noun+!>(blocked)
     [%x %incoming-invites ~]   ``noun+!>(incoming-invites)
     [%x %outgoing-requests ~]  ``noun+!>(outgoing-requests)
   ==

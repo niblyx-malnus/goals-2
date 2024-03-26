@@ -139,6 +139,7 @@
       [%pool-fields =pid]
       [%local-goal-tags ~]
       [%local-goal-fields ~]
+      [%local-blocked ~]
       [%goal-data keys=(list key)]
       [%outgoing-invites =pid]
       [%incoming-requests =pid]
