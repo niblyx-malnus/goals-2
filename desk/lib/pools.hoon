@@ -16,8 +16,8 @@
       %update-blocked
     ?-    -.p.tan
         %&
-      ?<  (~(has in hosts.blocked) our.bowl)
-      ?<  (~(has in `(set ship)`(~(run in pools.blocked) head)) our.bowl)
+      ?<  (~(has in hosts.p.p.tan) our.bowl)
+      ?<  (~(has in `(set ship)`(~(run in pools.p.p.tan) head)) our.bowl)
       %=  this
         pools.blocked  (~(uni in pools.blocked) pools.p.p.tan)
         hosts.blocked  (~(uni in hosts.blocked) hosts.p.p.tan)
