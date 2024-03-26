@@ -111,6 +111,11 @@
     ?>  =(src our):gowl
     ;<  ~  bind:m  (update-blocked p.act)
     (pure:m !>(~))
+    ::
+      %update-graylist
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (update-graylist [pid fields]:act)
+    (pure:m !>(~))
   ==
 ::
 ++  send-error
@@ -243,4 +248,14 @@
   :-  %pools-transition
   ^-  transition:p
   [%update-blocked upd]
+::
+++  update-graylist
+  |=  [=id:p fields=(list graylist-field:p)]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-transition
+  ^-  transition:p
+  :+  %update-pool  id
+  [%update-graylist fields]
 --

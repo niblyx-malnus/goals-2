@@ -162,5 +162,6 @@
       [%reject-request =pid requester=ship]
       [%delete-request =pid requester=ship]
       [%update-blocked p=(each blocked:p blocked:p)]
+      [%update-graylist =pid fields=(list graylist-field:p)]
   ==
 --
