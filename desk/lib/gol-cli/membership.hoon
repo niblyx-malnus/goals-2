@@ -106,6 +106,11 @@
     :: TODO: assert src.gowl has appropriate permissions wrt pool
     ;<  ~  bind:m  (delete-request [pid requester]:act)
     (pure:m !>(~))
+    ::
+      %update-blocked
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (update-blocked p.act)
+    (pure:m !>(~))
   ==
 ::
 ++  send-error
@@ -229,4 +234,13 @@
   :-  %pools-action
   ^-  action:p
   [%delete-request id requester]
+::
+++  update-blocked
+  |=  upd=(each blocked:p blocked:p)
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %pools-transition
+  ^-  transition:p
+  [%update-blocked upd]
 --

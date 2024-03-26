@@ -9,6 +9,7 @@
   |%
   ++  noun  membership-action
   ++  json
+    =<
     =,  dejs:j
     ^-  $-(json membership-action)
     %-  of
@@ -24,7 +25,17 @@
         [%accept-request (ot ~[pid+pid requester+(su fed:ag)])]
         [%reject-request (ot ~[pid+pid requester+(su fed:ag)])]
         [%delete-request (ot ~[pid+pid requester+(su fed:ag)])]
+        [%update-blocked ud-blocked]
     ==
+    ::
+    |%
+    ++  ud-blocked
+      =,  dejs:j
+      =,  dejs:format
+      %+  (ud ,blocked:p blocked:p)
+        (ot ~[pools+(as pid) hosts+(as ship)])
+      (ot ~[pools+(as pid) hosts+(as ship)])
+    --
   --
 ++  grad  %noun
 --

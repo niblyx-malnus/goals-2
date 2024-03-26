@@ -1,4 +1,4 @@
-/-  *goals
+/-  *goals, p=pools
 |%
 +$  transition
   $%  [%create-pool =pid title=@t]
@@ -161,5 +161,6 @@
       [%accept-request =pid requester=ship]
       [%reject-request =pid requester=ship]
       [%delete-request =pid requester=ship]
+      [%update-blocked p=(each blocked:p blocked:p)]
   ==
 --
