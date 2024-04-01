@@ -11,35 +11,6 @@
 ++  emit  |=(=card this(cards [card cards]))
 ++  emil  |=(cadz=(list card) this(cards (weld cadz cards)))
 ::
-:: ============================================================================
-:: 
-:: HELPERS
-::
-:: ============================================================================
-::
-++  create-pool
-  |=  [=pid:gol own=ship title=@t]
-  ^-  pool:gol
-  ?<  (~(has by pools.store) pid)
-  :*  pid
-      title
-      (~(put by *perms:gol) own %owner)
-      ~  ~  [~ ~]  ~  ~
-  ==
-::
-++  clone-pool
-  |=  [=old=pid:gol title=@t own=ship now=@da]
-  ^-  [pid:gol pool:gol]
-  =/  old-pool  (~(got by pools.store) old-pid)
-  :: =/  [=pid:gol =pool:gol]  (create-pool title own now)
-  :: =.  pool  pool(goals goals:(clone-goals:gols goals.old-pool pid now))
-  !! :: [pid (inflate-pool:fl pool)]
-:: ============================================================================
-:: 
-:: UPDATES
-::
-:: ============================================================================
-::
 ++  handle-transition
   |=  tan=transition:act
   ^-  _this
@@ -47,7 +18,11 @@
   ?-    -.tan
       %create-pool
     ?>  =(our.bowl host.pid.tan)
-    =/  =pool:gol    (create-pool pid.tan src.bowl title.tan)
+    ?<  (~(has by pools.store) pid.tan)
+    =|  =pool:gol
+    =:  title.pool  title.tan
+        perms.pool  (~(put by *perms:gol) host.pid.tan %host)
+      ==
     =.  pools.store  (~(put by pools.store) pid.tan pool)
     =.  pool-order.local.store  [pid.tan pool-order.local.store]
     this
@@ -64,7 +39,7 @@
 ++  handle-action
   |=  [mod=ship axn=action:act]
   ^-  _this
-  ?-    -.axn
+  ?+    -.axn  !!
       %reorder-roots
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
@@ -178,7 +153,7 @@
           |=(=gid:gol done.i.status:(~(got-node nd goals.new) e+gid))
         this
       :: TODO: make this only occur if has permissions on ancestors...
-      :: owner responsible for resulting completions
+      :: host responsible for resulting completions
       (handle-action:this our.bowl [%set-complete pid u.parent %&])
       ::
         %|
@@ -252,38 +227,6 @@
     =.  pools.store  (~(put by pools.store) pid new)
     this
     ::
-      %pools-slot-above
-    =+  axn
-    ?~  idx=(find [dis]~ pool-order.local.store)  !!
-    =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
-    ?~  idx=(find [dat]~ pool-order.local.store)  !!
-    =.  pool-order.local.store  (into pool-order.local.store u.idx dis)
-    this
-    ::
-      %pools-slot-below
-    =+  axn
-    ?~  idx=(find [dis]~ pool-order.local.store)  !!
-    =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
-    ?~  idx=(find [dat]~ pool-order.local.store)  !!
-    =.  pool-order.local.store  (into pool-order.local.store +(u.idx) dis)
-    this
-    ::
-      %goals-slot-above
-    =+  axn
-    ?~  idx=(find [dis]~ goal-order.local.store)  !!
-    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
-    ?~  idx=(find [dat]~ goal-order.local.store)  !!
-    =.  goal-order.local.store  (into goal-order.local.store u.idx dis)
-    this
-    ::
-      %goals-slot-below
-    =+  axn
-    ?~  idx=(find [dis]~ goal-order.local.store)  !!
-    =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
-    ?~  idx=(find [dat]~ goal-order.local.store)  !!
-    =.  goal-order.local.store  (into goal-order.local.store +(u.idx) dis)
-    this
-    ::
       %update-pool-perms
     =+  axn
     =/  old=pool:gol  (~(got by pools.store) pid)
@@ -333,75 +276,95 @@
     =.  pools.store  (~(put by pools.store) pid new)
     this
     ::
-      %update-local-goal-metadata
-    ?>  =(src our):bowl
-    =/  goal-metadata=(map @t json)  (~(gut by goal-metadata.local.store) key.axn ~)
-    =.  goal-metadata
-      ?-  -.p.axn
-        %&  (~(put by goal-metadata) p.p.axn)
-        %|  (~(del by goal-metadata) p.p.axn)
-      ==
-    this(goal-metadata.local.store (~(put by goal-metadata.local.store) key.axn goal-metadata))
-    ::
-      %update-local-pool-metadata
-    ?>  =(src our):bowl
-    =/  pool-metadata=(map @t json)  (~(gut by pool-metadata.local.store) pid.axn ~)
-    =.  pool-metadata
-      ?-  -.p.axn
-        %&  (~(put by pool-metadata) p.p.axn)
-        %|  (~(del by pool-metadata) p.p.axn)
-      ==
-    this(pool-metadata.local.store (~(put by pool-metadata.local.store) pid.axn pool-metadata))
-    ::
-      %update-local-metadata-field
-    ?>  =(src our):bowl
-    =/  properties  (~(gut by metadata-properties.local.store) field.axn ~)
-    =.  properties
-      ?-  -.p.axn
-        %&  (~(put by properties) p.p.axn)
-        %|  (~(del by properties) p.p.axn)
-      ==
-    %=    this
-        metadata-properties.local.store
-      (~(put by metadata-properties.local.store) field.axn properties)
-    ==
-    ::
-      %delete-local-metadata-field
-    this(metadata-properties.local.store (~(del by metadata-properties.local.store) field.axn))
-    ::
-      %update-pool-metadata
-    =/  old=pool:gol  (~(got by pools.store) pid.axn)
-    =/  new=pool:gol
-      abet:(update-pool-metadata:(apex:pl old) p.axn mod)
-    this(pools.store (~(put by pools.store) pid.axn new))
-    ::
-      %update-pool-metadata-field
-    =/  old=pool:gol  (~(got by pools.store) pid.axn)
-    =/  new=pool:gol
-      abet:(update-pool-metadata-field:(apex:pl old) field.axn p.axn mod)
-    this(pools.store (~(put by pools.store) pid.axn new))
-    ::
-      %delete-pool-metadata-field
-    =/  old=pool:gol  (~(got by pools.store) pid.axn)
-    =/  new=pool:gol
-      abet:(delete-pool-metadata-field:(apex:pl old) field.axn mod)
-    this(pools.store (~(put by pools.store) pid.axn new))
-    ::
-    %create-pool  !!
-    %delete-pool  !!
-    ::
       %update-goal-metadata
     =/  old=pool:gol  (~(got by pools.store) pid.axn)
     =/  new=pool:gol
       abet:(update-goal-metadata:(apex:pl old) gid.axn p.axn mod)
     this(pools.store (~(put by pools.store) pid.axn new))
+  ==
+::
+++  handle-local-transition
+  |=  tan=local-transition:act
+  ^-  _this
+  ?>  =(src our):bowl
+  ?-    -.tan
+      %pool-order
+    ?-    -.p.tan
+        %&
+      ?~  idx=(find [dis.p.p.tan]~ pool-order.local.store)  !!
+      =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
+      ?~  idx=(find [dat.p.p.tan]~ pool-order.local.store)  !!
+      =.  pool-order.local.store  (into pool-order.local.store u.idx dis.p.p.tan)
+      this
+      ::
+        %|
+      ?~  idx=(find [dis.p.p.tan]~ pool-order.local.store)  !!
+      =.  pool-order.local.store  (oust [u.idx 1] pool-order.local.store)
+      ?~  idx=(find [dat.p.p.tan]~ pool-order.local.store)  !!
+      =.  pool-order.local.store  (into pool-order.local.store +(u.idx) dis.p.p.tan)
+      this
+    ==
     ::
-      %update-setting
-    ?>  =(src our):bowl
-    =,  local.store
-    ?-  -.p.axn
-      %&  this(settings.local.store (~(put by settings) p.p.axn))
-      %|  this(settings.local.store (~(del by settings) p.p.axn))
+      %goal-order
+    ?-    -.p.tan
+        %&
+      ?~  idx=(find [dis.p.p.tan]~ goal-order.local.store)  !!
+      =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
+      ?~  idx=(find [dat.p.p.tan]~ goal-order.local.store)  !!
+      =.  goal-order.local.store  (into goal-order.local.store u.idx dis.p.p.tan)
+      this
+      ::
+        %|
+      ?~  idx=(find [dis.p.p.tan]~ goal-order.local.store)  !!
+      =.  goal-order.local.store  (oust [u.idx 1] goal-order.local.store)
+      ?~  idx=(find [dat.p.p.tan]~ goal-order.local.store)  !!
+      =.  goal-order.local.store  (into goal-order.local.store +(u.idx) dis.p.p.tan)
+      this
+    ==
+    ::
+      %goal-metadata
+    =/  goal-metadata=(map @t json)  (~(gut by goal-metadata.local.store) key.tan ~)
+    =.  goal-metadata
+      ?-  -.p.tan
+        %&  (~(put by goal-metadata) p.p.tan)
+        %|  (~(del by goal-metadata) p.p.tan)
+      ==
+    this(goal-metadata.local.store (~(put by goal-metadata.local.store) key.tan goal-metadata))
+    ::
+      %pool-metadata
+    =/  pool-metadata=(map @t json)  (~(gut by pool-metadata.local.store) pid.tan ~)
+    =.  pool-metadata
+      ?-  -.p.tan
+        %&  (~(put by pool-metadata) p.p.tan)
+        %|  (~(del by pool-metadata) p.p.tan)
+      ==
+    this(pool-metadata.local.store (~(put by pool-metadata.local.store) pid.tan pool-metadata))
+    ::
+      %metadata-properties
+    =/  properties  (~(gut by metadata-properties.local.store) field.tan ~)
+    ?~  p.tan
+      %=    this
+          metadata-properties.local.store
+        (~(del by metadata-properties.local.store) field.tan)
+      ==
+    =.  properties
+      ?-  -.u.p.tan
+        %&  (~(put by properties) p.u.p.tan)
+        %|  (~(del by properties) p.u.p.tan)
+      ==
+    %=    this
+        metadata-properties.local.store
+      (~(put by metadata-properties.local.store) field.tan properties)
+    ==
+    ::
+      %settings
+    ?-    -.p.tan
+        %&
+      this(settings.local.store (~(put by settings.local.store) p.p.tan))
+      ::
+        %|
+      this(settings.local.store (~(del by settings.local.store) p.p.tan))
     ==
   ==
 --
+

@@ -1,6 +1,6 @@
 /-  p=pools, gol=goals, axn=action, pyk=peek, spider
 /+  *ventio, pools, tree=filetree,
-    gol-cli-membership,
+    gol-cli-membership, gol-cli-view,
     gol-cli-traverse, gol-cli-node, gol-cli-pool,
     goj=gol-cli-json
 =,  strand=strand:spider
@@ -17,11 +17,18 @@
 ?>  =(our src):gowl
 ::
 =*  hc   ~(. helper-core gowl)
-=*  mem  ~(. gol-cli-membership gowl)
+=*  mhc  ~(. gol-cli-membership gowl)
+=*  vhc  ~(. gol-cli-view gowl)
 ::
 ~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
+    %goal-membership-action
+  (handle-membership-action:mhc !<(membership-action:axn vase))
+  ::
+    %goal-local-view
+  (handle-local-view:vhc !<(local-view:axn vase))
+  ::
     %goal-action
   =+  !<(act=action:axn vase)
   =/  gam  %goal-action-and-mod
@@ -314,43 +321,6 @@
       ?.(=(pid pid.vyu) ~ `gid)
     (turn (custom-roots-ordered-goals-harvest:tv tag-goals order) (lead pid.vyu))
     ::
-      %local-tag-goals
-    =;  keys=(list key:gol)
-      (send-goal-data keys src.gowl)
-    %+  murn  ~(tap by goal-metadata.local.store)
-    |=  [[=pid:gol =gid:gol] metadata=(map @t json)]
-    =/  tags=(set @t)
-        ((as so):dejs:format (~(gut by metadata) 'labels' a+~))
-    =/  =pool:gol       (~(got by pools.store) pid)
-    ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
-      ~
-    `[pid gid]
-    ::
-      %local-tag-harvest
-    =/  tag-goals=(list gid:gol)
-      %+  murn  ~(tap by goal-metadata.local.store)
-      |=  [[=pid:gol =gid:gol] metadata=(map @t json)]
-      =/  tags=(set @t)
-        ((as so):dejs:format (~(gut by metadata) 'labels' a+~))
-      =/  =pool:gol       (~(got by pools.store) pid)
-      ?.  &((~(has by goals.pool) gid) (~(has in tags) tag.vyu))
-        ~
-      `(encode-key pid gid)
-    =;  harvest=(list key:gol)
-      (send-goal-data harvest src.gowl)
-    =/  tv  ~(. gol-cli-traverse (all-goals store))
-    =/  key-order=(list gid:gol)
-      (turn goal-order.local.store encode-key)
-    %+  turn
-      (custom-roots-ordered-goals-harvest:tv tag-goals key-order)
-    decode-key
-    ::
-      %pools-index
-    %-  pure:m  !>
-    %-  enjs-pools-index
-    %+  turn  pool-order.local.store
-    |=(=pid:gol [pid title:(~(got by pools.store) pid)])
-    ::
       %pool-title
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     (pure:m !>(s+title.pool))
@@ -395,29 +365,12 @@
       %pool-tag-note
     !!
     ::
-      %local-tag-note
-    !!
-    ::
-      %setting
-    (pure:m !>(?~(s=(~(get by settings.local.store) setting.vyu) ~ s+u.s)))
-    ::
       %pool-tags
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  vals=(list (set @t))
       %+  turn  ~(val by goals.pool)
       |=  =goal:gol
       ((as so):dejs:format (~(gut by metadata.goal) 'labels' a+~))
-    =|  tags=(set @t)
-    |-
-    ?~  vals
-      (pure:m !>(a+(turn ~(tap in tags) (lead %s))))
-    $(vals t.vals, tags (~(uni in tags) i.vals))
-    ::
-      %local-goal-tags
-    =/  vals=(list (set @t))
-      %+  turn  ~(val by goal-metadata.local.store)
-      |=  metadata=(map @t json)
-      ((as so):dejs:format (~(gut by metadata) 'labels' a+~))
     =|  tags=(set @t)
     |-
     ?~  vals
@@ -435,36 +388,6 @@
     ?.  (~(has by p) 'attributeType')
       ~
     [~ f o+p]
-    ::
-      %local-goal-fields
-    =,  enjs:format
-    %-  pure:m  !>
-    %-  pairs
-    %+  murn  ~(tap by metadata-properties.local.store)
-    |=  [f=@t p=(map @t json)]
-    ^-  (unit [@t json])
-    ?.  (~(has by p) 'attributeType')
-      ~
-    [~ f o+p]
-    ::
-      %local-blocked
-    ;<  =blocked:p  bind:m  (scry-hard ,blocked:p /gx/pools/blocked/noun)
-    =,  enjs:format
-    %-  pure:m  !>
-    %-  pairs
-    :~  [%pools a+(turn (turn ~(tap in pools.blocked) id-string:enjs:pools) (lead %s))] 
-        [%hosts a+(turn ~(tap in hosts.blocked) |=(=@p s+(scot %p p)))]
-    ==
-    ::
-      %remote-pools
-    ;<  =remote-pools:p  bind:m  (scry-hard ,remote-pools:p /gx/pools/remote-pools/noun)
-    %-  pure:m  !>
-    :-  %a
-    %+  turn
-      %+  turn
-        ~(tap in remote-pools)
-      id-string:enjs:pools
-    (lead %s)
     ::
     %goal-data  (send-goal-data keys.vyu src.gowl)
     ::
@@ -524,30 +447,6 @@
         ~(tap by metadata.u.status)
     ==
     ::
-      %incoming-invites
-    ;<  =incoming-invites:p  bind:m
-      (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
-    %-  pure:m  !>
-    =,  enjs:format
-    %-  pairs
-    %+  murn  ~(tap by incoming-invites)
-    |=  [=pid:gol =invite:p =status:p]
-    ^-  (unit [@t json])
-    =/  dudes  ((as so):dejs:format (~(gut by invite) 'dudes' a+~))
-    ?.  (~(has in dudes) dap.gowl)
-      ~
-    :-  ~
-    :-  (enjs-pid:goj pid)
-    %-  pairs
-    :~  [%invite o+invite]
-        :-  %status
-        ?~  status
-          ~
-        %-  pairs
-        :-  ['response' b+response.u.status]
-        ~(tap by metadata.u.status)
-    ==
-    ::
       %incoming-requests
     ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
     =/  =pool:p  (~(got by pools) pid.vyu)
@@ -567,34 +466,7 @@
         :-  ['response' b+response.u.status]
         ~(tap by metadata.u.status)
     ==
-    ::
-      %outgoing-requests
-    ;<  =outgoing-requests:p  bind:m
-      (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
-    %-  pure:m  !>
-    =,  enjs:format
-    %-  pairs
-    %+  murn  ~(tap by outgoing-requests)
-    |=  [=pid:gol =request:p =status:p]
-    ^-  (unit [@t json])
-    =/  dudes  ((as so):dejs:format (~(gut by request) 'dudes' a+~))
-    ?.  (~(has in dudes) dap.gowl)
-      ~
-    :-  ~
-    :-  (enjs-pid:goj pid)
-    %-  pairs
-    :~  [%request o+request]
-        :-  %status
-        ?~  status
-          ~
-        %-  pairs
-        :-  ['response' b+response.u.status]
-        ~(tap by metadata.u.status)
-    ==
   ==
-  ::
-    %goal-membership-action
-  (handle-membership-action:mem !<(membership-action:axn vase))
 ==
 ::
 |_  =gowl
@@ -654,13 +526,7 @@
       summary=@t
       note=@t
       labels=(list @t) :: pool-specific
-      tags=(list @t)   :: private
-      inherited-labels=(list @t)
-      inherited-tags=(list @t)
       attributes=(list [@t json]) :: pool-specific
-      fields=(list [@t json])     :: private
-      inherited-attributes=(list [@t json])
-      inherited-fields=(list [@t json])
       parent=(unit key:gol)
       src-perms=@t
       chief=ship
@@ -678,13 +544,7 @@
       [%note s+note]
       [%summary s+summary]
       [%labels a+(turn labels (lead %s))]
-      [%tags a+(turn tags (lead %s))]
-      ['inheritedLabels' a+(turn inherited-labels (lead %s))]
-      ['inheritedTags' a+(turn inherited-tags (lead %s))]
       [%attributes (pairs attributes)]
-      [%fields (pairs fields)]
-      ['inheritedAttributes' (pairs inherited-attributes)]
-      ['inheritedFields' (pairs inherited-fields)]
       [%parent ?~(parent ~ (enjs-key:goj u.parent))]
       ['yourPerms' s+src-perms]
       [%chief s+(scot %p chief)]
@@ -740,19 +600,12 @@
   ?~  pul=(~(get by pools.store) pid.key)  ~
   ?~  get=(~(get by goals.u.pul) gid.key)  ~
   =+  u.get
-  |^
   :-  ~
   :*  key
       summary
       (so:dejs:format (~(gut by metadata) 'note' s+''))
       (get-goal-labels key store) :: labels (pool-specific)
-      (get-goal-tags key store)   :: tags (private)
-      inherited-labels
-      inherited-tags
       (get-goal-attributes key store) :: attributes (pool-specific)
-      (get-goal-fields key store)   :: fields (private)
-      inherited-attributes
-      inherited-fields
       ?~(parent ~ `[pid.key u.parent])
       (get-goal-permission-level:(apex:gol-cli-pool u.pul) gid.key src)
       chief
@@ -762,65 +615,6 @@
       done.i.status.end
       actionable
   ==
-  ++  inherited-labels
-    %~  tap  in
-    %-  ~(gas in *(set @t))
-    |-
-    ^-  (list @t)
-    ?~  parent
-      ~
-    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
-    %+  weld
-      (get-goal-labels [pid.key u.parent] store) :: labels (pool-specific)
-    $(parent parent.goal)
-  ++  inherited-tags
-    %~  tap  in
-    %-  ~(gas in *(set @t))
-    |-
-    ^-  (list @t)
-    ?~  parent
-      ~
-    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
-    %+  weld
-      (get-goal-tags [pid.key u.parent] store) :: tags (private)
-    $(parent parent.goal)
-  ++  inherited-attributes
-    =|  attributes=(map @t json)
-    %~  tap  by
-    ^-  (map @t json)
-    |-
-    ?~  parent
-      attributes
-    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
-    =/  parent-attributes=(list [@t json])
-      (get-goal-attributes [pid.key u.parent] store)
-    %=    $
-      parent  parent.goal
-        attributes
-      %-  ~(gas by attributes)
-      %+  murn  parent-attributes
-      |=  [a=@t d=json]
-      ?:((~(has by attributes) a) ~ [~ a d])
-    ==
-  ++  inherited-fields
-    =|  fields=(map @t json)
-    %~  tap  by
-    ^-  (map @t json)
-    |-
-    ?~  parent
-      fields
-    =/  =goal:gol  (~(got by goals.u.pul) u.parent)
-    =/  parent-fields=(list [@t json])
-      (get-goal-fields [pid.key u.parent] store)
-    %=    $
-      parent  parent.goal
-        fields
-      %-  ~(gas by fields)
-      %+  murn  parent-fields
-      |=  [a=@t d=json]
-      ?:((~(has by fields) a) ~ [~ a d])
-    ==
-  --
 ++  send-goal-datum
   |=  [=key:gol src=ship]
   =/  m  (strand ,vase)
@@ -861,19 +655,12 @@
   ?~  ten=(~(get by contents.archive.u.pul) rid)  ~
   ?~  get=(~(get by goals.u.ten) gid)  ~
   =+  u.get
-  |^
   :-  ~
   :*  [pid gid]
       summary
       (so:dejs:format (~(gut by metadata) 'note' s+''))
       (get-archive-goal-labels pid rid gid store) :: labels (pool-specific)
-      (get-goal-tags [pid gid] store)             :: tags (private)
-      inherited-labels
-      inherited-tags
       (get-archive-goal-attributes pid rid gid store) :: attributes (pool-specific)
-      (get-goal-fields [pid gid] store)               :: fields (private)
-      inherited-attributes
-      inherited-fields
       ?~(parent ~ `[pid u.parent])
       (get-goal-permission-level:(apex:gol-cli-pool u.pul) gid src)
       chief
@@ -883,83 +670,6 @@
       done.i.status.end
       actionable
   ==
-  ++  inherited-labels
-    %~  tap  in
-    %-  ~(gas in *(set @t))
-    |-
-    ^-  (list @t)
-    ?~  parent
-      =/  parent=(unit gid:gol)  context.u.ten
-      |-
-      ^-  (list @t)
-      ?~  parent
-        ~
-      =/  =goal:gol  (~(got by goals.u.pul) u.parent)
-      %+  weld
-        (get-goal-labels [pid u.parent] store) :: labels (pool-specific)
-      $(parent parent.goal)
-    =/  =goal:gol  (~(got by goals.u.ten) u.parent)
-    %+  weld
-      (get-archive-goal-labels pid rid u.parent store) :: labels (pool-specific)
-    $(parent parent.goal)
-  ++  inherited-tags
-    %~  tap  in
-    %-  ~(gas in *(set @t))
-    |-
-    ^-  (list @t)
-    ?~  parent
-      =/  parent=(unit gid:gol)  context.u.ten
-      |-
-      ^-  (list @t)
-      ?~  parent
-        ~
-      =/  =goal:gol  (~(got by goals.u.pul) u.parent)
-      %+  weld
-        (get-goal-tags [pid u.parent] store) :: tags (private)
-      $(parent parent.goal)
-    =/  =goal:gol  (~(got by goals.u.ten) u.parent)
-    %+  weld
-      (get-goal-tags [pid u.parent] store) :: tags (private)
-    $(parent parent.goal)
-  ++  inherited-attributes
-    :: TODO: inherit from context like in labels/tags
-    =|  attributes=(map @t json)
-    %~  tap  by
-    ^-  (map @t json)
-    |-
-    ?~  parent
-      attributes
-    =/  =goal:gol  (~(got by goals.u.ten) u.parent)
-    =/  parent-attributes=(list [@t json])
-      (get-archive-goal-attributes pid rid u.parent store)
-    %=    $
-      parent  parent.goal
-        attributes
-      %-  ~(gas by attributes)
-      %+  murn  parent-attributes
-      |=  [a=@t d=json]
-      ?:((~(has by attributes) a) ~ [~ a d])
-    ==
-  ++  inherited-fields
-    :: TODO: inherit from context like in labels/tags
-    =|  fields=(map @t json)
-    %~  tap  by
-    ^-  (map @t json)
-    |-
-    ?~  parent
-      fields
-    =/  =goal:gol  (~(got by goals.u.ten) u.parent)
-    =/  parent-fields=(list [@t json])
-      (get-goal-fields [pid u.parent] store)
-    %=    $
-      parent  parent.goal
-        fields
-      %-  ~(gas by fields)
-      %+  murn  parent-fields
-      |=  [f=@t d=json]
-      ?:((~(has by fields) f) ~ [~ f d])
-    ==
-  --
 ++  send-archive-goal-datum
   |=  [=pid:gol rid=gid:gol =gid:gol src=ship]
   =/  m  (strand ,vase)
@@ -984,16 +694,6 @@
   %+  murn  keys
   |=  [=pid:gol rid=gid:gol =gid:gol]
   (get-archive-datum pid rid gid store src)
-++  enjs-pools-index
-  =,  enjs:format
-  |=  pools-index=(list [pid:gol @])
-  :-  %a
-  %+  turn  pools-index
-  |=  [=pid:gol title=@t] 
-  %-  pairs
-  :~  [%pid s+(enjs-pid:goj pid)]
-      [%title s+title]
-  ==
 ::
 ++  create-goals-pool
   |=  [=pid:gol title=@t]

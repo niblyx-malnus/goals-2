@@ -1,12 +1,14 @@
 /-  gol=goals, act=action
-/+  vent, bout, dbug, default-agent, verb,
-    tree=filetree, gol-cli-emot, gs=gol-cli-state, gol-cli-node,
+/+  goals, vent, bout, dbug, default-agent, verb,
+    tree=filetree, gs=gol-cli-state, gol-cli-node,
 :: import during development to force compilation
 ::
     gol-cli-json
 /=  x  /mar/goal/action
 /=  x  /mar/goal/view
+/=  x  /mar/goal/local-view
 /=  x  /mar/goal/membership-action
+/=  x  /mar/goal/local-transition
 /=  x  /ted/vines/goals
 /=  x  /ted/test
 ::
@@ -29,10 +31,10 @@
 ^-  agent:gall
 :: %-  agent:tree
 |_  =bowl:gall
-+*  this    .
++*  this  .
     def   ~(. (default-agent this %.n) bowl)
     det   ~(. default:tree bowl)
-    emot  ~(. gol-cli-emot bowl ~ state)
+    ghc   ~(. goals bowl ~ state)
 ::
 ++  on-init   on-init:def
 ++  on-save   !>(state)
@@ -56,14 +58,14 @@
     =+  !<([mod=ship axn=action:act] vase)
     ~&  received-axn+axn
     =^  cards  state
-      abet:(handle-action:emot mod axn)
+      abet:(handle-action:ghc mod axn)
     [cards this]
     ::
       %goals-transition
     =+  !<(tan=transition:act vase)
     ~&  received-transition+tan
     =^  cards  state
-      abet:(handle-transition:emot tan)
+      abet:(handle-transition:ghc tan)
     [cards this]
   ==
 ::

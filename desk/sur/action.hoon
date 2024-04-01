@@ -5,18 +5,56 @@
       [%delete-pool =pid]
   ==
 ::
-+$  action  $%(local-action pool-action goal-action)
-++  local-action
-  $%  [%pools-slot-above dis=pid dat=pid]
-      [%pools-slot-below dis=pid dat=pid]
-      [%goals-slot-above dis=key dat=key]
-      [%goals-slot-below dis=key dat=key]
-      [%update-local-goal-metadata =key p=(each [@t json] @t)]
-      [%update-local-pool-metadata =pid p=(each [@t json] @t)]
-      [%update-local-metadata-field field=@t p=(each [@t json] @t)]
-      [%delete-local-metadata-field field=@t]
-      [%update-setting p=(each [@t json] @t)]
++$  local-transition
+  $%  [%goal-order p=(each [dis=key dat=key] [dis=key dat=key])]
+      [%pool-order p=(each [dis=pid dat=pid] [dis=pid dat=pid])]
+      [%goal-metadata =key p=(each [@t json] @t)]
+      [%pool-metadata =pid p=(each [@t json] @t)]
+      [%metadata-properties field=@t p=(unit (each [@t json] @t))]
+      [%settings p=(each [@t json] @t)]
   ==
+::
++$  pool-transition
+  %+  pair  pid
+  $%  [%create-pool title=@t]
+      [%delete-pool ~]
+      [%update-pool mod=ship =pool-update] 
+  ==
+::
++$  pool-update
+  $%  [%title title=@t]
+      [%perms new=perms]
+      [%yoke yoks=(list plex)]
+      [%update-goal =gid =goal-update]
+      [%reorder-archive archive=(list gid)]
+      [%reorder-roots roots=(list gid)]
+      [%metadata p=(each [@t json] @t)]
+      [%metadata-properties field=@t p=(unit (each [@t json] @t))]
+  ==
+::
++$  goal-update
+    $%  [%create upid=(unit gid) summary=@t]
+        [%delete ~]
+        [%archive ~]
+        [%restore ~]
+        [%restore-to-root ~]
+        [%delete-from-archive ~]
+        [%move upid=(unit gid)]
+        [%start-moment =moment]
+        [%end-moment =moment]
+        [%summary summary=@t]
+        [%chief chief=ship rec=?]
+        [%open-to =open-to]
+        [%actionable p=?]
+        [%complete p=?]
+        [%active p=?]
+        [%perms p=(each [ship role] ship)]
+        [%reorder-children children=(list gid)]
+        [%reorder-archive archive=(list gid)]
+        [%metadata p=(each [@t json] @t)]
+    ==
+::
++$  action  $%(pool-action goal-action)
 ++  pool-action
   $%  [%create-pool title=@t]
       [%delete-pool =pid]
@@ -64,39 +102,6 @@
     --
   --
 ::
-+$  core-yoke
-  $%  [%dag-yoke n1=nid n2=nid]
-      [%dag-rend n1=nid n2=nid]
-  ==
-::
-+$  plex  $%(exposed-yoke nuke)
-::
-+$  exposed-yoke  
-  $%  [%prio-rend lid=gid rid=gid]
-      [%prio-yoke lid=gid rid=gid]
-      [%prec-rend lid=gid rid=gid]
-      [%prec-yoke lid=gid rid=gid]
-      [%nest-rend lid=gid rid=gid]
-      [%nest-yoke lid=gid rid=gid]
-      [%hook-rend lid=gid rid=gid]
-      [%hook-yoke lid=gid rid=gid]
-      [%held-rend lid=gid rid=gid]
-      [%held-yoke lid=gid rid=gid]
-  ==
-::
-+$  nuke
-  $%  [%nuke-prio-left =gid]
-      [%nuke-prio-ryte =gid]
-      [%nuke-prio =gid]
-      [%nuke-prec-left =gid]
-      [%nuke-prec-ryte =gid]
-      [%nuke-prec =gid]
-      [%nuke-prio-prec =gid]
-      [%nuke-nest-left =gid]
-      [%nuke-nest-ryte =gid]
-      [%nuke-nest =gid]
-  ==
-::
 +$  harvest-type
   $%  [%main ~]
       [%pool =pid]
@@ -124,29 +129,37 @@
       [%pool-tag-goals =pid tag=@t]
       [%pool-tag-harvest =pid tag=@t]
       [%pool-tag-note =pid tag=@t]
-      [%local-tag-goals tag=@t]
-      [%local-tag-harvest tag=@t]
-      [%local-tag-note tag=@t]
-      [%pools-index ~]
       [%pool-title =pid]
       [%pool-note =pid]
       [%pool-perms =pid]
       [%pool-graylist =pid]
       [%goal =pid =gid]
       [%archive-goal =pid rid=gid =gid]
-      [%setting setting=@t]
       [%pool-tags =pid]
       [%pool-fields =pid]
+      [%goal-data keys=(list key)]
+      [%outgoing-invites =pid]
+      [%incoming-requests =pid]
+  ==
+::
++$  pool-view
+  $:  =pid
+  $%  [%test ~]
+  ==  ==
+::
++$  local-view
+  $%  [%pools-index ~]
+      [%local-tag-goals tag=@t]
+      [%local-tag-harvest tag=@t]
+      [%local-tag-note tag=@t]
       [%local-goal-tags ~]
       [%local-goal-fields ~]
       [%local-blocked ~]
       [%remote-pools ~]
-      [%goal-data keys=(list key)]
-      [%outgoing-invites =pid]
-      [%incoming-requests =pid]
       [%incoming-invites ~]
       [%outgoing-requests ~]
-  ==
+      [%setting setting=@t]
+  == 
 ::
 +$  membership-action
   $%  [%join =pid]

@@ -38,11 +38,22 @@
   ::
   ++  pd  (each-method %put %del)
   ++  ud  (each-method %uni %dif)
+  ++  ab  (each-method %above %below)
   ::
-  ++  pd-setting
+  ++  pd-settings
     %+  (pd ,[@t json] @t)
       (ot ~[setting+so contents+same])
     (ot ~[setting+so])
+  ::
+  ++  ab-goal-order
+    %+  (ab ,[^key ^key] ,[^key ^key])
+      (ot ~[dis+key dat+key])
+    (ot ~[dis+key dat+key])
+  ::
+  ++  ab-pool-order
+    %+  (ab ,[^pid ^pid] ,[^pid ^pid])
+      (ot ~[dis+pid dat+pid])
+    (ot ~[dis+pid dat+pid])
   ::
   ++  pd-goal-metadata
     |=  jon=json
@@ -73,15 +84,6 @@
       (ot ~[property+so data+same])
     (ot ~[property+so])
   ::
-  ++  pd-local-metadata-field
-    |=  jon=json
-    ?>  ?=(%o -.jon)
-    :-  (so (~(got by p.jon) 'field'))
-    %.  o+(~(del by p.jon) 'field')
-    %+  (pd ,[@t json] [@t])
-      (ot ~[property+so data+same])
-    (ot ~[property+so])
-  ::
   ++  pd-local-goal-metadata
     |=  jon=json
     ?>  ?=(%o -.jon)
@@ -100,14 +102,35 @@
       (ot ~[field+so data+same])
     (ot ~[field+so])
   ::
-  ++  action
+  ++  pd-local-metadata-properties
     |=  jon=json
-    ^-  action:act
+    ?>  ?=(%o -.jon)
+    :-  (so (~(got by p.jon) 'field'))
+    =.  jon  o+(~(del by p.jon) 'field')
+    ?~  p.jon  ~
+    :-  ~
     %.  jon
+    %+  (pd ,[@t json] [@t])
+      (ot ~[property+so data+same])
+    (ot ~[property+so])
+  ::
+  ++  local-transition
+    ^-  $-(json local-transition:act)
     %-  of
-    :~  [%create-pool (ot ~[title+so])]
+    :~  [%goal-order ab-goal-order]
+        [%pool-order ab-pool-order]
+        [%goal-metadata pd-local-goal-metadata]
+        [%pool-metadata pd-local-pool-metadata]
+        [%metadata-properties pd-local-metadata-properties]
+        [%settings pd-settings]
+    ==
+  ::
+  ++  action
+    ^-  $-(json action:act)
+    %-  of
+    :~  [%set-pool-title (ot ~[pid+pid title+so])]
+        [%create-pool (ot ~[title+so])]
         [%delete-pool (ot ~[pid+pid])]
-        [%set-pool-title (ot ~[pid+pid title+so])]
         [%create-goal (ot ~[pid+pid upid+unit-gid summary+so actionable+bo active+bo])]
         [%archive-goal (ot ~[pid+pid gid+gid])]
         [%restore-goal (ot ~[pid+pid gid+gid])]
@@ -127,20 +150,11 @@
         [%reorder-roots (ot ~[pid+pid roots+(ar gid)])]
         [%reorder-children (ot ~[pid+pid gid+gid children+(ar gid)])]
         [%reorder-archive (ot ~[pid+pid context+unit-gid archive+(ar gid)])]
-        [%pools-slot-above (ot ~[dis+pid dat+pid])]
-        [%pools-slot-below (ot ~[dis+pid dat+pid])]
-        [%goals-slot-above (ot ~[dis+key dat+key])]
-        [%goals-slot-below (ot ~[dis+key dat+key])]
         [%update-pool-perms (ot ~[pid+pid new+perms])]
         [%update-pool-metadata pd-pool-metadata]
         [%update-pool-metadata-field pd-pool-metadata-field]
         [%delete-pool-metadata-field (ot ~[pid+pid field+so])]
         [%update-goal-metadata pd-goal-metadata]
-        [%update-local-goal-metadata pd-local-goal-metadata]
-        [%update-local-pool-metadata pd-local-pool-metadata]
-        [%update-local-metadata-field pd-local-metadata-field]
-        [%delete-local-metadata-field (ot ~[field+so])]
-        [%update-setting pd-setting]
     ==
   ::
   ++  perms
@@ -154,7 +168,7 @@
   ++  role
     %-  su
     ;~  pose
-      (cold %owner (jest 'owner'))
+      (cold %host (jest 'host'))
       (cold %admin (jest 'admin'))
       (cold %creator (jest 'creator'))
       (cold %viewer (jest 'viewer'))

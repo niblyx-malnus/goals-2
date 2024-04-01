@@ -29,6 +29,11 @@
     |=  [=path arow=(avow:khan cage)]
     ^-  (quip card:agent:gall _agent)
     =/  vid=vent-id:vio  (de-path:vio path)
+    =?  arow  ?=(%| -.arow)
+        :-  %|
+        :-  mote.p.arow
+        :_  tang.p.arow
+        leaf+"crash in {(scow %p our.bowl)}'s %{(trip dap.bowl)} vine"
     =/  =cage  ?-(-.arow %& p.arow, %| goof+!>(p.arow))
     %-  (slog ?:(?=(%.y -.arow) ~ p.arow))
     :_  agent
