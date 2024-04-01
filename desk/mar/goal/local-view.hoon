@@ -19,6 +19,7 @@
         [%local-goal-tags ul]
         [%local-goal-fields ul]
         [%local-blocked ul]
+        [%local-pools ul]
         [%remote-pools ul]
         [%incoming-invites ul]
         [%outgoing-requests ul]

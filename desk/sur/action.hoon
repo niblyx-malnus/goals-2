@@ -155,6 +155,7 @@
       [%local-goal-tags ~]
       [%local-goal-fields ~]
       [%local-blocked ~]
+      [%local-pools ~]
       [%remote-pools ~]
       [%incoming-invites ~]
       [%outgoing-requests ~]
