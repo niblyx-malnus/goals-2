@@ -26,6 +26,9 @@
     %goal-membership-action
   (handle-membership-action:mhc !<(membership-action:axn vase))
   ::
+    %goal-remote-view
+  (handle-remote-view:vhc !<(remote-view:axn vase))
+  ::
     %goal-local-view
   (handle-local-view:vhc !<(local-view:axn vase))
   ::
