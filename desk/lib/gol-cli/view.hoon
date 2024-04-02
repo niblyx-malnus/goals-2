@@ -8,12 +8,56 @@
   =/  m  (strand ,vase)
   ^-  form:m
   ?.  =(our.gowl host.pid.vyu)
+    ?>  =(src our):gowl
     ;<  jon=json  bind:m
       ((vent ,json) [host.pid.vyu %goals] goal-pool-view+vyu)
     (pure:m !>(jon))
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   =/  =pool:gol  (~(got by pools.store) pid.vyu)
-  !!
+  ?-    +<.vyu
+      %pool-data
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =pool:p  (~(got by pools) pid.vyu)
+    ?>  (~(has by members.pool) src.gowl)
+    %-  pure:m  !>
+    %-  pairs:enjs:format
+    :~  [%private o+private.pool-data.pool]
+        [%public o+public.pool-data.pool]
+    ==
+  ==
+::
+++  handle-remote-view
+  =,  strand=strand:spider
+  |=  vyu=remote-view:axn
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ?.  =(our.gowl dst.vyu)
+    ?>  =(src our):gowl
+    ;<  jon=json  bind:m
+      ((vent ,json) [dst.vyu %goals] goal-remote-view+vyu)
+    (pure:m !>(jon))
+  ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+  ?-    +<.vyu
+      %pools-data
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =|  response=(map @t json)
+    |-
+    ?~  pids.vyu
+      (pure:m !>(o+response))
+    =/  =pool:p  (~(got by pools) i.pids.vyu)
+    %=    $
+      pids.vyu  t.pids.vyu
+        response
+      %+  ~(put by response)
+        (id-string:enjs:^pools i.pids.vyu)
+      ?.  (~(has by members.pool) src.gowl)
+        s+%permission-failure
+      %-  pairs:enjs:format
+      :~  [%private o+private.pool-data.pool]
+          [%public o+public.pool-data.pool]
+      ==
+    ==
+  ==
 ::
 ++  handle-local-view
   =,  strand=strand:spider

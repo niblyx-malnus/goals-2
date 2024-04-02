@@ -7,6 +7,7 @@
 /=  x  /mar/goal/action
 /=  x  /mar/goal/view
 /=  x  /mar/goal/local-view
+/=  x  /mar/goal/remote-view
 /=  x  /mar/goal/membership-action
 /=  x  /mar/goal/local-transition
 /=  x  /ted/vines/goals

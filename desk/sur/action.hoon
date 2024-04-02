@@ -144,7 +144,12 @@
 ::
 +$  pool-view
   $:  =pid
-  $%  [%test ~]
+  $%  [%pool-data ~]
+  ==  ==
+::
++$  remote-view
+  $:  dst=ship
+  $%  [%pools-data pids=(list pid)]
   ==  ==
 ::
 +$  local-view
