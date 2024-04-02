@@ -14,8 +14,6 @@
 =/  m  (strand ,^vase)
 ^-  form:m
 ::
-?>  =(our src):gowl
-::
 =*  hc   ~(. helper-core gowl)
 =*  mhc  ~(. gol-cli-membership gowl)
 =*  vhc  ~(. gol-cli-view gowl)
