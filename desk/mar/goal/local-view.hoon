@@ -21,6 +21,7 @@
         [%local-blocked ul]
         [%local-pools ul]
         [%remote-pools ul]
+        [%all-pools ul]
         [%incoming-invites ul]
         [%outgoing-requests ul]
         [%setting (ot ~[setting+so])]

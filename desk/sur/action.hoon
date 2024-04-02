@@ -162,6 +162,7 @@
       [%local-blocked ~]
       [%local-pools ~]
       [%remote-pools ~]
+      [%all-pools ~]
       [%incoming-invites ~]
       [%outgoing-requests ~]
       [%setting setting=@t]

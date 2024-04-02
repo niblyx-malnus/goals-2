@@ -146,6 +146,21 @@
       id-string:enjs:pools
     (lead %s)
     ::
+      %all-pools
+    ;<  local=pools:p    bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    ;<  =remote-pools:p  bind:m  (scry-hard ,remote-pools:p /gx/pools/remote-pools/noun)
+    %-  pure:m  !>
+    :-  %a
+    %+  turn
+      %+  weld
+        %+  turn
+          ~(tap in ~(key by local))
+        id-string:enjs:pools
+      %+  turn
+        ~(tap in remote-pools)
+      id-string:enjs:pools
+    (lead %s)
+    ::
       %incoming-invites
     ;<  =incoming-invites:p  bind:m
       (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
