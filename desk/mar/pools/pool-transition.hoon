@@ -1,12 +1,12 @@
 /+  *pools
-|_  tan=transition
+|_  tan=pool-transition
 ++  grow
   |%
   ++  noun  tan
   --
 ++  grab
   |%
-  ++  noun  transition
+  ++  noun  pool-transition
   --
 ++  grad  %noun
 --

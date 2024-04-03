@@ -6,6 +6,9 @@
 ++  abet   [(flop cards) state]
 ++  emit   |=(=card this(cards [card cards]))
 ++  emil   |=(cadz=(list card) this(cards (weld cadz cards)))
+::
+++  en-path  |=(=id `path`/pool/(scot %p host.id)/[name.id])
+::
 ++  handle-transition
   |=  tan=transition
   ^-  _this
@@ -96,173 +99,169 @@
     ?>  =(our.bowl host.id.tan)
     this(pools (~(del by pools) id.tan))
     ::
-      %update-remote-pools
-    ?-    -.p.tan
-        %&
-      ?>  (~(all in p.p.tan) |=(id !=(our.bowl host)))
-      this(remote-pools (~(uni in remote-pools) p.p.tan))
-      ::
-        %|
-      ?>  (~(all in p.p.tan) |=(id !=(our.bowl host)))
-      this(remote-pools (~(dif in remote-pools) p.p.tan))
-    ==
-    ::
       %update-pool
     :: we must be the host of the given pool
     ::
     ?>  =(our.bowl host.id.tan)
-    =/  old=pool  (~(got by pools) id.tan)
-    =/  pan=pool-transition  p.tan
-    =;  new=pool
-      this(pools (~(put by pools) id.tan new))
-    ?-    -.pan
-        %update-members
-      ?~  roles.pan
-        old(members (~(del by members.old) member.pan))
-      ?-    -.u.roles.pan
-          %&
-        =/  =roles  (~(gut by members.old) member.pan ~)
-        %=    old
-            members
-          %+  ~(put by members.old)
-            member.pan
-          (~(uni in roles) p.u.roles.pan)
-        ==
-        ::
-          %|
-        =/  =roles  (~(gut by members.old) member.pan ~)
-        %=    old
-            members
-          %+  ~(put by members.old)
-            member.pan
-          (~(dif in roles) p.u.roles.pan)
-        ==
-      ==
-      ::
-        %update-outgoing-invites
-      ?~  invite.pan
-        :: if invite is null, delete invite
-        ::
-        old(outgoing-invites (~(del by outgoing-invites.old) invitee.pan))
-      :: the status of the current invite status must be undecided
-      ::
-      =/  [* =status]  (~(gut by outgoing-invites.old) invitee.pan [~ ~])
-      ?>  ?=(~ status)
+    =.  this  (handle-pool-transition [id p]:tan)
+    (emit %give %fact ~[(en-path id.tan)] pools-pool-transition+!>(p.tan))
+  ==
+::
+++  handle-pool-transition
+  |=  [=id tan=pool-transition]
+  ^-  _this
+  =/  old=pool  (~(got by pools) id)
+  =;  new=pool
+    this(pools (~(put by pools) id new))
+  ?-    -.tan
+    %replace-pool  pool.tan
+    ::
+      %update-members
+    ?~  roles.tan
+      old(members (~(del by members.old) member.tan))
+    ?-    -.u.roles.tan
+        %&
+      =/  =roles  (~(gut by members.old) member.tan ~)
       %=    old
-          outgoing-invites
-        %+  ~(put by outgoing-invites.old)
-          invitee.pan
-        [u.invite.pan ~]
+          members
+        %+  ~(put by members.old)
+          member.tan
+        (~(uni in roles) p.u.roles.tan)
       ==
       ::
-        %update-incoming-requests
-      ?~  request.pan
-        :: if request is null, delete request
-        ::
-        old(incoming-requests (~(del by incoming-requests.old) requester.pan))
-      :: the status of the current request status must be undecided
-      ::
-      =/  [* =status]  (~(gut by incoming-requests.old) requester.pan [~ ~])
-      ?>  ?=(~ status)
+        %|
+      =/  =roles  (~(gut by members.old) member.tan ~)
       %=    old
-          incoming-requests
-        %+  ~(put by incoming-requests.old)
-          requester.pan
-        [u.request.pan ~]
+          members
+        %+  ~(put by members.old)
+          member.tan
+        (~(dif in roles) p.u.roles.tan)
       ==
+    ==
+    ::
+      %update-outgoing-invites
+    ?~  invite.tan
+      :: if invite is null, delete invite
       ::
-        %update-outgoing-invite-response
-      ~&  invitee+invitee.pan
-      =/  [=invite *]  (~(got by outgoing-invites.old) invitee.pan)
-      %=    old
-          outgoing-invites
-        %+  ~(put by outgoing-invites.old)
-          invitee.pan
-        [invite status.pan]
-      ==
+      old(outgoing-invites (~(del by outgoing-invites.old) invitee.tan))
+    :: the status of the current invite status must be undecided
+    ::
+    =/  [* =status]  (~(gut by outgoing-invites.old) invitee.tan [~ ~])
+    ?>  ?=(~ status)
+    %=    old
+        outgoing-invites
+      %+  ~(put by outgoing-invites.old)
+        invitee.tan
+      [u.invite.tan ~]
+    ==
+    ::
+      %update-incoming-requests
+    ?~  request.tan
+      :: if request is null, delete request
       ::
-        %update-incoming-request-response
-      =/  [=request *]  (~(got by incoming-requests.old) requester.pan)
-      %=    old
-          incoming-requests
-        %+  ~(put by incoming-requests.old)
-          requester.pan
-        [request status.pan]
-      ==
+      old(incoming-requests (~(del by incoming-requests.old) requester.tan))
+    :: the status of the current request status must be undecided
+    ::
+    =/  [* =status]  (~(gut by incoming-requests.old) requester.tan [~ ~])
+    ?>  ?=(~ status)
+    %=    old
+        incoming-requests
+      %+  ~(put by incoming-requests.old)
+        requester.tan
+      [u.request.tan ~]
+    ==
+    ::
+      %update-outgoing-invite-response
+    ~&  invitee+invitee.tan
+    =/  [=invite *]  (~(got by outgoing-invites.old) invitee.tan)
+    %=    old
+        outgoing-invites
+      %+  ~(put by outgoing-invites.old)
+        invitee.tan
+      [invite status.tan]
+    ==
+    ::
+      %update-incoming-request-response
+    =/  [=request *]  (~(got by incoming-requests.old) requester.tan)
+    %=    old
+        incoming-requests
+      %+  ~(put by incoming-requests.old)
+        requester.tan
+      [request status.tan]
+    ==
+    ::
+      %update-graylist
+    |-
+    ?~  fields.tan
+      old
+    ?-    -.i.fields.tan
+      %dude  old(dude.graylist p.i.fields.tan)
+      %rest  old(rest.graylist p.i.fields.tan)
       ::
-        %update-graylist
+        %ship
       |-
-      ?~  fields.pan
-        old
-      ?-    -.i.fields.pan
-        %dude  old(dude.graylist p.i.fields.pan)
-        %rest  old(rest.graylist p.i.fields.pan)
-        ::
-          %ship
-        |-
-        ?~  p.i.fields.pan
-          ^$(fields.pan t.fields.pan)
-        =/  [=ship auto=(unit auto)]  i.p.i.fields.pan
-        ?~  auto
-          %=  $
-            p.i.fields.pan     t.p.i.fields.pan
-            ship.graylist.old  (~(del by ship.graylist.old) ship)
-          ==
+      ?~  p.i.fields.tan
+        ^$(fields.tan t.fields.tan)
+      =/  [=ship auto=(unit auto)]  i.p.i.fields.tan
+      ?~  auto
         %=  $
-          p.i.fields.pan     t.p.i.fields.pan
-          ship.graylist.old  (~(put by ship.graylist.old) ship u.auto)
+          p.i.fields.tan     t.p.i.fields.tan
+          ship.graylist.old  (~(del by ship.graylist.old) ship)
         ==
-        ::
-          %rank
-        |-
-        ?~  p.i.fields.pan
-          ^$(fields.pan t.fields.pan)
-        =/  [=rank auto=(unit auto)]  i.p.i.fields.pan
-        ?~  auto
-          %=  $
-            p.i.fields.pan     t.p.i.fields.pan
-            rank.graylist.old  (~(del by rank.graylist.old) rank)
-          ==
-        %=  $
-          p.i.fields.pan     t.p.i.fields.pan
-          rank.graylist.old  (~(put by rank.graylist.old) rank u.auto)
-        ==
+      %=  $
+        p.i.fields.tan     t.p.i.fields.tan
+        ship.graylist.old  (~(put by ship.graylist.old) ship u.auto)
       ==
       ::
-        %update-pool-data
+        %rank
       |-
-      ?~  fields.pan
-        old
-      ?-    -.i.fields.pan
-          %private
-        |-
-        ?~  p.i.fields.pan
-          ^$(fields.pan t.fields.pan)
-        =/  [key=@t val=(unit json)]  i.p.i.fields.pan
-        ?~  val
-          %=  $
-            p.i.fields.pan         t.p.i.fields.pan
-            private.pool-data.old  (~(del by private.pool-data.old) key)
-          ==
+      ?~  p.i.fields.tan
+        ^$(fields.tan t.fields.tan)
+      =/  [=rank auto=(unit auto)]  i.p.i.fields.tan
+      ?~  auto
         %=  $
-          p.i.fields.pan         t.p.i.fields.pan
-          private.pool-data.old  (~(put by private.pool-data.old) key u.val)
+          p.i.fields.tan     t.p.i.fields.tan
+          rank.graylist.old  (~(del by rank.graylist.old) rank)
         ==
-        ::
-          %public
-        |-
-        ?~  p.i.fields.pan
-          ^$(fields.pan t.fields.pan)
-        =/  [key=@t val=(unit json)]  i.p.i.fields.pan
-        ?~  val
-          %=  $
-            p.i.fields.pan        t.p.i.fields.pan
-            public.pool-data.old  (~(del by public.pool-data.old) key)
-          ==
+      %=  $
+        p.i.fields.tan     t.p.i.fields.tan
+        rank.graylist.old  (~(put by rank.graylist.old) rank u.auto)
+      ==
+    ==
+    ::
+      %update-pool-data
+    |-
+    ?~  fields.tan
+      old
+    ?-    -.i.fields.tan
+        %private
+      |-
+      ?~  p.i.fields.tan
+        ^$(fields.tan t.fields.tan)
+      =/  [key=@t val=(unit json)]  i.p.i.fields.tan
+      ?~  val
         %=  $
-          p.i.fields.pan        t.p.i.fields.pan
-          public.pool-data.old  (~(put by public.pool-data.old) key u.val)
+          p.i.fields.tan         t.p.i.fields.tan
+          private.pool-data.old  (~(del by private.pool-data.old) key)
         ==
+      %=  $
+        p.i.fields.tan         t.p.i.fields.tan
+        private.pool-data.old  (~(put by private.pool-data.old) key u.val)
+      ==
+      ::
+        %public
+      |-
+      ?~  p.i.fields.tan
+        ^$(fields.tan t.fields.tan)
+      =/  [key=@t val=(unit json)]  i.p.i.fields.tan
+      ?~  val
+        %=  $
+          p.i.fields.tan        t.p.i.fields.tan
+          public.pool-data.old  (~(del by public.pool-data.old) key)
+        ==
+      %=  $
+        p.i.fields.tan        t.p.i.fields.tan
+        public.pool-data.old  (~(put by public.pool-data.old) key u.val)
       ==
     ==
   ==

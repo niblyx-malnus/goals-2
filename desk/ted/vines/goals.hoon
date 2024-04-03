@@ -51,7 +51,9 @@
     ?>  =(src our):gowl
     ;<  ~  bind:m  (delete-goals-pool:hc pid.act)
     :: don't crash if pool-pool deletion fails
-    ;<  *  bind:m  ((soften ,~) (delete-pools-pool:hc pid.act))
+    ;<  out=(each ~ goof)  bind:m
+      ((soften ,~) (delete-pools-pool:hc pid.act))
+    ~&  out
     (pure:m !>(~))
     ::
       %create-goal

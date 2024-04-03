@@ -161,7 +161,6 @@
       [%local-goal-fields ~]
       [%local-blocked ~]
       [%local-pools ~]
-      [%remote-pools ~]
       [%all-pools ~]
       [%incoming-invites ~]
       [%outgoing-requests ~]

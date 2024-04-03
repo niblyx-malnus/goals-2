@@ -67,10 +67,11 @@
   ?-    -.ges
       %kick
     ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-remote-pools |+(sy ~[id.ges]))
     (pure:m !>(~))
     ::
       %leave
+    :: TODO: kick non-members
+    :: TODO: kick blacklisted
     ;<  ~  bind:m  (update-members id.ges src.gowl ~)
     (pure:m !>(~))
     ::
@@ -113,7 +114,13 @@
     ;<  ~  bind:m  (update-outgoing-request-response id.ges status.ges)
     ?.  ?=([~ %& *] status.ges)
       (pure:m !>(~))
-    ;<  ~  bind:m  (update-remote-pools &+(sy ~[id.ges]))
+    ;<  ~  bind:m
+      %:  agent-watch-path
+        %pools
+        /(scot %p host.id.ges)/[name.id.ges]
+        [host.id.ges %pools]
+        /(scot %p host.id.ges)/[name.id.ges]
+      ==
     (pure:m !>(~))
     ::
       %delete-request
@@ -158,7 +165,6 @@
     ;<  *  bind:m  ((soften ,~) (cancel-request id.act))
     ;<  *  bind:m  ((soften ,~) (delete-invite id.act))
     ;<  *  bind:m  ((soften ,~) (give-leave-gesture id.act))
-    ;<  ~  bind:m  (update-remote-pools |+(sy ~[id.act]))
     (pure:m !>(~))
     ::
       %extend-invite
@@ -177,7 +183,13 @@
       %accept-invite
     ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-invite-response id.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-remote-pools &+(sy ~[id.act]))
+    ;<  ~  bind:m
+      %:  agent-watch-path
+        %pools
+        /(scot %p host.id.act)/[name.id.act]
+        [host.id.act %pools]
+        /(scot %p host.id.act)/[name.id.act]
+      ==
     (pure:m !>(~))
     ::
       %reject-invite
@@ -320,15 +332,6 @@
   :-  %pools-transition  !>
   ^-  transition:p
   [%delete-pool id]
-::
-++  update-remote-pools
-  |=  upd=(each (set id:p) (set id:p))
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  [%update-remote-pools upd]
 ::
 ++  update-graylist
   |=  [=id:p fields=(list graylist-field:p)]

@@ -68,15 +68,7 @@
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   ?-    -.vyu
       %pools-index
-    ;<  =remote-pools:p  bind:m  (scry-hard ,remote-pools:p /gx/pools/remote-pools/noun)
-    %-  pure:m  !>
-    %-  enjs-pools-index
-    %+  weld
-      %+  turn  pool-order.local.store
-      |=(=pid:gol [pid title:(~(got by pools.store) pid)])
-    %+  turn
-      ~(tap in remote-pools)
-    |=(=pid:gol [pid 'REMOTE POOL'])
+    !!
     ::
       %local-tag-goals
     =/  vals=(list (set @t))
@@ -126,16 +118,6 @@
         [%hosts a+(turn ~(tap in hosts.blocked) |=(=@p s+(scot %p p)))]
     ==
     ::
-      %remote-pools
-    ;<  =remote-pools:p  bind:m  (scry-hard ,remote-pools:p /gx/pools/remote-pools/noun)
-    %-  pure:m  !>
-    :-  %a
-    %+  turn
-      %+  turn
-        ~(tap in remote-pools)
-      id-string:enjs:pools
-    (lead %s)
-    ::
       %local-pools
     ;<  local=pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
     %-  pure:m  !>
@@ -148,16 +130,11 @@
     ::
       %all-pools
     ;<  local=pools:p    bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-    ;<  =remote-pools:p  bind:m  (scry-hard ,remote-pools:p /gx/pools/remote-pools/noun)
     %-  pure:m  !>
     :-  %a
     %+  turn
-      %+  weld
-        %+  turn
-          ~(tap in ~(key by local))
-        id-string:enjs:pools
       %+  turn
-        ~(tap in remote-pools)
+        ~(tap in ~(key by local))
       id-string:enjs:pools
     (lead %s)
     ::

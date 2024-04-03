@@ -38,11 +38,9 @@
 :: don't subscribe to foreign pools during development
 :: state-syncing is time-wasting tedium; vent-views only to start
 ::
-+$  remote-pools  (set id)
 +$  state-0
   $:  %0
       =pools
-      =remote-pools :: eventually will go into pools + synced via subs
       =incoming-invites
       =outgoing-requests
       =blocked
@@ -56,14 +54,14 @@
       [%update-outgoing-requests =id request=(unit request)]
       [%update-incoming-invite-response =id =status]
       [%update-outgoing-request-response =id =status]
-      [%update-remote-pools p=(each (set id) (set id))]
       [%update-pool =id p=pool-transition]
       [%create-pool =id]
       [%delete-pool =id]
   ==
 ::
 +$  pool-transition
-  $%  [%update-members member=ship roles=(unit (each roles roles))]
+  $%  [%replace-pool =pool]
+      [%update-members member=ship roles=(unit (each roles roles))]
       [%update-outgoing-invites invitee=ship invite=(unit invite)]
       [%update-incoming-requests requester=ship request=(unit request)]
       [%update-outgoing-invite-response invitee=ship =status]
