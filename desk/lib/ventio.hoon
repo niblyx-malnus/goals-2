@@ -240,6 +240,12 @@
   ::
   ;<  our=ship  bind:m  get-our
   ;<  ~  bind:m  (watch /[dude]/vent-on-agent [our dude] /vent-on-agent)
+  :: catch subscribe wire not unique
+  ::
+  ;<  [wex=boat:gall sup=bitt:gall]  bind:m
+    (scry-hard ,[boat bitt]:gall /gx/[dude]/vent/subscriptions/noun)
+   ?:  (~(has by wex) [wire dock])
+     ~|  %subscribe-wire-not-unique  !!
   :: send %watch card
   ::
   =/  =card:agent:gall  [%pass wire %agent dock %watch path]
@@ -406,7 +412,7 @@
   ;<  our=@p  bind:m  get-our
   ;<  =thread-result  bind:m  (vent-soft [our vap] scry+path)
   ?-    -.thread-result
-    %|  (pure:m %| p.thread-result)
+    %|  (pure:m %| %venter-scry-fail p.thread-result)
       %&
     =/  res  (mole |.(;;(mold q.p.thread-result)))
     ?~  res  (pure:m %| %error-molding-scry-result ~)
@@ -505,6 +511,7 @@
   ?:  ?=(%done -.next.c-res)
     c-res(value.next &+value.next.c-res)
   ?:  ?=(%fail -.next.c-res)
+    %-  (slog %soft-fail err.next.c-res)
     c-res(next [%done |+err.next.c-res])
   c-res
 --

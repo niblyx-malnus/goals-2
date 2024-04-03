@@ -71,7 +71,11 @@
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
-    (on-peek:ag path)
+    ?.  ?=([@ %vent *] path)
+      (on-peek:ag path)
+    ?+  path  [~ ~]
+      [%x %vent %subscriptions ~]  ``noun+!>([wex sup]:bowl)
+    ==
   ::
   ++  on-init
     ^-  (quip card:agent:gall agent:gall)

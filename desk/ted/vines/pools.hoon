@@ -208,7 +208,7 @@
     ;<  ~  bind:m  (give-request-response-gesture id.act requester.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-request-response id.act requester.act [~ & metadata.act])
     ;<  ~  bind:m  (update-members id.act requester.act ~ &+~)
-    ;<  ~  bind:m  (give-watch-me-gesture [id requester]:act)
+    ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture [id requester]:act))
     (pure:m !>(~))
     ::
       %reject-request
