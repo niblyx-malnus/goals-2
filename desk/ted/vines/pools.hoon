@@ -117,9 +117,9 @@
     ;<  ~  bind:m
       %:  agent-watch-path
         %pools
-        /(scot %p host.id.ges)/[name.id.ges]
+        /pool/(scot %p host.id.ges)/[name.id.ges]
         [host.id.ges %pools]
-        /(scot %p host.id.ges)/[name.id.ges]
+        /pool/(scot %p host.id.ges)/[name.id.ges]
       ==
     (pure:m !>(~))
     ::
@@ -186,9 +186,9 @@
     ;<  ~  bind:m
       %:  agent-watch-path
         %pools
-        /(scot %p host.id.act)/[name.id.act]
+        /pool/(scot %p host.id.act)/[name.id.act]
         [host.id.act %pools]
-        /(scot %p host.id.act)/[name.id.act]
+        /pool/(scot %p host.id.act)/[name.id.act]
       ==
     (pure:m !>(~))
     ::
