@@ -68,7 +68,7 @@
     ?>  (~(has by members.pool) src.bowl)
     :: give initial update
     ::
-    :_(this [%give %fact ~ pools-pool-transition+!>([%pool pool])]~)
+    :_(this [%give %fact ~ pools-pool-transition+!>([%replace-pool pool])]~)
   ==
 ::
 ++  on-agent
