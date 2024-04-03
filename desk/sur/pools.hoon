@@ -97,6 +97,7 @@
       [%accept-request =id requester=ship =metadata]
       [%reject-request =id requester=ship =metadata]
       [%delete-request =id requester=ship]
+      [%watch-pool =id]
   ==
 ::
 +$  gesture
@@ -108,6 +109,7 @@
       [%request =id request=(unit request)]
       [%request-response =id =status]
       [%delete-request =id]
+      [%watch-me =id]
   ==
 ::
 +$  delegation

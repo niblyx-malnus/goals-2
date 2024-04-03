@@ -273,8 +273,12 @@
   =/  m  (strand ,mold)
   ^-  form:m
   |=  tin=strand-input:strand
-  ?+  in.tin  `[%skip ~]
-      ~  `[%wait ~]
+  ?+     in.tin
+    `[%skip ~]
+    ::
+      ~
+    `[%wait ~]
+    ::
       [~ %agent * %fact *]
     ?.  =(watch+wire wire.u.in.tin)
       `[%skip ~]

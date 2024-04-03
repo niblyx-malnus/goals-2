@@ -112,20 +112,16 @@
       %request-response
     ?>  =(src.gowl host.id.ges)
     ;<  ~  bind:m  (update-outgoing-request-response id.ges status.ges)
-    ?.  ?=([~ %& *] status.ges)
-      (pure:m !>(~))
-    ;<  ~  bind:m
-      %:  agent-watch-path
-        %pools
-        /pool/(scot %p host.id.ges)/[name.id.ges]
-        [host.id.ges %pools]
-        /pool/(scot %p host.id.ges)/[name.id.ges]
-      ==
     (pure:m !>(~))
     ::
       %delete-request
     ?>  =(src.gowl host.id.ges)
     ;<  ~  bind:m  (update-outgoing-requests id.ges ~)
+    (pure:m !>(~))
+    ::
+      %watch-me
+    ?>  =(src.gowl host.id.ges)
+    ;<  ~  bind:m  (watch-valid-pool id.ges)
     (pure:m !>(~))
   ==
 ::
@@ -183,13 +179,7 @@
       %accept-invite
     ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-invite-response id.act [~ & metadata.act])
-    ;<  ~  bind:m
-      %:  agent-watch-path
-        %pools
-        /pool/(scot %p host.id.act)/[name.id.act]
-        [host.id.act %pools]
-        /pool/(scot %p host.id.act)/[name.id.act]
-      ==
+    ;<  ~  bind:m  (watch-valid-pool id.act)
     (pure:m !>(~))
     ::
       %reject-invite
@@ -218,6 +208,7 @@
     ;<  ~  bind:m  (give-request-response-gesture id.act requester.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-request-response id.act requester.act [~ & metadata.act])
     ;<  ~  bind:m  (update-members id.act requester.act ~ &+~)
+    ;<  ~  bind:m  (give-watch-me-gesture [id requester]:act)
     (pure:m !>(~))
     ::
       %reject-request
@@ -230,6 +221,10 @@
     ?>  =(our.gowl host.id.act)
     ;<  *  bind:m  ((soften ,~) (give-delete-request-gesture [id requester]:act))
     ;<  ~  bind:m  (update-incoming-requests id.act requester.act ~)
+    (pure:m !>(~))
+    ::
+      %watch-pool
+    ;<  ~  bind:m  (watch-valid-pool id.act)
     (pure:m !>(~))
   ==
 ::
@@ -314,6 +309,22 @@
   ?^  auto=(~(get by ship.graylist) requester)  auto
   ?^  auto=(~(get by rank.graylist) (clan:title requester))  auto
   rest.graylist
+::
+++  watch-valid-pool
+  |=  =id:p
+  =/  m  (strand ,~)
+  ^-  form:m
+  ;<  =incoming-invites:p   bind:m  (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
+  ;<  =outgoing-requests:p  bind:m  (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
+  =/  [* istat=status:p]  (~(gut by incoming-invites) id [~ ~])
+  =/  [* rstat=status:p]  (~(gut by outgoing-requests) id [~ ~])
+  ?>  |(?=([~ %& *] istat) ?=([~ %& *] rstat))
+  %:  agent-watch-path
+    %pools
+    /pool/(scot %p host.id)/[name.id]
+    [host.id %pools]
+    /pool/(scot %p host.id)/[name.id]
+  ==
 ::
 ++  create-pool
   |=  =id:p
@@ -520,6 +531,16 @@
   :-  %pools-gesture
   ^-  gesture:p
   [%delete-request id]
+::
+++  give-watch-me-gesture
+  |=  [=id:p member=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (set-timeout ,~)  timeout
+  %+  (vent ,~)  [member dap.gowl]
+  :-  %pools-gesture
+  ^-  gesture:p
+  [%watch-me id]
 ::
 ++  accept-request
   |=  [=id:p requester=ship =metadata:p]
