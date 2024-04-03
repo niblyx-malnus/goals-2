@@ -110,7 +110,7 @@
 ++  handle-pool-transition
   |=  [=id tan=pool-transition]
   ^-  _this
-  =/  old=pool  (~(got by pools) id)
+  =/  old=pool  (~(gut by pools) id *pool)
   =;  new=pool
     this(pools (~(put by pools) id new))
   ?-    -.tan
