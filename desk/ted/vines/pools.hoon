@@ -153,6 +153,7 @@
     ;<  *  bind:m  ((soften ,~) (cancel-invite id.act member.act))
     ;<  *  bind:m  ((soften ,~) (delete-request id.act member.act))
     ;<  *  bind:m  ((soften ,~) (give-kick-gesture id.act member.act))
+    ;<  ~  bind:m  (kick-ship id.act member.act)
     ;<  ~  bind:m  (update-members id.act member.act ~)
     (pure:m !>(~))
     ::
@@ -325,6 +326,12 @@
     [host.id %pools]
     /pool/(scot %p host.id)/[name.id]
   ==
+::
+++  kick-ship
+  |=  [=id:p member=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  (agent-kick-ship dap.gowl ~[(en-path:lib id)] ~ member)
 ::
 ++  create-pool
   |=  =id:p

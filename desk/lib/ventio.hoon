@@ -273,6 +273,10 @@
   ;<  p=(unit tang)  bind:m  (agent-watch-path-soft dude wire dock path)
   ?~(p (pure:m ~) (strand-fail %agent-watch-ack-fail u.p))
 ::
+++  agent-kick-ship
+  |=  [=dude:gall paths=(list path) ship=(unit ship)]
+  (agent-send-card dude %give %kick paths ship)
+::
 ++  take-special-fact
   |*  [=wire =mark =mold]
   |=  take=$-(mold ?)
