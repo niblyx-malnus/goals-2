@@ -271,11 +271,19 @@
   =/  m  (strand ,~)
   ^-  form:m
   ;<  p=(unit tang)  bind:m  (agent-watch-path-soft dude wire dock path)
-  ?~(p (pure:m ~) (strand-fail %agent-watch-ack-fail u.p))
+  ?~(p (pure:m ~) (strand-fail %agent-watch-nack u.p))
 ::
 ++  agent-kick-ship
   |=  [=dude:gall paths=(list path) ship=(unit ship)]
   (agent-send-card dude %give %kick paths ship)
+::
+++  agent-kick-ships
+  |=  [=dude:gall paths=(list path) ships=(list ship)]
+  =|  cards=(list card:agent:gall)
+  |-
+  ?~  ships
+    (agent-send-cards dude cards)
+  $(cards [[%give %kick paths [~ i.ships]] cards])
 ::
 ++  take-special-fact
   |*  [=wire =mark =mold]
@@ -294,7 +302,7 @@
       `[%skip ~]
     ?.  =(mark p.cage.sign.u.in.tin)
       `[%skip ~]
-    =+  ;;(a=mold q.cage.sign.u.in.tin)
+    =+  ;;(a=mold q.q.cage.sign.u.in.tin)
     ?.  (take a)
       `[%skip ~]
     `[%done a]

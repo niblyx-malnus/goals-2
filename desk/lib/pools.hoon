@@ -8,6 +8,11 @@
 ++  emil   |=(cadz=(list card) this(cards (weld cadz cards)))
 ::
 ++  en-path  |=(=id `path`/pool/(scot %p host.id)/[name.id])
+++  de-path
+  |=  =path
+  ^-  id
+  =+  ;;([%pool host=@ta name=@ta ~] path)
+  [(slav %p host) name]
 ::
 ++  handle-transition
   |=  tan=transition
@@ -94,9 +99,6 @@
     this(pools (~(put by pools) id.tan *pool))
     ::
       %delete-pool
-    :: we must be the host of the given pool
-    ::
-    ?>  =(our.bowl host.id.tan)
     this(pools (~(del by pools) id.tan))
     ::
       %update-pool

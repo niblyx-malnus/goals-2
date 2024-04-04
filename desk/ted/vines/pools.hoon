@@ -67,12 +67,12 @@
   ?-    -.ges
       %kick
     ?>  =(src.gowl host.id.ges)
+    ;<  ~  bind:m  (delete-pool id.ges)
     (pure:m !>(~))
     ::
       %leave
-    :: TODO: kick non-members
-    :: TODO: kick blacklisted
     ;<  ~  bind:m  (update-members id.ges src.gowl ~)
+    ;<  ~  bind:m  (kick-ship id.ges src.gowl)
     (pure:m !>(~))
     ::
       %invite
@@ -157,11 +157,32 @@
     ;<  ~  bind:m  (update-members id.act member.act ~)
     (pure:m !>(~))
     ::
+      %kick-blacklisted
+    ?>  =(our.gowl host.id.act)
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =pool:p  (~(got by pools) id.act)
+    ;<  [* sup=bitt:gall]  bind:m
+      (scry-hard ,[* bitt:gall] /gx/pools/vent/subscriptions/noun)
+    =/  subs=(list [=ship =path])  ~(val by sup)
+    |-
+    ?~  subs
+      (pure:m !>(~))
+    ?.  =(id.act (de-path:lib path.i.subs))
+      $(subs t.subs)
+    =/  =metadata:p  (~(gut by metadata.act) ship.i.subs ~)
+    ;<  auto=(unit auto:p)  bind:m
+      (graylist-resolution id.act ship.i.subs metadata)
+    ?.  |(?=([~ %|] auto) !(~(has by members.pool) ship.i.subs))
+      $(subs t.subs)
+    ;<  ~  bind:m  (kick-member id.act ship.i.subs)
+    $(subs t.subs)
+    ::
       %leave-pool
     ?<  =(our.gowl host.id.act) :: can't leave own pool
     ;<  *  bind:m  ((soften ,~) (cancel-request id.act))
     ;<  *  bind:m  ((soften ,~) (delete-invite id.act))
     ;<  *  bind:m  ((soften ,~) (give-leave-gesture id.act))
+    ;<  ~  bind:m  (delete-pool id.act)
     (pure:m !>(~))
     ::
       %extend-invite
@@ -328,10 +349,16 @@
   ==
 ::
 ++  kick-ship
-  |=  [=id:p member=ship]
+  |=  [=id:p =ship]
   =/  m  (strand ,~)
   ^-  form:m
-  (agent-kick-ship dap.gowl ~[(en-path:lib id)] ~ member)
+  (agent-kick-ship dap.gowl ~[(en-path:lib id)] ~ ship)
+::
+++  kick-ships
+  |=  [=id:p ships=(list ship)]
+  =/  m  (strand ,~)
+  ^-  form:m
+  (agent-kick-ships dap.gowl ~[(en-path:lib id)] ships)
 ::
 ++  create-pool
   |=  =id:p
@@ -548,6 +575,15 @@
   :-  %pools-gesture
   ^-  gesture:p
   [%watch-me id]
+::
+++  kick-member
+  |=  [=id:p member=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-action
+  ^-  action:p
+  [%kick-member id member]
 ::
 ++  accept-request
   |=  [=id:p requester=ship =metadata:p]

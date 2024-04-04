@@ -86,6 +86,7 @@
   $%  [%create-pool graylist-fields=(list graylist-field) pool-data-fields=(list pool-data-field)]
       [%delete-pool =id]
       [%kick-member =id member=ship]
+      [%kick-blacklisted =id metadata=(map ship metadata)]
       [%leave-pool =id]
       [%extend-invite =id invitee=ship =invite]
       [%cancel-invite =id invitee=ship]
@@ -114,9 +115,10 @@
 ::
 +$  delegation
   $%  [%graylist =id requester=ship =request]
-      [%add-from-invite =id invitee=ship =invite]
-      [%add-from-request =id requester=ship =request]
+      :: [%add-from-invite =id invitee=ship =invite]
+      :: [%add-from-request =id requester=ship =request]
   ==
+:: delegated graylist can allow conditionally based on metadata
 ::
 +$  view
   $%  [%pools =metadata]
