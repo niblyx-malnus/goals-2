@@ -141,13 +141,4 @@
   ==
 ::
 +$  plex  $%(exposed-yoke nuke) :: complex yoke
-::
-+$  sub-event
-  $%  [%kick ~]
-      [%leave ~]
-      [%watch-ack p=(unit tang)]
-  ==
-::
-+$  sub-history    (list [timestamp=@da =sub-event])
-+$  sub-histories  (map pid sub-history)
 --

@@ -1,14 +1,13 @@
 /-  *action
 /+  *gol-cli-json
-|_  act=action
+|_  tan=transition
 ++  grow
   |%
-  ++  noun  act
+  ++  noun  tan
   --
 ++  grab
   |%
-  ++  noun  action
-  ++  json  action:dejs
+  ++  noun  transition
   --
 ++  grad  %noun
 --

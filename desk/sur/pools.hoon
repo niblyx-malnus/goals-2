@@ -60,7 +60,7 @@
   ==
 ::
 +$  pool-transition
-  $%  [%replace-pool =pool]
+  $%  [%init-pool =pool]
       [%update-members member=ship roles=(unit (each roles roles))]
       [%update-outgoing-invites invitee=ship invite=(unit invite)]
       [%update-incoming-requests requester=ship request=(unit request)]

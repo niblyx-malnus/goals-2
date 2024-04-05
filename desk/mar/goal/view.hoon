@@ -44,6 +44,16 @@
         [%goal-data (ot ~[keys+(ar key)])]
         [%outgoing-invites (ot ~[pid+pid])]
         [%incoming-requests (ot ~[pid+pid])]
+        [%pools-index ul]
+        [%local-tag-goals (ot ~[tag+so])]
+        [%local-tag-harvest (ot ~[tag+so])]
+        [%local-tag-note (ot ~[tag+so])]
+        [%local-goal-tags ul]
+        [%local-goal-fields ul]
+        [%local-blocked ul]
+        [%incoming-invites ul]
+        [%outgoing-requests ul]
+        [%setting (ot ~[setting+so])]
     ==
     ++  type
       %-  of

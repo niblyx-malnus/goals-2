@@ -20,6 +20,7 @@
   :: only we can directly modify our agent state
   ::
   ?>  =(src our):bowl
+  =.  this  (emit %give %fact ~[/transitions] pools-transition+!>(tan))
   ?-    -.tan
       %update-blocked
     ?-    -.p.tan
@@ -116,7 +117,7 @@
   =;  new=pool
     this(pools (~(put by pools) id new))
   ?-    -.tan
-    %replace-pool  pool.tan
+    %init-pool  pool.tan
     ::
       %update-members
     ?~  roles.tan

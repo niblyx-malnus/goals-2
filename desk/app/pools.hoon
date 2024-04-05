@@ -60,6 +60,8 @@
   |=  =(pole knot)
   ^-  (quip card _this)
   ?+    pole  (on-watch:def pole)
+    [%transitions ~]  ?>(=(src our):bowl [~ this])
+    ::
       [%pool host=@ name=@ ~]
     =/  host=ship  (slav %p host.pole)
     ?>  =(host our.bowl)
@@ -68,7 +70,7 @@
     ?>  (~(has by members.pool) src.bowl)
     :: give initial update
     ::
-    :_(this [%give %fact ~ pools-pool-transition+!>([%replace-pool pool])]~)
+    :_(this [%give %fact ~ pools-pool-transition+!>([%init-pool pool])]~)
   ==
 ::
 ++  on-agent
@@ -97,9 +99,14 @@
         %fact
       ?.  =(p.cage.sign %pools-pool-transition)
         (on-agent:def pole sign)
+      =+  !<(tan=pool-transition:p q.cage.sign)
       =^  cards  state
-        abet:(handle-pool-transition:pul id !<(pool-transition:p q.cage.sign))
-      [cards this]
+        abet:(handle-pool-transition:pul id tan)
+      :_  this
+      :_  cards
+      :*  %give  %fact  ~[/transitions]
+          pools-transition+!>([%update-pool id tan])
+      ==
     ==
   ==
 ::

@@ -1,7 +1,6 @@
 /-  p=pools, gol=goals, axn=action, pyk=peek, spider
-/+  *ventio, pools, tree=filetree,
-    gol-cli-membership, gol-cli-view,
-    gol-cli-traverse, gol-cli-node, gol-cli-pool,
+/+  *ventio, pools, tree=filetree, goals,
+    gol-cli-membership, gol-cli-traverse, gol-cli-node, gol-cli-pool,
     goj=gol-cli-json
 =,  strand=strand:spider
 ^-  thread:spider
@@ -16,7 +15,7 @@
 ::
 =*  hc   ~(. helper-core gowl)
 =*  mhc  ~(. gol-cli-membership gowl)
-=*  vhc  ~(. gol-cli-view gowl)
+=*  ghc  ~(. vine:goals gowl)
 ::
 ~&  "%goals vine: receiving mark {(trip mark)}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
@@ -24,53 +23,15 @@
     %goal-membership-action
   (handle-membership-action:mhc !<(membership-action:axn vase))
   ::
-    %goal-remote-view
-  (handle-remote-view:vhc !<(remote-view:axn vase))
+    %goal-local-action
+  (handle-local-action:ghc !<(local-action:axn vase))
   ::
-    %goal-local-view
-  (handle-local-view:vhc !<(local-view:axn vase))
-  ::
-    %goal-action
-  =+  !<(act=action:axn vase)
-  =/  gam  %goal-action-and-mod
-  ?+    -.act  (just-poke [our dap]:gowl gam !>([src.gowl act]))
-      %create-pool
-    :: only we can create a pool under our name
-    ::
-    ?>  =(src our):gowl
-    =/  data-fields  [%public [%title ~ s+title.act]~]~
-    ;<  =id:p  bind:m  (create-pools-pool:hc ~ data-fields)
-    =/  data-fields  [%private ['goalsPool' ~ s+(id-string:enjs:pools id)]~]~
-    ;<  ~  bind:m  (update-pool-data:hc id data-fields)
-    ;<  ~  bind:m  (create-goals-pool:hc id title.act)
-    (pure:m !>(s+(id-string:enjs:pools id)))
-    ::
-      %delete-pool
-    :: only we can delete a pool under our name
-    ::
-    ?>  =(src our):gowl
-    ;<  ~  bind:m  (delete-goals-pool:hc pid.act)
-    :: don't crash if pool-pool deletion fails
-    ;<  out=(each ~ goof)  bind:m
-      ((soften ,~) (delete-pools-pool:hc pid.act))
-    ~&  out
-    (pure:m !>(~))
-    ::
-      %create-goal
-    :: Hacky way to get new id
-    ::
-    =/  old=(set gid:gol)  ~(key by goals:(~(got by pools.store) pid.act))
-    ;<  ~  bind:m  (poke [our dap]:gowl gam !>([src.gowl act]))
-    ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
-    =/  new=(set gid:gol)  ~(key by goals:(~(got by pools.store) pid.act))
-    =/  gid-list=(list gid:gol)  ~(tap in (~(dif in new) old))
-    ?>  ?=(^ gid-list)
-    ?>  =(1 (lent gid-list))
-    (pure:m !>((enjs-key:goj [pid.act i.gid-list])))
-  ==
+    %goal-pool-action
+  (handle-pool-action:ghc !<([pid:gol pool-action:axn] vase))
   ::
     %goal-view
   =+  !<(vyu=goal-view:axn vase)
+  ?>  =(src our):gowl
   ?-    -.vyu
       %archive-goal-children
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
@@ -469,6 +430,120 @@
         :-  ['response' b+response.u.status]
         ~(tap by metadata.u.status)
     ==
+    ::
+      %pools-index
+    :: TODO: reorder this according to pool-order
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    %-  pure:m  !>
+    :-  %a
+    %+  murn  ~(tap by pools)
+    |=  [=id:p =pool:p]
+    ^-  (unit json)
+    %+  morn
+      (~(has by private.pool-data.pool) 'goalsPool')
+    %-  pairs:enjs:format
+    :~  [%pid s+(id-string:enjs:^pools id)]
+        [%title (~(got by public.pool-data.pool) 'title')]
+    ==
+    ::
+      %local-tag-goals
+    =/  vals=(list (set @t))
+      %+  turn  ~(val by goal-metadata.local.store)
+      |=  metadata=(map @t json)
+      ((as so):dejs:format (~(gut by metadata) 'labels' a+~))
+    =|  tags=(set @t)
+    |-
+    ?~  vals
+      (pure:m !>(a+(turn ~(tap in tags) (lead %s))))
+    $(vals t.vals, tags (~(uni in tags) i.vals))
+    ::
+      %local-tag-harvest  
+    !!
+    ::
+      %local-tag-note
+    !!
+    ::
+      %local-goal-tags
+    =/  vals=(list (set @t))
+      %+  turn  ~(val by goal-metadata.local.store)
+      |=  metadata=(map @t json)
+      ((as so):dejs:format (~(gut by metadata) 'labels' a+~))
+    =|  tags=(set @t)
+    |-
+    ?~  vals
+      (pure:m !>(a+(turn ~(tap in tags) (lead %s))))
+    $(vals t.vals, tags (~(uni in tags) i.vals))
+    ::
+      %local-goal-fields
+    =,  enjs:format
+    %-  pure:m  !>
+    %-  pairs
+    %+  murn  ~(tap by metadata-properties.local.store)
+    |=  [f=@t p=(map @t json)]
+    ^-  (unit [@t json])
+    ?.  (~(has by p) 'attributeType')
+      ~
+    [~ f o+p]
+    ::
+      %local-blocked
+    ;<  =blocked:p  bind:m  (scry-hard ,blocked:p /gx/pools/blocked/noun)
+    =,  enjs:format
+    %-  pure:m  !>
+    %-  pairs
+    :~  [%pools a+(turn (turn ~(tap in pools.blocked) id-string:enjs:pools) (lead %s))] 
+        [%hosts a+(turn ~(tap in hosts.blocked) |=(=@p s+(scot %p p)))]
+    ==
+    ::
+      %incoming-invites
+    ;<  =incoming-invites:p  bind:m
+      (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
+    %-  pure:m  !>
+    =,  enjs:format
+    %-  pairs
+    %+  murn  ~(tap by incoming-invites)
+    |=  [=pid:gol =invite:p =status:p]
+    ^-  (unit [@t json])
+    =/  dudes  ((as so):dejs:format (~(gut by invite) 'dudes' a+~))
+    ?.  (~(has in dudes) dap.gowl)
+      ~
+    :-  ~
+    :-  (enjs-pid:goj pid)
+    %-  pairs
+    :~  [%invite o+invite]
+        :-  %status
+        ?~  status
+          ~
+        %-  pairs
+        :-  ['response' b+response.u.status]
+        ~(tap by metadata.u.status)
+    ==
+    ::
+      %outgoing-requests
+    ;<  =outgoing-requests:p  bind:m
+      (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
+    %-  pure:m  !>
+    =,  enjs:format
+    %-  pairs
+    %+  murn  ~(tap by outgoing-requests)
+    |=  [=pid:gol =request:p =status:p]
+    ^-  (unit [@t json])
+    =/  dudes  ((as so):dejs:format (~(gut by request) 'dudes' a+~))
+    ?.  (~(has in dudes) dap.gowl)
+      ~
+    :-  ~
+    :-  (enjs-pid:goj pid)
+    %-  pairs
+    :~  [%request o+request]
+        :-  %status
+        ?~  status
+          ~
+        %-  pairs
+        :-  ['response' b+response.u.status]
+        ~(tap by metadata.u.status)
+    ==
+    ::
+      %setting
+    (pure:m !>(?~(s=(~(get by settings.local.store) setting.vyu) ~ s+u.s)))
   ==
 ==
 ::
@@ -480,6 +555,18 @@
   =/  =(pole knot)  (rash cord stap) 
   ?>  ?=([host=@ta name=@ta gid=@ta ~] -)
   [[(slav %p host.pole) name.pole] gid.pole]
+++  enjs-pools-index
+  =,  enjs:format
+  |=  pools-index=(list [pid:gol @])
+  :-  %a
+  %+  turn  pools-index
+  |=  [=pid:gol title=@t] 
+  %-  pairs
+  :~  [%pid s+(enjs-pid:goj pid)]
+      [%title s+title]
+  ==
+::
+++  morn  |*([a=? b=*] ?.(a ~ [~ b]))
 ++  convert-node
   |=  [=pid:gol node:gol]
   ^-  node:gol

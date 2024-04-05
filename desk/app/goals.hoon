@@ -4,14 +4,14 @@
 :: import during development to force compilation
 ::
     gol-cli-json
-/=  x  /mar/goal/action
-/=  x  /mar/goal/view
-/=  x  /mar/goal/local-view
-/=  x  /mar/goal/remote-view
+/=  x  /mar/goal/transition
+/=  x  /mar/goal/pool-transition
+/=  x  /mar/goal/compound-transition
+/=  x  /mar/goal/local-action
+/=  x  /mar/goal/pool-action
 /=  x  /mar/goal/membership-action
-/=  x  /mar/goal/local-transition
+/=  x  /mar/goal/view
 /=  x  /ted/vines/goals
-/=  x  /ted/test
 ::
 |%
 +$  card     card:agent:gall
@@ -35,7 +35,7 @@
 +*  this  .
     def   ~(. (default-agent this %.n) bowl)
     det   ~(. default:tree bowl)
-    ghc   ~(. goals bowl ~ state)
+    ghc   ~(. agent:goals bowl ~ state)
 ::
 ++  on-init   on-init:def
 ++  on-save   !>(state)
@@ -55,18 +55,18 @@
   ?>  =(src our):bowl
   ~&  "%goals app: receiving mark {(trip mark)}"
   ?+    mark  (on-poke:def mark vase)
-      %goal-action-and-mod
-    =+  !<([mod=ship axn=action:act] vase)
-    ~&  received-axn+axn
-    =^  cards  state
-      abet:(handle-action:ghc mod axn)
-    [cards this]
-    ::
-      %goals-transition
+      %goal-transition
     =+  !<(tan=transition:act vase)
     ~&  received-transition+tan
     =^  cards  state
       abet:(handle-transition:ghc tan)
+    [cards this]
+    ::
+      %goal-compound-transition
+    =+  !<(tan=compound-transition:act vase)
+    ~&  received-compound-transition+tan
+    =^  cards  state
+      abet:(handle-compound-transition:ghc tan)
     [cards this]
   ==
 ::
@@ -83,13 +83,59 @@
   |=  =(pole knot)
   ^-  (quip card _this)
   ?+    pole  (on-watch:def pole)
-    [%settings ~]  ?>(=(src our):bowl `this)
+    [%transitions ~]  ?>(=(src our):bowl [~ this])
+    ::
+      [%pool host=@ name=@ ~]
+    =/  host=ship  (slav %p host.pole)
+    ?>  =(host our.bowl)
+    =/  =pid:gol    [host name.pole]
+    =/  =pool:gol  (~(got by pools.store) pid)
+    ?>  (~(has by perms.pool) src.bowl)
+    :: give initial update
+    ::
+    :_(this [%give %fact ~ goal-pool-transition+!>([host %init-pool pool])]~)
+  ==
+::
+++  on-agent
+  |=  [=(pole knot) =sign:agent:gall]
+  ^-  (quip card _this)
+  ?+    pole  (on-agent:def pole sign)
+      [%pool host=@ name=@ ~]
+    =/  host=ship  (slav %p host.pole)
+    ?>  =(host src.bowl)
+    =/  =pid:gol      [host name.pole]
+    ?+    -.sign  (on-agent:def pole sign)
+        %watch-ack
+      ?~  p.sign
+        %-  (slog 'Subscription success.' ~)
+        [~ this]
+      %-  (slog 'Subscription failure.' ~)
+      %-  (slog u.p.sign)
+      [~ this]
+      ::
+        %kick
+      :: resubscribe on kick
+      ::
+      %-  (slog '%pools: Got kick, resubscribing...' ~)
+      :_(this [%pass pole %agent [src dap]:bowl %watch pole]~)
+      ::
+        %fact
+      ?.  =(p.cage.sign %goal-pool-transition)
+        (on-agent:def pole sign)
+      =+  !<([mod=ship tan=pool-transition:act] q.cage.sign)
+      =^  cards  state
+        abet:(handle-pool-transition:ghc pid mod tan)
+      :_  this
+      :_  cards
+      :*  %give  %fact  ~[/transitions]
+          goal-transition+!>([%update-pool pid mod tan])
+      ==
+    ==
   ==
 ::
 :: ++  on-tree   on-tree:det
 ::
 ++  on-leave  on-leave:def
-++  on-agent  on-agent:def
 ++  on-arvo   on-arvo:def
 ++  on-fail   on-fail:def
 --

@@ -1,14 +1,13 @@
 /-  *action
 /+  *gol-cli-json
-|_  tan=local-transition
+|_  tan=compound-transition
 ++  grow
   |%
   ++  noun  tan
   --
 ++  grab
   |%
-  ++  noun  local-transition
-  ++  json  local-transition:dejs
+  ++  noun  compound-transition
   --
 ++  grad  %noun
 --

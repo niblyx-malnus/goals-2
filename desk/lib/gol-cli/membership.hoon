@@ -8,27 +8,9 @@
   ^-  form:m
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   ?-    -.act
-      %join
-    !!
-    :: :: watch the pool path
-    :: ::
-    :: ;<  p=(unit tang)  bind:m
-    ::   %:  agent-watch-path-soft
-    ::     %goals
-    ::     /(scot %p host.pid.act)/[name.pid.act]
-    ::     [host.pid.act %goals]
-    ::     /(scot %p host.pid.act)/[name.pid.act]
-    ::   ==
-    :: :: update subscription history
-    :: ::
-    :: =/  =cage
-    ::   membership-transition+!>([%pool-sub-event pid.act %watch-ack p])
-    :: ;<  ~  bind:m  (poke [our.gowl %goals-members] cage)
-    :: :: return or fail
-    :: ::
-    :: ?~  p
-    ::   (pure:m !>(~))
-    :: (strand-fail %pool-subscription-fail u.p)
+      %watch-pool
+    ;<  ~  bind:m  (watch-valid-pool pid.act)
+    (pure:m !>(~))
     ::
       %kick-member
     ?>  =(our.gowl host.pid.act)
@@ -39,6 +21,8 @@
       %leave-pool
     ?>  =(src our):gowl
     ;<  ~  bind:m  (leave-pool pid.act)
+    :: TODO: hard or soft leave (leave pool or subscription)
+    :: TODO: leave %goals pool subscription
     (pure:m !>(~))
     ::
       %extend-invite
@@ -131,6 +115,20 @@
   =,  enjs:format
   %-  pure:m  !>
   (pairs [warning+(pairs data) ~])
+::
+++  watch-valid-pool
+  |=  =pid:gol
+  =/  m  (strand ,~)
+  ^-  form:m
+  ;<  =pools:p   bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+  =/  =pool:p   (~(gut by pools) pid *pool:p)
+  ?>  (~(has by private.pool-data.pool) 'goalsPool')
+  %:  agent-watch-path
+    %goals
+    /pool/(scot %p host.pid)/[name.pid]
+    [host.pid %goals]
+    /pool/(scot %p host.pid)/[name.pid]
+  ==
 ::
 ++  kick-member
   |=  [=id:p member=ship]

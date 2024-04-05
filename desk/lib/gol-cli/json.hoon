@@ -58,18 +58,13 @@
   ++  pd-goal-metadata
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (pid (~(got by p.jon) 'pid'))
     :-  (gid (~(got by p.jon) 'gid'))
-    %.  o+(~(del by (~(del by p.jon) 'pid')) 'gid')
+    %.  o+(~(del by p.jon) 'gid')
     %+  (pd ,[@t json] [@t])
       (ot ~[field+so data+same])
     (ot ~[field+so])
   ::
   ++  pd-pool-metadata
-    |=  jon=json
-    ?>  ?=(%o -.jon)
-    :-  (pid (~(got by p.jon) 'pid'))
-    %.  o+(~(del by p.jon) 'pid')
     %+  (pd ,[@t json] [@t])
       (ot ~[property+so data+same])
     (ot ~[property+so])
@@ -77,9 +72,8 @@
   ++  pd-pool-metadata-field
     |=  jon=json
     ?>  ?=(%o -.jon)
-    :-  (pid (~(got by p.jon) 'pid'))
     :-  (so (~(got by p.jon) 'field'))
-    %.  o+(~(del by (~(del by p.jon) 'pid')) 'field')
+    %.  o+(~(del by p.jon) 'field')
     %+  (pd ,[@t json] [@t])
       (ot ~[property+so data+same])
     (ot ~[property+so])
@@ -114,47 +108,44 @@
       (ot ~[property+so data+same])
     (ot ~[property+so])
   ::
-  ++  local-transition
-    ^-  $-(json local-transition:act)
+  ++  local-action
+    ^-  $-(json local-action:act)
     %-  of
-    :~  [%goal-order ab-goal-order]
-        [%pool-order ab-pool-order]
-        [%goal-metadata pd-local-goal-metadata]
+    :~  [%goal-metadata pd-local-goal-metadata]
         [%pool-metadata pd-local-pool-metadata]
         [%metadata-properties pd-local-metadata-properties]
         [%settings pd-settings]
-    ==
-  ::
-  ++  action
-    ^-  $-(json action:act)
-    %-  of
-    :~  [%set-pool-title (ot ~[pid+pid title+so])]
         [%create-pool (ot ~[title+so])]
         [%delete-pool (ot ~[pid+pid])]
-        [%create-goal (ot ~[pid+pid upid+unit-gid summary+so actionable+bo active+bo])]
-        [%archive-goal (ot ~[pid+pid gid+gid])]
-        [%restore-goal (ot ~[pid+pid gid+gid])]
-        [%restore-to-root (ot ~[pid+pid gid+gid])]
-        [%delete-from-archive (ot ~[pid+pid gid+gid])]
-        [%delete-goal (ot ~[pid+pid gid+gid])]
-        [%yoke (ot ~[pid+pid yoks+yoke-seq])]
-        [%move (ot ~[pid+pid cid+gid upid+unit-gid])]
-        [%set-summary (ot ~[pid+pid gid+gid summary+so])]
-        [%set-start (ot ~[pid+pid gid+gid start+unit-di])]
-        [%set-end (ot ~[pid+pid gid+gid end+unit-di])]
-        [%set-chief (ot ~[pid+pid gid+gid chief+ship rec+bo])]
-        [%set-open-to (ot ~[pid+pid gid+gid open-to+open-to])]
-        [%set-actionable (ot ~[pid+pid gid+gid val+bo])]
-        [%set-complete (ot ~[pid+pid gid+gid val+bo])]
-        [%set-active (ot ~[pid+pid gid+gid val+bo])]
-        [%reorder-roots (ot ~[pid+pid roots+(ar gid)])]
-        [%reorder-children (ot ~[pid+pid gid+gid children+(ar gid)])]
-        [%reorder-archive (ot ~[pid+pid context+unit-gid archive+(ar gid)])]
-        [%update-pool-perms (ot ~[pid+pid new+perms])]
+    ==
+  ::
+  ++  pool-action
+    ^-  $-(json pool-action:act)
+    %-  of
+    :~  [%set-pool-title (ot ~[title+so])]
+        [%create-goal (ot ~[upid+unit-gid summary+so actionable+bo active+bo])]
+        [%archive-goal (ot ~[gid+gid])]
+        [%restore-goal (ot ~[gid+gid])]
+        [%restore-to-root (ot ~[gid+gid])]
+        [%delete-from-archive (ot ~[gid+gid])]
+        [%delete-goal (ot ~[gid+gid])]
+        [%yoke (ot ~[yoks+yoke-seq])]
+        [%move (ot ~[cid+gid upid+unit-gid])]
+        [%set-summary (ot ~[gid+gid summary+so])]
+        [%set-start (ot ~[gid+gid start+unit-di])]
+        [%set-end (ot ~[gid+gid end+unit-di])]
+        [%set-chief (ot ~[gid+gid chief+ship rec+bo])]
+        [%set-open-to (ot ~[gid+gid open-to+open-to])]
+        [%set-actionable (ot ~[gid+gid val+bo])]
+        [%set-complete (ot ~[gid+gid val+bo])]
+        [%set-active (ot ~[gid+gid val+bo])]
+        [%reorder-roots (ot ~[roots+(ar gid)])]
+        [%reorder-children (ot ~[gid+gid children+(ar gid)])]
+        [%reorder-archive (ot ~[context+unit-gid archive+(ar gid)])]
+        [%update-goal-metadata pd-goal-metadata]
         [%update-pool-metadata pd-pool-metadata]
         [%update-pool-metadata-field pd-pool-metadata-field]
-        [%delete-pool-metadata-field (ot ~[pid+pid field+so])]
-        [%update-goal-metadata pd-goal-metadata]
+        [%delete-pool-metadata-field (ot ~[field+so])]
     ==
   ::
   ++  perms
