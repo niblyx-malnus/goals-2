@@ -1,7 +1,15 @@
 /-  gol=goals, p=pools, act=action
-/+  *ventio, *gol-cli-util, pools, pl=gol-cli-pool, nd=gol-cli-node,
-    tv=gol-cli-traverse, gol-cli-goals, gs=gol-cli-state, goj=gol-cli-json
+/+  ventio, *gol-cli-util, pools, subc=sub-count,
+    pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
+    gol-cli-goals, gs=gol-cli-state, goj=gol-cli-json
 |%
+++  en-pool-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
+++  de-pool-path
+  |=  =path
+  ^-  pid:gol
+  =+  ;;([%pool host=@ta name=@ta ~] path)
+  [(slav %p host) name]
+::
 ++  agent
   |_  [=bowl:gall cards=(list card:agent:gall) state-5-30:gs]
   +*  this   .
@@ -11,13 +19,6 @@
   ++  abet  [(flop cards) state]
   ++  emit  |=(=card this(cards [card cards]))
   ++  emil  |=(cadz=(list card) this(cards (weld cadz cards)))
-  ::
-  ++  en-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
-  ++  de-path
-    |=  =path
-    ^-  pid:gol
-    =+  ;;([%pool host=@ta name=@ta ~] path)
-    [(slav %p host) name]
   ::
   ++  handle-transition
     |=  tan=transition:act
@@ -137,7 +138,7 @@
       ::
       ?>  =(our.bowl host.pid.tan)
       =.  this  (handle-pool-transition [pid mod p]:tan)
-      (emit %give %fact ~[(en-path pid.tan)] goals-pool-transition+!>([mod p]:tan))
+      (emit %give %fact ~[(en-pool-path pid.tan)] goals-pool-transition+!>([mod p]:tan))
     ==
   ::
   ++  handle-pool-transition
@@ -333,6 +334,7 @@
   --
 ::
 ++  vine
+  =,  ventio
   |_  =gowl
   ++  handle-local-action
     =,  strand=strand:spider
@@ -388,10 +390,18 @@
     |^
     =/  m  (strand ,vase)
     ^-  form:m
-    :: if we're not the host vent it to the host
     ?.  =(our.gowl host.pid)
-      :: TODO: catch the update on our /transitions subpath
-      (vent-raw [host.pid dap.gowl] goal-pool-action+!>([pid axn]))
+      :: forward action to remote pool
+      :: (only returns when local copy synced)
+      ::
+      %:  vent-counted-action:vine:subc
+        [host.pid dap.gowl]
+        `path`pool-path
+        `wire`pool-path
+        goal-pool-action+[pid axn]
+      ==
+    :: deal with our pool
+    ::
     ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
     ?-    -.axn
         %create-goal
@@ -437,6 +447,8 @@
         (handle-pool-transition ;;(pool-transition:act axn))
       (pure:m !>(~))
     ==
+    ::
+    ++  pool-path  `path`(en-pool-path pid)
     ::
     ++  handle-pool-transition
       |=  =pool-transition:act

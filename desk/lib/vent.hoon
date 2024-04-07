@@ -4,6 +4,8 @@
 ::
 /+  vio=ventio, default-agent
 |%
++$  card  card:agent:gall
+::
 ++  utils
   |*  agent=*
   |_  =bowl:gall
@@ -11,7 +13,7 @@
   ::
   ++  to-vine
     |=  [vid=vent-id:vio =page]
-    ^-  (quip card:agent:gall _agent)
+    ^-  (quip card _agent)
     =/  args=cage  noun+!>(`[bowl vid page])
     :: vine must have same desk and same name as agent in /ted/vines
     ::
@@ -21,13 +23,13 @@
   ::
   ++  poke-to-vent
     |=  [=mark =vase]
-    ^-  (quip card:agent:gall _agent)
+    ^-  (quip card _agent)
     (to-vine [*vent-id:vio mark q.vase])
   :: return the vine output on the vent path
   ::
   ++  vent-arow
     |=  [=path arow=(avow:khan cage)]
-    ^-  (quip card:agent:gall _agent)
+    ^-  (quip card _agent)
     =/  vid=vent-id:vio  (de-path:vio path)
     =?  arow  ?=(%| -.arow)
         :-  %|
@@ -54,7 +56,7 @@
   ::
   ++  on-poke
     |=  [=mark =vase]
-    ^-  (quip card:agent:gall agent:gall)
+    ^-  (quip card agent:gall)
     :: forward vent requests directly to the vine
     ::
     ?+    mark
@@ -65,7 +67,7 @@
       ::
         %send-cards
       ?>  =(our src):bowl
-      [;;((list card:agent:gall) q.vase) this]
+      [;;((list card) q.vase) this]
     ==
   ::
   ++  on-peek
@@ -78,7 +80,7 @@
     ==
   ::
   ++  on-init
-    ^-  (quip card:agent:gall agent:gall)
+    ^-  (quip card agent:gall)
     =^  cards  agent  on-init:ag
     [cards this]
   ::
@@ -86,13 +88,13 @@
   ::
   ++  on-load
     |=  old-state=vase
-    ^-  (quip card:agent:gall agent:gall)
+    ^-  (quip card agent:gall)
     =^  cards  agent  (on-load:ag old-state)
     [cards this]
   ::
   ++  on-watch
     |=  =path
-    ^-  (quip card:agent:gall agent:gall)
+    ^-  (quip card agent:gall)
     ?+    path
       =^  cards  agent  (on-watch:ag path)
       [cards this]
@@ -103,45 +105,45 @@
   ::
   ++  on-leave
     |=  =path
-    ^-  (quip card:agent:gall agent:gall)
+    ^-  (quip card agent:gall)
     =^  cards  agent  (on-leave:ag path)
     [cards this]
   ::
   ++  on-agent
     |=  [=wire =sign:agent:gall]
-    ^-  (quip card:agent:gall agent:gall)
+    ^-  (quip card agent:gall)
     =^  cards  agent  (on-agent:ag wire sign)
-    =;  =card:agent:gall
+    =;  =card
       [[card cards] this]
     (agent-update wire sign bowl)
   ::
   ++  on-arvo
     |=  [=wire =sign-arvo]
-    ^-  (quip card:agent:gall agent:gall)
+    ^-  (quip card agent:gall)
     =^  cards  agent
       ?.  ?=([%vent @ @ @ ~] wire)
         (on-arvo:ag wire sign-arvo)
       ?.  ?=([%khan %arow *] sign-arvo)
         (on-arvo:def wire sign-arvo)
       (vent-arow:vnt wire p.sign-arvo)
-    =;  =card:agent:gall
+    =;  =card
       [[card cards] this]
     (arvo-update wire sign-arvo bowl)
   ::
   ++  on-fail
     |=  [=term =tang]
-    ^-  (quip card:agent:gall agent:gall)
+    ^-  (quip card agent:gall)
     =^  cards  agent  (on-fail:ag term tang)
     [cards this]
   --
 ::
 ++  agent-update
   |=  [=wire =sign:agent:gall =bowl:gall]
-  ^-  card:agent:gall
+  ^-  card
   [%give %fact ~[/vent-on-agent] %noun !>(`noun`[bowl wire sign])]
 ::
 ++  arvo-update
   |=  [=wire =sign-arvo =bowl:gall]
-  ^-  card:agent:gall
+  ^-  card
   [%give %fact ~[/vent-on-arvo] %noun !>(`noun`[bowl wire sign-arvo])]
 --

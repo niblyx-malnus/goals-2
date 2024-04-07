@@ -1,5 +1,5 @@
 /-  p=pools, gol=goals, axn=action, pyk=peek, spider
-/+  *ventio, pools, tree=filetree, goals,
+/+  *ventio, pools, tree=filetree, goals, subc=sub-count,
     gol-cli-membership, gol-cli-traverse, gol-cli-node, gol-cli-pool,
     goj=gol-cli-json
 =,  strand=strand:spider
@@ -8,7 +8,8 @@
 =<  =*  helper-core  .
 ::
 %-  vine-thread
-%-  vine:tree
+:: %-  vine:tree
+%-  vine:subc
 |=  [gowl=bowl:gall vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m

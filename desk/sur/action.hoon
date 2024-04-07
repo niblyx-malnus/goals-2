@@ -61,6 +61,7 @@
       [%settings p=(each [@t json] @t)]
       [%create-pool title=@t]
       [%delete-pool =pid]
+      :: [%update-pool =pid axn=pool-action]
   ==
 ::
 +$  pool-action :: sent with a pid

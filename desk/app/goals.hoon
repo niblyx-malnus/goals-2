@@ -1,5 +1,5 @@
 /-  gol=goals, act=action
-/+  goals, vent, bout, dbug, default-agent, verb,
+/+  goals, vent, bout, dbug, default-agent, verb, subc=sub-count,
     tree=filetree, gs=gol-cli-state, gol-cli-node,
 :: import during development to force compilation
 ::
@@ -28,6 +28,7 @@
 %+  verb  |
 :: %-  agent:bout
 %-  agent:dbug
+%-  agent:subc
 %-  agent:vent
 ^-  agent:gall
 :: %-  agent:tree
