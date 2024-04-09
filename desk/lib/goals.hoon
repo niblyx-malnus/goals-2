@@ -493,7 +493,7 @@
         (pure:m !>(~))
         ::
           %update-members
-        ?.  =(our.gowl host.id.tan)
+        ?.  =(our.gowl host.id)
           (pure:m !>(~))
         ?~  roles.tan
           ;<  ~  bind:m  (set-goals-pool-role id member.tan ~)
