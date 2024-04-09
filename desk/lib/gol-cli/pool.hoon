@@ -317,9 +317,6 @@
   ?:  =(ship host.pid.pool)
     ~|("Cannot change host perms." !!)
   ?.  (check-pool-edit-perm mod)
-    ~&  >>>  pid+pid.pool
-    ~&  >>>  ship+ship
-    ~&  >>>  mod+mod
     ~|("Do not have host or admin perms." !!)
   ?:  ?&  =((~(get by perms.pool) ship) (some (some %admin)))
           !|(=(mod host.pid.pool) =(mod ship))

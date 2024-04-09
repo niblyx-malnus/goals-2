@@ -118,7 +118,8 @@
       ?>  =(our.bowl host.pid.tan)
       ?<  (~(has by pools.store) pid.tan)
       =|  =pool:gol
-      =:  title.pool  title.tan
+      =:  pid.pool    pid.tan
+          title.pool  title.tan
           perms.pool  (~(put by *perms:gol) host.pid.tan %host)
         ==
       =.  pools.store  (~(put by pools.store) pid.tan pool)
