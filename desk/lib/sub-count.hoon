@@ -2,7 +2,6 @@
 ::
 ::    usage: %-((agent path-type):sub-count your-agent)
 ::
-/-  act=action
 /+  vio=ventio, default-agent
 /=  x  /mar/counted-update
 /=  x  /mar/counted-action
@@ -146,9 +145,10 @@
       ~&  %taking-counted-update
       ~&  p.vase
       =+  !<([count=@ =page] vase)
+      =/  nase=^vase  ((get-tube p.page) !>(q.page))
       ~&  [count+count mark+p.page]
-      ~&  ;;([ship pool-transition:act] ((get-tube p.page) !>(q.page)))
-      [count p.page ((get-tube p.page) !>(q.page))]
+      %-  (slog (sell nase) ~)
+      [count p.page nase]
     ::
     ++  get-tube
       |=  =mark
