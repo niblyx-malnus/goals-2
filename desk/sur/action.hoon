@@ -1,5 +1,33 @@
 /-  *goals, p=pools
 |%
++$  exposed-yoke  
+  $%  [%prio-rend lid=gid rid=gid] :: start-to-start
+      [%prio-yoke lid=gid rid=gid] :: start-to-start
+      [%prec-rend lid=gid rid=gid] :: end-to-start
+      [%prec-yoke lid=gid rid=gid] :: end-to-start
+      [%nest-yoke lid=gid rid=gid] :: end-to-end
+      [%nest-rend lid=gid rid=gid] :: end-to-end
+      [%hook-rend lid=gid rid=gid] :: start-to-end
+      [%hook-yoke lid=gid rid=gid] :: start-to-end
+      [%held-rend lid=gid rid=gid] :: start-to-start and end-to-end (containment)
+      [%held-yoke lid=gid rid=gid] :: start-to-start and end-to-end (containment)
+  ==
+::
++$  nuke
+  $%  [%nuke-prio-left =gid]
+      [%nuke-prio-ryte =gid]
+      [%nuke-prio =gid]
+      [%nuke-prec-left =gid]
+      [%nuke-prec-ryte =gid]
+      [%nuke-prec =gid]
+      [%nuke-prio-prec =gid]
+      [%nuke-nest-left =gid]
+      [%nuke-nest-ryte =gid]
+      [%nuke-nest =gid]
+  ==
+::
++$  plex  $%(exposed-yoke nuke) :: complex yoke
+::
 +$  transition
   $%  [%goal-order p=(each [idx=@ keys=(list key)] keys=(list key))]
       [%pool-order p=(each [idx=@ pids=(list pid)] pids=(list pid))]
