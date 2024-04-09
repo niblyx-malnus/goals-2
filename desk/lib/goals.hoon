@@ -507,7 +507,7 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  poke  [our dap]:gowl
-    :-  %membership-action  !>
+    :-  %goal-membership-action  !>
     ^-  membership-action:act
     [%watch-pool id]
   ::
