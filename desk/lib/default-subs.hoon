@@ -16,7 +16,7 @@
   !!
 ::
 ++  on-leave
-  |=  path
+  |=  =path
   %-  (slog leaf+"{<src.bowl>} leaving subscription to path {<path>}" ~)
   [~ agent]
 ::
