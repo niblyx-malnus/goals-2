@@ -41,10 +41,8 @@
 ::
 ++  on-init
     ^-  (quip card _this)
-    :_  this
-    :~  :*   %pass  /pools-transitions  %agent
-             [our.bowl %pools]  %watch  /transitions
-    ==  ==
+    :_  this  :_  ~
+    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]
 ::
 ++  on-save   !>(state)
 ::
