@@ -234,7 +234,7 @@
     ;<  our=@p  bind:m  get-our
     ;<  ~       bind:m  (watch /sub-counts [our q.dock] /sub-counts)
     ;<  [count=@ vnt=*]  bind:m
-      ((vent ,[@ *]) dock counted-action+page)
+      ((vent ,[@ *]) dock counted-action+[path page])
     |-
     ;<  upd=cage  bind:m  (take-fact /sub-counts)
     ?.  ?=(%wire-count p.upd)  $
