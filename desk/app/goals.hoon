@@ -54,13 +54,10 @@
   :: =/  old  !<(versioned-state:gs old-vase)
   =/  old  ;;(versioned-state:gs q.old-vase)
   =/  new=state-5-30:gs   (convert-to-latest:gs old)
-  =/  cards=(list card)  (upgrade-io:gs new bowl)
-  =.  cards
-    %+  welp  cards
-    ?:  (~(has by wex.bowl) [/pools-transitions our.bowl %pools])
-      ~
-    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]~
-  [cards this(state new)]
+  :_  this(state new)
+  ?:  (~(has by wex.bowl) [/pools-transitions our.bowl %pools])
+    ~
+  [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]~
 ::
 ++  on-poke
   |=  [=mark =vase]
