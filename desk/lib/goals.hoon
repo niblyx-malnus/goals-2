@@ -135,7 +135,7 @@
       ::
         %update-pool
       =.  this  (handle-pool-transition [pid mod p]:tan)
-      (emit %give %fact ~[(en-pool-path pid.tan)] goals-pool-transition+!>([mod p]:tan))
+      (emit %give %fact ~[(en-pool-path pid.tan)] goal-pool-transition+!>([mod p]:tan))
     ==
   ::
   ++  handle-pool-transition
