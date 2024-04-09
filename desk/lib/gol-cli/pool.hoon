@@ -798,7 +798,7 @@
 ++  set-pool-role
   |=  [=ship role=(unit role:gol) mod=ship]
   ^-  _this
-  ?>  (check-pool-role-mod ship mod)
+  ?>  (check-pool-role-mod mod mod)
   ?~  role
     =/  pore  (replace-chiefs (sy ~[ship]))
     =/  pore  (purge-deputies:pore (sy ~[ship]))
