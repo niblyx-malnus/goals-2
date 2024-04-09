@@ -297,7 +297,7 @@
           [[%filetree @ta *] *]
         ?>  =(dap.bowl +<.site)
         ?>  =(src our):bowl
-        ?+    method.request.req  (poke-to-vent:vnt mark vase)
+        ?+    method.request.req  (vent-cage:vnt mark vase)
             %'GET'
           ?^  ext
             :_  this

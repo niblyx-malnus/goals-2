@@ -130,6 +130,7 @@
       [%outgoing-invites =pid]
       [%incoming-requests =pid]
       [%pools-index ~]
+      [%pool-status =pid]
       [%local-tag-goals tag=@t]
       [%local-tag-harvest tag=@t]
       [%local-tag-note tag=@t]

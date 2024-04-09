@@ -114,7 +114,7 @@
   ::
   ?.  ?=(%goof p.rep)
     ~?  >>>  !?=(%noun p.rep)
-      %venting-unexpected-mark
+      `@t`(cat 3 'venting unexpected mark: ' p.rep)
     (pure:m %& q.rep)
   (pure:m %| !<(goof q.rep))
 ::
@@ -197,6 +197,13 @@
 ::
 +$  gowl     bowl:gall   :: gall bowl alias
 +$  sowl     bowl:spider :: spider bowl alias
+::
++$  vent-pign
+  $%  [%poke-ack p=(unit tang)]
+      [%watch-ack p=(unit tang)]
+      [%fact =page]
+      [%kick ~]
+  ==
 :: common vase strand functions
 ::
 ++  vand     (strand ,vase)
@@ -266,6 +273,7 @@
     |=  [=bowl:gall wyre=^wire =sign:agent:gall]
     &(=(wyre wire) ?=(%watch-ack -.sign))
   --
+::
 ++  agent-watch-path
   |=  [=dude:gall =wire =dock =path]
   =/  m  (strand ,~)

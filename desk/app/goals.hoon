@@ -1,6 +1,6 @@
-/-  gol=goals, act=action
-/+  goals, vent, bout, dbug, default-agent, verb, subc=sub-count,
-    tree=filetree, gs=gol-cli-state, gol-cli-node,
+/-  gol=goals, act=action, p=pools
+/+  goals, vent, bout, dbug, default-agent, verb, sub-count,
+    tree=filetree, gs=gol-cli-state, gol-cli-node, default-subs,
 :: import during development to force compilation
 ::
     gol-cli-json
@@ -28,17 +28,24 @@
 %+  verb  |
 :: %-  agent:bout
 %-  agent:dbug
-%-  agent:subc
+%-  (agent ,[%pool path]):sub-count
 %-  agent:vent
 ^-  agent:gall
 :: %-  agent:tree
 |_  =bowl:gall
 +*  this  .
-    def   ~(. (default-agent this %.n) bowl)
+    dus   ~(. (default-subs this %.y %.y %.n) bowl)
     det   ~(. default:tree bowl)
     ghc   ~(. agent:goals bowl ~ state)
+    vnt   ~(. (utils:vent this) bowl)
 ::
-++  on-init   on-init:def
+++  on-init
+    ^-  (quip card _this)
+    :_  this
+    :~  :*   %pass  /pools-transitions  %agent
+             [our.bowl %pools]  %watch  /transitions
+    ==  ==
+::
 ++  on-save   !>(state)
 ::
 ++  on-load
@@ -48,6 +55,9 @@
   =/  old  ;;(versioned-state:gs q.old-vase)
   =/  new=state-5-30:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
+  =.  cards
+    :_  cards
+    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]
   [cards this(state new)]
 ::
 ++  on-poke
@@ -55,7 +65,7 @@
   ^-  (quip card _this)
   ?>  =(src our):bowl
   ~&  "%goals app: receiving mark {(trip mark)}"
-  ?+    mark  (on-poke:def mark vase)
+  ?+    mark  (on-poke:dus mark vase)
       %goal-transition
     =+  !<(tan=transition:act vase)
     ~&  received-transition+tan
@@ -74,7 +84,7 @@
 ++  on-peek
   |=  =(pole knot)
   ^-  (unit (unit cage))
-  ?+    pole  (on-peek:def pole)
+  ?+    pole  (on-peek:dus pole)
     [%x %store ~]  ``noun+!>(store)
     [%x %pools ~]  ``json+!>((enjs-pools:gol-cli-json pools.store))
     [%x %local ~]  ``json+!>((enjs-local:gol-cli-json local.store))
@@ -83,7 +93,7 @@
 ++  on-watch
   |=  =(pole knot)
   ^-  (quip card _this)
-  ?+    pole  (on-watch:def pole)
+  ?+    pole  (on-watch:dus pole)
     [%transitions ~]  ?>(=(src our):bowl [~ this])
     ::
       [%pool host=@ name=@ ~]
@@ -100,43 +110,33 @@
 ++  on-agent
   |=  [=(pole knot) =sign:agent:gall]
   ^-  (quip card _this)
-  ?+    pole  (on-agent:def pole sign)
+  ?+    pole  (on-agent:dus pole sign)
       [%pool host=@ name=@ ~]
     =/  host=ship  (slav %p host.pole)
     ?>  =(host src.bowl)
     =/  =pid:gol      [host name.pole]
-    ?+    -.sign  (on-agent:def pole sign)
-        %watch-ack
-      ?~  p.sign
-        %-  (slog 'Subscription success.' ~)
-        [~ this]
-      %-  (slog 'Subscription failure.' ~)
-      %-  (slog u.p.sign)
-      [~ this]
-      ::
-        %kick
-      :: resubscribe on kick
-      ::
-      %-  (slog '%pools: Got kick, resubscribing...' ~)
-      :_(this [%pass pole %agent [src dap]:bowl %watch pole]~)
-      ::
+    ?+    -.sign  (on-agent:dus pole sign)
         %fact
       ?.  =(p.cage.sign %goal-pool-transition)
-        (on-agent:def pole sign)
+        (on-agent:dus pole sign)
       =+  !<([mod=ship tan=pool-transition:act] q.cage.sign)
       =^  cards  state
-        abet:(handle-pool-transition:ghc pid mod tan)
-      :_  this
-      :_  cards
-      :*  %give  %fact  ~[/transitions]
-          goal-transition+!>([%update-pool pid mod tan])
-      ==
+        abet:(handle-transition:ghc %update-pool pid mod tan)
+      [cards this]
+    ==
+    ::
+      [%pools-transitions ~]
+    ?+    -.sign  (on-agent:dus pole sign)
+        %fact
+      ?.  =(p.cage.sign %pools-transition)
+        (on-agent:dus pole sign)
+      (vent-cage:vnt cage.sign)
     ==
   ==
 ::
 :: ++  on-tree   on-tree:det
 ::
-++  on-leave  on-leave:def
-++  on-arvo   on-arvo:def
-++  on-fail   on-fail:def
+++  on-leave  on-leave:dus
+++  on-arvo   on-arvo:dus
+++  on-fail   on-fail:dus
 --

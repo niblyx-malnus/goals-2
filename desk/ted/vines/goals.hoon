@@ -1,5 +1,5 @@
 /-  p=pools, gol=goals, axn=action, pyk=peek, spider
-/+  *ventio, pools, tree=filetree, goals, subc=sub-count,
+/+  *ventio, pools, tree=filetree, goals, sub-count,
     gol-cli-membership, gol-cli-traverse, gol-cli-node, gol-cli-pool,
     goj=gol-cli-json
 =,  strand=strand:spider
@@ -9,7 +9,7 @@
 ::
 %-  vine-thread
 :: %-  vine:tree
-%-  vine:subc
+%-  vine:sub-count
 |=  [gowl=bowl:gall vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m
@@ -29,6 +29,9 @@
   ::
     %goal-pool-action
   (handle-pool-action:ghc !<([pid:gol pool-action:axn] vase))
+  ::
+    %pools-transition
+  (handle-pools-transition:ghc !<(tan=transition:p vase))
   ::
     %goal-view
   =+  !<(vyu=goal-view:axn vase)
@@ -442,9 +445,26 @@
     ^-  (unit json)
     %+  morn
       (~(has by private.pool-data.pool) 'goalsPool')
+    =/  =path  (en-pool-path:goals id)
     %-  pairs:enjs:format
     :~  [%pid s+(id-string:enjs:^pools id)]
         [%title (~(got by public.pool-data.pool) 'title')]
+        [%host s+(rsh [3 1] (scot %p host.id))] :: redundant, but that's fine
+        [%name s+name.id] :: redundant, but that's fine
+        ['isValid' b+%.y]
+        ['haveCopy' b+(~(has by pools.store) id)]
+        ['areWatching' b+(~(has by wex.gowl) [path host.id dap.gowl])]
+    ==
+    ::
+      %pool-status
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =pool:p   (~(gut by pools) pid.vyu *pool:p)
+    =/  =path     (en-pool-path:goals pid.vyu)
+    %-  pure:m  !>
+    %-  pairs:enjs:format
+    :~  ['isValid' b+(~(has by private.pool-data.pool) 'goalsPool')]
+        ['haveCopy' b+(~(has by pools.store) pid.vyu)]
+        ['areWatching' b+(~(has by wex.gowl) [path host.pid.vyu dap.gowl])]
     ==
     ::
       %local-tag-goals

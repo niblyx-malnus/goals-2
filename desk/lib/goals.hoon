@@ -1,5 +1,5 @@
 /-  gol=goals, p=pools, act=action
-/+  ventio, *gol-cli-util, pools, subc=sub-count,
+/+  ventio, *gol-cli-util, pools, sub-count,
     pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
     gol-cli-goals, gs=gol-cli-state, goj=gol-cli-json
 |%
@@ -394,7 +394,7 @@
       :: forward action to remote pool
       :: (only returns when local copy synced)
       ::
-      %:  vent-counted-action:vine:subc
+      %:  vent-counted-action:vine:sub-count
         [host.pid dap.gowl]
         `path`pool-path
         `wire`pool-path
@@ -468,6 +468,15 @@
       ^-  compound-transition:act
       [%update-pool pid src.gowl compound-pool-transition]
     --
+    :: update from %pools agent /transitions subscription path
+    ::
+    ++  handle-pools-transition
+      =,  strand=strand:spider
+      |=  tan=transition:p
+      =/  m  (strand ,vase)
+      ^-  form:m
+      ?>  =(our src):gowl
+      !!
   ::
   ++  create-pools-pool
     |=  $:  graylist-fields=(list graylist-field:p)

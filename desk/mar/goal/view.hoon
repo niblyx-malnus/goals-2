@@ -45,6 +45,7 @@
         [%outgoing-invites (ot ~[pid+pid])]
         [%incoming-requests (ot ~[pid+pid])]
         [%pools-index ul]
+        [%pool-status (ot ~[pid+pid])]
         [%local-tag-goals (ot ~[tag+so])]
         [%local-tag-harvest (ot ~[tag+so])]
         [%local-tag-note (ot ~[tag+so])]

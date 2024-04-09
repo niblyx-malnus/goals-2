@@ -6,7 +6,7 @@
 =;  helper-core
 ::
 %-  vine-thread
-|=  [gowl=bowl:gall vid=vent-id =mark =vase]
+|=  [=gowl vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m
 ::

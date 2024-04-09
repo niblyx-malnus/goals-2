@@ -21,7 +21,7 @@
     :_(agent [%pass (en-path:vio vid) %arvo %k %fard fyrd]~)
   :: re-interpret a poke as a vent-request
   ::
-  ++  poke-to-vent
+  ++  vent-cage
     |=  [=mark =vase]
     ^-  (quip card _agent)
     (to-vine [*vent-id:vio mark q.vase])

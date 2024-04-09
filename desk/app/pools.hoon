@@ -1,4 +1,4 @@
-/+  p=pools, vent, bout, dbug, default-agent, verb
+/+  p=pools, vent, bout, dbug, default-agent, verb, default-subs
 /=  x  /ted/vines/pools
 /=  x  /mar/pools/transition
 /=  x  /mar/pools/pool-transition
@@ -19,10 +19,10 @@
 ^-  agent:gall
 |_  =bowl:gall
 +*  this  .
-    def   ~(. (default-agent this %.n) bowl)
+    dus   ~(. (default-subs this %.y %.y %.n) bowl)
     pul   ~(. p bowl ~ state)
 ::
-++  on-init   on-init:def
+++  on-init   on-init:dus
 ++  on-save   !>(state)
 ::
 ++  on-load
@@ -36,7 +36,7 @@
   ^-  (quip card _this)
   ?>  =(src our):bowl
   ~&  "%pools app: receiving mark {(trip mark)}"
-  ?+    mark  (on-poke:def mark vase)
+  ?+    mark  (on-poke:dus mark vase)
       %pools-transition
     =+  !<(tan=transition:p vase)
     ~&  received-transition+tan
@@ -48,7 +48,7 @@
 ++  on-peek
   |=  =(pole knot)
   ^-  (unit (unit cage))
-  ?+    pole  (on-peek:def pole)
+  ?+    pole  (on-peek:dus pole)
     [%x %state ~]              ``noun+!>(state)
     [%x %pools ~]              ``noun+!>(pools)
     [%x %blocked ~]            ``noun+!>(blocked)
@@ -59,7 +59,7 @@
 ++  on-watch
   |=  =(pole knot)
   ^-  (quip card _this)
-  ?+    pole  (on-watch:def pole)
+  ?+    pole  (on-watch:dus pole)
     [%transitions ~]  ?>(=(src our):bowl [~ this])
     ::
       [%pool host=@ name=@ ~]
@@ -76,29 +76,15 @@
 ++  on-agent
   |=  [=(pole knot) =sign:agent:gall]
   ^-  (quip card _this)
-  ?+    pole  (on-agent:def pole sign)
+  ?+    pole  (on-agent:dus pole sign)
       [%pool host=@ name=@ ~]
     =/  host=ship  (slav %p host.pole)
     ?>  =(host src.bowl)
     =/  =id:p      [host name.pole]
-    ?+    -.sign  (on-agent:def pole sign)
-        %watch-ack
-      ?~  p.sign
-        %-  (slog 'Subscription success.' ~)
-        [~ this]
-      %-  (slog 'Subscription failure.' ~)
-      %-  (slog u.p.sign)
-      [~ this]
-      ::
-        %kick
-      :: resubscribe on kick
-      ::
-      %-  (slog '%pools: Got kick, resubscribing...' ~)
-      :_(this [%pass pole %agent [src dap]:bowl %watch pole]~)
-      ::
+    ?+    -.sign  (on-agent:dus pole sign)
         %fact
       ?.  =(p.cage.sign %pools-pool-transition)
-        (on-agent:def pole sign)
+        (on-agent:dus pole sign)
       =+  !<(tan=pool-transition:p q.cage.sign)
       =^  cards  state
         abet:(handle-pool-transition:pul id tan)
@@ -110,7 +96,7 @@
     ==
   ==
 ::
-++  on-leave  on-leave:def
-++  on-arvo   on-arvo:def
-++  on-fail   on-fail:def
+++  on-leave  on-leave:dus
+++  on-arvo   on-arvo:dus
+++  on-fail   on-fail:dus
 --
