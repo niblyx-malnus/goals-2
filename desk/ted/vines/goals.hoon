@@ -810,13 +810,13 @@
   |=  [=pid:gol title=@t]
   =/  m  (strand ,~)
   ^-  form:m
-  (poke [our dap]:gowl goals-transition+!>([%create-pool pid title]))
+  (poke [our dap]:gowl goal-transition+!>([%create-pool pid title]))
 ::
 ++  delete-goals-pool
   |=  =pid:gol
   =/  m  (strand ,~)
   ^-  form:m
-  (poke [our dap]:gowl goals-transition+!>([%delete-pool pid]))
+  (poke [our dap]:gowl goal-transition+!>([%delete-pool pid]))
 ::
 ++  create-pools-pool
   |=  $:  graylist-fields=(list graylist-field:p)

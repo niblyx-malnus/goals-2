@@ -24,7 +24,7 @@
     |=  tan=transition:act
     ^-  _this
     ?>  =(src our):bowl
-    =.  this  (emit %give %fact ~[/transitions] goals-transition+!>(tan))
+    =.  this  (emit %give %fact ~[/transitions] goal-transition+!>(tan))
     ?-    -.tan
         %pool-order
       ?-    -.p.tan
@@ -502,13 +502,13 @@
     |=  [=pid:gol title=@t]
     =/  m  (strand ,~)
     ^-  form:m
-    (poke [our dap]:gowl goals-transition+!>([%create-pool pid title]))
+    (poke [our dap]:gowl goal-transition+!>([%create-pool pid title]))
   ::
   ++  delete-goals-pool
     |=  =pid:gol
     =/  m  (strand ,~)
     ^-  form:m
-    (poke [our dap]:gowl goals-transition+!>([%delete-pool pid]))
+    (poke [our dap]:gowl goal-transition+!>([%delete-pool pid]))
   ::
   ++  delete-pools-pool
     |=  =id:p
