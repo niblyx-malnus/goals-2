@@ -41,8 +41,10 @@
 ::
 ++  on-init
     ^-  (quip card _this)
-    :_  this  :_  ~
-    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]
+    :_  this
+    ?:  (~(has by wex.bowl) [/pools-transitions our.bowl %pools])
+      ~
+    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]~
 ::
 ++  on-save   !>(state)
 ::
@@ -54,8 +56,10 @@
   =/  new=state-5-30:gs   (convert-to-latest:gs old)
   =/  cards=(list card)  (upgrade-io:gs new bowl)
   =.  cards
-    :_  cards
-    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]
+    %+  welp  cards
+    ?:  (~(has by wex.bowl) [/pools-transitions our.bowl %pools])
+      ~
+    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]~
   [cards this(state new)]
 ::
 ++  on-poke
