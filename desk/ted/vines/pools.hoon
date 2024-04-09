@@ -12,7 +12,7 @@
 ::
 =*  hc  ~(. helper-core gowl)
 ::
-~&  "%pools vine: receiving mark {(trip mark)}"
+~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
 ?+  mark  (just-poke [our dap]:gowl mark vase) :: poke normally
   %pools-view     (handle-pools-view:hc !<(view:p vase))
   %pools-gesture  (handle-pools-gesture:hc !<(gesture:p vase))

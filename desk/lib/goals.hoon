@@ -23,7 +23,6 @@
   ++  handle-transition
     |=  tan=transition:act
     ^-  _this
-    ?>  =(src our):bowl
     =.  this  (emit %give %fact ~[/transitions] goal-transition+!>(tan))
     ?-    -.tan
         %pool-order
@@ -134,9 +133,6 @@
       this
       ::
         %update-pool
-      :: we must be the host of the given pool
-      ::
-      ?>  =(our.bowl host.pid.tan)
       =.  this  (handle-pool-transition [pid mod p]:tan)
       (emit %give %fact ~[(en-pool-path pid.tan)] goals-pool-transition+!>([mod p]:tan))
     ==
@@ -230,7 +226,6 @@
   ++  handle-compound-transition
     |=  tan=compound-transition:act
     ^-  _this
-    ?>  =(src our):bowl
     ?-    -.tan
         %pool-order-slot
       ?-    -.p.tan
@@ -476,7 +471,54 @@
       =/  m  (strand ,vase)
       ^-  form:m
       ?>  =(our src):gowl
-      !!
+      ~&  >>  "receiving %pools transition {<`@tas`-.tan>} in %goals vine"
+      ?+    -.tan  (pure:m !>(~))
+          %create-pool
+        ;<  ~  bind:m  (watch-goals-pool id.tan)
+        (pure:m !>(~))
+        ::
+          %update-pool
+        (handle-pools-pool-transition [id p]:tan)
+      ==
+    ::
+    ++  handle-pools-pool-transition
+      =,  strand=strand:spider
+      |=  [=id:p tan=pool-transition:p]
+      =/  m  (strand ,vase)
+      ^-  form:m
+      ?+    -.tan
+        (pure:m !>(~))
+          %init-pool
+        ;<  ~  bind:m  (watch-goals-pool id)
+        (pure:m !>(~))
+        ::
+          %update-members
+        ?.  =(our.gowl host.id.tan)
+          (pure:m !>(~))
+        ?~  roles.tan
+          ;<  ~  bind:m  (set-goals-pool-role id member.tan ~)
+          (pure:m !>(~))
+        ;<  ~  bind:m  (set-goals-pool-role id member.tan ~ %viewer)
+        (pure:m !>(~))
+      ==
+  ::
+  ++  watch-goals-pool
+    |=  =id:p
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  poke  [our dap]:gowl
+    :-  %membership-action  !>
+    ^-  membership-action:act
+    [%watch-pool id]
+  ::
+  ++  set-goals-pool-role
+    |=  [=pid:gol =ship role=(unit role:gol)]
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  poke  [our dap]:gowl
+    :-  %goal-transition  !>
+    ^-  transition:act
+    [%update-pool pid our.gowl %set-pool-role ship role]
   ::
   ++  create-pools-pool
     |=  $:  graylist-fields=(list graylist-field:p)

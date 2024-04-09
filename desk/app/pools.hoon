@@ -35,7 +35,7 @@
   |=  [=mark =vase]
   ^-  (quip card _this)
   ?>  =(src our):bowl
-  ~&  "%pools app: receiving mark {(trip mark)}"
+  ~&  "poke to {<dap.bowl>} agent with mark {<mark>}"
   ?+    mark  (on-poke:dus mark vase)
       %pools-transition
     =+  !<(tan=transition:p vase)
@@ -87,12 +87,8 @@
         (on-agent:dus pole sign)
       =+  !<(tan=pool-transition:p q.cage.sign)
       =^  cards  state
-        abet:(handle-pool-transition:pul id tan)
-      :_  this
-      :_  cards
-      :*  %give  %fact  ~[/transitions]
-          pools-transition+!>([%update-pool id tan])
-      ==
+        abet:(handle-transition:pul %update-pool id tan)
+      [cards this]
     ==
   ==
 ::

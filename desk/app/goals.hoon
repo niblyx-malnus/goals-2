@@ -63,10 +63,10 @@
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
-  ?>  =(src our):bowl
-  ~&  "%goals app: receiving mark {(trip mark)}"
+  ~&  "poke to {<dap.bowl>} agent with mark {<mark>}"
   ?+    mark  (on-poke:dus mark vase)
       %goal-transition
+    ?>  =(src our):bowl
     =+  !<(tan=transition:act vase)
     ~&  received-transition+tan
     =^  cards  state
@@ -74,6 +74,7 @@
     [cards this]
     ::
       %goal-compound-transition
+    ?>  =(src our):bowl
     =+  !<(tan=compound-transition:act vase)
     ~&  received-compound-transition+tan
     =^  cards  state
@@ -127,6 +128,13 @@
     ::
       [%pools-transitions ~]
     ?+    -.sign  (on-agent:dus pole sign)
+        %kick
+      %-  (slog leaf+"{<dap.bowl>} got kick from {<src.bowl>} on wire {<wire>}" ~)
+      :_  this  :_  ~
+      :*  %pass  /pools-transitions  %agent
+          [our.bowl %pools]  %watch  /transitions
+      ==
+      ::
         %fact
       ?.  =(p.cage.sign %pools-transition)
         (on-agent:dus pole sign)

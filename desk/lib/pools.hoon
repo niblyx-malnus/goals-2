@@ -17,9 +17,6 @@
 ++  handle-transition
   |=  tan=transition
   ^-  _this
-  :: only we can directly modify our agent state
-  ::
-  ?>  =(src our):bowl
   =.  this  (emit %give %fact ~[/transitions] pools-transition+!>(tan))
   ?-    -.tan
       %update-blocked
@@ -94,8 +91,6 @@
     ==
     ::
       %create-pool
-    :: we must be the host of the given pool
-    ::
     ?>  =(our.bowl host.id.tan)
     this(pools (~(put by pools) id.tan *pool))
     ::
@@ -103,9 +98,6 @@
     this(pools (~(del by pools) id.tan))
     ::
       %update-pool
-    :: we must be the host of the given pool
-    ::
-    ?>  =(our.bowl host.id.tan)
     =.  this  (handle-pool-transition [id p]:tan)
     (emit %give %fact ~[(en-path id.tan)] pools-pool-transition+!>(p.tan))
   ==

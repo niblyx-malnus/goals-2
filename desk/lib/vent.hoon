@@ -99,7 +99,6 @@
       =^  cards  agent  (on-watch:ag path)
       [cards this]
       [%vent @ta @ta @ta ~]  ?>(=(src.bowl (slav %p i.t.path)) `this)
-      [%vent-on-arvo ~]      ?>(=(our src):bowl `this)
       [%vent-on-agent ~]     ?>(=(our src):bowl `this) 
     ==
   ::
@@ -126,9 +125,7 @@
       ?.  ?=([%khan %arow *] sign-arvo)
         (on-arvo:def wire sign-arvo)
       (vent-arow:vnt wire p.sign-arvo)
-    =;  =card
-      [[card cards] this]
-    (arvo-update wire sign-arvo bowl)
+    [cards this]
   ::
   ++  on-fail
     |=  [=term =tang]
@@ -141,9 +138,4 @@
   |=  [=wire =sign:agent:gall =bowl:gall]
   ^-  card
   [%give %fact ~[/vent-on-agent] %noun !>(`noun`[bowl wire sign])]
-::
-++  arvo-update
-  |=  [=wire =sign-arvo =bowl:gall]
-  ^-  card
-  [%give %fact ~[/vent-on-arvo] %noun !>(`noun`[bowl wire sign-arvo])]
 --

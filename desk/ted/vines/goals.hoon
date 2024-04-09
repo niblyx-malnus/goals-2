@@ -18,7 +18,7 @@
 =*  mhc  ~(. gol-cli-membership gowl)
 =*  ghc  ~(. vine:goals gowl)
 ::
-~&  "%goals vine: receiving mark {(trip mark)}"
+~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
     %goal-membership-action

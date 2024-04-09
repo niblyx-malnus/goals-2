@@ -122,7 +122,9 @@
   ^-  form:m
   ;<  =pools:p   bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
   =/  =pool:p   (~(gut by pools) pid *pool:p)
-  ?>  (~(has by private.pool-data.pool) 'goalsPool')
+  ?.  (~(has by private.pool-data.pool) 'goalsPool')
+    ~&  "%goals vine: ignoring watch for invalid %goals pool id"
+    (pure:m ~)
   %:  agent-watch-path
     %goals
     /pool/(scot %p host.pid)/[name.pid]
