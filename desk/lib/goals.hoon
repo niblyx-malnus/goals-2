@@ -114,6 +114,7 @@
           %|
         this(settings.local.store (~(del by settings.local.store) p.p.tan))
       ==
+      ::
         %create-pool
       ?>  =(our.bowl host.pid.tan)
       ?<  (~(has by pools.store) pid.tan)
@@ -474,10 +475,6 @@
       ?>  =(our src):gowl
       ~&  >>  "receiving %pools transition {<`@tas`-.tan>} in %goals vine"
       ?+    -.tan  (pure:m !>(~))
-          %create-pool
-        ;<  ~  bind:m  (watch-goals-pool id.tan)
-        (pure:m !>(~))
-        ::
           %update-pool
         (handle-pools-pool-transition [id p]:tan)
       ==
@@ -495,6 +492,8 @@
         ::
           %update-members
         ?.  =(our.gowl host.id)
+          (pure:m !>(~))
+        ?:  =(member.tan host.id)
           (pure:m !>(~))
         ?~  roles.tan
           ;<  ~  bind:m  (set-goals-pool-role id member.tan ~)
