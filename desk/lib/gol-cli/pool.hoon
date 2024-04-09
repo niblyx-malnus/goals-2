@@ -315,8 +315,11 @@
   |=  [=ship mod=ship]
   ^-  ?
   ?:  =(ship host.pid.pool)
-    ~|("Cannot change host.pid.perms." !!)
+    ~|("Cannot change host perms." !!)
   ?.  (check-pool-edit-perm mod)
+    ~&  >>>  pid+pid.pool
+    ~&  >>>  ship+ship
+    ~&  >>>  mod+mod
     ~|("Do not have host or admin perms." !!)
   ?:  ?&  =((~(get by perms.pool) ship) (some (some %admin)))
           !|(=(mod host.pid.pool) =(mod ship))
@@ -798,7 +801,7 @@
 ++  set-pool-role
   |=  [=ship role=(unit role:gol) mod=ship]
   ^-  _this
-  ?>  (check-pool-role-mod mod mod)
+  ?>  (check-pool-role-mod ship mod)
   ?~  role
     =/  pore  (replace-chiefs (sy ~[ship]))
     =/  pore  (purge-deputies:pore (sy ~[ship]))
