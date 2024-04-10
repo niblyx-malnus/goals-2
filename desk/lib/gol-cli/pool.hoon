@@ -196,7 +196,7 @@
   |=  mod=ship
   ^-  ?
   ?|  =(mod host.pid.pool)
-      ?=([~ %admin] (~(got by perms.pool) mod))
+      ?=(%admin (~(got by perms.pool) mod))
   ==
 :: host, admin or creator
 ::
@@ -204,7 +204,7 @@
   |=  mod=ship
   ^-  ?
   ?|  =(mod host.pid.pool)
-      ?=([~ ?(%admin %creator)] (~(got by perms.pool) mod))
+      ?=(?(%admin %creator) (~(got by perms.pool) mod))
   ==
 :: most senior ancestor
 ::
