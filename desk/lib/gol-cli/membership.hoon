@@ -161,7 +161,7 @@
   |=  [=id:p member=ship =role:gol mod=ship]
   =/  m  (strand ,~)
   ^-  form:m
-  %+  (vent ,~)  [our.gowl %pools]
+  %+  (vent ,~)  [our dap]:gowl
   :-  %goal-transition
   ^-  transition:axn
   :^  %update-pool  id  mod
