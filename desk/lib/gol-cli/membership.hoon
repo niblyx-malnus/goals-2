@@ -151,6 +151,13 @@
     /pool/(scot %p host.pid)/[name.pid]
   ==
 ::
+++  leave-goals-pool
+  |=  =pid:gol
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  agent-send-card  dap.gowl
+  [%pass (en-pool-path pid) %agent [host.pid dap.gowl] %leave ~]
+::
 ++  delete-goals-pool
   |=  =pid:gol
   =/  m  (strand ,~)
@@ -181,7 +188,7 @@
   |=  [=id:p member=ship roles=(unit (each roles:p roles:p))]
   =/  m  (strand ,~)
   ^-  form:m
-  %+  poke  [our dap]:gowl
+  %+  poke  [our.gowl %pools]
   :-  %pools-transition  !>
   ^-  transition:p
   :+  %update-pool  id
@@ -204,13 +211,6 @@
   :-  %pools-action
   ^-  action:p
   [%leave-pool id]
-::
-++  leave-goals-pool
-  |=  =pid:gol
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  agent-send-card  dap.gowl
-  [%pass (en-pool-path pid) %agent [host.pid dap.gowl] %leave ~]
 ::
 ++  extend-invite
   |=  [=id:p invitee=ship =invite:p]

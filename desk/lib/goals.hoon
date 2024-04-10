@@ -474,7 +474,6 @@
       ^-  form:m
       ?>  =(our src):gowl
       ~&  >>  "receiving %pools transition {<`@tas`-.tan>} in %goals vine"
-      ~&  tan
       ?+    -.tan  (pure:m !>(~))
           %update-pool
         (handle-pools-pool-transition [id p]:tan)
