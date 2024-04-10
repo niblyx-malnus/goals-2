@@ -533,7 +533,8 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  (vent:api ,~)  our.gowl
-    :-  %goals  :-  %goal-transition
+    :-  %goals
+    :-  %goal-transition
     :^  %update-pool  id  our.gowl
     [%set-pool-role member ~]
   ::

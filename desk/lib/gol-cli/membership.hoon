@@ -181,6 +181,9 @@
   ;<  =pools:p   bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
   =/  =pool:p    (~(got by pools) id)
   =/  current=roles:p  (~(got by members.pool) member)
+  ?:  =(current (sy ~[role]))
+    ~&  %role-already-set
+    (pure:m ~)
   ;<  ~  bind:m  (update-members id member ~ %| current)
   (update-members id member ~ %& (sy ~[role]))
 ::

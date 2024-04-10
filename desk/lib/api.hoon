@@ -6,6 +6,7 @@
   |=  [dst=ship pok=poke:api]
   =/  m  (strand:vio ,~)
   ^-  form:m
+  ~&  %api-poking
   %+  poke:vio  [dst ;;(dude:gall -.pok)]
   [;;(mark +<.pok) !>(+>.pok)]
 ::
@@ -14,6 +15,7 @@
   =/  m  (strand:vio ,a)
   |=  [dst=ship vnt=vent:api]
   ^-  form:m
+  ~&  %api-venting
   %+  (vent:vio ,a)  [dst ;;(dude:gall -.vnt)]
   [;;(mark +<.vnt) +>.vnt]
 ::

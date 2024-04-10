@@ -119,10 +119,23 @@
       [%delete-pool-metadata-field field=@t]
   ==
 ::
-+$  harvest-type
-  $%  [%main ~]
-      [%pool =pid]
-      [%goal =pid =gid]
++$  membership-action
+  $%  [%watch-pool =pid]
+      [%kick-member =pid member=ship]
+      [%set-pool-role =pid member=ship =role]
+      [%leave-pool =pid]
+      [%extend-invite =pid invitee=ship]
+      [%cancel-invite =pid invitee=ship]
+      [%accept-invite =pid]
+      [%reject-invite =pid]
+      [%delete-invite =pid]
+      [%extend-request =pid]
+      [%cancel-request =pid]
+      [%accept-request =pid requester=ship]
+      [%reject-request =pid requester=ship]
+      [%delete-request =pid requester=ship]
+      [%update-graylist =pid fields=(list graylist-field:p)]
+      [%update-blocked p=(each blocked:p blocked:p)]
   ==
 ::
 +$  goal-perms-check
@@ -143,6 +156,12 @@
       [%check-goal-deputies-mod-perm =pid =gid mod=ship]
       [%check-goal-open-to-mod-perm =pid =gid mod=ship]
       [%get-goal-permission-level =gid mod=ship]
+  ==
+::
++$  harvest-type
+  $%  [%main ~]
+      [%pool =pid]
+      [%goal =pid =gid]
   ==
 ::
 +$  goal-view
@@ -189,23 +208,4 @@
       [%outgoing-requests ~]
       [%setting setting=@t]
   == 
-::
-+$  membership-action
-  $%  [%watch-pool =pid]
-      [%kick-member =pid member=ship]
-      [%set-pool-role =pid member=ship =role]
-      [%leave-pool =pid]
-      [%extend-invite =pid invitee=ship]
-      [%cancel-invite =pid invitee=ship]
-      [%accept-invite =pid]
-      [%reject-invite =pid]
-      [%delete-invite =pid]
-      [%extend-request =pid]
-      [%cancel-request =pid]
-      [%accept-request =pid requester=ship]
-      [%reject-request =pid requester=ship]
-      [%delete-request =pid requester=ship]
-      [%update-graylist =pid fields=(list graylist-field:p)]
-      [%update-blocked p=(each blocked:p blocked:p)]
-  ==
 --
