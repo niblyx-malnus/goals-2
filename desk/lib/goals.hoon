@@ -488,6 +488,7 @@
       |=  [=id:p tan=pool-transition:p]
       =/  m  (strand ,vase)
       ^-  form:m
+      ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
       ?+    -.tan
         (pure:m !>(~))
           %init-pool
@@ -502,7 +503,9 @@
         ?~  roles.tan
           ;<  ~  bind:m  (del-pool-role id member.tan)
           (pure:m !>(~))
-        ;<  ~  bind:m  (set-pool-role id member.tan %viewer)
+        =/  =role:gol
+          (~(gut by perms:(~(got by pools.store) id)) member.tan %viewer)
+        ;<  ~  bind:m  (set-pool-role id member.tan role)
         (pure:m !>(~))
       ==
   ::

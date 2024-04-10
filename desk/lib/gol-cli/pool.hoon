@@ -801,6 +801,7 @@
     =/  pore  (replace-chiefs (sy ~[ship]))
     =/  pore  (purge-deputies:pore (sy ~[ship]))
     pore(perms.pool (~(del by perms.pool) ship))
+  ?<  ?=(%host u.role)
   this(perms.pool (~(put by perms.pool) ship u.role))
 :: set the chief of a goal or optionally all its subgoals
 ::

@@ -28,6 +28,7 @@
     ::
       %set-pool-role
     ?>  =(our.gowl host.pid.act)
+    ~&  >>  %setting-pool-role
     ;<  ~  bind:m  (goals-set-role pid.act member.act role.act src.gowl)
     ;<  ~  bind:m  (pools-set-role [pid member role]:act)
     (pure:m !>(~))
