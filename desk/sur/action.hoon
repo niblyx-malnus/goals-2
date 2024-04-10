@@ -125,6 +125,26 @@
       [%goal =pid =gid]
   ==
 ::
++$  goal-perms-check
+  $%  [%check-pool-edit-perm =pid mod=ship]
+      [%check-root-create-perm =pid mod=ship]
+      [%stock-root =gid]
+      [%check-goal-master =pid =gid mod=ship]
+      [%get-ancestral-deputies =gid]
+      [%check-goal-super =pid =gid mod=ship]
+      [%check-goal-edit-perm =pid =gid mod=ship]
+      [%check-goal-create-perm =pid =gid mod=ship]
+      [%check-move-to-root-perm =pid =gid mod=ship]
+      [%nearest-common-ancestor a=gid b=gid]
+      [%check-move-to-goal-perm kid=gid dad=gid mod=ship]
+      [%check-pool-role-mod member=ship mod=ship]
+      [%check-open-to =gid mod=ship]
+      [%check-goal-chief-mod-perm =gid mod=ship]
+      [%check-goal-deputies-mod-perm =pid =gid mod=ship]
+      [%check-goal-open-to-mod-perm =pid =gid mod=ship]
+      [%get-goal-permission-level =gid mod=ship]
+  ==
+::
 +$  goal-view
   $%  [%pool-roots =pid]
       [%pool-archive =pid]
@@ -173,6 +193,7 @@
 +$  membership-action
   $%  [%watch-pool =pid]
       [%kick-member =pid member=ship]
+      [%set-pool-role =pid member=ship =role]
       [%leave-pool =pid]
       [%extend-invite =pid invitee=ship]
       [%cancel-invite =pid invitee=ship]
@@ -184,7 +205,7 @@
       [%accept-request =pid requester=ship]
       [%reject-request =pid requester=ship]
       [%delete-request =pid requester=ship]
-      [%update-blocked p=(each blocked:p blocked:p)]
       [%update-graylist =pid fields=(list graylist-field:p)]
+      [%update-blocked p=(each blocked:p blocked:p)]
   ==
 --

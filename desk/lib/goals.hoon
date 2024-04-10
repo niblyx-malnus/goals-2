@@ -496,9 +496,9 @@
         ?:  =(member.tan host.id)
           (pure:m !>(~))
         ?~  roles.tan
-          ;<  ~  bind:m  (set-goals-pool-role id member.tan ~)
+          ;<  ~  bind:m  (del-pool-role id member.tan)
           (pure:m !>(~))
-        ;<  ~  bind:m  (set-goals-pool-role id member.tan ~ %viewer)
+        ;<  ~  bind:m  (set-pool-role id member.tan %viewer)
         (pure:m !>(~))
       ==
   ::
@@ -510,15 +510,27 @@
     :-  %goal-membership-action
     ^-  membership-action:act
     [%watch-pool id]
+  :: Adds to %goals and %pools
   ::
-  ++  set-goals-pool-role
-    |=  [=pid:gol =ship role=(unit role:gol)]
+  ++  set-pool-role
+    |=  [=pid:gol member=ship =role:gol]
     =/  m  (strand ,~)
     ^-  form:m
-    %+  poke  [our dap]:gowl
-    :-  %goal-transition  !>
+    %+  (vent ,~)  [our dap]:gowl
+    :-  %goal-membership-action
+    ^-  membership-action:act
+    [%set-pool-role pid member role]
+  :: Deletes from %goals only (already removed in %pools)
+  ::
+  ++  del-pool-role
+    |=  [=id:p member=ship]
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  (vent ,~)  [our dap]:gowl
+    :-  %goal-transition
     ^-  transition:act
-    [%update-pool pid our.gowl %set-pool-role ship role]
+    :^  %update-pool  id  our.gowl
+    [%set-pool-role member ~]
   ::
   ++  create-pools-pool
     |=  $:  graylist-fields=(list graylist-field:p)

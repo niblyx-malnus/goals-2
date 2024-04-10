@@ -312,14 +312,14 @@
 :: checks if mod can modify ship's pool permissions
 ::
 ++  check-pool-role-mod
-  |=  [=ship mod=ship]
+  |=  [member=ship mod=ship]
   ^-  ?
-  ?:  =(ship host.pid.pool)
+  ?:  =(member host.pid.pool)
     ~|("Cannot change host perms." !!)
   ?.  (check-pool-edit-perm mod)
     ~|("Do not have host or admin perms." !!)
-  ?:  ?&  =((~(get by perms.pool) ship) (some (some %admin)))
-          !|(=(mod host.pid.pool) =(mod ship))
+  ?:  ?&  =((~(get by perms.pool) member) (some (some %admin)))
+          !|(=(mod host.pid.pool) =(mod member))
       ==
     ~|("Must be host or self to modify admin perms." !!)
   %&
@@ -792,8 +792,6 @@
 ::   create sets. We must also remove it from all goal chiefs and replace
 ::   the chief with its nearest non-deleted ancestor chief or the pool
 ::   host when no ancestor is available.
-:: If role is [~ u=~], make ship basic viewer.
-:: If role is [~ u=[~ u=?(%admin %creator)]], make ship ?(%admin %creator).
 ::
 ++  set-pool-role
   |=  [=ship role=(unit role:gol) mod=ship]

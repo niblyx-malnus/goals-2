@@ -16,6 +16,7 @@
     %-  of
     :~  [%watch-pool (ot ~[pid+pid])]
         [%kick-member (ot ~[pid+pid member+(su fed:ag)])]
+        [%set-pool-role (ot ~[pid+pid member+(su fed:ag) role+role])]
         [%leave-pool (ot ~[pid+pid])]
         [%extend-invite (ot ~[pid+pid invitee+(su fed:ag)])]
         [%cancel-invite (ot ~[pid+pid invitee+(su fed:ag)])]

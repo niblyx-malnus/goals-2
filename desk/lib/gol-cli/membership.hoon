@@ -1,6 +1,13 @@
 /-  gol=goals, axn=action, p=pools, spider
-/+  *ventio, pools
+/+  *ventio, pools, gol-cli-pool
 |_  =gowl
+++  en-pool-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
+++  de-pool-path
+  |=  =path
+  ^-  pid:gol
+  =+  ;;([%pool host=@ta name=@ta ~] path)
+  [(slav %p host) name]
+::
 ++  handle-membership-action
   =,  strand=strand:spider
   |=  act=membership-action:axn
@@ -14,20 +21,28 @@
     ::
       %kick-member
     ?>  =(our.gowl host.pid.act)
-    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+    ?>  (check-pool-role-mod:pl member.act src.gowl)
     ;<  ~  bind:m  (kick-member [pid member]:act)
+    (pure:m !>(~))
+    ::
+      %set-pool-role
+    ?>  =(our.gowl host.pid.act)
+    ;<  ~  bind:m  (goals-set-role pid.act member.act role.act src.gowl)
+    ;<  ~  bind:m  (pools-set-role [pid member role]:act)
     (pure:m !>(~))
     ::
       %leave-pool
     ?>  =(src our):gowl
-    ;<  ~  bind:m  (leave-pool pid.act)
-    :: TODO: hard or soft leave (leave pool or subscription)
-    :: TODO: leave %goals pool subscription
+    ;<  ~  bind:m  (leave-pools-pool pid.act)
+    ;<  ~  bind:m  (leave-goals-pool pid.act)
+    ;<  ~  bind:m  (delete-goals-pool pid.act)
     (pure:m !>(~))
     ::
       %extend-invite
     ?>  =(our.gowl host.pid.act)
-    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+    ?>  (check-pool-edit-perm:pl src.gowl)
     =/  =pool:gol  (~(got by pools.store) pid.act)
     =/  =invite:p
       %-  ~(gas by *metadata:p)
@@ -40,7 +55,8 @@
     ::
       %cancel-invite
     ?>  =(our.gowl host.pid.act)
-    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+    ?>  (check-pool-edit-perm:pl src.gowl)
     ;<  ~  bind:m  (cancel-invite pid.act invitee.act)
     (pure:m !>(~))
     ::
@@ -75,19 +91,22 @@
     ::
       %accept-request
     ?>  =(our.gowl host.pid.act)
-    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+    ?>  (check-pool-edit-perm:pl src.gowl)
     ;<  ~  bind:m  (accept-request pid.act requester.act)
     (pure:m !>(~))
     ::
       %reject-request
     ?>  =(our.gowl host.pid.act)
-    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+    ?>  (check-pool-edit-perm:pl src.gowl)
     ;<  ~  bind:m  (reject-request pid.act requester.act)
     (pure:m !>(~))
     ::
       %delete-request
     ?>  =(our.gowl host.pid.act)
-    :: TODO: assert src.gowl has appropriate permissions wrt pool
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+    ?>  (check-pool-edit-perm:pl src.gowl)
     ;<  ~  bind:m  (delete-request [pid requester]:act)
     (pure:m !>(~))
     ::
@@ -132,6 +151,42 @@
     /pool/(scot %p host.pid)/[name.pid]
   ==
 ::
+++  delete-goals-pool
+  |=  =pid:gol
+  =/  m  (strand ,~)
+  ^-  form:m
+  (poke [our dap]:gowl goal-transition+!>([%delete-pool pid]))
+::
+++  goals-set-role
+  |=  [=id:p member=ship =role:gol mod=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %pools]
+  :-  %goal-transition
+  ^-  transition:axn
+  :^  %update-pool  id  mod
+  [%set-pool-role member ~ role]
+::
+++  pools-set-role
+  |=  [=id:p member=ship =role:p]
+  =/  m  (strand ,~)
+  ^-  form:m
+  ;<  =pools:p   bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+  =/  =pool:p    (~(got by pools) id)
+  =/  current=roles:p  (~(got by members.pool) member)
+  ;<  ~  bind:m  (update-members id member ~ %| current)
+  (update-members id member ~ %& (sy ~[role]))
+::
+++  update-members
+  |=  [=id:p member=ship roles=(unit (each roles:p roles:p))]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  poke  [our dap]:gowl
+  :-  %pools-transition  !>
+  ^-  transition:p
+  :+  %update-pool  id
+  [%update-members member roles]
+::
 ++  kick-member
   |=  [=id:p member=ship]
   =/  m  (strand ,~)
@@ -141,7 +196,7 @@
   ^-  action:p
   [%kick-member id member]
 ::
-++  leave-pool
+++  leave-pools-pool
   |=  =id:p
   =/  m  (strand ,~)
   ^-  form:m
@@ -149,6 +204,13 @@
   :-  %pools-action
   ^-  action:p
   [%leave-pool id]
+::
+++  leave-goals-pool
+  |=  =pid:gol
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  agent-send-card  dap.gowl
+  [%pass (en-pool-path pid) %agent [host.pid dap.gowl] %leave ~]
 ::
 ++  extend-invite
   |=  [=id:p invitee=ship =invite:p]

@@ -51,7 +51,7 @@
     %noun  `this(tube-verb (tail !<([%verb ?] vase)))
     ::
     %moons  ~&(pilot-moons+!moons.pilots `this(moons.pilots !moons.pilots))
-    ::
+    
       %uni-ships
     =+  !<(ships=(set ship) vase)
     ~&  pilot-ships+(~(uni in ships.pilots) ships)
