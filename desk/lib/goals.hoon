@@ -1,5 +1,5 @@
 /-  gol=goals, p=pools, act=action
-/+  ventio, *gol-cli-util, pools, sub-count,
+/+  ventio, *gol-cli-util, pools, sub-count, api,
     pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
     gol-cli-goals, gs=gol-cli-state, goj=gol-cli-json
 |%
@@ -370,15 +370,17 @@
       |=  =transition:act
       =/  m  (strand ,~)
       ^-  form:m
-      %+  poke  [our dap]:gowl
-      goal-transition+!>(transition)
+      %+  poke:api  our.gowl
+      :-  %goals
+      goal-transition+transition
     ::
     ++  handle-compound-transition
       |=  =compound-transition:act
       =/  m  (strand ,~)
       ^-  form:m
-      %+  poke  [our dap]:gowl
-      goal-compound-transition+!>(compound-transition)
+      %+  poke:api  our.gowl
+      :-  %goals
+      goal-compound-transition+compound-transition
     --
   ::
   ++  handle-pool-action
@@ -451,8 +453,9 @@
       |=  =pool-transition:act
       =/  m  (strand ,~)
       ^-  form:m
-      %+  poke  [our dap]:gowl
-      :-  %goal-transition  !>
+      %+  poke:api  our.gowl
+      :-  %goals
+      :-  %goal-transition
       ^-  transition:act
       [%update-pool pid src.gowl pool-transition]
     ::
@@ -460,8 +463,9 @@
       |=  =compound-pool-transition:act
       =/  m  (strand ,~)
       ^-  form:m
-      %+  poke  [our dap]:gowl
-      :-  %goal-compound-transition  !>
+      %+  poke:api  our.gowl
+      :-  %goals
+      :-  %goal-compound-transition
       ^-  compound-transition:act
       [%update-pool pid src.gowl compound-pool-transition]
     --
@@ -506,7 +510,8 @@
     |=  =id:p
     =/  m  (strand ,~)
     ^-  form:m
-    %+  (vent ,~)  [our dap]:gowl
+    %+  (vent:api ,~)  our.gowl
+    :-  %goals
     :-  %goal-membership-action
     ^-  membership-action:act
     [%watch-pool id]
@@ -516,7 +521,8 @@
     |=  [=pid:gol member=ship =role:gol]
     =/  m  (strand ,~)
     ^-  form:m
-    %+  (vent ,~)  [our dap]:gowl
+    %+  (vent:api ,~)  our.gowl
+    :-  %goals
     :-  %goal-membership-action
     ^-  membership-action:act
     [%set-pool-role pid member role]
@@ -526,9 +532,8 @@
     |=  [=id:p member=ship]
     =/  m  (strand ,~)
     ^-  form:m
-    %+  (vent ,~)  [our dap]:gowl
-    :-  %goal-transition
-    ^-  transition:act
+    %+  (vent:api ,~)  our.gowl
+    :-  %goals  :-  %goal-transition
     :^  %update-pool  id  our.gowl
     [%set-pool-role member ~]
   ::
@@ -539,16 +544,18 @@
     =/  m  (strand ,id:p)
     ^-  form:m
     ;<  jon=json  bind:m
-      %+  (vent ,json)  [our.gowl %pools]
-      pools-action+[%create-pool graylist-fields pool-data-fields]
+      %+  (vent:api ,json)  our.gowl
+      :-  %pools  :-  %pools-action
+      [%create-pool graylist-fields pool-data-fields]
     (pure:m (id:dejs:pools jon))
   ::
   ++  update-pool-data
     |=  [=id:p fields=(list pool-data-field:p)]
     =/  m  (strand ,~)
     ^-  form:m
-    %+  poke  [our.gowl %pools]
-    :-  %pools-transition  !>
+    %+  poke:api  our.gowl
+    :-  %pools
+    :-  %pools-transition
     :+  %update-pool  id
     [%update-pool-data fields]
   ::
@@ -556,18 +563,18 @@
     |=  [=pid:gol title=@t]
     =/  m  (strand ,~)
     ^-  form:m
-    (poke [our dap]:gowl goal-transition+!>([%create-pool pid title]))
+    (poke:api our.gowl %goals %goal-transition %create-pool pid title)
   ::
   ++  delete-goals-pool
     |=  =pid:gol
     =/  m  (strand ,~)
     ^-  form:m
-    (poke [our dap]:gowl goal-transition+!>([%delete-pool pid]))
+    (poke:api our.gowl %goals %goal-transition %delete-pool pid)
   ::
   ++  delete-pools-pool
     |=  =id:p
     =/  m  (strand ,~)
     ^-  form:m
-    (poke [our.gowl %pools] pools-transition+!>([%delete-pool id]))
+    (poke:api our.gowl %pools %pools-transition %delete-pool id)
   --
 --

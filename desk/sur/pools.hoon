@@ -115,8 +115,6 @@
 ::
 +$  delegation
   $%  [%graylist =id requester=ship =request]
-      :: [%add-from-invite =id invitee=ship =invite]
-      :: [%add-from-request =id requester=ship =request]
   ==
 :: delegated graylist can allow conditionally based on metadata
 ::
