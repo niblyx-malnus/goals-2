@@ -9,7 +9,8 @@
 /=  x  /mar/goal/compound-transition
 /=  x  /mar/goal/local-action
 /=  x  /mar/goal/pool-action
-/=  x  /mar/goal/membership-action
+/=  x  /mar/goal/local-membership-action
+/=  x  /mar/goal/pool-membership-action
 /=  x  /mar/goal/view
 /=  x  /ted/vines/goals
 ::

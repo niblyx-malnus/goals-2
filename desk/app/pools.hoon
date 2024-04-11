@@ -1,9 +1,10 @@
-/+  p=pools, vent, bout, dbug, default-agent, verb, default-subs
+/+  p=pools, vent, bout, dbug, default-agent, verb, default-subs, sub-count
 /=  x  /ted/vines/pools
 /=  x  /mar/pools/transition
 /=  x  /mar/pools/pool-transition
 /=  x  /mar/pools/gesture
-/=  x  /mar/pools/action
+/=  x  /mar/pools/local-action
+/=  x  /mar/pools/pool-action
 ::
 |%
 +$  card     card:agent:gall
@@ -15,6 +16,7 @@
 %+  verb  |
 :: %-  agent:bout
 %-  agent:dbug
+%-  (agent ,[%pool path]):sub-count
 %-  agent:vent
 ^-  agent:gall
 |_  =bowl:gall

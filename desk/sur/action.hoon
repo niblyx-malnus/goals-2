@@ -119,23 +119,26 @@
       [%delete-pool-metadata-field field=@t]
   ==
 ::
-+$  membership-action
++$  local-membership-action
   $%  [%watch-pool =pid]
-      [%kick-member =pid member=ship]
-      [%set-pool-role =pid member=ship =role]
       [%leave-pool =pid]
-      [%extend-invite =pid invitee=ship]
-      [%cancel-invite =pid invitee=ship]
+      [%update-blocked p=(each blocked:p blocked:p)]
+      [%extend-request =pid]
+      [%cancel-request =pid]
       [%accept-invite =pid]
       [%reject-invite =pid]
       [%delete-invite =pid]
-      [%extend-request =pid]
-      [%cancel-request =pid]
-      [%accept-request =pid requester=ship]
-      [%reject-request =pid requester=ship]
-      [%delete-request =pid requester=ship]
-      [%update-graylist =pid fields=(list graylist-field:p)]
-      [%update-blocked p=(each blocked:p blocked:p)]
+  ==
+::
++$  pool-membership-action :: sent with pid
+  $%  [%kick-member member=ship]
+      [%set-pool-role member=ship =role]
+      [%update-graylist fields=(list graylist-field:p)]
+      [%extend-invite invitee=ship]
+      [%cancel-invite invitee=ship]
+      [%accept-request requester=ship]
+      [%reject-request requester=ship]
+      [%delete-request requester=ship]
   ==
 ::
 +$  goal-perms-check

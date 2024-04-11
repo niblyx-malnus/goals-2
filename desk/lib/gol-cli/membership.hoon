@@ -1,5 +1,5 @@
 /-  gol=goals, axn=action, p=pools, spider
-/+  *ventio, pools, gol-cli-pool
+/+  *ventio, pools, gol-cli-pool, sub-count
 |_  =gowl
 ++  en-pool-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
 ++  de-pool-path
@@ -8,29 +8,16 @@
   =+  ;;([%pool host=@ta name=@ta ~] path)
   [(slav %p host) name]
 ::
-++  handle-membership-action
+++  handle-local-membership-action
   =,  strand=strand:spider
-  |=  act=membership-action:axn
+  |=  act=local-membership-action:axn
   =/  m  (strand ,vase)
   ^-  form:m
+  ?>  =(src our):gowl
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   ?-    -.act
       %watch-pool
     ;<  ~  bind:m  (watch-valid-pool pid.act)
-    (pure:m !>(~))
-    ::
-      %kick-member
-    ?>  =(our.gowl host.pid.act)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
-    ?>  (check-pool-role-mod:pl member.act src.gowl)
-    ;<  ~  bind:m  (kick-member [pid member]:act)
-    (pure:m !>(~))
-    ::
-      %set-pool-role
-    ?>  =(our.gowl host.pid.act)
-    ~&  >>  %setting-pool-role
-    ;<  ~  bind:m  (goals-set-role pid.act member.act role.act src.gowl)
-    ;<  ~  bind:m  (pools-set-role [pid member role]:act)
     (pure:m !>(~))
     ::
       %leave-pool
@@ -40,40 +27,9 @@
     ;<  ~  bind:m  (delete-goals-pool pid.act)
     (pure:m !>(~))
     ::
-      %extend-invite
-    ?>  =(our.gowl host.pid.act)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
-    ?>  (check-pool-edit-perm:pl src.gowl)
-    =/  =pool:gol  (~(got by pools.store) pid.act)
-    =/  =invite:p
-      %-  ~(gas by *metadata:p)
-      :~  [%dudes a+~[s+%goals]]
-          [%from s+(scot %p src.gowl)]
-          [%title s+title.pool]
-      ==
-    ;<  ~  bind:m  (extend-invite pid.act invitee.act invite)
-    (pure:m !>(~))
-    ::
-      %cancel-invite
-    ?>  =(our.gowl host.pid.act)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
-    ?>  (check-pool-edit-perm:pl src.gowl)
-    ;<  ~  bind:m  (cancel-invite pid.act invitee.act)
-    (pure:m !>(~))
-    ::
-      %accept-invite
+      %update-blocked
     ?>  =(src our):gowl
-    ;<  ~  bind:m  (accept-invite pid.act)
-    (pure:m !>(~))
-    ::
-      %reject-invite
-    ?>  =(src our):gowl
-    ;<  ~  bind:m  (reject-invite pid.act)
-    (pure:m !>(~))
-    ::
-      %delete-invite
-    ?>  =(src our):gowl
-    ;<  ~  bind:m  (delete-invite pid.act)
+    ;<  ~  bind:m  (update-blocked p.act)
     (pure:m !>(~))
     ::
       %extend-request
@@ -90,35 +46,103 @@
     ;<  ~  bind:m  (cancel-request pid.act)
     (pure:m !>(~))
     ::
-      %accept-request
-    ?>  =(our.gowl host.pid.act)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+      %accept-invite
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (accept-invite pid.act)
+    (pure:m !>(~))
+    ::
+      %reject-invite
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (reject-invite pid.act)
+    (pure:m !>(~))
+    ::
+      %delete-invite
+    ?>  =(src our):gowl
+    ;<  ~  bind:m  (delete-invite pid.act)
+    (pure:m !>(~))
+  ==
+::
+++  handle-pool-membership-action
+  =,  strand=strand:spider
+  |=  [=pid:gol act=pool-membership-action:axn]
+  =/  m  (strand ,vase)
+  ^-  form:m
+  =/  pool-path=path  (en-pool-path pid)
+  ?.  =(our.gowl host.pid)
+    :: forward action to remote pool
+    :: (only returns when local copy synced)
+    ::
+    %:  vent-counted-action:vine:sub-count
+      [host.pid dap.gowl]
+      %-  ~(gas by *(map wire path))
+      :~  [`wire`[%goals pool-path] `path`[%goals pool-path]]
+          [`wire`[%pools pool-path] `path`[%pools pool-path]]
+      ==
+      goal-pool-membership-action+[pid act]
+    ==
+  :: deal with our pool
+  ::
+  ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+  ?-    -.act
+      %kick-member
+    ?>  =(our.gowl host.pid)
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
+    ?>  (check-pool-role-mod:pl member.act src.gowl)
+    ;<  ~  bind:m  (kick-member pid member.act)
+    (pure:m !>(~))
+    ::
+      %set-pool-role
+    ?>  =(our.gowl host.pid)
+    ~&  >>  %setting-pool-role
+    ;<  ~  bind:m  (goals-set-role pid member.act role.act src.gowl)
+    ;<  ~  bind:m  (pools-set-role pid [member role]:act)
+    (pure:m !>(~))
+    ::
+      %extend-invite
+    ?>  =(our.gowl host.pid)
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
     ?>  (check-pool-edit-perm:pl src.gowl)
-    ;<  ~  bind:m  (accept-request pid.act requester.act)
+    =/  =pool:gol  (~(got by pools.store) pid)
+    =/  =invite:p
+      %-  ~(gas by *metadata:p)
+      :~  [%dudes a+~[s+%goals]]
+          [%from s+(scot %p src.gowl)]
+          [%title s+title.pool]
+      ==
+    ;<  ~  bind:m  (extend-invite pid invitee.act invite)
+    (pure:m !>(~))
+    ::
+      %cancel-invite
+    ?>  =(our.gowl host.pid)
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
+    ?>  (check-pool-edit-perm:pl src.gowl)
+    ;<  ~  bind:m  (cancel-invite pid invitee.act)
+    (pure:m !>(~))
+    ::
+      %accept-request
+    ?>  =(our.gowl host.pid)
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
+    ?>  (check-pool-edit-perm:pl src.gowl)
+    ;<  ~  bind:m  (accept-request pid requester.act)
     (pure:m !>(~))
     ::
       %reject-request
-    ?>  =(our.gowl host.pid.act)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+    ?>  =(our.gowl host.pid)
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
     ?>  (check-pool-edit-perm:pl src.gowl)
-    ;<  ~  bind:m  (reject-request pid.act requester.act)
+    ;<  ~  bind:m  (reject-request pid requester.act)
     (pure:m !>(~))
     ::
       %delete-request
-    ?>  =(our.gowl host.pid.act)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid.act))
+    ?>  =(our.gowl host.pid)
+    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
     ?>  (check-pool-edit-perm:pl src.gowl)
-    ;<  ~  bind:m  (delete-request [pid requester]:act)
-    (pure:m !>(~))
-    ::
-      %update-blocked
-    ?>  =(src our):gowl
-    ;<  ~  bind:m  (update-blocked p.act)
+    ;<  ~  bind:m  (delete-request pid requester.act)
     (pure:m !>(~))
     ::
       %update-graylist
     ?>  =(src our):gowl
-    ;<  ~  bind:m  (update-graylist [pid fields]:act)
+    ;<  ~  bind:m  (update-graylist pid fields.act)
     (pure:m !>(~))
   ==
 ::
@@ -203,9 +227,9 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
-  ^-  action:p
-  [%kick-member id member]
+  :-  %pools-action  :-  id
+  ^-  pool-action:p
+  [%kick-member member]
 ::
 ++  leave-pools-pool
   |=  =id:p
@@ -213,7 +237,7 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
-  ^-  action:p
+  ^-  local-action:p
   [%leave-pool id]
 ::
 ++  extend-invite
@@ -221,18 +245,18 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
-  ^-  action:p
-  [%extend-invite id invitee invite]
+  :-  %pools-action  :-  id
+  ^-  pool-action:p
+  [%extend-invite invitee invite]
 ::
 ++  cancel-invite
   |=  [=id:p invitee=ship]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
-  ^-  action:p
-  [%cancel-invite id invitee]
+  :-  %pools-action  :-  id
+  ^-  pool-action:p
+  [%cancel-invite invitee]
 ::
 ++  accept-invite
   |=  =id:p
@@ -240,7 +264,7 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
-  ^-  action:p
+  ^-  local-action:p
   [%accept-invite id ~]
 ::
 ++  reject-invite
@@ -249,7 +273,7 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
-  ^-  action:p
+  ^-  local-action:p
   [%reject-invite id ~]
 ::
 ++  delete-invite
@@ -258,7 +282,7 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
-  ^-  action:p
+  ^-  local-action:p
   [%delete-invite id]
 ::
 ++  extend-request
@@ -267,7 +291,7 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
-  ^-  action:p
+  ^-  local-action:p
   [%extend-request id request]
 ::
 ++  cancel-request
@@ -276,7 +300,7 @@
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
   :-  %pools-action
-  ^-  action:p
+  ^-  local-action:p
   [%cancel-request id]
 ::
 ++  accept-request
@@ -284,35 +308,35 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
-  ^-  action:p
-  [%accept-request id requester ~]
+  :-  %pools-action  :-  id
+  ^-  pool-action:p
+  [%accept-request requester ~]
 ::
 ++  reject-request
   |=  [=id:p requester=ship]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
-  ^-  action:p
-  [%reject-request id requester ~]
+  :-  %pools-action  :-  id
+  ^-  pool-action:p
+  [%reject-request requester ~]
 ::
 ++  delete-request
   |=  [=id:p requester=ship]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
-  ^-  action:p
-  [%delete-request id requester]
+  :-  %pools-action  :-  id
+  ^-  pool-action:p
+  [%delete-request requester]
 ::
 ++  update-blocked
   |=  upd=(each blocked:p blocked:p)
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-transition
-  ^-  transition:p
+  :-  %pools-action
+  ^-  local-action:p
   [%update-blocked upd]
 ::
 ++  update-graylist
@@ -320,8 +344,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-transition
-  ^-  transition:p
-  :+  %update-pool  id
+  :-  %pools-action  :-  id
+  ^-  pool-action:p
   [%update-graylist fields]
 --

@@ -1,11 +1,11 @@
-|_  act=[path page]
+|_  act=[paths=(list path) page]
 ++  grow
   |%
   ++  noun  act
   --
 ++  grab
   |%
-  ++  noun  ,[path page]
+  ++  noun  ,[paths=(list path) page]
   --
 ++  grad  %noun
 --

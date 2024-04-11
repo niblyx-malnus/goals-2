@@ -1,11 +1,12 @@
 /-  p=pools, spider
-/+  *ventio, lib=pools
+/+  *ventio, lib=pools, sub-count
 =,  strand=strand:spider
 ^-  thread:spider
 ::
 =;  helper-core
 ::
 %-  vine-thread
+%-  vine:sub-count
 |=  [=gowl vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m
@@ -14,13 +15,14 @@
 ::
 ~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
 ?+  mark  (just-poke [our dap]:gowl mark vase) :: poke normally
-  %pools-view     (handle-pools-view:hc !<(view:p vase))
-  %pools-gesture  (handle-pools-gesture:hc !<(gesture:p vase))
-  %pools-action   (handle-pools-action:hc !<(action:p vase))
+  %pools-view           (handle-view:hc !<(view:p vase))
+  %pools-gesture        (handle-gesture:hc !<(gesture:p vase))
+  %pools-local-action   (handle-local-action:hc !<(local-action:p vase))
+  %pools-pool-action    (handle-pool-action:hc !<([id:p pool-action:p] vase))
 ==
 ::
 |_  =gowl
-++  handle-pools-view
+++  handle-view
   |=  vyu=view:p
   =/  m  (strand ,vase)
   ^-  form:m
@@ -59,7 +61,7 @@
     (pure:m !>(o+public.pool-data:(~(got by pools) id.vyu)))
   ==
 ::
-++  handle-pools-gesture
+++  handle-gesture
   |=  ges=gesture:p
   =/  m  (strand ,vase)
   ^-  form:m
@@ -125,14 +127,13 @@
     (pure:m !>(~))
   ==
 ::
-++  handle-pools-action
-  |=  act=action:p
+++  handle-local-action
+  |=  act=local-action:p
+  |^
   =/  m  (strand ,vase)
   ^-  form:m
-  :: only we can perform actions on our %pools agent
-  ::
   ?>  =(src our):gowl
-  ~&  "%pools vine: receiving action {(trip -.act)}"
+  ~&  "%pools vine: receiving local-action {(trip -.act)}"
   ?-    -.act
       %create-pool
     =/  title=@t  (extract-pool-title pool-data-fields.act)
@@ -147,36 +148,6 @@
     ;<  ~  bind:m  (delete-pool id.act)
     (pure:m !>(~))
     ::
-      %kick-member
-    ?>  =(our.gowl host.id.act)
-    ?<  =(our.gowl member.act) :: can't kick self as host
-    ;<  *  bind:m  ((soften ,~) (cancel-invite id.act member.act))
-    ;<  *  bind:m  ((soften ,~) (delete-request id.act member.act))
-    ;<  *  bind:m  ((soften ,~) (give-kick-gesture id.act member.act))
-    ;<  ~  bind:m  (kick-ship id.act member.act)
-    ;<  ~  bind:m  (update-members id.act member.act ~)
-    (pure:m !>(~))
-    ::
-      %kick-blacklisted
-    ?>  =(our.gowl host.id.act)
-    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-    =/  =pool:p  (~(got by pools) id.act)
-    ;<  [* sup=bitt:gall]  bind:m
-      (scry-hard ,[* bitt:gall] /gx/pools/vent/subscriptions/noun)
-    =/  subs=(list [=ship =path])  ~(val by sup)
-    |-
-    ?~  subs
-      (pure:m !>(~))
-    ?.  =(id.act (de-path:lib path.i.subs))
-      $(subs t.subs)
-    =/  =metadata:p  (~(gut by metadata.act) ship.i.subs ~)
-    ;<  auto=(unit auto:p)  bind:m
-      (graylist-resolution id.act ship.i.subs metadata)
-    ?.  |(?=([~ %|] auto) !(~(has by members.pool) ship.i.subs))
-      $(subs t.subs)
-    ;<  ~  bind:m  (kick-member id.act ship.i.subs)
-    $(subs t.subs)
-    ::
       %leave-pool
     ?<  =(our.gowl host.id.act) :: can't leave own pool
     ;<  *  bind:m  ((soften ,~) (cancel-request id.act))
@@ -185,17 +156,24 @@
     ;<  ~  bind:m  (delete-pool id.act)
     (pure:m !>(~))
     ::
-      %extend-invite
-    ?>  =(our.gowl host.id.act)
-    ?<  =(our.gowl invitee.act)
-    ;<  ~  bind:m  (give-invite-gesture [id invitee ~ invite]:act)
-    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~ invite.act)
+      %watch-pool
+    ;<  ~  bind:m  (watch-valid-pool id.act)
     (pure:m !>(~))
     ::
-      %cancel-invite
-    ?>  =(our.gowl host.id.act)
-    ;<  *  bind:m  ((soften ,~) (give-invite-gesture [id invitee ~]:act))
-    ;<  ~  bind:m  (update-outgoing-invites id.act invitee.act ~)
+      %update-blocked
+    ;<  ~  bind:m
+      (handle-transition ;;(transition:p act))
+    (pure:m !>(~))
+    ::
+      %extend-request
+    ?<  =(our.gowl host.id.act)
+    ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
+    ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
+    (pure:m !>(~))
+    ::
+      %cancel-request
+    ;<  *  bind:m  ((soften ,~) (give-request-gesture [id ~]:act))
+    ;<  ~  bind:m  (update-outgoing-requests id.act ~)
     (pure:m !>(~))
     ::
       %accept-invite
@@ -213,42 +191,109 @@
     ;<  *  bind:m  ((soften ,~) (give-delete-invite-gesture id.act))
     ;<  ~  bind:m  (update-incoming-invites id.act ~)
     (pure:m !>(~))
-    ::
-      %extend-request
-    ?<  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
-    ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
+  ==
+  ::
+  ++  handle-transition
+    |=  =transition:p
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  poke  [our.gowl %pools]
+    pools-transition+!>(transition)
+  --
+::
+++  handle-pool-action
+  |=  [=id:p act=pool-action:p]
+  |^
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ?>  =(src our):gowl
+  ?>  =(our.gowl host.id)
+  ~&  "%pools vine: receiving pool-action {(trip -.act)}"
+  ?-    -.act
+      %kick-member
+    ?>  =(our.gowl host.id)
+    ?<  =(our.gowl member.act) :: can't kick self as host
+    ;<  *  bind:m  ((soften ,~) (cancel-invite id member.act))
+    ;<  *  bind:m  ((soften ,~) (delete-request id member.act))
+    ;<  *  bind:m  ((soften ,~) (give-kick-gesture id member.act))
+    ;<  ~  bind:m  (kick-ship id member.act)
+    ;<  ~  bind:m  (update-members id member.act ~)
     (pure:m !>(~))
     ::
-      %cancel-request
-    ;<  *  bind:m  ((soften ,~) (give-request-gesture [id ~]:act))
-    ;<  ~  bind:m  (update-outgoing-requests id.act ~)
+      %kick-blacklisted
+    ?>  =(our.gowl host.id)
+    ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    =/  =pool:p  (~(got by pools) id)
+    ;<  [* sup=bitt:gall]  bind:m
+      (scry-hard ,[* bitt:gall] /gx/pools/vent/subscriptions/noun)
+    =/  subs=(list [=ship =path])  ~(val by sup)
+    |-
+    ?~  subs
+      (pure:m !>(~))
+    ?.  =(id (de-path:lib path.i.subs))
+      $(subs t.subs)
+    =/  =metadata:p  (~(gut by fake-requests.act) ship.i.subs ~)
+    ;<  auto=(unit auto:p)  bind:m
+      (graylist-resolution id ship.i.subs metadata)
+    ?.  |(?=([~ %|] auto) !(~(has by members.pool) ship.i.subs))
+      $(subs t.subs)
+    ;<  ~  bind:m  (kick-member id ship.i.subs)
+    $(subs t.subs)
+    ::
+      %update-graylist
+    ;<  ~  bind:m
+      (handle-pool-transition ;;(pool-transition:p act))
+    ;<  ~  bind:m  (kick-blacklisted id ~)
+    (pure:m !>(~))
+    ::
+      %update-pool-data
+    ;<  ~  bind:m
+      (handle-pool-transition ;;(pool-transition:p act))
+    (pure:m !>(~))
+    ::
+      %extend-invite
+    ?>  =(our.gowl host.id)
+    ?<  =(our.gowl invitee.act)
+    ;<  ~  bind:m  (give-invite-gesture id [invitee ~ invite]:act)
+    ;<  ~  bind:m  (update-outgoing-invites id invitee.act ~ invite.act)
+    (pure:m !>(~))
+    ::
+      %cancel-invite
+    ?>  =(our.gowl host.id)
+    ;<  *  bind:m  ((soften ,~) (give-invite-gesture id invitee.act ~))
+    ;<  ~  bind:m  (update-outgoing-invites id invitee.act ~)
     (pure:m !>(~))
     ::
       %accept-request
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-response-gesture id.act requester.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-incoming-request-response id.act requester.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-members id.act requester.act ~ &+~)
-    ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture [id requester]:act))
+    ?>  =(our.gowl host.id)
+    ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-incoming-request-response id requester.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-members id requester.act ~ &+~)
+    ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture id requester.act))
     (pure:m !>(~))
     ::
       %reject-request
-    ?>  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-response-gesture id.act requester.act [~ | metadata.act])
-    ;<  ~  bind:m  (update-incoming-request-response id.act requester.act [~ | metadata.act])
+    ?>  =(our.gowl host.id)
+    ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ | metadata.act])
+    ;<  ~  bind:m  (update-incoming-request-response id requester.act [~ | metadata.act])
     (pure:m !>(~))
     ::
       %delete-request
-    ?>  =(our.gowl host.id.act)
-    ;<  *  bind:m  ((soften ,~) (give-delete-request-gesture [id requester]:act))
-    ;<  ~  bind:m  (update-incoming-requests id.act requester.act ~)
-    (pure:m !>(~))
-    ::
-      %watch-pool
-    ;<  ~  bind:m  (watch-valid-pool id.act)
+    ?>  =(our.gowl host.id)
+    ;<  *  bind:m  ((soften ,~) (give-delete-request-gesture id requester.act))
+    ;<  ~  bind:m  (update-incoming-requests id requester.act ~)
     (pure:m !>(~))
   ==
+  ::
+  ++  handle-pool-transition
+    |=  =pool-transition:p
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  poke  [our.gowl %pools]
+    :-  %pools-transition  !>
+    ^-  transition:p
+    [%update-pool id pool-transition]
+  --
 ::
 ++  unique-id
   |=  name=@t
@@ -581,44 +626,53 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-action
-  ^-  action:p
-  [%kick-member id member]
+  :-  %pools-pool-action  :-  id
+  ^-  pool-action:p
+  [%kick-member member]
+::
+++  kick-blacklisted
+  |=  [=id:p fake-requests=(map ship request:p)]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-pool-action  :-  id
+  ^-  pool-action:p
+  [%kick-blacklisted fake-requests]
 ::
 ++  accept-request
   |=  [=id:p requester=ship =metadata:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-action
-  ^-  action:p
-  [%accept-request id requester metadata]
+  :-  %pools-pool-action  :-  id
+  ^-  pool-action:p
+  [%accept-request requester metadata]
 ::
 ++  reject-request
   |=  [=id:p requester=ship =metadata:p]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-action
-  ^-  action:p
-  [%reject-request id requester metadata]
+  :-  %pools-pool-action  :-  id
+  ^-  pool-action:p
+  [%reject-request requester metadata]
 ::
 ++  cancel-invite
   |=  [=id:p invitee=ship]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-action
-  ^-  action:p
-  [%cancel-invite id invitee]
+  :-  %pools-pool-action  :-  id
+  ^-  pool-action:p
+  [%cancel-invite invitee]
 ::
 ++  delete-invite
   |=  =id:p
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-action
-  ^-  action:p
+  :-  %pools-local-action
+  ^-  local-action:p
   [%delete-invite id]
 ::
 ++  cancel-request
@@ -626,8 +680,8 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-action
-  ^-  action:p
+  :-  %pools-local-action
+  ^-  local-action:p
   [%cancel-request id]
 ::
 ++  delete-request
@@ -635,9 +689,9 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-action
-  ^-  action:p
-  [%delete-request id requester]
+  :-  %pools-pool-action  :-  id
+  ^-  pool-action:p
+  [%delete-request requester]
 ::
 ++  delegate-graylist
   |=  [=dude:gall =id:p requester=ship =request:p]
@@ -648,66 +702,4 @@
   :-  %pools-delegation
   ^-  delegation:p
   [%graylist id requester request]
-::
-:: ++  get-outgoing-invite
-::   |=  [=id:p invitee=ship]
-::   =/  m  (strand ,invite:p)
-::   ^-  form:m
-::   ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-::   =/  =pool:p   (~(got by pools) id)
-::   (pure:m invite:(~(got by outgoing-invites.pool) invitee))
-::
-:: ++  delegate-add-from-invite
-::   |=  [=id:p invitee=ship]
-::   =/  m  (strand ,(map dude:gall goof))
-::   ^-  form:m
-::   =|  goofs=(map dude:gall goof)
-::   ;<  =invite:p  bind:m  (get-outgoing-invite id invitee)
-::   =/  dudes  ((ar so):dejs:format (~(gut by invite) 'dudes' a+~))
-::   |-
-::   ?~  dudes
-::     (pure:m goofs)
-::   ;<  del=(each ~ goof)  bind:m
-::     %-  (soften ,~)
-::     %+  (set-timeout ,~)  timeout
-::     %+  (vent ,~)
-::       [our.gowl i.dudes]
-::     :-  %pools-delegation
-::     ^-  delegation:p
-::     [%add-from-invite id invitee invite]
-::   %=  $
-::     dudes  t.dudes
-::     goofs  ?-(-.del %& goofs, %| (~(put by goofs) i.dudes p.del))
-::   ==
-::
-:: ++  get-incoming-request
-::   |=  [=id:p requester=ship]
-::   =/  m  (strand ,request:p)
-::   ^-  form:m
-::   ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-::   =/  =pool:p   (~(got by pools) id)
-::   (pure:m request:(~(got by incoming-requests.pool) requester))
-::
-:: ++  delegate-add-from-request
-::   |=  [=id:p requester=ship]
-::   =/  m  (strand ,(map dude:gall goof))
-::   ^-  form:m
-::   =|  goofs=(map dude:gall goof)
-::   ;<  =request:p  bind:m  (get-incoming-request id requester)
-::   =/  dudes  ((ar so):dejs:format (~(gut by request) 'dudes' a+~))
-::   |-
-::   ?~  dudes
-::     (pure:m goofs)
-::   ;<  del=(each ~ goof)  bind:m
-::     %-  (soften ,~)
-::     %+  (set-timeout ,~)  timeout
-::     %+  (vent ,~)
-::       [our.gowl i.dudes]
-::     :-  %pools-delegation
-::     ^-  delegation:p
-::     [%add-from-request id requester request]
-::   %=  $
-::     dudes  t.dudes
-::     goofs  ?-(-.del %& goofs, %| (~(put by goofs) i.dudes p.del))
-::   ==
 --

@@ -21,8 +21,11 @@
 ~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
-    %goal-membership-action
-  (handle-membership-action:mhc !<(membership-action:axn vase))
+    %goal-local-membership-action
+  (handle-local-membership-action:mhc !<(local-membership-action:axn vase))
+  ::
+    %goal-pool-membership-action
+  (handle-pool-membership-action:mhc !<([pid:gol pool-membership-action:axn] vase))
   ::
     %goal-local-action
   (handle-local-action:ghc !<(local-action:axn vase))

@@ -54,9 +54,9 @@
       [%update-outgoing-requests =id request=(unit request)]
       [%update-incoming-invite-response =id =status]
       [%update-outgoing-request-response =id =status]
-      [%update-pool =id p=pool-transition]
       [%create-pool =id]
       [%delete-pool =id]
+      [%update-pool =id p=pool-transition]
   ==
 ::
 +$  pool-transition
@@ -82,23 +82,29 @@
       [%public p=(list [@t (unit json)])]
   ==
 ::
-+$  action
++$  local-action
   $%  [%create-pool graylist-fields=(list graylist-field) pool-data-fields=(list pool-data-field)]
       [%delete-pool =id]
-      [%kick-member =id member=ship]
-      [%kick-blacklisted =id metadata=(map ship metadata)]
       [%leave-pool =id]
-      [%extend-invite =id invitee=ship =invite]
-      [%cancel-invite =id invitee=ship]
+      [%watch-pool =id]
+      [%update-blocked p=(each blocked blocked)] :: %&: uni; %|: dif
+      [%extend-request =id =request]
+      [%cancel-request =id]
       [%accept-invite =id =metadata]
       [%reject-invite =id =metadata]
       [%delete-invite =id]
-      [%extend-request =id =request]
-      [%cancel-request =id]
-      [%accept-request =id requester=ship =metadata]
-      [%reject-request =id requester=ship =metadata]
-      [%delete-request =id requester=ship]
-      [%watch-pool =id]
+  ==
+::
++$  pool-action :: sent with id
+  $%  [%kick-member member=ship]
+      [%kick-blacklisted fake-requests=(map ship request)]
+      [%update-graylist fields=(list graylist-field)]
+      [%update-pool-data fields=(list pool-data-field)]
+      [%extend-invite invitee=ship =invite]
+      [%cancel-invite invitee=ship]
+      [%accept-request requester=ship =metadata]
+      [%reject-request requester=ship =metadata]
+      [%delete-request requester=ship]
   ==
 ::
 +$  gesture

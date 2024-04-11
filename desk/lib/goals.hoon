@@ -393,8 +393,7 @@
       ::
       %:  vent-counted-action:vine:sub-count
         [host.pid dap.gowl]
-        `path`pool-path
-        `wire`pool-path
+        (my [`wire`[%goals pool-path] `path`[%goals pool-path]]~)
         goal-pool-action+[pid axn]
       ==
     :: deal with our pool
@@ -510,8 +509,8 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  (vent ,~)  [our.gowl %goals]
-    :-  %goal-membership-action
-    ^-  membership-action:act
+    :-  %goal-local-membership-action
+    ^-  local-membership-action:act
     [%watch-pool id]
   :: Adds to %goals and %pools
   ::
@@ -520,9 +519,10 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  (vent ,~)  [our.gowl %goals]
-    :-  %goal-membership-action
-    ^-  membership-action:act
-    [%set-pool-role pid member role]
+    :-  %goal-pool-membership-action
+    :-  pid
+    ^-  pool-membership-action:act
+    [%set-pool-role member role]
   :: Deletes from %goals only (already removed in %pools)
   ::
   ++  del-pool-role

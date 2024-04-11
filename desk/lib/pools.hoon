@@ -285,13 +285,21 @@
       ?>  ?=([host=@ta name=@ta ~] +<)
       [(slav %p host) name]
     pa
-  ++  action
+  ++  pool-action
     |=  jon=json
-    ^-  ^action
+    ^-  ^pool-action
     :: %.  jon
     :: %-  of
     :: :~
     :: ==
-    *^action
+    *^pool-action
+  ++  local-action
+    |=  jon=json
+    ^-  ^local-action
+    :: %.  jon
+    :: %-  of
+    :: :~
+    :: ==
+    *^local-action
   --
 --

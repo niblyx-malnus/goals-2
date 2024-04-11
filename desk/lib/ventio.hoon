@@ -293,6 +293,18 @@
     (agent-send-cards dude cards)
   $(cards [[%give %kick paths [~ i.ships]] cards])
 ::
+++  take-any-fact
+  =/  m  (strand ,[wire cage])
+  ^-  form:m
+  |=  tin=strand-input:strand
+  ?+  in.tin  `[%skip ~]
+      ~  `[%wait ~]
+      [~ %agent * %fact *]
+    ?.  ?=([%watch *] wire.u.in.tin)
+      `[%skip ~]
+    `[%done [t.wire cage.sign]:u.in.tin]
+  ==
+::
 ++  take-special-fact
   |*  [=wire =mark =mold]
   |=  take=$-(mold ?)

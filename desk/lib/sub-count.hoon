@@ -9,6 +9,10 @@
 /=  x  /mar/wire-count
 /=  x  /mar/subscription-kick
 |%
+:: assume the first item in the path is the agent name
++$  counted-action  [paths=(list path) =page]
++$  counted-update  [count=@ =page]
+::
 ++  agent
   =<  agent
   |%
@@ -137,14 +141,14 @@
     ++  make-counted-update
       |=  [count=@ =mark =vase]
       ^-  cage
-      counted-update+!>([count mark q.vase])
+      counted-update+!>(`counted-update`[count mark q.vase])
     ::
     ++  take-counted-update
       |=  =vase
       ^-  [@ cage]
       ~&  %taking-counted-update
       ~&  p.vase
-      =+  !<([count=@ =page] vase)
+      =+  !<(counted-update vase)
       =/  nase=^vase  ((get-tube p.page) !>(q.page))
       ~&  [count+count mark+p.page]
       %-  (slog (sell nase) ~)
@@ -218,37 +222,85 @@
     ^-  form:m
     ?+    mark  (vine gowl vid mark vase) :: delegate to original
         %counted-action
-      =+  !<([=path =page] vase)
+      =+  `counted-action`!<([paths=(list path) =page] vase)
+      ;<  ~           bind:m  (check-subscriber src.gowl paths)
       ;<  =tube:clay  bind:m  (build-our-tube q.byk.gowl %noun p.page)
       ;<  vnt=^vase   bind:m  (vine gowl vid p.page (tube !>(q.page)))
+      =|  counts=(map path @)
+      |-
+      ?~  paths
+        (pure:m (slop !>(counts) vnt))
       ;<  count=@  bind:m
-        (scry-hard ,@ :(weld /gx/[dap.gowl]/sub-count/path path /noun))
-      (pure:m (slop !>(count) vnt))
+        :: assume first item of path is agent name
+        ?>  ?=(^ i.paths)
+        (scry-hard ,@ :(weld /gx/[i.i.paths]/sub-count/path t.i.paths /noun))
+      $(paths t.paths, counts (~(put by counts) i.paths count))
     ==
+  ::
+  ++  check-subscriber
+    =,  vio
+    |=  [src=ship paths=(list path)] :: assume first item of path is agent name
+    =/  m  (strand ,~)
+    ^-  form:m
+    ?~  paths
+      (pure:m ~)
+    ?>  ?=(^ i.paths)
+    ;<  [wex=boat:gall sup=bitt:gall]  bind:m
+      (scry-hard ,[boat bitt]:gall /gx/[i.i.paths]/vent/subscriptions/noun)
+    ?.  (~(has in (sy ~(val by sup))) [src t.i.paths])
+      ~|("{<src>} not subscribed to {<path>}" !!)
+    $(paths t.paths)
+
   ::
   ++  vent-counted-action
     =,  vio
-    |=  [=dock =path =wire =page]
+    |=  [=dock paths=(map wire path) =page]
     =/  m  (strand ,^vase)
     ^-  form:m
-    ;<  our=@p  bind:m  get-our
-    ;<  ~       bind:m  (watch /sub-counts [our q.dock] /sub-counts)
-    ;<  [count=@ vnt=*]  bind:m
-      ((vent ,[@ *]) dock counted-action+[path page])
+    :: watch sub-count wires
+    ::
+    =/  dudes=(list dude:gall)
+      %+  turn  ~(tap in ~(key by paths))
+      |=(=wire ?>(?=(^ wire) i.wire))
+    ;<  ~       bind:m  (watch-sub-counts dudes)
+    :: vent the counted action
+    ::
+    ;<  [counts=(map path @) vnt=*]  bind:m
+      ((vent ,[(map path @) *]) dock counted-action+[~(val by paths) page])
     |-
-    ;<  upd=cage  bind:m  (take-fact /sub-counts)
+    ?:  =(0 ~(wyt by paths))
+      ~?  >>  ?=(^ counts)
+        ["strange count residue" counts]
+      (pure:m !>(vnt))
+    :: take a sub-counts fact
+    ::
+    ;<  [sub-counts-wire=wire upd=cage]  bind:m  take-any-fact
+    ?.  ?=([@ta %sub-counts ~] sub-counts-wire)  $
+    =/  =dude:gall  i.sub-counts-wire
     ?.  ?=(%wire-count p.upd)  $
-    =+  !<([wyre=^wire new-count=@] q.upd)
-    ?.  =(wyre wire)           $
+    =+  !<([=wire new-count=@] q.upd)
+    ?~  pat=(~(get by paths) [dude wire])  $
+    ::  if the new count exceeds the received count, it's done
+    =/  count=@  (~(got by counts) u.pat)
     ?.  (gte new-count count)  $
-    ~&  >>  `@t`(cat 3 'count: ' (numb count))
-    ~&  >>  `@t`(cat 3 'new count: ' (numb new-count))
-    (pure:m !>(vnt))
+    ~&  >>  (crip (weld "{<dude>} {<wire>} count: " (numb count)))
+    ~&  >>  (crip (weld "{<dude>} {<wire>} new count: " (numb new-count)))
+    $(paths (~(del by paths) [dude wire]), counts (~(del by counts) u.pat))
   ::
-  ++  numb :: from numb:enjs:format
+  ++  watch-sub-counts
+    =,  vio
+    |=  dudes=(list dude:gall)
+    =/  m  (strand ,~)
+    ^-  form:m
+    ?~  dudes  (pure:m ~)
+    ;<  our=@p  bind:m  get-our
+    ;<  ~  bind:m  (watch /[i.dudes]/sub-counts [our i.dudes] /sub-counts)
+    $(dudes t.dudes)
+  ::
+  ++  numb :: adapted from numb:enjs:format
     |=  a=@u
-    ?:  =(0 a)  '0'
-    %-  crip
+    ^-  tape
+    ?:  =(0 a)  "0"
     %-  flop
     |-  ^-  tape
     ?:(=(0 a) ~ [(add '0' (mod a 10)) $(a (div a 10))])

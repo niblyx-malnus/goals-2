@@ -1,14 +1,13 @@
 /+  *pools
-|_  act=action
+|_  act=local-action
 ++  grow
   |%
   ++  noun  act
   --
 ++  grab
   |%
-  ++  noun  action
-  ++  json  action:dejs
+  ++  noun  local-action
+  ++  json  local-action:dejs
   --
 ++  grad  %noun
 --
-
