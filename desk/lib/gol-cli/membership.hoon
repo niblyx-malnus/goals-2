@@ -227,7 +227,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action  :-  id
+  :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%kick-member member]
 ::
@@ -236,7 +236,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
+  :-  %pools-local-action
   ^-  local-action:p
   [%leave-pool id]
 ::
@@ -245,7 +245,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action  :-  id
+  :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%extend-invite invitee invite]
 ::
@@ -254,7 +254,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action  :-  id
+  :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%cancel-invite invitee]
 ::
@@ -263,7 +263,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
+  :-  %pools-local-action
   ^-  local-action:p
   [%accept-invite id ~]
 ::
@@ -272,7 +272,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
+  :-  %pools-local-action
   ^-  local-action:p
   [%reject-invite id ~]
 ::
@@ -281,7 +281,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
+  :-  %pools-local-action
   ^-  local-action:p
   [%delete-invite id]
 ::
@@ -290,7 +290,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
+  :-  %pools-local-action
   ^-  local-action:p
   [%extend-request id request]
 ::
@@ -299,7 +299,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
+  :-  %pools-local-action
   ^-  local-action:p
   [%cancel-request id]
 ::
@@ -308,7 +308,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action  :-  id
+  :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%accept-request requester ~]
 ::
@@ -317,7 +317,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action  :-  id
+  :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%reject-request requester ~]
 ::
@@ -326,7 +326,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action  :-  id
+  :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%delete-request requester]
 ::
@@ -335,7 +335,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action
+  :-  %pools-local-action
   ^-  local-action:p
   [%update-blocked upd]
 ::
@@ -344,7 +344,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %pools]
-  :-  %pools-action  :-  id
+  :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%update-graylist fields]
 --
