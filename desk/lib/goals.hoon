@@ -393,7 +393,9 @@
       ::
       %:  vent-counted-action:vine:sub-count
         [host.pid dap.gowl]
-        (my [`wire`[%goals pool-path] `path`[%goals pool-path]]~)
+        %-  ~(gas by *(map wire path))
+        :~  [`wire`[%goals pool-path] `path`[%goals pool-path]]
+        ==
         goal-pool-action+[pid axn]
       ==
     :: deal with our pool
@@ -526,12 +528,12 @@
   :: Deletes from %goals only (already removed in %pools)
   ::
   ++  del-pool-role
-    |=  [=id:p member=ship]
+    |=  [=pid:gol member=ship]
     =/  m  (strand ,~)
     ^-  form:m
     %+  (vent ,~)  [our.gowl %goals]
     :-  %goal-transition
-    :^  %update-pool  id  our.gowl
+    :^  %update-pool  pid  our.gowl
     [%set-pool-role member ~]
   ::
   ++  create-pools-pool

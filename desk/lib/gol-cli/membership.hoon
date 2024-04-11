@@ -89,6 +89,7 @@
     =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
     ?>  (check-pool-role-mod:pl member.act src.gowl)
     ;<  ~  bind:m  (kick-member pid member.act)
+    ;<  ~  bind:m  (del-pool-role pid member.act)
     (pure:m !>(~))
     ::
       %set-pool-role
@@ -230,6 +231,16 @@
   :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%kick-member member]
+:: Deletes from %goals only (already removed in %pools)
+::
+++  del-pool-role
+  |=  [=pid:gol member=ship]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl %goals]
+  :-  %goal-transition
+  :^  %update-pool  pid  our.gowl
+  [%set-pool-role member ~]
 ::
 ++  leave-pools-pool
   |=  =id:p
