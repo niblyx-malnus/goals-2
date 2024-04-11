@@ -7,8 +7,8 @@
 ++  emit   |=(=card this(cards [card cards]))
 ++  emil   |=(cadz=(list card) this(cards (weld cadz cards)))
 ::
-++  en-path  |=(=id `path`/pool/(scot %p host.id)/[name.id])
-++  de-path
+++  en-pool-path  |=(=id `path`/pool/(scot %p host.id)/[name.id])
+++  de-pool-path
   |=  =path
   ^-  id
   =+  ;;([%pool host=@ta name=@ta ~] path)
@@ -99,7 +99,7 @@
     ::
       %update-pool
     =.  this  (handle-pool-transition [id p]:tan)
-    (emit %give %fact ~[(en-path id.tan)] pools-pool-transition+!>(p.tan))
+    (emit %give %fact ~[(en-pool-path id.tan)] pools-pool-transition+!>(p.tan))
   ==
 ::
 ++  handle-pool-transition

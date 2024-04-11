@@ -230,7 +230,7 @@
     |-
     ?~  subs
       (pure:m !>(~))
-    ?.  =(id (de-path:lib path.i.subs))
+    ?.  =([~ id] (mole |.((de-pool-path:lib path.i.subs))))
       $(subs t.subs)
     =/  =metadata:p  (~(gut by fake-requests.act) ship.i.subs ~)
     ;<  auto=(unit auto:p)  bind:m
@@ -397,13 +397,13 @@
   |=  [=id:p =ship]
   =/  m  (strand ,~)
   ^-  form:m
-  (agent-kick-ship dap.gowl ~[(en-path:lib id)] ~ ship)
+  (agent-kick-ship dap.gowl ~[(en-pool-path:lib id)] ~ ship)
 ::
 ++  kick-ships
   |=  [=id:p ships=(list ship)]
   =/  m  (strand ,~)
   ^-  form:m
-  (agent-kick-ships dap.gowl ~[(en-path:lib id)] ships)
+  (agent-kick-ships dap.gowl ~[(en-pool-path:lib id)] ships)
 ::
 ++  create-pool
   |=  =id:p
