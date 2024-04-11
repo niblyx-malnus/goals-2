@@ -83,26 +83,22 @@
   :: deal with our pool
   ::
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+  :: only host or admins can modify pool level permissions
+  ::
+  =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
+  ?>  (check-pool-edit-perm:pl src.gowl)
   ?-    -.act
       %kick-member
-    ?>  =(our.gowl host.pid)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
-    ?>  (check-pool-role-mod:pl member.act src.gowl)
     ;<  ~  bind:m  (kick-member pid member.act)
     ;<  ~  bind:m  (del-pool-role pid member.act)
     (pure:m !>(~))
     ::
       %set-pool-role
-    ?>  =(our.gowl host.pid)
-    ~&  >>  %setting-pool-role
     ;<  ~  bind:m  (goals-set-role pid member.act role.act src.gowl)
     ;<  ~  bind:m  (pools-set-role pid [member role]:act)
     (pure:m !>(~))
     ::
       %extend-invite
-    ?>  =(our.gowl host.pid)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
-    ?>  (check-pool-edit-perm:pl src.gowl)
     =/  =pool:gol  (~(got by pools.store) pid)
     =/  =invite:p
       %-  ~(gas by *metadata:p)
@@ -114,35 +110,22 @@
     (pure:m !>(~))
     ::
       %cancel-invite
-    ?>  =(our.gowl host.pid)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
-    ?>  (check-pool-edit-perm:pl src.gowl)
     ;<  ~  bind:m  (cancel-invite pid invitee.act)
     (pure:m !>(~))
     ::
       %accept-request
-    ?>  =(our.gowl host.pid)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
-    ?>  (check-pool-edit-perm:pl src.gowl)
     ;<  ~  bind:m  (accept-request pid requester.act)
     (pure:m !>(~))
     ::
       %reject-request
-    ?>  =(our.gowl host.pid)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
-    ?>  (check-pool-edit-perm:pl src.gowl)
     ;<  ~  bind:m  (reject-request pid requester.act)
     (pure:m !>(~))
     ::
       %delete-request
-    ?>  =(our.gowl host.pid)
-    =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
-    ?>  (check-pool-edit-perm:pl src.gowl)
     ;<  ~  bind:m  (delete-request pid requester.act)
     (pure:m !>(~))
     ::
       %update-graylist
-    ?>  =(src our):gowl
     ;<  ~  bind:m  (update-graylist pid fields.act)
     (pure:m !>(~))
   ==
