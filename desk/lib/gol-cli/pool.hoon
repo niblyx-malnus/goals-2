@@ -355,52 +355,6 @@
   %viewer
 ::
 ++  check-in-pool  |=(=ship |(=(ship host.pid.pool) (~(has by perms.pool) ship)))
-:: replace all chiefs of goals whose chiefs have been kicked
-::
-++  replace-chiefs
-   |=  kick=(set ship)
-   ^-  _this
-   :: list of all ids of goals with replacable chiefs
-   ::
-   =/  kickable=(list gid:gol)
-     %+  murn
-       ~(tap by goals.pool)
-     |=  [=gid:gol =goal:gol]
-     ?.  (~(has in kick) chief.goal)
-       ~
-     (some gid)
-   :: accurate updated chief information
-   ::
-   =/  chiefs
-     ((chain:tv gid:gol ship) (replace-chief:tv kick host.pid.pool) kickable ~)
-   :: update goals.pool to reflect new chief information
-   ::
-  %=  this
-    goals.pool
-      %-  ~(gas by goals.pool)
-      %+  turn
-        kickable
-      |=  =gid:gol
-      =/  goal  (~(got by goals.pool) gid)
-      [gid goal(chief (~(got by chiefs) gid))]
-  ==
-:: remove a kick set from all goal deputies
-::
-++  purge-deputies
-  |=  kick=(set ship)
-  ^-  _this
-  %=    this
-      goals.pool
-    %-  ~(run by goals.pool)
-    |=  =goal:gol
-    %=    goal
-        deputies
-      %-  ~(gas by *deputies:gol)
-      %+  murn  ~(tap by deputies.goal)
-      |=  [=ship role=?(%edit %create)]
-      ?:((~(has in kick) ship) ~ [~ ship role])
-    ==
-  ==
 ::
 :: ============================================================================
 :: 
@@ -798,9 +752,7 @@
   ^-  _this
   ?>  (check-pool-role-mod ship mod)
   ?~  role
-    =/  pore  (replace-chiefs (sy ~[ship]))
-    =/  pore  (purge-deputies:pore (sy ~[ship]))
-    pore(perms.pool (~(del by perms.pool) ship))
+    this(perms.pool (~(del by perms.pool) ship))
   ?<  ?=(%host u.role)
   this(perms.pool (~(put by perms.pool) ship u.role))
 :: set the chief of a goal or optionally all its subgoals
