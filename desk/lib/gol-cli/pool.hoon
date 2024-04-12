@@ -1,5 +1,5 @@
 /-  gol=goals, act=action
-/+  *gol-cli-util, gol-cli-node, gol-cli-traverse, vd=gol-cli-validate
+/+  gol-cli-node, gol-cli-traverse, vd=gol-cli-validate
 |_  =pool:gol
 +*  this  .
     tv    ~(. gol-cli-traverse goals.pool)
@@ -39,48 +39,7 @@
       (check-goal-create-perm u.upid mod)
   =/  goal  (init-goal gid summary mod now)
   =.  goals.pool  (~(put by goals.pool) gid goal)
-  (move gid upid host.pid.pool) :: divine intervention (host)
-:: Extract goal from goals
-::
-++  wrest-goal
-  |=  [=gid:gol mod=ship]
-  ^-  [trac=goals:gol _this]
-  :: Get subgoals of goal including self
-  ::
-  =/  prog  (progeny:tv gid)
-  :: Move goal to root
-  ::
-  =/  pore  (move gid ~ host.pid.pool) :: divine intervention (host)
-  :: Partition subgoals of goal from rest of goals
-  ::
-  =.  pore  (partition:pore prog mod)
-  :: Get extracted goals
-  ::
-  =/  trac=goals:gol  (gat-by goals.pool.pore ~(tap in prog))
-  :: Update goals to remaining
-  ::
-  =.  goals.pool.pore  (gus-by goals.pool.pore ~(tap in prog))
-  :: TODO: both of these should get validated here (validate-goals:vd goals)
-  :: return extracted goals and remaining goals
-  ::
-  [trac pore]
-::
-++  set-summary
-  |=  [=gid:gol summary=@t mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  ?.  (lte (met 3 summary) 140)
-    ~|("Summary exceeds 140 characters." !!)
-  =/  =goal:gol  (~(got by goals.pool) gid)
-  this(goals.pool (~(put by goals.pool) gid goal(summary summary)))
-::
-++  set-pool-title
-  |=  [title=@t mod=ship]
-  ^-  _this
-  ?>  (check-pool-edit-perm mod)
-  ?.  (lte (met 3 title) 140)
-    ~|("Title exceeds 140 characters." !!)
-  this(title.pool title)
+  (handle-pool-transition host.pid.pool %move gid upid) :: divine intervention (host)
 :: Move goal and subgoals from main goals to archive
 ::
 ++  archive-goal
@@ -111,7 +70,7 @@
   =/  new-list=(list gid:gol)  (purge-from-list gid old-list)
   =.  contexts.archive.pool  (~(put by contexts.archive.pool) context new-list)
   =.  contents.archive.pool  (~(del by contents.archive.pool) gid)
-  (move:this gid context mod)
+  (handle-pool-transition mod %move gid context)
 :: Restore goal from archive to main goals at root
 ::
 ++  restore-to-root
@@ -124,7 +83,7 @@
   =/  new-list=(list gid:gol)  (purge-from-list gid old-list)
   =.  contexts.archive.pool  (~(put by contexts.archive.pool) context new-list)
   =.  contents.archive.pool  (~(del by contents.archive.pool) gid)
-  (move:this gid ~ mod)
+  (handle-pool-transition mod %move gid ~)
 ::
 ++  delete-from-archive
   |=  [=gid:gol mod=ship]
@@ -149,40 +108,37 @@
   =^  trac  this
     (wrest-goal gid mod) :: correctly handles orders
   this
-:: Partition the set of goals q from its complement q- in goals.pool
+:: Extract goal from goals
 ::
-++  partition
-  |=  [q=(set gid:gol) mod=ship]
-  ^-  _this
-  :: get complement of q
+++  wrest-goal
+  |=  [=gid:gol mod=ship]
+  ^-  [trac=goals:gol _this]
+  :: Get subgoals of goal including self
   ::
-  =/  q-  (~(dif in ~(key by goals.pool)) q)
-  :: iterate through and break bonds between each gid in q
-  :: and all ids in q's complement
+  =/  progeny=(set gid:gol)  (progeny:tv gid)
+  :: Move goal to root (divine intervention by host)
   ::
-  =/  q  ~(tap in q)
-  =/  pore  this
-  |-
-  ?~  q
-    pore
-  $(q t.q, pore (break-bonds:pore i.q q- mod))
-:: Break bonds between a goal and a set of other goals
-::
-++  break-bonds
-  |=  [=gid:gol exes=(set gid:gol) mod=ship]
-  ^-  _this
-  :: get the existing bonds between gid and its (future) exes
+  =.  this  (handle-pool-transition host.pid.pool %move gid ~)
+  :: Partition subgoals of goal from rest of goals
+  :: (Remove non-hierarchical DAG relationships)
   ::
-  =/  pairs  (get-bonds:nd gid exes)
-  :: iterate through and rend each of these bonds
+  =.  this  (handle-pool-transition mod %partition progeny)
+  :: Get extracted goals
   ::
-  =/  pore  this
-  |-
-  ?~  pairs
-    pore
-  %=  $
-    pairs  t.pairs
-    pore  (dag-rend:pore p.i.pairs q.i.pairs mod)
+  :-  %-  ~(gas by *goals:gol)
+      %+  turn  ~(tap in progeny)
+      |=  =gid:gol
+      [gid (~(got by goals.pool) gid)]
+  :: Update goals to remaining
+  ::
+  %=    this
+      goals.pool
+    %-  ~(gas by *goals:gol)
+    %+  murn  ~(tap by goals.pool)
+    |=  [=gid:gol =goal:gol]
+    ?:  (~(has in progeny) gid)
+      ~
+    [~ gid goal]
   ==
 ::
 :: ============================================================================
@@ -257,6 +213,21 @@
   ^-  ?
   ?|  (check-goal-super gid mod)
       ?=([~ %edit] (~(get by deputies:(~(got by goals.pool) gid)) mod))
+  ==
+:: Can yoke with permissions on *both* goals
+:: This only works if "rends" work with perms on *either*
+::
+++  check-dag-yoke-perm
+  |=  [bef=nid:gol aft=nid:gol mod=ship]
+  ?&  (check-goal-edit-perm gid.bef mod)
+      (check-goal-edit-perm gid.aft mod)
+  ==
+:: Can rend with permissions on *either* goal
+::
+++  check-dag-rend-perm
+  |=  [bef=nid:gol aft=nid:gol mod=ship]
+  ?|  (check-goal-edit-perm gid.bef mod)
+      (check-goal-edit-perm gid.aft mod)
   ==
 :: can edit goal
 :: or is a deputy with create permissions
@@ -342,9 +313,6 @@
       (check-open-to gid mod)
   ==
 ::
-++  check-goal-deputies-mod-perm  check-goal-super
-++  check-goal-open-to-mod-perm   check-goal-super
-::
 ++  get-goal-permission-level
   |=  [=gid:gol mod=ship]
   ^-  goal-perms:gol
@@ -355,109 +323,6 @@
   %viewer
 ::
 ++  check-in-pool  |=(=ship |(=(ship host.pid.pool) (~(has by perms.pool) ship)))
-::
-:: ============================================================================
-:: 
-:: YOKES/RENDS
-::
-:: ============================================================================
-::
-++  dag-yoke
-  |=  [n1=nid:gol n2=nid:gol mod=ship]
-  ^-  _this
-  :: Check mod permissions
-  :: Can yoke with permissions on *both* goals
-  :: This only works if "rends" work with perms on *either*
-  ::
-  ?.  ?&  (check-goal-edit-perm gid.n1 mod)
-          (check-goal-edit-perm gid.n2 mod)
-      ==
-    ~|("missing-goal-mod-perms" !!)
-  :: Cannot relate goal to itself
-  ::
-  ?:  =(gid.n1 gid.n2)  ~|("same-goal" !!)
-  :: Cannot create left-undone-right-done relationship
-  ::
-  ?:  ?&  !done.i.status:(got-node:nd n1)
-          done.i.status:(got-node:nd n2)
-      ==
-    ~|("left-undone-right-done" !!)
-  :: If the right gid is an actionable goal
-  :: and we are relating the left gid end to the right gid end,
-  :: unmark the right goal actionable
-  ::
-  =?  this  &(=(-.n1 %e) =(-.n2 %e) actionable:(~(got by goals.pool) gid.n2))
-    (set-actionable gid.n2 %| mod)
-  :: n2 must not come before n1
-  ::
-  ?:  (check-path:tv n2 n1 %r)  ~|("before-n2-n1" !!)
-  ::
-  =/  node1  (got-node:nd n1)
-  =/  node2  (got-node:nd n2)
-  :: there must be no bound mismatch between n1 and n2
-  ::
-  =/  lb  ?~(moment.node1 (left-bound:tv n1) moment.node1)
-  =/  rb  ?~(moment.node2 (ryte-bound:tv n2) moment.node2)
-  ?:  ?~(lb %| ?~(rb %| (gth u.lb u.rb)))  ~|("bound-mismatch" !!)
-  :: dag-yoke
-  ::
-  =.  outflow.node1  (~(put in outflow.node1) n2)
-  =.  inflow.node2  (~(put in inflow.node2) n1)
-  =.  goals.pool  (update-node:nd n1 node1)
-  =.  goals.pool  (update-node:nd n2 node2)
-  this
-::
-++  dag-rend
-  |=  [n1=nid:gol n2=nid:gol mod=ship]
-  ^-  _this
-  :: Check mod permissions
-  :: Can rend with permissions on *either* goal
-  ::
-  ?.  ?|  (check-goal-edit-perm gid.n1 mod)
-          (check-goal-edit-perm gid.n2 mod)
-      ==
-    ~|("missing-goal-mod-perms" !!)
-  :: Cannot unrelate goal from itself
-  ::
-  ?:  =(gid.n1 gid.n2)  ~|("same-goal" !!)
-  :: Cannot destroy containment of an owned goal
-  ::
-  =/  l  (~(got by goals.pool) gid.n1)
-  =/  r  (~(got by goals.pool) gid.n2)
-  ?:  ?|  &(=(-.n1 %e) =(-.n2 %e) (~(has in (sy children.r)) gid.n1))
-          &(=(-.n1 %s) =(-.n2 %s) (~(has in (sy children.l)) gid.n2))
-      ==
-    ~|("owned-goal" !!)
-  :: dag-rend
-  ::
-  =/  node1  (got-node:nd n1)
-  =/  node2  (got-node:nd n2)
-  =.  outflow.node1  (~(del in outflow.node1) n2)
-  =.  inflow.node2   (~(del in inflow.node2) n1)
-  =.  goals.pool  (update-node:nd n1 node1)
-  =.  goals.pool  (update-node:nd n2 node2)
-  this
-::
-++  yoke
-  |=  [yok=exposed-yoke:act mod=ship]
-  ^-  _this
-  =,  yok
-  ?-  -.yok
-    %prio-yoke  (dag-yoke [%s lid] [%s rid] mod)
-    %prio-rend  (dag-rend [%s lid] [%s rid] mod)
-    %prec-yoke  (dag-yoke [%e lid] [%s rid] mod)
-    %prec-rend  (dag-rend [%e lid] [%s rid] mod)
-    %nest-yoke  (dag-yoke [%e lid] [%e rid] mod)
-    %nest-rend  (dag-rend [%e lid] [%e rid] mod)
-    %hook-yoke  (dag-yoke [%s lid] [%e rid] mod)
-    %hook-rend  (dag-rend [%s lid] [%e rid] mod)
-      %held-yoke  
-    =/  pore  (dag-yoke [%e lid] [%e rid] mod)
-    (dag-yoke:pore [%s rid] [%s lid] mod)
-      %held-rend  
-    =/  pore  (dag-rend [%e lid] [%e rid] mod)
-    (dag-rend:pore [%s rid] [%s lid] mod)
-  ==
 ::
 ++  purge-from-list
   |*  [item=* =(list)]
@@ -470,251 +335,6 @@
     ~
   [~ i]
 ::
-++  slot-above
-  |=  [dis=* dat=* =(list)]
-  ^-  (^list _dis)
-  ?~  idx=(find [dis]~ list)  !!
-  =.  list  (oust [u.idx 1] list)
-  ?~  idx=(find [dat]~ list)  !!
-  (into list u.idx dis)
-::
-++  slot-below
-  |=  [dis=* dat=* =(list)]
-  ^-  (^list _dis)
-  ?~  idx=(find [dis]~ list)  !!
-  =.  list  (oust [u.idx 1] list)
-  ?~  idx=(find [dat]~ list)  !!
-  (into list +(u.idx) dis)
-::
-++  move-to-root
-  |=  [=gid:gol mod=ship]
-  ^-  _this
-  ?.  (check-move-to-root-perm gid mod)
-    ~|("missing-move-to-root-perms" !!)
-  =/  k  (~(got by goals.pool) gid)  
-  ?~  parent.k
-    this(roots.pool [gid (purge-from-list gid roots.pool)])
-  =/  q  (~(got by goals.pool) u.parent.k)
-  ?>  (~(has in (sy children.q)) gid)
-  =.  goals.pool  (~(put by goals.pool) gid k(parent ~))
-  =.  goals.pool  (~(put by goals.pool) u.parent.k q(children (purge-from-list gid children.q)))
-  =.  roots.pool  [gid roots.pool]
-  (yoke [%held-rend gid u.parent.k] mod)
-::
-++  move-to-goal
-  |=  [kid=gid:gol dad=gid:gol mod=ship]
-  ^-  _this
-  ?.  (check-move-to-goal-perm kid dad mod)
-    ~|("missing-move-to-goal-perms" !!)
-  =/  pore  (move-to-root kid host.pid.pool) :: divine intervention (host)
-  =/  k  (~(got by goals.pool.pore) kid)
-  =/  q  (~(got by goals.pool.pore) dad)
-  ?<  (~(has in (sy children.q)) kid)
-  =.  goals.pool.pore  (~(put by goals.pool.pore) kid k(parent (some dad)))
-  =.  goals.pool.pore  (~(put by goals.pool.pore) dad q(children [kid children.q]))
-  =.  roots.pool.pore  (purge-from-list kid roots.pool.pore)
-  (yoke:pore [%held-yoke kid dad] mod)
-::
-++  move
-  |=  [kid=gid:gol upid=(unit gid:gol) mod=ship]
-  ^-  _this
-  ?~(upid (move-to-root kid mod) (move-to-goal kid u.upid mod))
-::
-++  reorder-roots
-  |=  [roots=(list gid:gol) mod=ship]
-  ^-  _this
-  ?>  (check-pool-edit-perm mod)
-  ?>  =((sy roots) (sy roots.pool))
-  this(roots.pool roots)
-::
-++  reorder-children
-  |=  [=gid:gol children=(list gid:gol) mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  =/  =goal:gol  (~(got by goals.pool) gid)
-  ?>  =((sy children) (sy children.goal))
-  this(goals.pool (~(put by goals.pool) gid goal(children children)))
-::
-++  reorder-archive
-  |=  [context=(unit gid:gol) archive=(list gid:gol) mod=ship]
-  ^-  _this
-  ?>  ?~  context
-        (check-pool-edit-perm mod)
-      (check-goal-edit-perm u.context mod)
-  =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context)
-  ?>  =((sy archive) (sy old-list))
-  this(contexts.archive.pool (~(put by contexts.archive.pool) context archive))
-::
-++  yoke-sequence
-  |=  [yoks=(list exposed-yoke:act) mod=ship]
-  ^-  _this
-  =/  pore  this
-  |-
-  ?~  yoks
-    pore
-  %=  $
-    yoks  t.yoks
-    pore  (yoke:pore i.yoks mod)
-  ==
-:: perform several simultaneous rends
-::
-++  nuke
-  |=  [=nuke:act mod=ship]
-  ^-  _this
-  |^
-  ::
-  %-  yoke-sequence
-  :_  mod
-  ?-    -.nuke
-    %nuke-prio-left  prio-left
-    %nuke-prio-ryte  prio-ryte
-    %nuke-prio  (weld prio-left prio-ryte)
-    %nuke-prec-left  prec-left
-    %nuke-prec-ryte  prec-ryte
-    %nuke-prec  (weld prec-left prec-ryte)
-    %nuke-prio-prec  :(weld prio-left prio-ryte prec-left prec-ryte)
-    %nuke-nest-left  nest-left
-    %nuke-nest-ryte  nest-ryte
-    %nuke-nest  (weld nest-left nest-ryte)
-  ==
-  ::
-  ++  prio-left
-    %+  turn
-      ~(tap in (prio-left:nd gid.nuke))
-    |=  =gid:gol
-    ^-  exposed-yoke:act
-    [%prio-rend gid gid.nuke]
-  ::
-  ++  prio-ryte
-    %+  turn
-      ~(tap in (prio-ryte:nd gid.nuke))
-    |=  =gid:gol
-    ^-  exposed-yoke:act
-    [%prio-rend gid.nuke gid]
-  ::
-  ++  prec-left
-    %+  turn
-      ~(tap in (prec-left:nd gid.nuke))
-    |=  =gid:gol
-    ^-  exposed-yoke:act
-    [%prec-rend gid gid.nuke]
-  ::
-  ++  prec-ryte
-    %+  turn
-      ~(tap in (prec-ryte:nd gid.nuke))
-    |=  =gid:gol
-    ^-  exposed-yoke:act
-    [%prec-rend gid.nuke gid]
-  ::
-  ++  nest-left
-    %+  turn
-      ~(tap in (nest-left:nd gid.nuke))
-    |=  =gid:gol
-    ^-  exposed-yoke:act
-    [%nest-rend gid gid.nuke]
-  ::
-  ++  nest-ryte
-    %+  turn
-      ~(tap in (nest-ryte:nd gid.nuke))
-    |=  =gid:gol
-    ^-  exposed-yoke:act
-    [%nest-rend gid.nuke gid]
-  --
-:: composite yokes
-::
-++  plex
-  |=  [=plex:act mod=ship]
-  ^-  _this
-  ?-    plex
-      exposed-yoke:act
-    (yoke plex mod)
-      nuke:act
-    (nuke plex mod)
-  ==
-:: sequence of composite yokes
-::
-++  plex-sequence
-  |=  [plez=(list plex:act) mod=ship]
-  ^-  _this
-  =/  pore  this
-  |-
-  ?~  plez
-    pore
-  $(plez t.plez, pore (plex:pore i.plez mod))
-::
-:: ============================================================================
-:: 
-:: COMPLETE/ACTIONABLE/KICKOFF/DEADLINE/PERMS UPDATES
-::
-:: ============================================================================
-:: if inflow to end has more than its own start;
-:: in other words if has actually or virtually nested goals
-::
-++  has-nested  |=(=gid:gol `?`(gth (lent ~(tap in (iflo:nd [%e gid]))) 1))
-::
-++  set-actionable
-  |=  [=gid:gol val=? mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  =/  goal  (~(got by goals.pool) gid)
-  ?-    val
-    %|  this(goals.pool (~(put by goals.pool) gid goal(actionable %|)))
-    ::
-      %&
-    ?:  (has-nested gid)  ~|("has-nested" !!)
-    this(goals.pool (~(put by goals.pool) gid goal(actionable %&)))
-  ==
-::
-++  mark-done
-  |=  [=nid:gol now=@da mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid.nid mod)
-  =/  goal  (~(got by goals.pool) gid.nid)
-  ~&  marking-done+-.nid
-  ?:  (left-undone:tv nid)  ~&  %left-undone  ~|("left-undone" !!)
-  =.  goal
-    ?-    -.nid
-        %s
-      ?:  done.i.status.start.goal
-        ~|("already-done" goal)
-      ?:  (lth now timestamp.i.status.start.goal)
-        ~|("bad-time" goal)
-      goal(status.start [[now %&] status.start.goal])
-      ::
-        %e
-      ?:  done.i.status.end.goal
-        ~|("already-done" goal)
-      ?:  (lth now timestamp.i.status.end.goal)
-        ~|("bad-time" goal)
-      goal(status.end [[now %&] status.end.goal])
-    ==
-  ~&  goal
-  this(goals.pool (~(put by goals.pool) gid.nid goal))
-::
-++  unmark-done
-  |=  [=nid:gol now=@da mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid.nid mod)
-  =/  goal  (~(got by goals.pool) gid.nid)
-  ?:  (right-done:tv nid)  ~|("right-done" !!)
-  =.  goal
-    ?-    -.nid
-        %s
-      ?.  done.i.status.start.goal
-        ~|("already-undone" goal)
-      ?:  (lth now timestamp.i.status.start.goal)
-        ~|("bad-time" goal)
-      goal(status.start [[now %|] status.start.goal])
-      ::
-        %e
-      ?.  done.i.status.end.goal
-        ~|("already-undone" goal)
-      ?:  (lth now timestamp.i.status.end.goal)
-        ~|("bad-time" goal)
-      goal(status.end [[now %|] status.end.goal])
-    ==
-  this(goals.pool (~(put by goals.pool) gid.nid goal))
-::
 ++  bounded
   |=  [=nid:gol =moment:gol dir=?(%l %r)]
   ^-  ?
@@ -723,119 +343,465 @@
     %r  =/(rb (ryte-bound:tv nid) ?~(moment %| ?~(rb %| (lth u.rb u.moment))))
   == 
 ::
-++  set-start
-  |=  [=gid:gol =moment:gol mod=ship]
+++  handle-pool-event
+  |=  ven=pool-event:act
   ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  ?:  (bounded [%s gid] moment %l)  ~|("bound-left" !!)
-  ?:  (bounded [%s gid] moment %r)  ~|("bound-ryte" !!)
-  =/  goal  (~(got by goals.pool) gid)
-  this(goals.pool (~(put by goals.pool) gid goal(moment.start moment)))
+  ?-    -.ven
+      %dag-yoke
+    :: Cannot put end before start
+    ::
+    ?:  &(?=(%e -.bef.ven) ?=(%s -.aft.ven) =(gid.bef.ven gid.aft.ven))
+      ~|("inverting-goal-start-end" !!)
+    :: Cannot create left-undone-right-done relationship
+    ::
+    ?:  ?&  !done.i.status:(got-node:nd bef.ven)
+            done.i.status:(got-node:nd aft.ven)
+        ==
+      ~|("left-undone-right-done" !!)
+    :: aft.ven must not come before bef.ven
+    ::
+    ?:  (check-path:tv aft.ven bef.ven %r)  ~|("already-ordered" !!)
+    ::
+    =/  bef-node=node:gol  (got-node:nd bef.ven)
+    =/  aft-node=node:gol  (got-node:nd aft.ven)
+    :: there must be no bound mismatch between bef.ven and aft.ven
+    ::
+    =/  lb  ?~(moment.bef-node (left-bound:tv bef.ven) moment.bef-node)
+    =/  rb  ?~(moment.aft-node (ryte-bound:tv aft.ven) moment.aft-node)
+    ?:  ?~(lb %| ?~(rb %| (gth u.lb u.rb)))  ~|("bound-mismatch" !!)
+    :: dag-yoke
+    ::
+    =.  outflow.bef-node  (~(put in outflow.bef-node) aft.ven)
+    =.  inflow.aft-node   (~(put in inflow.aft-node) bef.ven)
+    =.  goals.pool        (update-node:nd bef.ven bef-node)
+    =.  goals.pool        (update-node:nd aft.ven aft-node)
+    this
+    ::
+      %dag-rend
+    :: Cannot unrelate goal from itself
+    ::
+    ?:  =(gid.bef.ven gid.aft.ven)  ~|("same-goal" !!)
+    :: Cannot destroy containment of an owned goal
+    ::
+    =/  l  (~(got by goals.pool) gid.bef.ven)
+    =/  r  (~(got by goals.pool) gid.aft.ven)
+    ?:  ?|  &(=(-.bef.ven %e) =(-.aft.ven %e) (~(has in (sy children.r)) gid.bef.ven))
+            &(=(-.bef.ven %s) =(-.aft.ven %s) (~(has in (sy children.l)) gid.aft.ven))
+        ==
+      ~|("owned-goal" !!)
+    :: dag-rend
+    ::
+    =/  bef-node=node:gol  (got-node:nd bef.ven)
+    =/  aft-node=node:gol  (got-node:nd aft.ven)
+    =.  outflow.bef-node  (~(del in outflow.bef-node) aft.ven)
+    =.  inflow.aft-node   (~(del in inflow.aft-node) bef.ven)
+    =.  goals.pool        (update-node:nd bef.ven bef-node)
+    =.  goals.pool        (update-node:nd aft.ven aft-node)
+    this
+    ::
+      %add-root
+    this(roots.pool [gid.ven roots.pool])
+    ::
+      %del-root
+    this(roots.pool (purge-from-list gid.ven roots.pool))
+    ::
+      %reorder-roots
+    ?>  =((sy roots.ven) (sy roots.pool))
+    this(roots.pool roots.ven)
+    ::
+      %add-child
+    =/  =goal:gol  (~(got by goals.pool) dad.ven)
+    ?:  actionable.goal  ~|("actionable-goal-cannot-have-child" !!)
+    =.  children.goal  [kid.ven children.goal]
+    this(goals.pool (~(put by goals.pool) dad.ven goal))
+    ::
+      %del-child
+    =/  =goal:gol  (~(got by goals.pool) dad.ven)
+    =.  children.goal  (purge-from-list kid.ven children.goal)
+    this(goals.pool (~(put by goals.pool) dad.ven goal))
 ::
-++  set-end
-  |=  [=gid:gol =moment:gol mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  ?:  (bounded [%e gid] moment %l)  ~|("bound-left" !!)
-  ?:  (bounded [%e gid] moment %r)  ~|("bound-ryte" !!)
-  =/  goal  (~(got by goals.pool) gid)
-  this(goals.pool (~(put by goals.pool) gid goal(moment.end moment)))
-:: Update pool permissions for individual ship.
-:: If role is ~, remove ship as viewer.
-::   If we remove a ship as a viewer, we must remove it from all goal
-::   create sets. We must also remove it from all goal chiefs and replace
-::   the chief with its nearest non-deleted ancestor chief or the pool
-::   host when no ancestor is available.
-::
-++  set-pool-role
-  |=  [=ship role=(unit role:gol) mod=ship]
-  ^-  _this
-  ?>  (check-pool-role-mod ship mod)
-  ?~  role
-    this(perms.pool (~(del by perms.pool) ship))
-  ?<  ?=(%host u.role)
-  this(perms.pool (~(put by perms.pool) ship u.role))
-:: set the chief of a goal or optionally all its subgoals
-::
-++  set-chief
-  |=  [=gid:gol chief=ship rec=?(%.y %.n) mod=ship]
-  ^-  _this
-  ?.  (check-goal-chief-mod-perm gid mod)
-    ~|("missing goal perms" !!)
-  ?.  (check-in-pool chief)
-    ~|("chief not in pool" !!)
-  =/  ids  ?.(rec ~[gid] ~(tap in (progeny:tv gid)))
-  %=  this
-    goals.pool
-      %-  ~(gas by goals.pool)
-      %+  turn
-        ids
+      %reorder-children
+    =/  =goal:gol  (~(got by goals.pool) gid.ven)
+    ?>  =((sy children.ven) (sy children.goal))
+    %=    this
+        goals.pool
+      %+  ~(put by goals.pool)
+        gid.ven
+      goal(children children.ven)
+    ==
+    ::
+      %update-parent
+    ?:  ?~(dad.ven %| actionable:(~(got by goals.pool) u.dad.ven))
+      ~|("actionable-goal-cannot-have-child" !!)
+    =/  =goal:gol  (~(got by goals.pool) kid.ven)
+    this(goals.pool (~(put by goals.pool) kid.ven goal(parent dad.ven)))
+    ::
+      %archive-root-tree
+    ?>  (~(has in (sy roots.pool)) gid.ven)
+    :: Get subgoals of goal including self
+    ::
+    =/  progeny=(set gid:gol)  (progeny:tv gid.ven)
+    =/  root-tree=goals:gol
+      %-  ~(gas by *goals:gol)
+      %+  turn  ~(tap in progeny)
       |=  =gid:gol
-      =/  goal  (~(got by goals.pool) gid)
-      [gid goal(chief chief)]
-  ==
-:: replace the deputies of a goal with new deputies
-::
-++  replace-deputies
-  |=  [=gid:gol =deputies:gol mod=ship]
-  ^-  _this
-  ?.  (check-goal-deputies-mod-perm gid mod)
-    ~|("missing super perms" !!)
-  ?.  (~(all in ~(key by deputies)) check-in-pool)
-    ~|("some ships in deputies are not in pool" !!)
-  =/  =goal:gol  (~(got by goals.pool) gid)
-  this(goals.pool (~(put by goals.pool) gid goal(deputies deputies)))
-::
-++  set-open-to
-  |=  [=gid:gol =open-to:gol mod=ship]
-  ^-  _this
-  ?.  (check-goal-open-to-mod-perm gid mod)
-    ~|("missing super perms" !!)
-  =/  =goal:gol  (~(got by goals.pool) gid)
-  this(goals.pool (~(put by goals.pool) gid goal(open-to open-to)))
-::
-++  update-pool-metadata-field
-  |=  [field=@t dif=(each [@t json] @t) mod=ship]
-  ^-  _this
-  ?>  (check-pool-edit-perm mod)
-  =/  properties  (~(gut by metadata-properties.pool) field ~)
-  =.  properties
-    ?-  -.dif
-      %&  (~(put by properties) p.dif)
-      %|  (~(del by properties) p.dif)
+      [gid (~(got by goals.pool) gid)]
+    ::
+    %=    this
+        contents.archive.pool
+      %+  ~(put by contents.archive.pool)
+        gid.ven
+      [context.ven root-tree]
+      ::
+        goals.pool
+      %-  ~(gas by *goals:gol)
+      %+  murn  ~(tap by goals.pool)
+      |=  [=gid:gol =goal:gol]
+      ?:  (~(has in progeny) gid)
+        ~
+      [~ gid goal]
     ==
-  %=    this
-      metadata-properties.pool
-    (~(put by metadata-properties.pool) field properties)
+    ::
+      %delete-content
+    this(contents.archive.pool (~(del by contents.archive.pool) gid.ven))
+    ::
+      %restore-content
+    :: restores content to root
+    ::
+    =+  (~(got by contents.archive.pool) gid.ven)
+    =.  goals.pool  (~(uni by goals.pool) (validate-goals:vd goals))
+    this(contents.archive.pool (~(del by contents.archive.pool) gid.ven))
+    ::
+      %add-to-context
+    =/  old-list=(list gid:gol)  (~(gut by contexts.archive.pool) context.ven ~)
+    =/  new-list=(list gid:gol)  [gid.ven old-list]
+    %=    this
+        contexts.archive.pool
+      (~(put by contexts.archive.pool) context.ven new-list)
+    ==
+    ::
+      %del-from-context
+    =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context.ven)
+    =/  new-list=(list gid:gol)  (purge-from-list gid.ven old-list)
+    %=    this
+        contexts.archive.pool
+      (~(put by contexts.archive.pool) context.ven new-list)
+    ==
+    ::
+      %reorder-archive
+    =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context.ven)
+    ?>  =((sy archive.ven) (sy old-list))
+    %=    this
+        contexts.archive.pool
+      (~(put by contexts.archive.pool) [context archive]:ven)
+    ==
+    ::
+      %delete-context
+    :: when a context is deleted from main goals
+    ::
+    %=    this
+        contexts.archive.pool
+      (~(del by contexts.archive.pool) [~ context.ven])
+    ==
+    ::
+      %remove-context
+    :: when a context is deleted from main goals
+    ::
+    =/  [* =goals:gol]  (~(got by contents.archive.pool) gid.ven)
+    %=  this
+        contents.archive.pool
+      %+  ~(put by contents.archive.pool)
+        gid.ven
+      [~ goals]
+    ==
+    ::
+      %set-actionable
+    =/  goal  (~(got by goals.pool) gid.ven)
+    ?-    val.ven
+      %|  this(goals.pool (~(put by goals.pool) gid.ven goal(actionable %|)))
+      ::
+        %&
+      ?^  children.goal  ~|("has-children" !!)
+      this(goals.pool (~(put by goals.pool) gid.ven goal(actionable %&)))
+    ==
+    ::
+      %mark-done
+    =/  goal  (~(got by goals.pool) gid.nid.ven)
+    ?:  (left-undone:tv nid.ven)  ~&  %left-undone  ~|("left-undone" !!)
+    =.  goal
+      ?-    -.nid.ven
+          %s
+        ?:  done.i.status.start.goal
+          ~&(>> "already-done" goal)
+        ?:  (lth now.ven timestamp.i.status.start.goal)
+          ~&(>>> "bad-time" goal)
+        goal(status.start [[now.ven %&] status.start.goal])
+        ::
+          %e
+        ?:  done.i.status.end.goal
+          ~&(>> "already-done" goal)
+        ?:  (lth now.ven timestamp.i.status.end.goal)
+          ~&(>>> "bad-time" goal)
+        goal(status.end [[now.ven %&] status.end.goal])
+      ==
+    this(goals.pool (~(put by goals.pool) gid.nid.ven goal))
+    ::
+      %mark-undone
+    =/  goal  (~(got by goals.pool) gid.nid.ven)
+    ?:  (right-done:tv nid.ven)  ~|("right-done" !!)
+    =.  goal
+      ?-    -.nid.ven
+          %s
+        ?.  done.i.status.start.goal
+          ~&(>> "already-undone" goal)
+        ?:  (lth now.ven timestamp.i.status.start.goal)
+          ~&(>>> "bad-time" goal)
+        goal(status.start [[now.ven %|] status.start.goal])
+        ::
+          %e
+        ?.  done.i.status.end.goal
+          ~&(>> "already-undone" goal)
+        ?:  (lth now.ven timestamp.i.status.end.goal)
+          ~&(>>> "bad-time" goal)
+        goal(status.end [[now.ven %|] status.end.goal])
+      ==
+    this(goals.pool (~(put by goals.pool) gid.nid.ven goal))
+    ::
+      %set-summary
+    ?.  (lte (met 3 summary.ven) 140)
+      ~|("Summary exceeds 140 characters." !!)
+    =/  =goal:gol  (~(got by goals.pool) gid.ven)
+    this(goals.pool (~(put by goals.pool) gid.ven goal(summary summary.ven)))
+    ::
+      %set-pool-title
+    ?.  (lte (met 3 title.ven) 140)
+      ~|("Title exceeds 140 characters." !!)
+    this(title.pool title.ven)
+    ::
+      %set-start
+    ?:  (bounded [%s gid.ven] start.ven %l)  ~|("bound-left" !!)
+    ?:  (bounded [%s gid.ven] start.ven %r)  ~|("bound-ryte" !!)
+    =/  goal  (~(got by goals.pool) gid.ven)
+    this(goals.pool (~(put by goals.pool) gid.ven goal(moment.start start.ven)))
+    ::
+      %set-end
+    ?:  (bounded [%e gid.ven] end.ven %l)  ~|("bound-left" !!)
+    ?:  (bounded [%e gid.ven] end.ven %r)  ~|("bound-ryte" !!)
+    =/  goal  (~(got by goals.pool) gid.ven)
+    this(goals.pool (~(put by goals.pool) gid.ven goal(moment.end end.ven)))
+    ::
+      %set-pool-role
+    ?~  role.ven
+      this(perms.pool (~(del by perms.pool) ship.ven))
+    ?<  ?=(%host u.role.ven)
+    this(perms.pool (~(put by perms.pool) [ship u.role]:ven))
+    ::
+      %set-chief
+    ?.  (check-in-pool chief.ven)
+      ~|("chief not in pool" !!)
+    =/  =goal:gol  (~(got by goals.pool) gid.ven)
+    this(goals.pool (~(put by goals.pool) gid.ven goal(chief chief.ven)))
+    ::
+      %set-open-to
+    =/  =goal:gol  (~(got by goals.pool) gid.ven)
+    this(goals.pool (~(put by goals.pool) gid.ven goal(open-to open-to.ven)))
+    ::
+      %update-deputies
+    =/  =goal:gol  (~(got by goals.pool) gid.ven)
+    =.  deputies.goal
+      ?-    -.p.ven
+        %|  (~(del by deputies.goal) p.p.ven)
+        ::
+          %&
+        ?.  (check-in-pool ship.p.p.ven)
+          ~|("{<ship>} not in pool" !!)
+        (~(put by deputies.goal) p.p.ven)
+      ==
+    this(goals.pool (~(put by goals.pool) gid.ven goal))
+    ::
+      %update-goal-metadata
+    =/  =goal:gol  (~(got by goals.pool) gid.ven)
+    =.  metadata.goal
+      ?-  -.p.ven
+        %&  (~(put by metadata.goal) p.p.ven)
+        %|  (~(del by metadata.goal) p.p.ven)
+      ==
+    this(goals.pool (~(put by goals.pool) gid.ven goal))
+    ::
+      %update-pool-metadata
+    %=    this
+        metadata.pool
+      ?-  -.p.ven
+        %&  (~(put by metadata.pool) p.p.ven)
+        %|  (~(del by metadata.pool) p.p.ven)
+      ==
+    ==
+    ::
+      %update-pool-metadata-field
+    =/  properties  (~(gut by metadata-properties.pool) field.ven ~)
+    =.  properties
+      ?-  -.p.ven
+        %&  (~(put by properties) p.p.ven)
+        %|  (~(del by properties) p.p.ven)
+      ==
+    %=    this
+        metadata-properties.pool
+      (~(put by metadata-properties.pool) field.ven properties)
+    ==
+      ::
+      %delete-pool-metadata-field
+    this(metadata-properties.pool (~(del by metadata-properties.pool) field.ven))
   ==
 ::
-++  delete-pool-metadata-field
-  |=  [field=@t mod=ship]
+++  handle-pool-transition
+  |=  [mod=ship tan=pool-transition:act]
   ^-  _this
-  ?>  (check-pool-edit-perm mod)
-  this(metadata-properties.pool (~(del by metadata-properties.pool) field))
-::
-++  update-pool-metadata
-  |=  [dif=(each [@t json] @t) mod=ship]
-  ^-  _this
-  ?>  (check-pool-edit-perm mod)
-  %=    this
-      metadata.pool
-    ?-  -.dif
-      %&  (~(put by metadata.pool) p.dif)
-      %|  (~(del by metadata.pool) p.dif)
+  ?+    -.tan  !!
+      %init-pool
+    ?>  =(mod host.pid.pool)
+    this(pool pool.tan)
+    ::
+      %dag-yoke
+    ?>  (check-dag-yoke-perm bef.tan aft.tan mod)
+    (handle-pool-event tan)
+    ::
+      %dag-rend
+    ?>  (check-dag-rend-perm bef.tan aft.tan mod)
+    (handle-pool-event tan)
+    ::
+      %break-bonds
+    =/  edges=(list edge:gol)  (get-bonds:nd [gid gids]:tan)
+    |-
+    ?~  edges
+      this
+    %=  $
+      edges  t.edges
+      this   (handle-pool-transition mod %dag-rend i.edges)
     ==
+    ::
+      %partition
+    =/  complement=(set gid:gol)  (~(dif in ~(key by goals.pool)) part.tan)
+    =/  part-list=(list gid:gol)  ~(tap in part.tan)
+    |-
+    ?~  part-list
+      this
+    %=  $
+      part-list  t.part-list
+      this       (handle-pool-transition mod %break-bonds i.part-list complement)
+    ==
+    ::
+      %yoke
+    =,  yok.tan
+    ?-  -.yok.tan
+      %prio-yoke  (handle-pool-transition mod %dag-yoke [%s lid] [%s rid])
+      %prio-rend  (handle-pool-transition mod %dag-rend [%s lid] [%s rid])
+      %prec-yoke  (handle-pool-transition mod %dag-yoke [%e lid] [%s rid])
+      %prec-rend  (handle-pool-transition mod %dag-rend [%e lid] [%s rid])
+      %nest-yoke  (handle-pool-transition mod %dag-yoke [%e lid] [%e rid])
+      %nest-rend  (handle-pool-transition mod %dag-rend [%e lid] [%e rid])
+      %hook-yoke  (handle-pool-transition mod %dag-yoke [%s lid] [%e rid])
+      %hook-rend  (handle-pool-transition mod %dag-rend [%s lid] [%e rid])
+        %held-yoke
+      =.  this  (handle-pool-transition mod %dag-yoke [%e lid] [%e rid])
+      (handle-pool-transition mod %dag-yoke [%s rid] [%s lid])
+        %held-rend
+      =/  this  (handle-pool-transition mod %dag-rend [%e lid] [%e rid])
+      (handle-pool-transition mod %dag-rend [%s rid] [%s lid])
+    ==
+    ::
+      %move-to-root
+    :: TODO: delegate transformations to events
+    ?.  (check-move-to-root-perm gid.tan mod)
+      ~|("missing-move-to-root-perms" !!)
+    =/  k  (~(got by goals.pool) gid.tan)
+    ?~  parent.k
+      this(roots.pool [gid.tan (purge-from-list gid.tan roots.pool)])
+    =/  q  (~(got by goals.pool) u.parent.k)
+    ?>  (~(has in (sy children.q)) gid.tan)
+    =.  goals.pool  (~(put by goals.pool) gid.tan k(parent ~))
+    =.  goals.pool  (~(put by goals.pool) u.parent.k q(children (purge-from-list gid.tan children.q)))
+    =.  roots.pool  [gid.tan roots.pool]
+    (handle-pool-transition mod %yoke %held-rend gid.tan u.parent.k)
+    ::
+      %move-to-goal
+    :: TODO: delegate transformations to events
+    ?.  (check-move-to-goal-perm kid.tan dad.tan mod)
+      ~|("missing-move-to-goal-perms" !!)
+    :: divine intervention to move goal to root
+    ::
+    =.  this  (handle-pool-transition host.pid.pool %move-to-root kid.tan)
+    =/  k  (~(got by goals.pool) kid.tan)
+    =/  q  (~(got by goals.pool) dad.tan)
+    ?<  (~(has in (sy children.q)) kid.tan)
+    =?  this  actionable.q
+      (handle-pool-transition mod %set-actionable dad.tan %|)
+    =.  goals.pool  (~(put by goals.pool) kid.tan k(parent (some dad.tan)))
+    =.  goals.pool  (~(put by goals.pool) dad.tan q(children [kid.tan children.q]))
+    =.  roots.pool  (purge-from-list kid.tan roots.pool)
+    (handle-pool-transition mod %yoke %held-yoke kid.tan dad.tan)
+    ::
+      %move
+    ?~  upid.tan
+      (handle-pool-transition mod %move-to-root cid.tan)
+    (handle-pool-transition mod %move-to-goal [cid u.upid]:tan)
+    ::
+      $?  %reorder-roots
+          %set-pool-title
+          %update-pool-metadata
+          %update-pool-metadata-field
+          %delete-pool-metadata-field
+      ==
+    ?>  (check-pool-edit-perm mod)
+    (handle-pool-event tan)
+    ::
+      $?  %reorder-children
+          %set-actionable
+          %set-summary
+          %set-start
+          %set-end
+          %update-goal-metadata
+      ==
+    ?>  (check-goal-edit-perm gid.tan mod)
+    (handle-pool-event tan)
+    ::
+      ?(%mark-done %mark-undone)
+    ?>  (check-goal-edit-perm gid.nid.tan mod)
+    (handle-pool-event tan)
+    ::
+      %reorder-archive
+    ?>  ?~  context.tan
+          (check-pool-edit-perm mod)
+        (check-goal-edit-perm u.context.tan mod)
+    (handle-pool-event tan)
+    ::
+      $?  %set-open-to
+          %update-deputies
+      ==
+    ?.  (check-goal-super gid.tan mod)
+      ~|("missing super perms" !!)
+    (handle-pool-event tan)
+    ::
+      %set-pool-role
+    ::   TODO:
+    ::   If we remove a ship as a viewer, we must remove it from all goal
+    ::   create sets. We must also remove it from all goal chiefs and replace
+    ::   the chief with its nearest non-deleted ancestor chief or the pool
+    ::   host when no ancestor is available.
+    ::
+    ?>  (check-pool-role-mod ship.tan mod)
+    (handle-pool-event tan)
+    ::
+      %set-chief
+    ?.  (check-goal-chief-mod-perm gid.tan mod)
+      ~|("missing goal perms" !!)
+    =.  this  (handle-pool-event %set-chief [gid chief]:tan)
+    ?.  rec.tan
+      this
+    =/  children=(list gid:gol)  children:(~(got by goals.pool) gid.tan)
+    |-
+    ?~  children
+      this
+    =.  this  (handle-pool-transition mod tan(gid i.children))
+    $(children t.children)
   ==
-::
-++  update-goal-metadata
-  |=  [=gid:gol dif=(each [@t json] @t) mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  =/  =goal:gol  (~(got by goals.pool) gid)
-  =.  metadata.goal
-    ?-  -.dif
-      %&  (~(put by metadata.goal) p.dif)
-      %|  (~(del by metadata.goal) p.dif)
-    ==
-  this(goals.pool (~(put by goals.pool) gid goal))
 --

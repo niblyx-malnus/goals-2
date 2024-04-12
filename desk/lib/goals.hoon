@@ -1,6 +1,6 @@
 /-  gol=goals, p=pools, act=action
 /+  ventio, *gol-cli-util, pools, sub-count,
-    pl=gol-cli-pool, nd=gol-cli-node, tv=gol-cli-traverse,
+    pl=gol-cli-pool, gol-cli-node, gol-cli-traverse,
     gol-cli-goals, gs=gol-cli-state, goj=gol-cli-json
 |%
 ++  en-pool-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
@@ -146,17 +146,35 @@
     =;  new=pool:gol
       this(pools.store (~(put by pools.store) pid new))
     ?-    -.tan
-        %init-pool
-      ?>(=(mod host.pid) pool.tan)
-      ::
-        %reorder-roots
-      abet:(reorder-roots:(apex:pl old) roots.tan mod)
-      ::
-        %reorder-children
-      abet:(reorder-children:(apex:pl old) gid.tan children.tan mod)
-      ::
-        %reorder-archive
-      abet:(reorder-archive:(apex:pl old) context.tan archive.tan mod)
+        $?  %init-pool
+            %dag-yoke
+            %dag-rend
+            %break-bonds
+            %partition
+            %yoke
+            %move-to-root
+            %move-to-goal
+            %move
+            %reorder-roots
+            %reorder-children
+            %reorder-archive
+            %set-actionable
+            %mark-done
+            %mark-undone
+            %set-summary
+            %set-pool-title
+            %set-start
+            %set-end
+            %set-pool-role
+            %set-chief
+            %set-open-to
+            %update-deputies
+            %update-goal-metadata
+            %update-pool-metadata
+            %update-pool-metadata-field
+            %delete-pool-metadata-field
+        ==
+      abet:(handle-pool-transition:(apex:pl old) mod tan)
       ::
         %create-goal
       abet:(create-goal:(apex:pl old) gid.tan upid.tan summary.tan now.tan mod)
@@ -175,54 +193,6 @@
       ::
         %delete-goal
       abet:(delete-goal:(apex:pl old) gid.tan mod)
-      ::
-        %move
-      abet:(move:(apex:pl old) cid.tan upid.tan mod)
-      ::
-        %yoke
-      abet:(plex-sequence:(apex:pl old) yoks.tan mod)
-      ::
-        %set-actionable
-      abet:(set-actionable:(apex:pl old) gid.tan val.tan mod)
-      ::
-        %mark-done
-      abet:(mark-done:(apex:pl old) nid.tan now.tan mod)
-      ::
-        %unmark-done
-      abet:(unmark-done:(apex:pl old) nid.tan now.tan mod)
-      ::
-        %set-summary
-      abet:(set-summary:(apex:pl old) gid.tan summary.tan mod)
-      ::
-        %set-pool-title
-      abet:(set-pool-title:(apex:pl old) title.tan mod)
-      ::
-        %set-start
-      abet:(set-start:(apex:pl old) gid.tan start.tan mod)
-      ::
-        %set-end
-      abet:(set-end:(apex:pl old) gid.tan end.tan mod)
-      ::
-        %set-pool-role
-      abet:(set-pool-role:(apex:pl old) ship.tan role.tan mod)
-      ::
-        %set-chief
-      abet:(set-chief:(apex:pl old) gid.tan chief.tan rec.tan mod)
-      ::
-        %set-open-to
-      abet:(set-open-to:(apex:pl old) gid.tan open-to.tan mod)
-      ::
-        %update-goal-metadata
-      abet:(update-goal-metadata:(apex:pl old) gid.tan p.tan mod)
-      ::
-        %update-pool-metadata
-      abet:(update-pool-metadata:(apex:pl old) p.tan mod)
-      ::
-        %update-pool-metadata-field
-      abet:(update-pool-metadata-field:(apex:pl old) field.tan p.tan mod)
-      ::
-        %delete-pool-metadata-field
-      abet:(delete-pool-metadata-field:(apex:pl old) field.tan mod)
     ==
   ::
   ++  handle-compound-transition
@@ -263,43 +233,48 @@
     |=  [=pid:gol mod=ship tan=compound-pool-transition:act]
     ^-  _this
     =>  |%
-        :: this will send appropriate transition updats
-        ::
+        ++  comp
+          |=  tan=compound-pool-transition:act
+          ^-  _this
+          (handle-compound-pool-transition pid mod tan)
         ++  handle-pool-transition
           |=  tan=pool-transition:act
           ^-  _this
           (handle-transition [%update-pool pid mod tan])
         --
     =*  goals  goals:(~(got by pools.store) pid)
+    =*  nd     ~(. gol-cli-node goals)
     ?-    -.tan
         %set-active
       ?-    val.tan
           %&
         :: automatically mark parent active if possible
+        ::
         =/  parent=(unit gid:gol)
           parent:(~(got by goals) gid.tan)
         =?  this  ?=(^ parent)
-          $(tan [%set-active u.parent %&])
+          (comp [%set-active u.parent %&])
         ~&  %marking-active
         (handle-pool-transition %mark-done s+gid.tan now.bowl)
         ::
           %|
         :: automatically unmark child active if possible
+        ::
         =/  children=(list gid:gol)
           children:(~(got by goals) gid.tan)
         =.  this
           |-
           ?~  children
             this
-          $(tan [%set-active i.children %|])
+          (comp [%set-active i.children %|])
         ~&  %unmarking-active
-        (handle-pool-transition %unmark-done s+gid.tan now.bowl)
+        (handle-pool-transition %mark-undone s+gid.tan now.bowl)
       ==
       ::
         %set-complete
       ?-    val.tan
           %&
-        =.  this  $(tan [%set-active gid.tan %&])
+        =.  this  (comp [%set-active gid.tan %&])
         ~&  %marking-complete
         =?  this  done.i.status.start:(~(got by goals) gid.tan)
           (handle-pool-transition %mark-done s+gid.tan now.bowl)
@@ -308,25 +283,105 @@
         ::
         =/  parent=(unit gid:gol)  parent:(~(got by goals) gid.tan)
         ?~  parent  this
-        ?.  %-  ~(all in (~(young nd goals) u.parent))
-            |=(=gid:gol done.i.status:(~(got-node nd goals) e+gid.tan))
+        ?.  %-  ~(all in (young:nd u.parent))
+            |=(=gid:gol done.i.status:(got-node:nd e+gid.tan))
           this
-        :: TODO: make this only occur if has permissions on ancestors...
-        :: host responsible for resulting completions
-        $(mod our.bowl, tan [%set-complete u.parent %&])
+        :: Set parent complete if possible
+        ::
+        =/  mul
+          %-  mule  |.
+          (comp [%set-complete u.parent %&])
+        ?-  -.mul
+          %&  p.mul
+          %|  ((slog p.mul) this)
+        ==
         ::
           %|
         ~&  %unmarking-complete
-        =.  this  (handle-pool-transition %unmark-done e+gid.tan now.bowl)
+        =.  this  (handle-pool-transition %mark-undone e+gid.tan now.bowl)
         :: Unmark start done if possible
+        ::
         =/  mul
           %-  mule  |.
-          (handle-pool-transition %unmark-done s+gid.tan now.bowl)
+          (handle-pool-transition %mark-undone s+gid.tan now.bowl)
         ?-  -.mul
           %&  p.mul
           %|  ((slog p.mul) this)
         ==
       ==
+      ::
+        %yokes
+      |-
+      ?~  yokes.tan
+        this
+      %=  $
+        yokes.tan  t.yokes.tan
+        this       (handle-pool-transition %yoke i.yokes.tan)
+      ==
+      ::
+        %nukes
+      %-  comp
+      :-  %yokes
+      %-  zing
+      %+  turn  nukes.tan
+      |=  =nuke:act
+      |^
+      ^-  (list exposed-yoke:act)
+      ?-    -.nuke
+        %nuke-prio-left  prio-left
+        %nuke-prio-ryte  prio-ryte
+        %nuke-prio  (weld prio-left prio-ryte)
+        %nuke-prec-left  prec-left
+        %nuke-prec-ryte  prec-ryte
+        %nuke-prec  (weld prec-left prec-ryte)
+        %nuke-prio-prec  :(weld prio-left prio-ryte prec-left prec-ryte)
+        %nuke-nest-left  nest-left
+        %nuke-nest-ryte  nest-ryte
+        %nuke-nest  (weld nest-left nest-ryte)
+      ==
+      ::
+      ++  prio-left
+        %+  turn
+          ~(tap in (prio-left:nd gid.nuke))
+        |=  =gid:gol
+        ^-  exposed-yoke:act
+        [%prio-rend gid gid.nuke]
+      ::
+      ++  prio-ryte
+        %+  turn
+          ~(tap in (prio-ryte:nd gid.nuke))
+        |=  =gid:gol
+        ^-  exposed-yoke:act
+        [%prio-rend gid.nuke gid]
+      ::
+      ++  prec-left
+        %+  turn
+          ~(tap in (prec-left:nd gid.nuke))
+        |=  =gid:gol
+        ^-  exposed-yoke:act
+        [%prec-rend gid gid.nuke]
+      ::
+      ++  prec-ryte
+        %+  turn
+          ~(tap in (prec-ryte:nd gid.nuke))
+        |=  =gid:gol
+        ^-  exposed-yoke:act
+        [%prec-rend gid.nuke gid]
+      ::
+      ++  nest-left
+        %+  turn
+          ~(tap in (nest-left:nd gid.nuke))
+        |=  =gid:gol
+        ^-  exposed-yoke:act
+        [%nest-rend gid gid.nuke]
+      ::
+      ++  nest-ryte
+        %+  turn
+          ~(tap in (nest-ryte:nd gid.nuke))
+        |=  =gid:gol
+        ^-  exposed-yoke:act
+        [%nest-rend gid.nuke gid]
+      --
     ==
   --
 ::
@@ -395,6 +450,7 @@
         [host.pid dap.gowl]
         %-  ~(gas by *(map wire path))
         :~  [`wire`[%goals pool-path] `path`[%goals pool-path]]
+            [`wire`[%pools pool-path] `path`[%pools pool-path]]
         ==
         goal-pool-action+[pid axn]
       ==
@@ -419,8 +475,7 @@
         (handle-compound-pool-transition ;;(compound-pool-transition:act axn))
       (pure:m !>(~))
       ::
-        $?  %yoke
-            %set-pool-title
+        $?  %set-pool-title
             %archive-goal
             %restore-goal
             %restore-to-root

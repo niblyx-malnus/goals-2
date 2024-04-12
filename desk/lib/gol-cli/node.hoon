@@ -131,7 +131,7 @@
 :: contained in the inflow/outflow of a goal's start/end
 ++  bond-overlap
   |=  [=gid:gol nids=(set nid:gol) dir=?(%l %r) src=?(%s %e)]
-  ^-  (set (pair nid:gol nid:gol))
+  ^-  edges:gol
   =/  flo  ?-(dir %l iflo, %r oflo)
   %-  ~(run in (~(int in nids) (flo [src gid])))
   |=(=nid:gol ?-(dir %l [nid src gid], %r [[src gid] nid]))
@@ -139,10 +139,10 @@
 :: get the bonds which exist between a goal and a set of other goals
 ++  get-bonds
   |=  [=gid:gol ids=(set gid:gol)]
-  ^-  (list (pair nid:gol nid:gol))
+  ^-  (list edge:gol)
   ::
   :: get set of nodes of ids
-  =/  nids  (nodify ids)
+  =/  nids=(set nid:gol)  (nodify ids)
   :: 
   %~  tap  in
   ::

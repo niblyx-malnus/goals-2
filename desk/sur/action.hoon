@@ -1,5 +1,103 @@
 /-  *goals, p=pools
 |%
++$  transition
+  $%  [%goal-order p=(each [idx=@ keys=(list key)] keys=(list key))]
+      [%pool-order p=(each [idx=@ pids=(list pid)] pids=(list pid))]
+      [%goal-metadata =key p=(each [@t json] @t)]
+      [%pool-metadata =pid p=(each [@t json] @t)]
+      [%metadata-properties field=@t p=(unit (each [@t json] @t))]
+      [%settings p=(each [@t json] @t)]
+      [%create-pool =pid title=@t]
+      [%delete-pool =pid]
+      [%update-pool =pid mod=ship p=pool-transition]
+  ==
+:: used internally to update a pool
+:: transition building blocks and updates
+::
++$  pool-event
+  $%  [%dag-yoke bef=nid aft=nid]
+      [%dag-rend bef=nid aft=nid]
+      [%add-root =gid]
+      [%del-root =gid]
+      [%reorder-roots roots=(list gid)]
+      [%add-child kid=gid dad=gid]
+      [%del-child kid=gid dad=gid]
+      [%reorder-children =gid children=(list gid)]
+      [%update-parent kid=gid dad=(unit gid)]
+      [%archive-root-tree =gid context=(unit gid)]
+      [%delete-content =gid]
+      [%restore-content =gid]
+      [%add-to-context context=(unit gid) =gid]
+      [%del-from-context context=(unit gid) =gid]
+      [%reorder-archive context=(unit gid) archive=(list gid)]
+      [%delete-context context=gid]
+      [%remove-context =gid]
+      [%set-actionable =gid val=?]
+      [%mark-done =nid now=@da]
+      [%mark-undone =nid now=@da]
+      [%set-summary =gid summary=@t]
+      [%set-pool-title title=@t]
+      [%set-start =gid start=(unit @da)]
+      [%set-end =gid end=(unit @da)]
+      [%set-pool-role =ship role=(unit role)]
+      [%set-chief =gid chief=ship]
+      [%set-open-to =gid =open-to]
+      [%update-deputies =gid p=(each [=ship ?(%edit %create)] ship)]
+      [%update-goal-metadata =gid p=(each [@t json] @t)]
+      [%update-pool-metadata p=(each [@t json] @t)]
+      [%update-pool-metadata-field field=@t p=(each [@t json] @t)]
+      [%delete-pool-metadata-field field=@t]
+  ==
+::
++$  pool-transition
+  $%  [%init-pool =pool] 
+      [%reorder-roots roots=(list gid)]
+      [%reorder-children =gid children=(list gid)]
+      [%reorder-archive context=(unit gid) archive=(list gid)]
+      [%create-goal =gid upid=(unit gid) summary=@t now=@da]
+      [%archive-goal =gid]
+      [%restore-goal =gid]
+      [%restore-to-root =gid]
+      [%delete-from-archive =gid]
+      [%delete-goal =gid]
+      [%dag-yoke bef=nid aft=nid]
+      [%dag-rend bef=nid aft=nid]
+      [%move-to-root =gid]
+      [%move-to-goal kid=gid dad=gid]
+      [%move cid=gid upid=(unit gid)]
+      [%yoke yok=exposed-yoke]
+      [%break-bonds =gid gids=(set gid)]
+      [%partition part=(set gid)]
+      [%set-actionable =gid val=?]
+      [%mark-done =nid now=@da]
+      [%mark-undone =nid now=@da]
+      [%set-summary =gid summary=@t]
+      [%set-pool-title title=@t]
+      [%set-start =gid start=(unit @da)]
+      [%set-end =gid end=(unit @da)]
+      [%set-pool-role =ship role=(unit role)]
+      [%set-chief =gid chief=ship rec=?]
+      [%set-open-to =gid =open-to]
+      [%update-deputies =gid p=(each [ship ?(%edit %create)] ship)]
+      [%update-goal-metadata =gid p=(each [@t json] @t)]
+      [%update-pool-metadata p=(each [@t json] @t)]
+      [%update-pool-metadata-field field=@t p=(each [@t json] @t)]
+      [%delete-pool-metadata-field field=@t]
+  ==
+::
++$  compound-transition
+  $%  [%pool-order-slot p=(each [dis=pid dat=pid] [dis=pid dat=pid])]
+      [%goal-order-slot p=(each [dis=key dat=key] [dis=key dat=key])]
+      [%update-pool =pid mod=ship p=compound-pool-transition]
+  ==
+::
++$  compound-pool-transition
+  $%  [%set-active =gid val=?]
+      [%set-complete =gid val=?]
+      [%yokes yokes=(list exposed-yoke)]
+      [%nukes nukes=(list nuke)]
+  ==
+::
 +$  exposed-yoke  
   $%  [%prio-rend lid=gid rid=gid] :: start-to-start
       [%prio-yoke lid=gid rid=gid] :: start-to-start
@@ -26,59 +124,6 @@
       [%nuke-nest =gid]
   ==
 ::
-+$  plex  $%(exposed-yoke nuke) :: complex yoke
-::
-+$  transition
-  $%  [%goal-order p=(each [idx=@ keys=(list key)] keys=(list key))]
-      [%pool-order p=(each [idx=@ pids=(list pid)] pids=(list pid))]
-      [%goal-metadata =key p=(each [@t json] @t)]
-      [%pool-metadata =pid p=(each [@t json] @t)]
-      [%metadata-properties field=@t p=(unit (each [@t json] @t))]
-      [%settings p=(each [@t json] @t)]
-      [%create-pool =pid title=@t]
-      [%delete-pool =pid]
-      [%update-pool =pid mod=ship p=pool-transition]
-  ==
-::
-+$  pool-transition
-  $%  [%init-pool =pool] 
-      [%reorder-roots roots=(list gid)]
-      [%reorder-children =gid children=(list gid)]
-      [%reorder-archive context=(unit gid) archive=(list gid)]
-      [%create-goal =gid upid=(unit gid) summary=@t now=@da]
-      [%archive-goal =gid]
-      [%restore-goal =gid]
-      [%restore-to-root =gid]
-      [%delete-from-archive =gid]
-      [%delete-goal =gid]
-      [%move cid=gid upid=(unit gid)]
-      [%yoke yoks=(list plex)]
-      [%set-actionable =gid val=?]
-      [%mark-done =nid now=@da]
-      [%unmark-done =nid now=@da]
-      [%set-summary =gid summary=@t]
-      [%set-pool-title title=@t]
-      [%set-start =gid start=(unit @da)]
-      [%set-end =gid end=(unit @da)]
-      [%set-pool-role =ship role=(unit role)]
-      [%set-chief =gid chief=ship rec=?]
-      [%set-open-to =gid =open-to]
-      [%update-goal-metadata =gid p=(each [@t json] @t)]
-      [%update-pool-metadata p=(each [@t json] @t)]
-      [%update-pool-metadata-field field=@t p=(each [@t json] @t)]
-      [%delete-pool-metadata-field field=@t]
-  ==
-::
-+$  compound-transition
-  $%  [%pool-order-slot p=(each [dis=pid dat=pid] [dis=pid dat=pid])]
-      [%goal-order-slot p=(each [dis=key dat=key] [dis=key dat=key])]
-      [%update-pool =pid mod=ship p=compound-pool-transition]
-  ==
-::
-+$  compound-pool-transition
-  $%  [%set-active =gid val=?]
-      [%set-complete =gid val=?]
-  ==
 ::
 +$  local-action
   $%  [%pool-order-slot p=(each [dis=pid dat=pid] [dis=pid dat=pid])]
@@ -89,12 +134,10 @@
       [%settings p=(each [@t json] @t)]
       [%create-pool title=@t]
       [%delete-pool =pid]
-      :: [%update-pool =pid axn=pool-action]
   ==
 ::
 +$  pool-action :: sent with a pid
-  $%  [%yoke yoks=(list plex)]
-      [%set-pool-title title=@t]
+  $%  [%set-pool-title title=@t]
       [%create-goal upid=(unit gid) summary=@t actionable=? active=?]
       [%archive-goal =gid]
       [%restore-goal =gid]

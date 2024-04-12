@@ -129,7 +129,6 @@
         [%restore-to-root (ot ~[gid+gid])]
         [%delete-from-archive (ot ~[gid+gid])]
         [%delete-goal (ot ~[gid+gid])]
-        [%yoke (ot ~[yoks+yoke-seq])]
         [%move (ot ~[cid+gid upid+unit-gid])]
         [%set-summary (ot ~[gid+gid summary+so])]
         [%set-start (ot ~[gid+gid start+unit-di])]

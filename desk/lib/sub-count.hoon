@@ -223,33 +223,34 @@
     ?+    mark  (vine gowl vid mark vase) :: delegate to original
         %counted-action
       =+  `counted-action`!<([paths=(list path) =page] vase)
-      ;<  ~           bind:m  (check-subscriber src.gowl paths)
-      ;<  =tube:clay  bind:m  (build-our-tube q.byk.gowl %noun p.page)
-      ;<  vnt=^vase   bind:m  (vine gowl vid p.page (tube !>(q.page)))
+      ;<  paths=(list path)  bind:m  (check-subscriber src.gowl paths)
+      ;<  =tube:clay         bind:m  (build-our-tube q.byk.gowl %noun p.page)
+      ;<  vnt=^vase          bind:m  (vine gowl vid p.page (tube !>(q.page)))
       =|  counts=(map path @)
       |-
       ?~  paths
         (pure:m (slop !>(counts) vnt))
       ;<  count=@  bind:m
-        :: assume first item of path is agent name
-        ?>  ?=(^ i.paths)
+        ?>  ?=(^ i.paths) :: assume first item of path is agent name
         (scry-hard ,@ :(weld /gx/[i.i.paths]/sub-count/path t.i.paths /noun))
       $(paths t.paths, counts (~(put by counts) i.paths count))
     ==
   ::
   ++  check-subscriber
     =,  vio
+    =|  kept=(list path)
     |=  [src=ship paths=(list path)] :: assume first item of path is agent name
-    =/  m  (strand ,~)
+    =/  m  (strand ,(list path))
     ^-  form:m
     ?~  paths
-      (pure:m ~)
+      (pure:m kept)
     ?>  ?=(^ i.paths)
     ;<  [wex=boat:gall sup=bitt:gall]  bind:m
       (scry-hard ,[boat bitt]:gall /gx/[i.i.paths]/vent/subscriptions/noun)
     ?.  (~(has in (sy ~(val by sup))) [src t.i.paths])
-      ~|("{<src>} not subscribed to {<path>}" !!)
-    $(paths t.paths)
+      ~&  "{<src>} not subscribed to {<path>}"
+      $(paths t.paths) :: simply ignore unsubscribed paths
+    $(kept [i.paths kept], paths t.paths)
 
   ::
   ++  vent-counted-action
@@ -267,10 +268,15 @@
     ::
     ;<  [counts=(map path @) vnt=*]  bind:m
       ((vent ,[(map path @) *]) dock counted-action+[~(val by paths) page])
+    :: do an in initial scry check in case no updates come
+    ::
+    ;<  counts=(map path @)  bind:m  (clear-already-done paths counts)
+    :: catch wire updates and check if it's above counted
+    ::
     |-
-    ?:  =(0 ~(wyt by paths))
-      ~?  >>  ?=(^ counts)
-        ["strange count residue" counts]
+    ?:  =(0 ~(wyt by counts))
+      ~?  >>  !=(0 ~(wyt by paths))
+        ["wire residue (probably not subscribed): " ~(tap by paths)]
       (pure:m !>(vnt))
     :: take a sub-counts fact
     ::
@@ -281,11 +287,52 @@
     =+  !<([=wire new-count=@] q.upd)
     ?~  pat=(~(get by paths) [dude wire])  $
     ::  if the new count exceeds the received count, it's done
+    ::
     =/  count=@  (~(got by counts) u.pat)
     ?.  (gte new-count count)  $
     ~&  >>  (crip (weld "{<dude>} {<wire>} count: " (numb count)))
     ~&  >>  (crip (weld "{<dude>} {<wire>} new count: " (numb new-count)))
-    $(paths (~(del by paths) [dude wire]), counts (~(del by counts) u.pat))
+    %=  $
+      paths   (~(del by paths) [dude wire])
+      counts  (~(del by counts) u.pat)
+    ==
+  ::
+  ++  clear-already-done
+    =,  vio
+    |=  [paths=(map wire path) counts=(map path @)]
+    =/  m  (strand ,(map path @))
+    ^-  form:m
+    :: get mapping from path to wire
+    ::
+    =/  wires=(map path wire)
+      %-  ~(gas by *(map path wire))
+      %+  turn  ~(tap by paths)
+      |=([=wire =path] [path wire])
+    :: iterate through counts
+    ::
+    =/  counts-list=(list [=path count=@])  ~(tap by counts)
+    |-
+    ?~  counts-list
+      (pure:m counts)
+    ?~  wyr=(~(get by wires) path.i.counts-list)
+      ~&  %strange-missing-wire
+      %=  $
+        counts-list  t.counts-list
+        counts       (~(del by counts) path.i.counts-list)
+      ==
+    ::  if the new count exceeds the received count, it's done
+    ::
+    ?>  ?=(^ u.wyr) :: assume first item of path is agent name
+    ;<  new-count=@  bind:m
+      (scry-hard ,@ :(weld /gx/[i.u.wyr]/sub-count/wire t.u.wyr /noun))
+    ?.  (gte new-count count.i.counts-list)
+      $(counts-list t.counts-list)
+    ~&  >>  (crip (weld "{<i.u.wyr>} {<t.u.wyr>} count: " (numb count.i.counts-list)))
+    ~&  >>  (crip (weld "{<i.u.wyr>} {<t.u.wyr>} new count: " (numb new-count)))
+    %=  $
+      counts-list  t.counts-list
+      counts       (~(del by counts) path.i.counts-list)
+    ==
   ::
   ++  watch-sub-counts
     =,  vio
