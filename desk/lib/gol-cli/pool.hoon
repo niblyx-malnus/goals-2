@@ -26,13 +26,14 @@
   ?|  =(mod host.pid.pool)
       ?=(?(%admin %creator) (~(got by perms.pool) mod))
   ==
-:: most senior ancestor
 ::
-++  stock-root
-  |=  =gid:gol
-  ^-  [=gid:gol chief=ship]
-  (snag 0 (flop (get-stock:tv gid)))
-:: host, admin, or chief of stock-root (most senior ancestor)
+++  check-root-chief
+  |=  [=gid:gol mod=ship]
+  =/  =goal:gol  (~(got by goals.pool) gid)
+  ?~  parent.goal
+    =(mod chief.goal)
+  (check-root-chief u.parent.goal mod)
+:: host, admin, or chief of root ancestor
 :: goal master can edit and re-assign the goal
 :: and move it anywhere they can create a goal
 ::
@@ -40,43 +41,35 @@
   |=  [=gid:gol mod=ship]
   ^-  ?
   ?|  (check-pool-edit-perm mod)
-      =(mod chief:(stock-root gid))
-  ==
-::
-++  get-ancestral-deputies
-  |=  =gid:gol
-  ^-  deputies:gol 
-  :: ignore self; only ancestors
-  =/  =stock:gol  ?~(get=(get-stock:tv gid) ~ t.get)
-  =|  =deputies:gol
-  |-
-  ?~  stock
-    deputies
-  =/  =goal:gol  (~(got by goals.pool) gid.i.stock)
-  %=  $
-    stock     t.stock
-    deputies  (~(uni by deputies) deputies.goal)
+      (check-root-chief gid mod)
   ==
 :: can edit pool (host or admin)
-:: or is ranking member on goal
-:: goal super can edit and re-assign the goal
-::
-++  check-goal-super
-  |=  [=gid:gol mod=ship]
-  ^-  ?
-  ?|  (check-pool-edit-perm mod)
-      ?=(^ (get-rank:tv mod gid))
-      ?=([~ %edit] (~(get by (get-ancestral-deputies gid)) mod))
-  ==
-:: can edit pool (host or admin)
-:: or is ranking member on goal
-:: or is a deputy with edit permissions
+:: or is chief on this goal or its ancestors
+:: or is a deputy with edit permissions on this goal or its ancestors
 ::
 ++  check-goal-edit-perm
   |=  [=gid:gol mod=ship]
   ^-  ?
-  ?|  (check-goal-super gid mod)
-      ?=([~ %edit] (~(get by deputies:(~(got by goals.pool) gid)) mod))
+  ?|  (check-pool-edit-perm mod)
+      |-
+      =/  =goal:gol  (~(got by goals.pool) gid)
+      ?|  =(mod chief.goal)
+          ?=([~ %edit] (~(get by deputies.goal) mod))
+          ?~(parent.goal %.n $(gid u.parent.goal))
+      ==
+  ==
+:: can edit pool (host or admin)
+:: or can edit this goal's parent
+:: or is chief of this goal
+::
+++  check-goal-super
+  |=  [=gid:gol mod=ship]
+  ^-  ?
+  =/  =goal:gol  (~(got by goals.pool) gid)
+  ?|  ?~  parent.goal
+        (check-pool-edit-perm mod)
+      (check-goal-edit-perm u.parent.goal mod)
+      =(mod chief.goal)
   ==
 :: Can yoke with permissions on *both* goals
 :: This only works if "rends" work with perms on *either*
@@ -101,6 +94,50 @@
   ^-  ?
   ?|  (check-goal-edit-perm gid mod)
       ?=([~ %create] (~(get by deputies:(~(got by goals.pool) gid)) mod))
+  ==
+::
+++  check-move-to-root-perm
+  |=  [=gid:gol mod=ship]
+  ^-  ?
+  ?&  (check-goal-master gid mod)
+      (check-root-create-perm mod)
+  ==
+:: TODO: remove get-stock, just use parents
+::
+++  nearest-common-ancestor
+  |=  [a=gid:gol b=gid:gol]
+  ^-  (unit gid:gol)
+  =/  a-flock=stock:gol  (flop (get-stock:tv a))
+  =/  b-flock=stock:gol  (flop (get-stock:tv b))
+  =|  anc=(unit gid:gol)
+  |-
+  ?~  a-flock
+    anc
+  ?~  b-flock
+    anc
+  ?.  =(gid.i.a-flock gid.i.b-flock)
+    anc
+  %=  $
+    anc      [~ gid.i.a-flock]
+    a-flock  t.a-flock
+    b-flock  t.b-flock
+  ==
+:: checks if mod can move kid under pid
+::
+++  check-move-to-goal-perm
+  |=  [kid=gid:gol dad=gid:gol mod=ship]
+  ^-  ?
+  ?|  (check-pool-edit-perm mod)
+      :: if master of kid and create permissions on dad
+      ::
+      ?&  (check-goal-master kid mod)
+          (check-goal-create-perm dad mod)
+      ==
+      :: permissions on a goal which contains both goals
+      ::
+      ?~  nec=(nearest-common-ancestor kid dad)
+        %.n
+      (check-goal-edit-perm u.nec mod)
   ==
 ::
 ++  check-restore-to-root-perm
@@ -132,68 +169,29 @@
           ?=([~ %edit] (~(get by deputies.goal) mod))
       ==
   ==
-::
-++  check-move-to-root-perm
-  |=  [=gid:gol mod=ship]
-  ^-  ?
-  ?&  (check-goal-master gid mod)
-      (check-root-create-perm mod)
-  ==
-::
-++  nearest-common-ancestor
-  |=  [a=gid:gol b=gid:gol]
-  ^-  (unit gid:gol)
-  =/  a-flock=stock:gol  (flop (get-stock:tv a))
-  =/  b-flock=stock:gol  (flop (get-stock:tv b))
-  =|  anc=(unit gid:gol)
-  |-
-  ?~  a-flock
-    anc
-  ?~  b-flock
-    anc
-  ?.  =(gid.i.a-flock gid.i.b-flock)
-    anc
-  %=  $
-    anc      [~ gid.i.a-flock]
-    a-flock  t.a-flock
-    b-flock  t.b-flock
-  ==
-:: checks if mod can move kid under pid
-::
-++  check-move-to-goal-perm
-  |=  [kid=gid:gol dad=gid:gol mod=ship]
-  ^-  ?
-  ?|  (check-pool-edit-perm mod)
-      :: permissions on a goal which contains both goals
-      ::
-      ?~  nec=(nearest-common-ancestor kid dad)
-        %|
-      (check-goal-edit-perm u.nec mod)
-      :: if master of kid and edit permissions on dad
-      ::
-      ?&  (check-goal-master kid mod)
-          (check-goal-create-perm dad mod)
-  ==  ==
 :: checks if mod can modify ship's pool permissions
 ::
 ++  check-pool-role-mod
   |=  [member=ship mod=ship]
   ^-  ?
   ?:  =(member host.pid.pool)
-    ~|("Cannot change host perms." !!)
+    ~&  >>>  "Cannot change host perms."
+    %.n
   ?.  (check-pool-edit-perm mod)
-    ~|("Do not have host or admin perms." !!)
-  ?:  ?&  =((~(get by perms.pool) member) (some (some %admin)))
+    ~&  >>>  "Do not have host or admin perms."
+    %.n
+  ?:  ?&  =([~ %admin] (~(get by perms.pool) member))
           !|(=(mod host.pid.pool) =(mod member))
       ==
-    ~|("Must be host or self to modify admin perms." !!)
-  %&
+    %.y
+  ~&  >>>  "Must be host or self to modify admin perms."
+  %.n
 ::
 ++  check-open-to
   |=  [=gid:gol mod=ship]
   ^-  ?
   =/  =goal:gol  (~(got by goals.pool) gid)
-  ?+    open-to.goal  %|
+  ?+    open-to.goal  %.n
     [~ %supers]    (check-pool-edit-perm mod)
     [~ %deputies]  (check-goal-edit-perm gid mod)
     [~ %viewers]   (~(has by perms.pool) mod)
@@ -215,8 +213,6 @@
   ?:  (check-goal-edit-perm gid mod)    %editor
   ?:  (check-goal-create-perm gid mod)  %creator
   %viewer
-::
-++  check-in-pool  |=(=ship |(=(ship host.pid.pool) (~(has by perms.pool) ship)))
 ::
 ++  purge-from-list
   |*  [item=* =(list)]
@@ -500,7 +496,7 @@
     this(perms.pool (~(put by perms.pool) [ship u.role]:tan))
     ::
       %set-chief
-    ?.  (check-in-pool chief.tan)
+    ?.  (~(has by perms.pool) chief.tan)
       ~|("chief not in pool" !!)
     =/  =goal:gol  (~(got by goals.pool) gid.tan)
     this(goals.pool (~(put by goals.pool) gid.tan goal(chief chief.tan)))
@@ -516,7 +512,7 @@
         %|  (~(del by deputies.goal) p.p.tan)
         ::
           %&
-        ?.  (check-in-pool ship.p.p.tan)
+        ?.  (~(has by perms.pool) ship.p.p.tan)
           ~|("{<ship>} not in pool" !!)
         (~(put by deputies.goal) p.p.tan)
       ==

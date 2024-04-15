@@ -179,26 +179,6 @@
       [%delete-request requester=ship]
   ==
 ::
-+$  goal-perms-check
-  $%  [%check-pool-edit-perm =pid mod=ship]
-      [%check-root-create-perm =pid mod=ship]
-      [%stock-root =gid]
-      [%check-goal-master =pid =gid mod=ship]
-      [%get-ancestral-deputies =gid]
-      [%check-goal-super =pid =gid mod=ship]
-      [%check-goal-edit-perm =pid =gid mod=ship]
-      [%check-goal-create-perm =pid =gid mod=ship]
-      [%check-move-to-root-perm =pid =gid mod=ship]
-      [%nearest-common-ancestor a=gid b=gid]
-      [%check-move-to-goal-perm kid=gid dad=gid mod=ship]
-      [%check-pool-role-mod member=ship mod=ship]
-      [%check-open-to =gid mod=ship]
-      [%check-goal-chief-mod-perm =gid mod=ship]
-      [%check-goal-deputies-mod-perm =pid =gid mod=ship]
-      [%check-goal-open-to-mod-perm =pid =gid mod=ship]
-      [%get-goal-permission-level =gid mod=ship]
-  ==
-::
 +$  harvest-type
   $%  [%main ~]
       [%pool =pid]
