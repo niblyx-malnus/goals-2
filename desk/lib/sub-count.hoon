@@ -285,6 +285,7 @@
     ?.  ?=(%wire-count p.upd)  $
     =+  !<([=wire new-count=@] q.upd)
     ?~  pat=(~(get by paths) [dude wire])  $
+    ?.  (~(has by counts) u.pat)  $
     ::  if the new count exceeds the received count, it's done
     ::
     =/  count=@  (~(got by counts) u.pat)
@@ -326,8 +327,8 @@
       (scry-hard ,@ :(weld /gx/[i.u.wyr]/sub-count/wire t.u.wyr /noun))
     ?.  (gte new-count count.i.counts-list)
       $(counts-list t.counts-list)
-    ~&  >>  (crip (weld "{<i.u.wyr>} {<t.u.wyr>} count: " (numb count.i.counts-list)))
-    ~&  >>  (crip (weld "{<i.u.wyr>} {<t.u.wyr>} new count: " (numb new-count)))
+    ~&  >>  (crip (weld "{<`@tas`i.u.wyr>} {<t.u.wyr>} count: " (numb count.i.counts-list)))
+    ~&  >>  (crip (weld "{<`@tas`i.u.wyr>} {<t.u.wyr>} new count: " (numb new-count)))
     %=  $
       counts-list  t.counts-list
       counts       (~(del by counts) path.i.counts-list)
