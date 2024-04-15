@@ -103,6 +103,36 @@
       ?=([~ %create] (~(get by deputies:(~(got by goals.pool) gid)) mod))
   ==
 ::
+++  check-restore-to-root-perm
+  |=  [=gid:gol mod=ship]
+  ^-  ?
+  =/  [context=(unit gid:gol) =goals:gol]
+    (~(got by contents.archive.pool) gid)
+  ::
+  =/  =goal:gol  (~(got by goals) gid)
+  ?|  (check-pool-edit-perm mod)
+      &(?=(~ context) =(mod chief.goal))
+      &(?=(~ context) ?=([~ %edit] (~(get by deputies.goal) mod)))
+  ==
+::
+++  check-restore-to-context-perm
+  |=  [=gid:gol mod=ship]
+  ^-  ?
+  =/  [context=(unit gid:gol) =goals:gol]
+    (~(got by contents.archive.pool) gid)
+  =/  =goal:gol  (~(got by goals) gid)
+  ?~  context
+    ?|  (check-pool-edit-perm mod)
+        =(mod chief.goal)
+        ?=([~ %edit] (~(get by deputies.goal) mod))
+    ==
+  ?&  (~(has by goals.pool) u.context)
+      ?|  (check-goal-edit-perm u.context mod)
+          =(mod chief.goal)
+          ?=([~ %edit] (~(get by deputies.goal) mod))
+      ==
+  ==
+::
 ++  check-move-to-root-perm
   |=  [=gid:gol mod=ship]
   ^-  ?
@@ -374,16 +404,12 @@
     ==
     ::
       %delete-context
-    :: when a context is deleted from main goals
-    ::
     %=    this
         contexts.archive.pool
       (~(del by contexts.archive.pool) [~ context.tan])
     ==
     ::
       %remove-context
-    :: when a context is deleted from main goals
-    ::
     =/  [* =goals:gol]  (~(got by contents.archive.pool) gid.tan)
     %=  this
         contents.archive.pool
@@ -705,11 +731,9 @@
     (handle-transition tan)
     ::
       %reorder-archive
-    :: TODO: archiving permissions are broken
-    ::       because they're not in goals.pool...
-    ::       Think this through more thoroughly...
     ?>  ?~  context.tan
           (check-pool-edit-perm mod)
+        :: only works when the context itself is not archived
         (check-goal-edit-perm u.context.tan mod)
     (handle-transition tan)
     ::
@@ -812,12 +836,14 @@
     ::
       %create-goal
     |^
+    ?>  ?~   upid.tan
+          (check-root-create-perm mod)
+        (check-goal-create-perm u.upid.tan mod)
     =/  =goal:gol  (init-goal gid.tan summary.tan mod now.tan)
     =.  this  (handle-transition %init-goal gid.tan goal)
     =.  this  (handle-transition %add-root gid.tan)
     ?~   upid.tan
-      ?>((check-root-create-perm mod) this)
-    ?>  (check-goal-create-perm u.upid.tan mod)
+      this
     %+  handle-compound-transition
       host.pid.pool :: divine intervention (host)
     [%move-to-goal gid.tan u.upid.tan]
@@ -846,52 +872,56 @@
     =/  context=(unit gid:gol)  parent:(~(got by goals.pool) gid.tan)
     :: Move goal to root (divine intervention by host)
     ::
-    =.  this  (handle-compound-transition host.pid.pool %move gid.tan ~)
+    =?  this  ?=(^ context)
+      (handle-compound-transition host.pid.pool %move-to-root gid.tan)
     :: Partition subgoals of goal from rest of goals
     :: (Remove non-hierarchical DAG relationships)
     ::
     =.  this  (handle-compound-transition mod %partition (progeny:tv gid.tan))
     =.  this  (handle-transition %archive-root-tree gid.tan context)
-    (handle-transition %add-to-context context gid.tan)
-    ::
-      %restore-goal
-    :: Restore goal from archive to main goals
-    ::
-    =/  [context=(unit gid:gol) =goals:gol]
-      (~(got by contents.archive.pool) gid.tan)
-    :: TODO: archiving permissions are broken
-    ::       because they're not in goals.pool...
-    ::       Think this through more thoroughly...
-    ?>  ?~  context
-          (check-goal-master gid.tan mod)
-        (check-goal-edit-perm u.context mod)
-    =.  this  (handle-transition %restore-content gid.tan)
-    =.  this  (handle-transition %del-from-context context gid.tan)
-    (handle-compound-transition mod %move gid.tan context)
+    =.  this  (handle-transition %add-to-context context gid.tan)
+    (handle-transition %del-root gid.tan)
     ::
       %restore-to-root
     :: Restore goal from archive to main goals
     ::
+    ?>  (check-restore-to-root-perm gid.tan mod)
     =/  [context=(unit gid:gol) =goals:gol]
       (~(got by contents.archive.pool) gid.tan)
-    :: TODO: archiving permissions are broken
-    ::       because they're not in goals.pool...
-    ::       Think this through more thoroughly...
-    ?>  ?~  context
-          (check-goal-master gid.tan mod)
-        (check-goal-create-perm u.context mod)
     =.  this  (handle-transition %restore-content gid.tan)
     =.  this  (handle-transition %del-from-context context gid.tan)
-    (handle-compound-transition mod %move gid.tan ~)
+    (handle-transition %add-root gid.tan)
+    ::
+      %restore-goal
+    ?>  (check-restore-to-context-perm gid.tan mod)
+    :: Restore goal from archive to main goals
+    ::
+    =/  [context=(unit gid:gol) =goals:gol]
+      (~(got by contents.archive.pool) gid.tan)
+    :: divine intervention (host)
+    ::
+    =.  this  (handle-compound-transition host.pid.pool %restore-to-root gid.tan)
+    ?~  context
+      this
+    (handle-compound-transition host.pid.pool %move-to-goal gid.tan u.context)
     ::
       %delete-from-archive
     :: Only admin level can perma-delete
     ::
     ?>  (check-pool-edit-perm mod)
-    =/  [context=(unit gid:gol) *]
+    =/  [context=(unit gid:gol) =goals:gol]
       (~(got by contents.archive.pool) gid.tan)
     =.  this  (handle-transition %delete-content gid.tan)
-    (handle-transition %del-from-context context gid.tan)
+    =.  this  (handle-transition %del-from-context context gid.tan)
+    %-  handle-transitions
+    %-  zing
+    %+  turn  ~(tap in ~(key by goals))
+    |=  =gid:gol
+    ^-  (list pool-transition:act)
+    :-  [%delete-context gid]
+    %+  turn
+      (~(gut by contexts.archive.pool) [~ gid] ~)
+    |=(=gid:gol [%remove-context gid])
     ::
       %delete-goal
     =.  this  (handle-compound-transition mod %archive-goal gid.tan)
