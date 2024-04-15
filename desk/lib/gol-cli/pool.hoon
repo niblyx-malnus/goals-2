@@ -110,7 +110,7 @@
     (~(got by contents.archive.pool) gid)
   ::
   =/  =goal:gol  (~(got by goals) gid)
-  ?|  (check-pool-edit-perm mod)
+  ?|  (check-pool-edit-perm mod) :: only admins can force to root
       &(?=(~ context) =(mod chief.goal))
       &(?=(~ context) ?=([~ %edit] (~(get by deputies.goal) mod)))
   ==
@@ -126,7 +126,7 @@
         =(mod chief.goal)
         ?=([~ %edit] (~(get by deputies.goal) mod))
     ==
-  ?&  (~(has by goals.pool) u.context)
+  ?&  (~(has by goals.pool) u.context) :: context must be live
       ?|  (check-goal-edit-perm u.context mod)
           =(mod chief.goal)
           ?=([~ %edit] (~(get by deputies.goal) mod))
@@ -344,6 +344,8 @@
     this(goals.pool (~(put by goals.pool) kid.tan goal(parent dad.tan)))
     ::
       %archive-root-tree
+    ~&  gid+gid.tan
+    ~&  roots+roots.pool
     ?>  (~(has in (sy roots.pool)) gid.tan)
     :: Get subgoals of goal including self
     ::
