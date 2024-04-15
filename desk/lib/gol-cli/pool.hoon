@@ -661,13 +661,16 @@
       %move-to-goal
     ?.  (check-move-to-goal-perm kid.tan dad.tan mod)
       ~|("missing-move-to-goal-perms" !!)
+    =/  kid-goal=goal:gol  (~(got by goals.pool) kid.tan)
     =/  dad-goal=goal:gol  (~(got by goals.pool) dad.tan)
+    ?<  =([~ dad.tan] parent.kid-goal)
     ?<  (~(has in (sy children.dad-goal)) kid.tan)
-    =?  this  actionable.dad-goal
-      (handle-compound-transition mod %set-actionable dad.tan %|)
     :: divine intervention to move goal to root
     ::
-    =.  this  (handle-compound-transition host.pid.pool %move-to-root kid.tan)
+    =?  this  ?=(^ parent.kid-goal)
+      (handle-compound-transition host.pid.pool %move-to-root kid.tan)
+    =?  this  actionable.dad-goal
+      (handle-compound-transition mod %set-actionable dad.tan %|)
     =.  this  (handle-transition %update-parent kid.tan ~ dad.tan)
     =.  this  (handle-transition %add-child kid.tan dad.tan)
     =.  this  (handle-transition %del-root kid.tan)
@@ -809,14 +812,15 @@
     ::
       %create-goal
     |^
-    ?>  ?~  upid.tan
-          (check-root-create-perm mod)
-        (check-goal-create-perm u.upid.tan mod)
     =/  =goal:gol  (init-goal gid.tan summary.tan mod now.tan)
     =.  this  (handle-transition %init-goal gid.tan goal)
-    :: divine intervention (host)
-    ::
-    (handle-compound-transition host.pid.pool %move gid.tan upid.tan)
+    =.  this  (handle-transition %add-root gid.tan)
+    ?~   upid.tan
+      ?>((check-root-create-perm mod) this)
+    ?>  (check-goal-create-perm u.upid.tan mod)
+    %+  handle-compound-transition
+      host.pid.pool :: divine intervention (host)
+    [%move-to-goal gid.tan u.upid.tan]
     ::
     ++  init-goal
       |=  [=gid:gol summary=@t chief=ship now=@da]
