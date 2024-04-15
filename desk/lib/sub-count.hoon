@@ -148,8 +148,8 @@
       ~&  %taking-counted-update
       ~&  p.vase
       =+  !<(counted-update vase)
-      =/  nase=^vase  ((get-tube p.page) !>(q.page))
       ~&  [count+count mark+p.page]
+      =/  nase=^vase  ((get-tube p.page) !>(q.page))
       %-  (slog (sell nase) ~)
       [count p.page nase]
     ::

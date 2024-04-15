@@ -1,5 +1,4 @@
 /-  *action
-/+  *gol-cli-json
 |_  tan=pool-transition
 ++  grow
   |%

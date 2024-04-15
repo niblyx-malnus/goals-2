@@ -108,7 +108,7 @@
     ?>  (~(has by perms.pool) src.bowl)
     :: give initial update
     ::
-    :_(this [%give %fact ~ goal-pool-transition+!>([host %init-pool pool])]~)
+    :_(this [%give %fact ~ goal-pool-transition+!>([%init-pool pool])]~)
   ==
 ::
 ++  on-agent
