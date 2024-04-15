@@ -7,7 +7,7 @@
     tv    ~(. gol-cli-traverse goals.pool)
     nd    ~(. gol-cli-node goals.pool)
 ++  abet  [tans pool]
-++  apex  |=(=pool:gol this(pool pool))
+++  apex  |=(=pool:gol this(pool pool, tans ~))
 ++  emit  |=(tan=pool-transition:act this(tans [tan tans]))
 ++  emil  |=(tanz=(list pool-transition:act) this(tans (weld tanz tans)))
 :: host or admin
@@ -344,8 +344,6 @@
     this(goals.pool (~(put by goals.pool) kid.tan goal(parent dad.tan)))
     ::
       %archive-root-tree
-    ~&  gid+gid.tan
-    ~&  roots+roots.pool
     ?>  (~(has in (sy roots.pool)) gid.tan)
     :: Get subgoals of goal including self
     ::
