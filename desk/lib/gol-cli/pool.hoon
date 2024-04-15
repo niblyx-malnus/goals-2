@@ -941,8 +941,7 @@
   ^-  _this
   =/  old=pool:gol  pool
   =.  this  (handle-compound-transition mod tan)
-  =/  [* new=pool:gol]  abet:(handle-transitions:(apex old) tans)
+  =/  [* new=pool:gol]  abet:(handle-transitions:(apex old) (flop tans))
   ?>  =(new pool)
   this
-
 --
