@@ -391,7 +391,8 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  (vent ,~)  [our.gowl %goals]
-    :-  %goal-transition
+    :-  %goal-compound-transition
+    ^-  compound-transition:act
     :^  %update-pool  pid  our.gowl
     [%set-pool-role member ~]
   ::
