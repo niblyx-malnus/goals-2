@@ -28,8 +28,8 @@
   gine(exit |~([=nod vis=(map nod med)] (~(got by vis) nod)))
 ::
 :: print nodes for debugging cycles
-:: ++  print-id  |=(=gid:gol (trip (~(got by fields:(~(got by goals) gid)) 'description')))
-:: ++  print-nid  |=(=nid:gol `tape`(weld (trip `@t`-.nid) (print-id gid.nid)))
+++  print-id   |=(=gid:gol (trip summary:(~(got by goals) gid)))
+++  print-nid  |=(=nid:gol `tape`:(weld "{<`@tas`-.nid>} " (print-id gid.nid)))
 ::
 :: traverse the underlying DAG (directed acyclic graph)
 ++  traverse
@@ -52,6 +52,7 @@
   :: catch cycles
   =/  i  (find [nod]~ pat) 
   =/  cyc=(list ^nod)  ?~(i ~ [nod (scag +(u.i) pat)])
+  :: TODO: never allow prnt to crash
   ?.  =(0 (lent cyc))  ~|(["cycle" (turn cyc prnt)] !!)
   ::
   :: iterate through neighbors (flo)
@@ -693,7 +694,7 @@
       flow  |=(=gid:gol =/(parent parent:(~(got by goals) gid) ?~(parent ~ [u.parent]~)))
       land  |=([=gid:gol =stock:gol ?] [[gid chief:(~(got by goals) gid)] stock])
       exit  |=([=gid:gol vis=(map gid:gol stock:gol)] vis)
-      :: prnt  print-id
+      prnt  print-id
     ==
   (((traverse gaso) gine vis) gid)
 ::

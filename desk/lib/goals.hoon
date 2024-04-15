@@ -135,65 +135,16 @@
       this
       ::
         %update-pool
-      =.  this  (handle-pool-transition [pid mod p]:tan)
-      (emit %give %fact ~[(en-pool-path pid.tan)] goal-pool-transition+!>([mod p]:tan))
+      (handle-pool-transition [pid p]:tan)
     ==
   ::
   ++  handle-pool-transition
-    |=  [=pid:gol mod=ship tan=pool-transition:act]
+    |=  [=pid:gol tan=pool-transition:act]
     ^-  _this
-    =/  old=pool:gol  (~(gut by pools.store) pid *pool:gol)
-    =;  new=pool:gol
-      this(pools.store (~(put by pools.store) pid new))
-    ?-    -.tan
-        $?  %init-pool
-            %dag-yoke
-            %dag-rend
-            %break-bonds
-            %partition
-            %yoke
-            %move-to-root
-            %move-to-goal
-            %move
-            %reorder-roots
-            %reorder-children
-            %reorder-archive
-            %set-actionable
-            %mark-done
-            %mark-undone
-            %set-summary
-            %set-pool-title
-            %set-start
-            %set-end
-            %set-pool-role
-            %set-chief
-            %set-open-to
-            %update-deputies
-            %update-goal-metadata
-            %update-pool-metadata
-            %update-pool-metadata-field
-            %delete-pool-metadata-field
-        ==
-      abet:(handle-pool-transition:(apex:pl old) mod tan)
-      ::
-        %create-goal
-      abet:(create-goal:(apex:pl old) gid.tan upid.tan summary.tan now.tan mod)
-      ::
-        %archive-goal
-      abet:(archive-goal:(apex:pl old) gid.tan mod)
-      ::
-        %restore-goal
-      abet:(restore-goal:(apex:pl old) gid.tan mod)
-      ::
-        %restore-to-root
-      abet:(restore-to-root:(apex:pl old) gid.tan mod)
-      ::
-        %delete-from-archive
-      abet:(delete-from-archive:(apex:pl old) gid.tan mod)
-      ::
-        %delete-goal
-      abet:(delete-goal:(apex:pl old) gid.tan mod)
-    ==
+    =/  =pool:gol  (~(gut by pools.store) pid *pool:gol)
+    =^  tans  pool
+      abet:(handle-transition:(apex:pl pool) tan)
+    this(pools.store (~(put by pools.store) pid pool))
   ::
   ++  handle-compound-transition
     |=  tan=compound-transition:act
@@ -232,157 +183,13 @@
   ++  handle-compound-pool-transition
     |=  [=pid:gol mod=ship tan=compound-pool-transition:act]
     ^-  _this
-    =>  |%
-        ++  comp
-          |=  tan=compound-pool-transition:act
-          ^-  _this
-          (handle-compound-pool-transition pid mod tan)
-        ++  handle-pool-transition
-          |=  tan=pool-transition:act
-          ^-  _this
-          (handle-transition [%update-pool pid mod tan])
-        --
-    =*  goals  goals:(~(got by pools.store) pid)
-    =*  nd     ~(. gol-cli-node goals)
-    ?-    -.tan
-        %set-active
-      ?-    val.tan
-          %&
-        :: automatically mark parent active if possible
-        ::
-        =/  parent=(unit gid:gol)
-          parent:(~(got by goals) gid.tan)
-        =?  this  ?=(^ parent)
-          (comp [%set-active u.parent %&])
-        ~&  %marking-active
-        (handle-pool-transition %mark-done s+gid.tan now.bowl)
-        ::
-          %|
-        :: automatically unmark child active if possible
-        ::
-        =/  children=(list gid:gol)
-          children:(~(got by goals) gid.tan)
-        =.  this
-          |-
-          ?~  children
-            this
-          (comp [%set-active i.children %|])
-        ~&  %unmarking-active
-        (handle-pool-transition %mark-undone s+gid.tan now.bowl)
-      ==
-      ::
-        %set-complete
-      ?-    val.tan
-          %&
-        =.  this  (comp [%set-active gid.tan %&])
-        ~&  %marking-complete
-        =?  this  done.i.status.start:(~(got by goals) gid.tan)
-          (handle-pool-transition %mark-done s+gid.tan now.bowl)
-        =.  this  (handle-pool-transition %mark-done e+gid.tan now.bowl)
-        :: automatically complete parent if all its children are complete
-        ::
-        =/  parent=(unit gid:gol)  parent:(~(got by goals) gid.tan)
-        ?~  parent  this
-        ?.  %-  ~(all in (young:nd u.parent))
-            |=(=gid:gol done.i.status:(got-node:nd e+gid.tan))
-          this
-        :: Set parent complete if possible
-        ::
-        =/  mul
-          %-  mule  |.
-          (comp [%set-complete u.parent %&])
-        ?-  -.mul
-          %&  p.mul
-          %|  ((slog p.mul) this)
-        ==
-        ::
-          %|
-        ~&  %unmarking-complete
-        =.  this  (handle-pool-transition %mark-undone e+gid.tan now.bowl)
-        :: Unmark start done if possible
-        ::
-        =/  mul
-          %-  mule  |.
-          (handle-pool-transition %mark-undone s+gid.tan now.bowl)
-        ?-  -.mul
-          %&  p.mul
-          %|  ((slog p.mul) this)
-        ==
-      ==
-      ::
-        %yokes
-      |-
-      ?~  yokes.tan
-        this
-      %=  $
-        yokes.tan  t.yokes.tan
-        this       (handle-pool-transition %yoke i.yokes.tan)
-      ==
-      ::
-        %nukes
-      %-  comp
-      :-  %yokes
-      %-  zing
-      %+  turn  nukes.tan
-      |=  =nuke:act
-      |^
-      ^-  (list exposed-yoke:act)
-      ?-    -.nuke
-        %nuke-prio-left  prio-left
-        %nuke-prio-ryte  prio-ryte
-        %nuke-prio  (weld prio-left prio-ryte)
-        %nuke-prec-left  prec-left
-        %nuke-prec-ryte  prec-ryte
-        %nuke-prec  (weld prec-left prec-ryte)
-        %nuke-prio-prec  :(weld prio-left prio-ryte prec-left prec-ryte)
-        %nuke-nest-left  nest-left
-        %nuke-nest-ryte  nest-ryte
-        %nuke-nest  (weld nest-left nest-ryte)
-      ==
-      ::
-      ++  prio-left
-        %+  turn
-          ~(tap in (prio-left:nd gid.nuke))
-        |=  =gid:gol
-        ^-  exposed-yoke:act
-        [%prio-rend gid gid.nuke]
-      ::
-      ++  prio-ryte
-        %+  turn
-          ~(tap in (prio-ryte:nd gid.nuke))
-        |=  =gid:gol
-        ^-  exposed-yoke:act
-        [%prio-rend gid.nuke gid]
-      ::
-      ++  prec-left
-        %+  turn
-          ~(tap in (prec-left:nd gid.nuke))
-        |=  =gid:gol
-        ^-  exposed-yoke:act
-        [%prec-rend gid gid.nuke]
-      ::
-      ++  prec-ryte
-        %+  turn
-          ~(tap in (prec-ryte:nd gid.nuke))
-        |=  =gid:gol
-        ^-  exposed-yoke:act
-        [%prec-rend gid.nuke gid]
-      ::
-      ++  nest-left
-        %+  turn
-          ~(tap in (nest-left:nd gid.nuke))
-        |=  =gid:gol
-        ^-  exposed-yoke:act
-        [%nest-rend gid gid.nuke]
-      ::
-      ++  nest-ryte
-        %+  turn
-          ~(tap in (nest-ryte:nd gid.nuke))
-        |=  =gid:gol
-        ^-  exposed-yoke:act
-        [%nest-rend gid.nuke gid]
-      --
-    ==
+    =/  =pool:gol  (~(gut by pools.store) pid *pool:gol)
+    =^  tans  pool
+      abet:(handle-compound-transition-safe:(apex:pl pool) mod tan)
+    %-  emil
+    %+  turn  tans
+    |=  tan=pool-transition:act
+    [%give %fact ~[(en-pool-path pid)] goal-pool-transition+!>(tan)]
   --
 ::
 ++  vine
@@ -461,18 +268,23 @@
         %create-goal
       =/  =gid:gol  (~(unique-id gol-cli-goals store) pid now.gowl)
       ;<  ~  bind:m
-        (handle-pool-transition %create-goal gid upid.axn summary.axn now.gowl)
+        (handle-compound-pool-transition %create-goal gid upid.axn summary.axn now.gowl)
       :: mark the goal started if active and if possible
       ::
       ;<  *  bind:m
         ?.  active.axn
           (pure:(strand ,~) ~)
-        ((soften ,~) (handle-compound-pool-transition %set-active gid %&))
+        ((soften ,~) (handle-compound-pool-transition %set-active gid %& now.gowl))
       (pure:m !>((enjs-key:goj [pid gid])))
       ::
-        ?(%set-active %set-complete)
+        %set-complete
       ;<  ~  bind:m
-        (handle-compound-pool-transition ;;(compound-pool-transition:act axn))
+        (handle-compound-pool-transition %set-complete gid.axn val.axn now.gowl)
+      (pure:m !>(~))
+      ::
+        %set-active
+      ;<  ~  bind:m
+        (handle-compound-pool-transition %set-active gid.axn val.axn now.gowl)
       (pure:m !>(~))
       ::
         $?  %set-pool-title
@@ -497,20 +309,11 @@
             %delete-pool-metadata-field
         ==
       ;<  ~  bind:m
-        (handle-pool-transition ;;(pool-transition:act axn))
+        (handle-compound-pool-transition ;;(compound-pool-transition:act axn))
       (pure:m !>(~))
     ==
     ::
     ++  pool-path  `path`(en-pool-path pid)
-    ::
-    ++  handle-pool-transition
-      |=  =pool-transition:act
-      =/  m  (strand ,~)
-      ^-  form:m
-      %+  poke  [our.gowl %goals]
-      :-  %goal-transition  !>
-      ^-  transition:act
-      [%update-pool pid src.gowl pool-transition]
     ::
     ++  handle-compound-pool-transition
       |=  =compound-pool-transition:act

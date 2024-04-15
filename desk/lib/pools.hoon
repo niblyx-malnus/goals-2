@@ -99,6 +99,8 @@
     ::
       %update-pool
     =.  this  (handle-pool-transition [id p]:tan)
+    ?.  =(our.bowl host.id.tan)
+      this
     (emit %give %fact ~[(en-pool-path id.tan)] pools-pool-transition+!>(p.tan))
   ==
 ::

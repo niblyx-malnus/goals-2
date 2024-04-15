@@ -68,6 +68,9 @@
       %goal-transition
     ?>  =(src our):bowl
     =+  !<(tan=transition:act vase)
+    :: cannot update pool with a direct transition
+    ::
+    ?<  ?=(%update-pool -.tan)
     ~&  received-transition+tan
     =^  cards  state
       abet:(handle-transition:ghc tan)
@@ -120,9 +123,9 @@
         %fact
       ?.  =(p.cage.sign %goal-pool-transition)
         (on-agent:dus pole sign)
-      =+  !<([mod=ship tan=pool-transition:act] q.cage.sign)
+      =+  !<(tan=pool-transition:act q.cage.sign)
       =^  cards  state
-        abet:(handle-transition:ghc %update-pool pid mod tan)
+        abet:(handle-transition:ghc %update-pool pid tan)
       [cards this]
     ==
     ::

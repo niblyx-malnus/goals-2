@@ -178,8 +178,8 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %goal-transition
-  ^-  transition:axn
+  :-  %goal-compound-transition
+  ^-  compound-transition:axn
   :^  %update-pool  id  mod
   [%set-pool-role member ~ role]
 ::
@@ -221,7 +221,8 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %goals]
-  :-  %goal-transition
+  :-  %goal-compound-transition
+  ^-  compound-transition:axn
   :^  %update-pool  pid  our.gowl
   [%set-pool-role member ~]
 ::

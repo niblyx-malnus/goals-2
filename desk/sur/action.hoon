@@ -9,13 +9,13 @@
       [%settings p=(each [@t json] @t)]
       [%create-pool =pid title=@t]
       [%delete-pool =pid]
-      [%update-pool =pid mod=ship p=pool-transition]
+      [%update-pool =pid p=pool-transition]
   ==
-:: used internally to update a pool
-:: transition building blocks and updates
 ::
-+$  pool-event
-  $%  [%dag-yoke bef=nid aft=nid]
++$  pool-transition
+  $%  [%init-pool =pool] 
+      [%init-goal =gid =goal] 
+      [%dag-yoke bef=nid aft=nid]
       [%dag-rend bef=nid aft=nid]
       [%add-root =gid]
       [%del-root =gid]
@@ -49,9 +49,14 @@
       [%delete-pool-metadata-field field=@t]
   ==
 ::
-+$  pool-transition
-  $%  [%init-pool =pool] 
-      [%reorder-roots roots=(list gid)]
++$  compound-transition
+  $%  [%pool-order-slot p=(each [dis=pid dat=pid] [dis=pid dat=pid])]
+      [%goal-order-slot p=(each [dis=key dat=key] [dis=key dat=key])]
+      [%update-pool =pid mod=ship p=compound-pool-transition]
+  ==
+::
++$  compound-pool-transition
+  $%  [%reorder-roots roots=(list gid)]
       [%reorder-children =gid children=(list gid)]
       [%reorder-archive context=(unit gid) archive=(list gid)]
       [%create-goal =gid upid=(unit gid) summary=@t now=@da]
@@ -62,12 +67,13 @@
       [%delete-goal =gid]
       [%dag-yoke bef=nid aft=nid]
       [%dag-rend bef=nid aft=nid]
+      [%break-bonds =gid gids=(set gid)]
+      [%partition part=(set gid)]
+      [%yoke yok=exposed-yoke]
+      [%nuke =nuke]
       [%move-to-root =gid]
       [%move-to-goal kid=gid dad=gid]
       [%move cid=gid upid=(unit gid)]
-      [%yoke yok=exposed-yoke]
-      [%break-bonds =gid gids=(set gid)]
-      [%partition part=(set gid)]
       [%set-actionable =gid val=?]
       [%mark-done =nid now=@da]
       [%mark-undone =nid now=@da]
@@ -83,19 +89,8 @@
       [%update-pool-metadata p=(each [@t json] @t)]
       [%update-pool-metadata-field field=@t p=(each [@t json] @t)]
       [%delete-pool-metadata-field field=@t]
-  ==
-::
-+$  compound-transition
-  $%  [%pool-order-slot p=(each [dis=pid dat=pid] [dis=pid dat=pid])]
-      [%goal-order-slot p=(each [dis=key dat=key] [dis=key dat=key])]
-      [%update-pool =pid mod=ship p=compound-pool-transition]
-  ==
-::
-+$  compound-pool-transition
-  $%  [%set-active =gid val=?]
-      [%set-complete =gid val=?]
-      [%yokes yokes=(list exposed-yoke)]
-      [%nukes nukes=(list nuke)]
+      [%set-active =gid val=? now=@da]
+      [%set-complete =gid val=? now=@da]
   ==
 ::
 +$  exposed-yoke  

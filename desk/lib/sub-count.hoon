@@ -7,7 +7,6 @@
 /=  x  /mar/counted-action
 /=  x  /mar/path-count
 /=  x  /mar/wire-count
-/=  x  /mar/subscription-kick
 |%
 :: assume the first item in the path is the agent name
 +$  counted-action  [paths=(list path) =page]

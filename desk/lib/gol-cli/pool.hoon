@@ -1,151 +1,15 @@
 /-  gol=goals, act=action
 /+  gol-cli-node, gol-cli-traverse, vd=gol-cli-validate
+::
+=|  tans=(list pool-transition:act)
 |_  =pool:gol
 +*  this  .
     tv    ~(. gol-cli-traverse goals.pool)
     nd    ~(. gol-cli-node goals.pool)
-++  abet  pool
+++  abet  [tans pool]
 ++  apex  |=(=pool:gol this(pool pool))
-::
-:: ============================================================================
-:: 
-:: SPAWNING/CACHING/WASTING/TRASHING/RENEWING GOALS
-::
-:: ============================================================================
-::
-:: Initialize a goal with initial state
-++  init-goal
-  |=  [=gid:gol summary=@t chief=ship now=@da]
-  ^-  goal:gol
-  ?.  (lte (met 3 summary) 140)
-    ~|("Summary exceeds 140 characters." !!)
-  =|  =goal:gol
-  =.  gid.goal       gid
-  =.  chief.goal    chief
-  =.  summary.goal  summary
-  :: Initialize inflowing and outflowing nodes
-  :: 
-  =.  outflow.start.goal  (~(put in *(set nid:gol)) [%e gid])
-  =.  inflow.end.goal     (~(put in *(set nid:gol)) [%s gid])
-  =.  status.start.goal   [[now %|] ~]
-  =.  status.end.goal     [[now %|] ~]
-  goal
-::
-++  create-goal
-  |=  [=gid:gol upid=(unit gid:gol) summary=@t now=@da mod=ship]
-  ^-  _this
-  ?>  ?~  upid
-        (check-root-create-perm mod)
-      (check-goal-create-perm u.upid mod)
-  =/  goal  (init-goal gid summary mod now)
-  =.  goals.pool  (~(put by goals.pool) gid goal)
-  (handle-pool-transition host.pid.pool %move gid upid) :: divine intervention (host)
-:: Move goal and subgoals from main goals to archive
-::
-++  archive-goal
-  |=  [=gid:gol mod=ship]
-  ^-  _this
-  ?>  (check-goal-edit-perm gid mod)
-  =/  context=(unit gid:gol)  parent:(~(got by goals.pool) gid)
-  =^  trac  this
-    (wrest-goal gid mod) :: mod has the correct perms for this
-  =/  old-list=(list gid:gol)  (~(gut by contexts.archive.pool) context ~)
-  =/  new-list=(list gid:gol)  [gid old-list]
-  =.  contexts.archive.pool  (~(put by contexts.archive.pool) context new-list)
-  =.  contents.archive.pool  (~(put by contents.archive.pool) gid [context trac])
-  this
-:: TODO: when a goal is deleted from goals or from contents.archive
-::       update the contexts in the archive (or delete completely?)
-:: Restore goal from archive to main goals
-::
-++  restore-goal
-  |=  [=gid:gol mod=ship]
-  ^-  _this
-  =+  (~(got by contents.archive.pool) gid)
-  ?>  ?~  context
-        (check-goal-master gid mod)
-      (check-goal-edit-perm u.context mod)
-  =.  goals.pool  (~(uni by goals.pool) (validate-goals:vd goals))
-  =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context)
-  =/  new-list=(list gid:gol)  (purge-from-list gid old-list)
-  =.  contexts.archive.pool  (~(put by contexts.archive.pool) context new-list)
-  =.  contents.archive.pool  (~(del by contents.archive.pool) gid)
-  (handle-pool-transition mod %move gid context)
-:: Restore goal from archive to main goals at root
-::
-++  restore-to-root
-  |=  [=gid:gol mod=ship]
-  ^-  _this
-  ?>  (check-goal-master gid mod)
-  =+  (~(got by contents.archive.pool) gid)
-  =.  goals.pool  (~(uni by goals.pool) (validate-goals:vd goals))
-  =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context)
-  =/  new-list=(list gid:gol)  (purge-from-list gid old-list)
-  =.  contexts.archive.pool  (~(put by contexts.archive.pool) context new-list)
-  =.  contents.archive.pool  (~(del by contents.archive.pool) gid)
-  (handle-pool-transition mod %move gid ~)
-::
-++  delete-from-archive
-  |=  [=gid:gol mod=ship]
-  ^-  _this
-  :: Only admin level can perma-delete
-  ::
-  ?>  (check-pool-edit-perm mod)
-  =+  (~(got by contents.archive.pool) gid)
-  =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context)
-  =/  new-list=(list gid:gol)  (purge-from-list gid old-list)
-  =.  contexts.archive.pool  (~(put by contexts.archive.pool) context new-list)
-  =.  contents.archive.pool  (~(del by contents.archive.pool) gid)
-  this
-:: Permanently delete goal and subgoals from archive
-::
-++  delete-goal
-  |=  [=gid:gol mod=ship]
-  ^-  _this
-  :: Only admin level can perma-delete
-  ::
-  ?>  (check-pool-edit-perm mod)
-  =^  trac  this
-    (wrest-goal gid mod) :: correctly handles orders
-  this
-:: Extract goal from goals
-::
-++  wrest-goal
-  |=  [=gid:gol mod=ship]
-  ^-  [trac=goals:gol _this]
-  :: Get subgoals of goal including self
-  ::
-  =/  progeny=(set gid:gol)  (progeny:tv gid)
-  :: Move goal to root (divine intervention by host)
-  ::
-  =.  this  (handle-pool-transition host.pid.pool %move gid ~)
-  :: Partition subgoals of goal from rest of goals
-  :: (Remove non-hierarchical DAG relationships)
-  ::
-  =.  this  (handle-pool-transition mod %partition progeny)
-  :: Get extracted goals
-  ::
-  :-  %-  ~(gas by *goals:gol)
-      %+  turn  ~(tap in progeny)
-      |=  =gid:gol
-      [gid (~(got by goals.pool) gid)]
-  :: Update goals to remaining
-  ::
-  %=    this
-      goals.pool
-    %-  ~(gas by *goals:gol)
-    %+  murn  ~(tap by goals.pool)
-    |=  [=gid:gol =goal:gol]
-    ?:  (~(has in progeny) gid)
-      ~
-    [~ gid goal]
-  ==
-::
-:: ============================================================================
-:: 
-:: PERMISSIONS UTILITIES
-::
-:: ============================================================================
+++  emit  |=(tan=pool-transition:act this(tans [tan tans]))
+++  emil  |=(tanz=(list pool-transition:act) this(tans (weld tanz tans)))
 :: host or admin
 ::
 ++  check-pool-edit-perm
@@ -343,104 +207,117 @@
     %r  =/(rb (ryte-bound:tv nid) ?~(moment %| ?~(rb %| (lth u.rb u.moment))))
   == 
 ::
-++  handle-pool-event
-  |=  ven=pool-event:act
+++  handle-transition
+  |=  tan=pool-transition:act
   ^-  _this
-  ?-    -.ven
+  =.  this  (emit tan)
+  ?-    -.tan
+    %init-pool  this(pool pool.tan)
+    ::
+      %init-goal
+    ?>  =(gid.tan gid.goal.tan)
+    ?>  (~(has in outflow.start.goal.tan) [%e gid.tan])
+    ?>  (~(has in inflow.end.goal.tan) [%s gid.tan])
+    ?>  ?=(^ status.start.goal.tan)
+    ?>  ?=(^ status.end.goal.tan)
+    ?.  (lte (met 3 summary.goal.tan) 140)
+      ~|("Summary exceeds 140 characters." !!)
+    this(goals.pool (~(put by goals.pool) [gid goal]:tan))
+    ::
       %dag-yoke
     :: Cannot put end before start
     ::
-    ?:  &(?=(%e -.bef.ven) ?=(%s -.aft.ven) =(gid.bef.ven gid.aft.ven))
+    ?:  &(?=(%e -.bef.tan) ?=(%s -.aft.tan) =(gid.bef.tan gid.aft.tan))
       ~|("inverting-goal-start-end" !!)
     :: Cannot create left-undone-right-done relationship
     ::
-    ?:  ?&  !done.i.status:(got-node:nd bef.ven)
-            done.i.status:(got-node:nd aft.ven)
+    ?:  ?&  !done.i.status:(got-node:nd bef.tan)
+            done.i.status:(got-node:nd aft.tan)
         ==
       ~|("left-undone-right-done" !!)
-    :: aft.ven must not come before bef.ven
+    :: aft.tan must not come before bef.tan
     ::
-    ?:  (check-path:tv aft.ven bef.ven %r)  ~|("already-ordered" !!)
+    ?:  (check-path:tv aft.tan bef.tan %r)  ~|("already-ordered" !!)
     ::
-    =/  bef-node=node:gol  (got-node:nd bef.ven)
-    =/  aft-node=node:gol  (got-node:nd aft.ven)
-    :: there must be no bound mismatch between bef.ven and aft.ven
+    =/  bef-node=node:gol  (got-node:nd bef.tan)
+    =/  aft-node=node:gol  (got-node:nd aft.tan)
+    :: there must be no bound mismatch between bef.tan and aft.tan
     ::
-    =/  lb  ?~(moment.bef-node (left-bound:tv bef.ven) moment.bef-node)
-    =/  rb  ?~(moment.aft-node (ryte-bound:tv aft.ven) moment.aft-node)
+    =/  lb  ?~(moment.bef-node (left-bound:tv bef.tan) moment.bef-node)
+    =/  rb  ?~(moment.aft-node (ryte-bound:tv aft.tan) moment.aft-node)
     ?:  ?~(lb %| ?~(rb %| (gth u.lb u.rb)))  ~|("bound-mismatch" !!)
     :: dag-yoke
     ::
-    =.  outflow.bef-node  (~(put in outflow.bef-node) aft.ven)
-    =.  inflow.aft-node   (~(put in inflow.aft-node) bef.ven)
-    =.  goals.pool        (update-node:nd bef.ven bef-node)
-    =.  goals.pool        (update-node:nd aft.ven aft-node)
+    =.  outflow.bef-node  (~(put in outflow.bef-node) aft.tan)
+    =.  inflow.aft-node   (~(put in inflow.aft-node) bef.tan)
+    =.  goals.pool        (update-node:nd bef.tan bef-node)
+    =.  goals.pool        (update-node:nd aft.tan aft-node)
     this
     ::
       %dag-rend
     :: Cannot unrelate goal from itself
     ::
-    ?:  =(gid.bef.ven gid.aft.ven)  ~|("same-goal" !!)
+    ?:  =(gid.bef.tan gid.aft.tan)  ~|("same-goal" !!)
     :: Cannot destroy containment of an owned goal
     ::
-    =/  l  (~(got by goals.pool) gid.bef.ven)
-    =/  r  (~(got by goals.pool) gid.aft.ven)
-    ?:  ?|  &(=(-.bef.ven %e) =(-.aft.ven %e) (~(has in (sy children.r)) gid.bef.ven))
-            &(=(-.bef.ven %s) =(-.aft.ven %s) (~(has in (sy children.l)) gid.aft.ven))
+    =/  l  (~(got by goals.pool) gid.bef.tan)
+    =/  r  (~(got by goals.pool) gid.aft.tan)
+    ?:  ?|  &(=(-.bef.tan %e) =(-.aft.tan %e) (~(has in (sy children.r)) gid.bef.tan))
+            &(=(-.bef.tan %s) =(-.aft.tan %s) (~(has in (sy children.l)) gid.aft.tan))
         ==
       ~|("owned-goal" !!)
     :: dag-rend
     ::
-    =/  bef-node=node:gol  (got-node:nd bef.ven)
-    =/  aft-node=node:gol  (got-node:nd aft.ven)
-    =.  outflow.bef-node  (~(del in outflow.bef-node) aft.ven)
-    =.  inflow.aft-node   (~(del in inflow.aft-node) bef.ven)
-    =.  goals.pool        (update-node:nd bef.ven bef-node)
-    =.  goals.pool        (update-node:nd aft.ven aft-node)
+    =/  bef-node=node:gol  (got-node:nd bef.tan)
+    =/  aft-node=node:gol  (got-node:nd aft.tan)
+    =.  outflow.bef-node  (~(del in outflow.bef-node) aft.tan)
+    =.  inflow.aft-node   (~(del in inflow.aft-node) bef.tan)
+    =.  goals.pool        (update-node:nd bef.tan bef-node)
+    =.  goals.pool        (update-node:nd aft.tan aft-node)
     this
     ::
       %add-root
-    this(roots.pool [gid.ven roots.pool])
+    this(roots.pool [gid.tan roots.pool])
     ::
       %del-root
-    this(roots.pool (purge-from-list gid.ven roots.pool))
+    this(roots.pool (purge-from-list gid.tan roots.pool))
     ::
       %reorder-roots
-    ?>  =((sy roots.ven) (sy roots.pool))
-    this(roots.pool roots.ven)
+    ?>  =((sy roots.tan) (sy roots.pool))
+    this(roots.pool roots.tan)
     ::
       %add-child
-    =/  =goal:gol  (~(got by goals.pool) dad.ven)
+    =/  =goal:gol  (~(got by goals.pool) dad.tan)
     ?:  actionable.goal  ~|("actionable-goal-cannot-have-child" !!)
-    =.  children.goal  [kid.ven children.goal]
-    this(goals.pool (~(put by goals.pool) dad.ven goal))
+    =.  children.goal  [kid.tan children.goal]
+    this(goals.pool (~(put by goals.pool) dad.tan goal))
     ::
       %del-child
-    =/  =goal:gol  (~(got by goals.pool) dad.ven)
-    =.  children.goal  (purge-from-list kid.ven children.goal)
-    this(goals.pool (~(put by goals.pool) dad.ven goal))
+    =/  =goal:gol  (~(got by goals.pool) dad.tan)
+    =.  children.goal  (purge-from-list kid.tan children.goal)
+    this(goals.pool (~(put by goals.pool) dad.tan goal))
 ::
       %reorder-children
-    =/  =goal:gol  (~(got by goals.pool) gid.ven)
-    ?>  =((sy children.ven) (sy children.goal))
+    =/  =goal:gol  (~(got by goals.pool) gid.tan)
+    ?>  =((sy children.tan) (sy children.goal))
     %=    this
         goals.pool
       %+  ~(put by goals.pool)
-        gid.ven
-      goal(children children.ven)
+        gid.tan
+      goal(children children.tan)
     ==
     ::
       %update-parent
-    ?:  ?~(dad.ven %| actionable:(~(got by goals.pool) u.dad.ven))
+    ?:  ?~(dad.tan %| actionable:(~(got by goals.pool) u.dad.tan))
       ~|("actionable-goal-cannot-have-child" !!)
-    =/  =goal:gol  (~(got by goals.pool) kid.ven)
-    this(goals.pool (~(put by goals.pool) kid.ven goal(parent dad.ven)))
+    =/  =goal:gol  (~(got by goals.pool) kid.tan)
+    this(goals.pool (~(put by goals.pool) kid.tan goal(parent dad.tan)))
     ::
       %archive-root-tree
-    ?>  (~(has in (sy roots.pool)) gid.ven)
+    ?>  (~(has in (sy roots.pool)) gid.tan)
     :: Get subgoals of goal including self
     ::
-    =/  progeny=(set gid:gol)  (progeny:tv gid.ven)
+    =/  progeny=(set gid:gol)  (progeny:tv gid.tan)
     =/  root-tree=goals:gol
       %-  ~(gas by *goals:gol)
       %+  turn  ~(tap in progeny)
@@ -450,8 +327,8 @@
     %=    this
         contents.archive.pool
       %+  ~(put by contents.archive.pool)
-        gid.ven
-      [context.ven root-tree]
+        gid.tan
+      [context.tan root-tree]
       ::
         goals.pool
       %-  ~(gas by *goals:gol)
@@ -463,37 +340,37 @@
     ==
     ::
       %delete-content
-    this(contents.archive.pool (~(del by contents.archive.pool) gid.ven))
+    this(contents.archive.pool (~(del by contents.archive.pool) gid.tan))
     ::
       %restore-content
     :: restores content to root
     ::
-    =+  (~(got by contents.archive.pool) gid.ven)
+    =+  (~(got by contents.archive.pool) gid.tan)
     =.  goals.pool  (~(uni by goals.pool) (validate-goals:vd goals))
-    this(contents.archive.pool (~(del by contents.archive.pool) gid.ven))
+    this(contents.archive.pool (~(del by contents.archive.pool) gid.tan))
     ::
       %add-to-context
-    =/  old-list=(list gid:gol)  (~(gut by contexts.archive.pool) context.ven ~)
-    =/  new-list=(list gid:gol)  [gid.ven old-list]
+    =/  old-list=(list gid:gol)  (~(gut by contexts.archive.pool) context.tan ~)
+    =/  new-list=(list gid:gol)  [gid.tan old-list]
     %=    this
         contexts.archive.pool
-      (~(put by contexts.archive.pool) context.ven new-list)
+      (~(put by contexts.archive.pool) context.tan new-list)
     ==
     ::
       %del-from-context
-    =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context.ven)
-    =/  new-list=(list gid:gol)  (purge-from-list gid.ven old-list)
+    =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context.tan)
+    =/  new-list=(list gid:gol)  (purge-from-list gid.tan old-list)
     %=    this
         contexts.archive.pool
-      (~(put by contexts.archive.pool) context.ven new-list)
+      (~(put by contexts.archive.pool) context.tan new-list)
     ==
     ::
       %reorder-archive
-    =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context.ven)
-    ?>  =((sy archive.ven) (sy old-list))
+    =/  old-list=(list gid:gol)  (~(got by contexts.archive.pool) context.tan)
+    ?>  =((sy archive.tan) (sy old-list))
     %=    this
         contexts.archive.pool
-      (~(put by contexts.archive.pool) [context archive]:ven)
+      (~(put by contexts.archive.pool) [context archive]:tan)
     ==
     ::
       %delete-context
@@ -501,173 +378,169 @@
     ::
     %=    this
         contexts.archive.pool
-      (~(del by contexts.archive.pool) [~ context.ven])
+      (~(del by contexts.archive.pool) [~ context.tan])
     ==
     ::
       %remove-context
     :: when a context is deleted from main goals
     ::
-    =/  [* =goals:gol]  (~(got by contents.archive.pool) gid.ven)
+    =/  [* =goals:gol]  (~(got by contents.archive.pool) gid.tan)
     %=  this
         contents.archive.pool
       %+  ~(put by contents.archive.pool)
-        gid.ven
+        gid.tan
       [~ goals]
     ==
     ::
       %set-actionable
-    =/  goal  (~(got by goals.pool) gid.ven)
-    ?-    val.ven
-      %|  this(goals.pool (~(put by goals.pool) gid.ven goal(actionable %|)))
+    =/  goal  (~(got by goals.pool) gid.tan)
+    ?-    val.tan
+      %|  this(goals.pool (~(put by goals.pool) gid.tan goal(actionable %|)))
       ::
         %&
       ?^  children.goal  ~|("has-children" !!)
-      this(goals.pool (~(put by goals.pool) gid.ven goal(actionable %&)))
+      this(goals.pool (~(put by goals.pool) gid.tan goal(actionable %&)))
     ==
     ::
       %mark-done
-    =/  goal  (~(got by goals.pool) gid.nid.ven)
-    ?:  (left-undone:tv nid.ven)  ~&  %left-undone  ~|("left-undone" !!)
+    =/  goal  (~(got by goals.pool) gid.nid.tan)
+    ?:  (left-undone:tv nid.tan)  ~&  %left-undone  ~|("left-undone" !!)
     =.  goal
-      ?-    -.nid.ven
+      ?-    -.nid.tan
           %s
         ?:  done.i.status.start.goal
           ~&(>> "already-done" goal)
-        ?:  (lth now.ven timestamp.i.status.start.goal)
+        ?:  (lth now.tan timestamp.i.status.start.goal)
           ~&(>>> "bad-time" goal)
-        goal(status.start [[now.ven %&] status.start.goal])
+        goal(status.start [[now.tan %&] status.start.goal])
         ::
           %e
         ?:  done.i.status.end.goal
           ~&(>> "already-done" goal)
-        ?:  (lth now.ven timestamp.i.status.end.goal)
+        ?:  (lth now.tan timestamp.i.status.end.goal)
           ~&(>>> "bad-time" goal)
-        goal(status.end [[now.ven %&] status.end.goal])
+        goal(status.end [[now.tan %&] status.end.goal])
       ==
-    this(goals.pool (~(put by goals.pool) gid.nid.ven goal))
+    this(goals.pool (~(put by goals.pool) gid.nid.tan goal))
     ::
       %mark-undone
-    =/  goal  (~(got by goals.pool) gid.nid.ven)
-    ?:  (right-done:tv nid.ven)  ~|("right-done" !!)
+    =/  goal  (~(got by goals.pool) gid.nid.tan)
+    ?:  (right-done:tv nid.tan)  ~|("right-done" !!)
     =.  goal
-      ?-    -.nid.ven
+      ?-    -.nid.tan
           %s
         ?.  done.i.status.start.goal
           ~&(>> "already-undone" goal)
-        ?:  (lth now.ven timestamp.i.status.start.goal)
+        ?:  (lth now.tan timestamp.i.status.start.goal)
           ~&(>>> "bad-time" goal)
-        goal(status.start [[now.ven %|] status.start.goal])
+        goal(status.start [[now.tan %|] status.start.goal])
         ::
           %e
         ?.  done.i.status.end.goal
           ~&(>> "already-undone" goal)
-        ?:  (lth now.ven timestamp.i.status.end.goal)
+        ?:  (lth now.tan timestamp.i.status.end.goal)
           ~&(>>> "bad-time" goal)
-        goal(status.end [[now.ven %|] status.end.goal])
+        goal(status.end [[now.tan %|] status.end.goal])
       ==
-    this(goals.pool (~(put by goals.pool) gid.nid.ven goal))
+    this(goals.pool (~(put by goals.pool) gid.nid.tan goal))
     ::
       %set-summary
-    ?.  (lte (met 3 summary.ven) 140)
+    ?.  (lte (met 3 summary.tan) 140)
       ~|("Summary exceeds 140 characters." !!)
-    =/  =goal:gol  (~(got by goals.pool) gid.ven)
-    this(goals.pool (~(put by goals.pool) gid.ven goal(summary summary.ven)))
+    =/  =goal:gol  (~(got by goals.pool) gid.tan)
+    this(goals.pool (~(put by goals.pool) gid.tan goal(summary summary.tan)))
     ::
       %set-pool-title
-    ?.  (lte (met 3 title.ven) 140)
+    ?.  (lte (met 3 title.tan) 140)
       ~|("Title exceeds 140 characters." !!)
-    this(title.pool title.ven)
+    this(title.pool title.tan)
     ::
       %set-start
-    ?:  (bounded [%s gid.ven] start.ven %l)  ~|("bound-left" !!)
-    ?:  (bounded [%s gid.ven] start.ven %r)  ~|("bound-ryte" !!)
-    =/  goal  (~(got by goals.pool) gid.ven)
-    this(goals.pool (~(put by goals.pool) gid.ven goal(moment.start start.ven)))
+    ?:  (bounded [%s gid.tan] start.tan %l)  ~|("bound-left" !!)
+    ?:  (bounded [%s gid.tan] start.tan %r)  ~|("bound-ryte" !!)
+    =/  goal  (~(got by goals.pool) gid.tan)
+    this(goals.pool (~(put by goals.pool) gid.tan goal(moment.start start.tan)))
     ::
       %set-end
-    ?:  (bounded [%e gid.ven] end.ven %l)  ~|("bound-left" !!)
-    ?:  (bounded [%e gid.ven] end.ven %r)  ~|("bound-ryte" !!)
-    =/  goal  (~(got by goals.pool) gid.ven)
-    this(goals.pool (~(put by goals.pool) gid.ven goal(moment.end end.ven)))
+    ?:  (bounded [%e gid.tan] end.tan %l)  ~|("bound-left" !!)
+    ?:  (bounded [%e gid.tan] end.tan %r)  ~|("bound-ryte" !!)
+    =/  goal  (~(got by goals.pool) gid.tan)
+    this(goals.pool (~(put by goals.pool) gid.tan goal(moment.end end.tan)))
     ::
       %set-pool-role
-    ?~  role.ven
-      this(perms.pool (~(del by perms.pool) ship.ven))
-    ?<  ?=(%host u.role.ven)
-    this(perms.pool (~(put by perms.pool) [ship u.role]:ven))
+    ?~  role.tan
+      this(perms.pool (~(del by perms.pool) ship.tan))
+    ?<  ?=(%host u.role.tan)
+    this(perms.pool (~(put by perms.pool) [ship u.role]:tan))
     ::
       %set-chief
-    ?.  (check-in-pool chief.ven)
+    ?.  (check-in-pool chief.tan)
       ~|("chief not in pool" !!)
-    =/  =goal:gol  (~(got by goals.pool) gid.ven)
-    this(goals.pool (~(put by goals.pool) gid.ven goal(chief chief.ven)))
+    =/  =goal:gol  (~(got by goals.pool) gid.tan)
+    this(goals.pool (~(put by goals.pool) gid.tan goal(chief chief.tan)))
     ::
       %set-open-to
-    =/  =goal:gol  (~(got by goals.pool) gid.ven)
-    this(goals.pool (~(put by goals.pool) gid.ven goal(open-to open-to.ven)))
+    =/  =goal:gol  (~(got by goals.pool) gid.tan)
+    this(goals.pool (~(put by goals.pool) gid.tan goal(open-to open-to.tan)))
     ::
       %update-deputies
-    =/  =goal:gol  (~(got by goals.pool) gid.ven)
+    =/  =goal:gol  (~(got by goals.pool) gid.tan)
     =.  deputies.goal
-      ?-    -.p.ven
-        %|  (~(del by deputies.goal) p.p.ven)
+      ?-    -.p.tan
+        %|  (~(del by deputies.goal) p.p.tan)
         ::
           %&
-        ?.  (check-in-pool ship.p.p.ven)
+        ?.  (check-in-pool ship.p.p.tan)
           ~|("{<ship>} not in pool" !!)
-        (~(put by deputies.goal) p.p.ven)
+        (~(put by deputies.goal) p.p.tan)
       ==
-    this(goals.pool (~(put by goals.pool) gid.ven goal))
+    this(goals.pool (~(put by goals.pool) gid.tan goal))
     ::
       %update-goal-metadata
-    =/  =goal:gol  (~(got by goals.pool) gid.ven)
+    =/  =goal:gol  (~(got by goals.pool) gid.tan)
     =.  metadata.goal
-      ?-  -.p.ven
-        %&  (~(put by metadata.goal) p.p.ven)
-        %|  (~(del by metadata.goal) p.p.ven)
+      ?-  -.p.tan
+        %&  (~(put by metadata.goal) p.p.tan)
+        %|  (~(del by metadata.goal) p.p.tan)
       ==
-    this(goals.pool (~(put by goals.pool) gid.ven goal))
+    this(goals.pool (~(put by goals.pool) gid.tan goal))
     ::
       %update-pool-metadata
     %=    this
         metadata.pool
-      ?-  -.p.ven
-        %&  (~(put by metadata.pool) p.p.ven)
-        %|  (~(del by metadata.pool) p.p.ven)
+      ?-  -.p.tan
+        %&  (~(put by metadata.pool) p.p.tan)
+        %|  (~(del by metadata.pool) p.p.tan)
       ==
     ==
     ::
       %update-pool-metadata-field
-    =/  properties  (~(gut by metadata-properties.pool) field.ven ~)
+    =/  properties  (~(gut by metadata-properties.pool) field.tan ~)
     =.  properties
-      ?-  -.p.ven
-        %&  (~(put by properties) p.p.ven)
-        %|  (~(del by properties) p.p.ven)
+      ?-  -.p.tan
+        %&  (~(put by properties) p.p.tan)
+        %|  (~(del by properties) p.p.tan)
       ==
     %=    this
         metadata-properties.pool
-      (~(put by metadata-properties.pool) field.ven properties)
+      (~(put by metadata-properties.pool) field.tan properties)
     ==
       ::
       %delete-pool-metadata-field
-    this(metadata-properties.pool (~(del by metadata-properties.pool) field.ven))
+    this(metadata-properties.pool (~(del by metadata-properties.pool) field.tan))
   ==
 ::
-++  handle-pool-transition
-  |=  [mod=ship tan=pool-transition:act]
+++  handle-compound-transition
+  |=  [mod=ship tan=compound-pool-transition:act]
   ^-  _this
-  ?+    -.tan  !!
-      %init-pool
-    ?>  =(mod host.pid.pool)
-    this(pool pool.tan)
-    ::
+  ?-    -.tan
       %dag-yoke
     ?>  (check-dag-yoke-perm bef.tan aft.tan mod)
-    (handle-pool-event tan)
+    (handle-transition tan)
     ::
       %dag-rend
     ?>  (check-dag-rend-perm bef.tan aft.tan mod)
-    (handle-pool-event tan)
+    (handle-transition tan)
     ::
       %break-bonds
     =/  edges=(list edge:gol)  (get-bonds:nd [gid gids]:tan)
@@ -676,7 +549,7 @@
       this
     %=  $
       edges  t.edges
-      this   (handle-pool-transition mod %dag-rend i.edges)
+      this   (handle-compound-transition mod %dag-rend i.edges)
     ==
     ::
       %partition
@@ -687,63 +560,123 @@
       this
     %=  $
       part-list  t.part-list
-      this       (handle-pool-transition mod %break-bonds i.part-list complement)
+      this       (handle-compound-transition mod %break-bonds i.part-list complement)
     ==
     ::
       %yoke
     =,  yok.tan
     ?-  -.yok.tan
-      %prio-yoke  (handle-pool-transition mod %dag-yoke [%s lid] [%s rid])
-      %prio-rend  (handle-pool-transition mod %dag-rend [%s lid] [%s rid])
-      %prec-yoke  (handle-pool-transition mod %dag-yoke [%e lid] [%s rid])
-      %prec-rend  (handle-pool-transition mod %dag-rend [%e lid] [%s rid])
-      %nest-yoke  (handle-pool-transition mod %dag-yoke [%e lid] [%e rid])
-      %nest-rend  (handle-pool-transition mod %dag-rend [%e lid] [%e rid])
-      %hook-yoke  (handle-pool-transition mod %dag-yoke [%s lid] [%e rid])
-      %hook-rend  (handle-pool-transition mod %dag-rend [%s lid] [%e rid])
+      %prio-yoke  (handle-compound-transition mod %dag-yoke [%s lid] [%s rid])
+      %prio-rend  (handle-compound-transition mod %dag-rend [%s lid] [%s rid])
+      %prec-yoke  (handle-compound-transition mod %dag-yoke [%e lid] [%s rid])
+      %prec-rend  (handle-compound-transition mod %dag-rend [%e lid] [%s rid])
+      %nest-yoke  (handle-compound-transition mod %dag-yoke [%e lid] [%e rid])
+      %nest-rend  (handle-compound-transition mod %dag-rend [%e lid] [%e rid])
+      %hook-yoke  (handle-compound-transition mod %dag-yoke [%s lid] [%e rid])
+      %hook-rend  (handle-compound-transition mod %dag-rend [%s lid] [%e rid])
         %held-yoke
-      =.  this  (handle-pool-transition mod %dag-yoke [%e lid] [%e rid])
-      (handle-pool-transition mod %dag-yoke [%s rid] [%s lid])
+      =.  this  (handle-compound-transition mod %dag-yoke [%e lid] [%e rid])
+      (handle-compound-transition mod %dag-yoke [%s rid] [%s lid])
         %held-rend
-      =/  this  (handle-pool-transition mod %dag-rend [%e lid] [%e rid])
-      (handle-pool-transition mod %dag-rend [%s rid] [%s lid])
+      =/  this  (handle-compound-transition mod %dag-rend [%e lid] [%e rid])
+      (handle-compound-transition mod %dag-rend [%s rid] [%s lid])
     ==
     ::
+      %nuke
+    =;  yokes=(list exposed-yoke:act)
+      |-
+      ?~  yokes
+        this
+      %=  $
+        yokes  t.yokes
+        this   (handle-compound-transition mod %yoke i.yokes)
+      ==
+    |^
+    ?-    -.nuke.tan
+      %nuke-prio-left  prio-left
+      %nuke-prio-ryte  prio-ryte
+      %nuke-prio       (weld prio-left prio-ryte)
+      %nuke-prec-left  prec-left
+      %nuke-prec-ryte  prec-ryte
+      %nuke-prec       (weld prec-left prec-ryte)
+      %nuke-prio-prec  :(weld prio-left prio-ryte prec-left prec-ryte)
+      %nuke-nest-left  nest-left
+      %nuke-nest-ryte  nest-ryte
+      %nuke-nest       (weld nest-left nest-ryte)
+    ==
+    ::
+    ++  prio-left
+      %+  turn
+        ~(tap in (prio-left:nd gid.nuke.tan))
+      |=  =gid:gol
+      ^-  exposed-yoke:act
+      [%prio-rend gid gid.nuke.tan]
+    ::
+    ++  prio-ryte
+      %+  turn
+        ~(tap in (prio-ryte:nd gid.nuke.tan))
+      |=  =gid:gol
+      ^-  exposed-yoke:act
+      [%prio-rend gid.nuke.tan gid]
+    ::
+    ++  prec-left
+      %+  turn
+        ~(tap in (prec-left:nd gid.nuke.tan))
+      |=  =gid:gol
+      ^-  exposed-yoke:act
+      [%prec-rend gid gid.nuke.tan]
+    ::
+    ++  prec-ryte
+      %+  turn
+        ~(tap in (prec-ryte:nd gid.nuke.tan))
+      |=  =gid:gol
+      ^-  exposed-yoke:act
+      [%prec-rend gid.nuke.tan gid]
+    ::
+    ++  nest-left
+      %+  turn
+        ~(tap in (nest-left:nd gid.nuke.tan))
+      |=  =gid:gol
+      ^-  exposed-yoke:act
+      [%nest-rend gid gid.nuke.tan]
+    ::
+    ++  nest-ryte
+      %+  turn
+        ~(tap in (nest-ryte:nd gid.nuke.tan))
+      |=  =gid:gol
+      ^-  exposed-yoke:act
+      [%nest-rend gid.nuke.tan gid]
+    --
+    ::
       %move-to-root
-    :: TODO: delegate transformations to events
     ?.  (check-move-to-root-perm gid.tan mod)
       ~|("missing-move-to-root-perms" !!)
-    =/  k  (~(got by goals.pool) gid.tan)
-    ?~  parent.k
-      this(roots.pool [gid.tan (purge-from-list gid.tan roots.pool)])
-    =/  q  (~(got by goals.pool) u.parent.k)
-    ?>  (~(has in (sy children.q)) gid.tan)
-    =.  goals.pool  (~(put by goals.pool) gid.tan k(parent ~))
-    =.  goals.pool  (~(put by goals.pool) u.parent.k q(children (purge-from-list gid.tan children.q)))
-    =.  roots.pool  [gid.tan roots.pool]
-    (handle-pool-transition mod %yoke %held-rend gid.tan u.parent.k)
+    =/  kid-goal=goal:gol  (~(got by goals.pool) gid.tan)
+    ?>  ?=(^ parent.kid-goal)
+    =.  this  (handle-transition %update-parent gid.tan ~)
+    =.  this  (handle-transition %del-child gid.tan u.parent.kid-goal)
+    =.  this  (handle-transition %add-root gid.tan)
+    (handle-compound-transition mod %yoke %held-rend gid.tan u.parent.kid-goal)
     ::
       %move-to-goal
-    :: TODO: delegate transformations to events
     ?.  (check-move-to-goal-perm kid.tan dad.tan mod)
       ~|("missing-move-to-goal-perms" !!)
+    =/  dad-goal=goal:gol  (~(got by goals.pool) dad.tan)
+    ?<  (~(has in (sy children.dad-goal)) kid.tan)
+    =?  this  actionable.dad-goal
+      (handle-compound-transition mod %set-actionable dad.tan %|)
     :: divine intervention to move goal to root
     ::
-    =.  this  (handle-pool-transition host.pid.pool %move-to-root kid.tan)
-    =/  k  (~(got by goals.pool) kid.tan)
-    =/  q  (~(got by goals.pool) dad.tan)
-    ?<  (~(has in (sy children.q)) kid.tan)
-    =?  this  actionable.q
-      (handle-pool-transition mod %set-actionable dad.tan %|)
-    =.  goals.pool  (~(put by goals.pool) kid.tan k(parent (some dad.tan)))
-    =.  goals.pool  (~(put by goals.pool) dad.tan q(children [kid.tan children.q]))
-    =.  roots.pool  (purge-from-list kid.tan roots.pool)
-    (handle-pool-transition mod %yoke %held-yoke kid.tan dad.tan)
+    =.  this  (handle-compound-transition host.pid.pool %move-to-root kid.tan)
+    =.  this  (handle-transition %update-parent kid.tan ~ dad.tan)
+    =.  this  (handle-transition %add-child kid.tan dad.tan)
+    =.  this  (handle-transition %del-root kid.tan)
+    (handle-compound-transition mod %yoke %held-yoke kid.tan dad.tan)
     ::
       %move
     ?~  upid.tan
-      (handle-pool-transition mod %move-to-root cid.tan)
-    (handle-pool-transition mod %move-to-goal [cid u.upid]:tan)
+      (handle-compound-transition mod %move-to-root cid.tan)
+    (handle-compound-transition mod %move-to-goal [cid u.upid]:tan)
     ::
       $?  %reorder-roots
           %set-pool-title
@@ -752,7 +685,7 @@
           %delete-pool-metadata-field
       ==
     ?>  (check-pool-edit-perm mod)
-    (handle-pool-event tan)
+    (handle-transition tan)
     ::
       $?  %reorder-children
           %set-actionable
@@ -762,24 +695,27 @@
           %update-goal-metadata
       ==
     ?>  (check-goal-edit-perm gid.tan mod)
-    (handle-pool-event tan)
+    (handle-transition tan)
     ::
       ?(%mark-done %mark-undone)
     ?>  (check-goal-edit-perm gid.nid.tan mod)
-    (handle-pool-event tan)
+    (handle-transition tan)
     ::
       %reorder-archive
+    :: TODO: archiving permissions are broken
+    ::       because they're not in goals.pool...
+    ::       Think this through more thoroughly...
     ?>  ?~  context.tan
           (check-pool-edit-perm mod)
         (check-goal-edit-perm u.context.tan mod)
-    (handle-pool-event tan)
+    (handle-transition tan)
     ::
       $?  %set-open-to
           %update-deputies
       ==
     ?.  (check-goal-super gid.tan mod)
       ~|("missing super perms" !!)
-    (handle-pool-event tan)
+    (handle-transition tan)
     ::
       %set-pool-role
     ::   TODO:
@@ -789,19 +725,190 @@
     ::   host when no ancestor is available.
     ::
     ?>  (check-pool-role-mod ship.tan mod)
-    (handle-pool-event tan)
+    (handle-transition tan)
     ::
       %set-chief
     ?.  (check-goal-chief-mod-perm gid.tan mod)
       ~|("missing goal perms" !!)
-    =.  this  (handle-pool-event %set-chief [gid chief]:tan)
+    =.  this  (handle-transition %set-chief [gid chief]:tan)
     ?.  rec.tan
       this
     =/  children=(list gid:gol)  children:(~(got by goals.pool) gid.tan)
     |-
     ?~  children
       this
-    =.  this  (handle-pool-transition mod tan(gid i.children))
+    =.  this  (handle-compound-transition mod tan(gid i.children))
     $(children t.children)
+    ::
+      %set-active
+    ?-    val.tan
+        %&
+      :: automatically mark parent active if possible
+      ::
+      =/  parent=(unit gid:gol)
+        parent:(~(got by goals.pool) gid.tan)
+      =?  this  ?=(^ parent)
+        (handle-compound-transition mod %set-active u.parent %& now.tan)
+      ~&  %marking-active
+      (handle-compound-transition mod %mark-done s+gid.tan now.tan)
+      ::
+        %|
+      :: automatically unmark child active if possible
+      ::
+      =/  children=(list gid:gol)
+        children:(~(got by goals.pool) gid.tan)
+      =.  this
+        |-
+        ?~  children
+          this
+        (handle-compound-transition mod %set-active i.children %| now.tan)
+      ~&  %unmarking-active
+      (handle-compound-transition mod %mark-undone s+gid.tan now.tan)
+    ==
+    ::
+      %set-complete
+    ?-    val.tan
+        %&
+      =.  this  (handle-compound-transition mod %set-active gid.tan %& now.tan)
+      ~&  %marking-complete
+      =?  this  done.i.status.start:(~(got by goals.pool) gid.tan)
+        (handle-compound-transition mod %mark-done s+gid.tan now.tan)
+      =.  this
+        (handle-compound-transition mod %mark-done e+gid.tan now.tan)
+      :: automatically complete parent if all its children are complete
+      ::
+      =/  parent=(unit gid:gol)  parent:(~(got by goals.pool) gid.tan)
+      ?~  parent  this
+      ?.  %-  ~(all in (young:nd u.parent))
+          |=(=gid:gol done.i.status:(got-node:nd e+gid.tan))
+        this
+      :: Set parent complete if possible
+      ::
+      =/  mul
+        %-  mule  |.
+        (handle-compound-transition mod %set-complete u.parent %& now.tan)
+      ?-  -.mul
+        %&  p.mul
+        %|  ((slog p.mul) this)
+      ==
+      ::
+        %|
+      ~&  %unmarking-complete
+      =.  this
+        (handle-compound-transition mod %mark-undone e+gid.tan now.tan)
+      :: Unmark start done if possible
+      ::
+      =/  mul
+        %-  mule  |.
+        (handle-compound-transition mod %mark-undone s+gid.tan now.tan)
+      ?-  -.mul
+        %&  p.mul
+        %|  ((slog p.mul) this)
+      ==
+    ==
+    ::
+      %create-goal
+    |^
+    ?>  ?~  upid.tan
+          (check-root-create-perm mod)
+        (check-goal-create-perm u.upid.tan mod)
+    =/  =goal:gol  (init-goal gid.tan summary.tan mod now.tan)
+    =.  this  (handle-transition %init-goal gid.tan goal)
+    :: divine intervention (host)
+    ::
+    (handle-compound-transition host.pid.pool %move gid.tan upid.tan)
+    ::
+    ++  init-goal
+      |=  [=gid:gol summary=@t chief=ship now=@da]
+      ^-  goal:gol
+      =|  =goal:gol
+      %=  goal
+        gid       gid
+        chief    chief
+        summary  summary
+        :: Initialize inflowing and outflowing nodes
+        :: 
+        outflow.start  (~(put in *(set nid:gol)) [%e gid])
+        inflow.end     (~(put in *(set nid:gol)) [%s gid])
+        status.start   [[now %|] ~]
+        status.end     [[now %|] ~]
+      ==
+    --
+    ::
+      %archive-goal
+    :: Move goal and subgoals from main goals to archive
+    ::
+    ?>  (check-goal-edit-perm gid.tan mod)
+    =/  context=(unit gid:gol)  parent:(~(got by goals.pool) gid.tan)
+    :: Move goal to root (divine intervention by host)
+    ::
+    =.  this  (handle-compound-transition host.pid.pool %move gid.tan ~)
+    :: Partition subgoals of goal from rest of goals
+    :: (Remove non-hierarchical DAG relationships)
+    ::
+    =.  this  (handle-compound-transition mod %partition (progeny:tv gid.tan))
+    =.  this  (handle-transition %archive-root-tree gid.tan context)
+    (handle-transition %add-to-context context gid.tan)
+    ::
+      %restore-goal
+    :: Restore goal from archive to main goals
+    ::
+    =/  [context=(unit gid:gol) =goals:gol]
+      (~(got by contents.archive.pool) gid.tan)
+    :: TODO: archiving permissions are broken
+    ::       because they're not in goals.pool...
+    ::       Think this through more thoroughly...
+    ?>  ?~  context
+          (check-goal-master gid.tan mod)
+        (check-goal-edit-perm u.context mod)
+    =.  this  (handle-transition %restore-content gid.tan)
+    =.  this  (handle-transition %del-from-context context gid.tan)
+    (handle-compound-transition mod %move gid.tan context)
+    ::
+      %restore-to-root
+    :: Restore goal from archive to main goals
+    ::
+    =/  [context=(unit gid:gol) =goals:gol]
+      (~(got by contents.archive.pool) gid.tan)
+    :: TODO: archiving permissions are broken
+    ::       because they're not in goals.pool...
+    ::       Think this through more thoroughly...
+    ?>  ?~  context
+          (check-goal-master gid.tan mod)
+        (check-goal-create-perm u.context mod)
+    =.  this  (handle-transition %restore-content gid.tan)
+    =.  this  (handle-transition %del-from-context context gid.tan)
+    (handle-compound-transition mod %move gid.tan ~)
+    ::
+      %delete-from-archive
+    :: Only admin level can perma-delete
+    ::
+    ?>  (check-pool-edit-perm mod)
+    =/  [context=(unit gid:gol) *]
+      (~(got by contents.archive.pool) gid.tan)
+    =.  this  (handle-transition %delete-content gid.tan)
+    (handle-transition %del-from-context context gid.tan)
+    ::
+      %delete-goal
+    =.  this  (handle-compound-transition mod %archive-goal gid.tan)
+    (handle-compound-transition mod %delete-from-archive gid.tan)
   ==
+::
+++  handle-transitions
+  |=  tans=(list pool-transition:act)
+  ^-  _this
+  ?~  tans
+    this
+  =.  this  (handle-transition i.tans)
+  $(tans t.tans)
+::
+++  handle-compound-transition-safe
+  |=  [mod=ship tan=compound-pool-transition:act]
+  ^-  _this
+  =/  old=pool:gol  pool
+  =.  this  (handle-compound-transition mod tan)
+  =/  [* new=pool:gol]  abet:(handle-transitions:(apex old) tans)
+  ?>  =(new pool)
+  this
+
 --

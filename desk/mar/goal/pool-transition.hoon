@@ -1,13 +1,13 @@
 /-  *action
 /+  *gol-cli-json
-|_  tan=[ship pool-transition]
+|_  tan=pool-transition
 ++  grow
   |%
   ++  noun  tan
   --
 ++  grab
   |%
-  ++  noun  ,[ship pool-transition]
+  ++  noun  pool-transition
   --
 ++  grad  %noun
 --
