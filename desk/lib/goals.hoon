@@ -20,6 +20,16 @@
   ++  emit  |=(=card this(cards [card cards]))
   ++  emil  |=(cadz=(list card) this(cards (weld cadz cards)))
   ::
+  ++  subscribe-to-pools-agent
+    ^-  (list card:agent:gall)
+    ?:  (~(has by wex.bowl) [/pools-transitions our.bowl %pools])
+      ~
+    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]~
+  ::
+  ++  poke-desk-into-venter
+    ^-  card:agent:gall
+    [%pass / %agent [our.bowl %venter] %poke uni-desks+!>((sy ~[%goals]))]
+  ::
   ++  handle-transition
     |=  tan=transition:act
     ^-  _this

@@ -9,10 +9,7 @@
 |=  [=gowl vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
 ^-  form:m
-?>  |(=(our src):gowl (moon:title [our src]:gowl))
-~?  >>  (moon:title [our src]:gowl)
-  "%json-tree vine: moon access from {(scow %p src.gowl)}"
-~&  "%json-tree vine: receiving mark {(trip mark)}"
+~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
 ;<  =json-tree  bind:m  (scry-hard ,json-tree /gx/json-tree/json-tree/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
     %json-tree-action

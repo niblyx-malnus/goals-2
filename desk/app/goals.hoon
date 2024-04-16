@@ -35,23 +35,24 @@
     vnt   ~(. (utils:vent this) bowl)
 ::
 ++  on-init
-    ^-  (quip card _this)
-    :_  this
-    ?:  (~(has by wex.bowl) [/pools-transitions our.bowl %pools])
-      ~
-    [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]~
+  ^-  (quip card _this)
+  :_  this
+  ;:  weld
+    subscribe-to-pools-agent:ghc
+    [poke-desk-into-venter:ghc]~
+  ==
 ::
 ++  on-save   !>(state)
 ::
 ++  on-load
   |=  =old=vase
   ^-  (quip card _this)
-  :: =/  old  !<(state-0:gol old-vase)
-  =/  old  [%0 +:;;([@ store:gol] q.old-vase)]
+  =/  old  !<(state-0:gol old-vase)
   :_  this(state old)
-  ?:  (~(has by wex.bowl) [/pools-transitions our.bowl %pools])
-    ~
-  [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]~
+  ;:  weld
+    subscribe-to-pools-agent:ghc
+    [poke-desk-into-venter:ghc]~
+  ==
 ::
 ++  on-poke
   |=  [=mark =vase]
