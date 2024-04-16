@@ -6,7 +6,7 @@
 +*  this  .
     tv    ~(. gol-cli-traverse goals.pool)
     nd    ~(. gol-cli-node goals.pool)
-++  abet  [tans pool]
+++  abet  [(flop tans) pool]
 ++  apex  |=(=pool:gol this(pool pool, tans ~))
 ++  emit  |=(tan=pool-transition:act this(tans [tan tans]))
 ++  emil  |=(tanz=(list pool-transition:act) this(tans (weld tanz tans)))
