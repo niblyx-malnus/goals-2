@@ -62,13 +62,15 @@
   ;<  =tube:clay       bind:m  (build-our-tube q.byk %noun p.page)
   ;<  ~                bind:m  (trace (cat 3 'mark: ' p.page) ~)
   (pure:m (tube !>(q.page)))
-:: vap (local venter agent) must be %[desk-name]-venter
+:: DEPRECATED: vap (local venter agent) must be %[desk-name]-venter
+:: NEW: vap must be %venter
 ::
 ++  get-vap
   =/  m  (strand ,dude:gall)
   ^-  form:m
   ;<  =desk  bind:m  get-desk
-  =/  vap=dude:gall  (cat 3 desk '-venter')
+  :: DEPRECATED: =/  vap=dude:gall  (cat 3 desk '-venter')
+  =/  vap=dude:gall  %venter
   ;<  dudes=(set [=dude:gall live=?])  bind:m
     (scry ,(set [dude:gall ?]) /ge/[desk]/$)
   ?:  (~(has in dudes) [vap &])
@@ -197,13 +199,6 @@
 ::
 +$  gowl     bowl:gall   :: gall bowl alias
 +$  sowl     bowl:spider :: spider bowl alias
-::
-+$  vent-pign
-  $%  [%poke-ack p=(unit tang)]
-      [%watch-ack p=(unit tang)]
-      [%fact =page]
-      [%kick ~]
-  ==
 :: common vase strand functions
 ::
 ++  vand     (strand ,vase)

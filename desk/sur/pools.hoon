@@ -97,7 +97,7 @@
 ::
 +$  pool-action :: sent with id
   $%  [%kick-member member=ship]
-      [%kick-blacklisted fake-requests=(map ship request)]
+      [%kick-blacklisted requests=(map ship request)]
       [%update-graylist fields=(list graylist-field)]
       [%update-pool-data fields=(list pool-data-field)]
       [%extend-invite invitee=ship =invite]
@@ -122,10 +122,10 @@
 +$  delegation
   $%  [%graylist =id requester=ship =request]
   ==
-:: delegated graylist can allow conditionally based on metadata
+:: delegated graylist can control access conditionally based on metadata
 ::
 +$  view
-  $%  [%pools =metadata]
-      [%public-data =id =metadata]
+  $%  [%pools =request]
+      [%public-data =id =request]
   ==
 --

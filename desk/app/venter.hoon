@@ -1,5 +1,4 @@
 /+  vio=ventio, dbug, verb, default-agent
-/=  x  /mar/vent-pign
 :: There is no way around this. Threads cannot do state.
 :: The venter needs STATE in order to enforce uniqueness on its vent-ids.
 ::
@@ -10,25 +9,60 @@
 :: %venter also maintains data about who can "pilot" this ship's venting
 ::
 |%
-+$  state-0    [%0 =pilots:vio =vents:vio tube-verb=$~(| ?)]
++$  state-0
+  $:  %0
+      =pilots:vio
+      =vents:vio
+      desks=(set desk)  :: tube-warming targets
+      tube-verb=$~(| ?)
+  ==
+::
 +$  card       card:agent:gall
 +$  vent-id    vent-id:vio
 --
+::
 %-  agent:dbug
 %+  verb  |
 =|  state-0
 =*  state  -
+::
+=>  |_  =bowl:gall
+    ++  revision-number
+      |=  =desk
+      ^-  @ud
+      +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[desk]/(scot %da now.bowl)))
+    ::
+    ++  watch-next
+      |=  =desk
+      ^-  card
+      =/  =@ud  (revision-number desk)
+      [%pass /next/[desk] %arvo %c %warp our.bowl desk ~ %many %.y ud+ud ud+ud /]
+    ::
+    ++  run-tube-warmer
+      |=  =desk
+      [%pass /tube-warmer/[desk] %arvo %k %fard desk %tube-warmer noun+!>(`[desk tube-verb])]
+    ::
+    ++  handle-desk
+      |=  =desk
+      ^-  (list card)
+      :~  (watch-next desk)
+          (run-tube-warmer desk)
+      ==
+    ::
+    ++  handle-desks
+      |=  desks=(set desk)
+      ^-  (list card)
+      (zing (turn ~(tap in desks) handle-desk))
+    --
+::
 ^-  agent:gall
 |_  =bowl:gall
 +*  this  .
     def   ~(. (default-agent this %|) bowl)
+    hc    ~(. +> bowl)
 ++  on-init
   ^-  (quip card _this)
-  =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[q.byk.bowl]/(scot %da now.bowl)))
-  :_  this
-  :~  [%pass /next %arvo %c %warp our.bowl q.byk.bowl ~ %many %.y ud+ud ud+ud /]
-      [%pass /tube-warmer %arvo %k %fard q.byk.bowl %tube-warmer noun+!>(`[q.byk.bowl tube-verb])]
-  ==
+  [(handle-desks:hc desks) this]
 ::
 ++  on-save   !>(state)
 ::
@@ -37,11 +71,7 @@
   ^-  (quip card _this)
   =/  old=state-0  !<(state-0 ole)
   =.  state  old
-  =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[q.byk.bowl]/(scot %da now.bowl)))
-  :_  this
-  :~  [%pass /next %arvo %c %warp our.bowl q.byk.bowl ~ %many %.y ud+ud ud+ud /]
-      [%pass /tube-warmer %arvo %k %fard q.byk.bowl %tube-warmer noun+!>(`[q.byk.bowl tube-verb])]
-  ==
+  [(handle-desks:hc desks) this]
 ::
 ++  on-poke
   |=  [=mark =vase]
@@ -61,6 +91,16 @@
     =+  !<(ships=(set ship) vase)
     ~&  pilot-ships+(~(dif in ships.pilots) ships)
     `this(ships.pilots (~(dif in ships.pilots) ships))
+    
+      %uni-desks
+    =+  !<(dex=(set desk) vase)
+    ~&  desks+(~(uni in desks) dex)
+    [(handle-desks:hc dex) this(desks (~(uni in desks) dex))]
+    
+      %dif-desks
+    =+  !<(dex=(set desk) vase)
+    ~&  desks+(~(dif in desks) dex)
+    `this(desks (~(dif in desks) dex))
     ::
       %tally-vent
     :: ~&  %venter-tallying
@@ -111,13 +151,15 @@
   ?+    pole  (on-peek:def pole)
     [%x %vents ~]   ``noun+!>(vents)
     [%x %pilots ~]  ``noun+!>(pilots)
+    [%x %desks ~]   ``noun+!>(desks)
+    [%x %verb ~]    ``noun+!>(tube-verb)
   ==
 ::
 ++  on-watch
   |=  =(pole knot)
   ^-  (quip card _this)
   ?+    pole  (on-watch:def pole)
-    [%vent @ @ @ ~]  ?>(=(src our):bowl `this)
+    [%vent @ @ @ ~]  ?>(=(src our):bowl [~ this])
   ==
 ::
 ++  on-leave  on-leave:def
@@ -127,18 +169,17 @@
   |=  [=(pole knot) sign=sign-arvo]
   ^-  (quip card _this)
   ?+    pole  (on-arvo:def pole sign)
-      [%tube-warmer ~]
+      [%tube-warmer desk=@tas ~]
     ?.  ?=([%khan %arow *] sign)  (on-arvo:def pole sign)
-    %-  (slog ?:(?=(%.y -.p.sign) ~ p.p.sign))
-    `this
+    %-  (slog ?:(?=(%.y -.p.sign) ~ [desk.pole p.p.sign]))
+    [~ this]
     ::
-      [%next ~]
-    ?.  ?=([%clay %writ ~] sign)  `this
-    =/  =@ud  +(ud:.^(cass:clay %cw /(scot %p our.bowl)/[q.byk.bowl]/(scot %da now.bowl)))
-    :_  this
-    :~  [%pass /next %arvo %c %warp our.bowl q.byk.bowl ~ %many %.y ud+ud ud+ud /]
-        [%pass /tube-warmer %arvo %k %fard q.byk.bowl %tube-warmer noun+!>(`[q.byk.bowl tube-verb])]
-    ==
+      [%next desk=@tas ~]
+    ?.  ?=([%clay %writ ~] sign)
+      [~ this]
+    ?.  (~(has in desks) desk.pole)
+      [~ this]
+    [(handle-desk:hc desk.pole) this]
   ==
 ::
 ++  on-fail   on-fail:def

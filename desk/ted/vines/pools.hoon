@@ -42,7 +42,7 @@
       |=  [=id:p public=metadata:p]
       [(id-string:enjs:lib id) o+public]
     ;<  auto=(unit auto:p)  bind:m
-      (graylist-resolution id.i.pools-list src.gowl metadata.vyu)
+      (graylist-resolution id.i.pools-list src.gowl request.vyu)
     ?:  ?=([~ %|] auto)
       $(pools-list t.pools-list)
     %=  $
@@ -54,7 +54,7 @@
     :: return public data for the pool if src.gowl isn't blacklisted
     ::
     ;<  auto=(unit auto:p)  bind:m
-      (graylist-resolution id.vyu src.gowl metadata.vyu)
+      (graylist-resolution id.vyu src.gowl request.vyu)
     ?:  ?=([~ %|] auto)
       (strand-fail %view-public-data-fail ~)
     ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
@@ -232,7 +232,7 @@
       (pure:m !>(~))
     ?.  =([~ id] (mole |.((de-pool-path:lib path.i.subs))))
       $(subs t.subs)
-    =/  =metadata:p  (~(gut by fake-requests.act) ship.i.subs ~)
+    =/  =metadata:p  (~(gut by requests.act) ship.i.subs ~)
     ;<  auto=(unit auto:p)  bind:m
       (graylist-resolution id ship.i.subs metadata)
     ?.  |(?=([~ %|] auto) !(~(has by members.pool) ship.i.subs))
@@ -631,13 +631,13 @@
   [%kick-member member]
 ::
 ++  kick-blacklisted
-  |=  [=id:p fake-requests=(map ship request:p)]
+  |=  [=id:p requests=(map ship request:p)]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
   :-  %pools-pool-action  :-  id
   ^-  pool-action:p
-  [%kick-blacklisted fake-requests]
+  [%kick-blacklisted requests]
 ::
 ++  accept-request
   |=  [=id:p requester=ship =metadata:p]
