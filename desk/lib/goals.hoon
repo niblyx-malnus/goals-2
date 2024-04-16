@@ -426,7 +426,8 @@
     ^-  form:m
     ;<  jon=json  bind:m
       %+  (vent ,json)  [our.gowl %pools]
-      :-  %pools-action
+      :-  %pools-local-action
+      ^-  local-action:p
       [%create-pool graylist-fields pool-data-fields]
     (pure:m (id:dejs:pools jon))
   ::
@@ -436,6 +437,7 @@
     ^-  form:m
     %+  poke  [our.gowl %pools]
     :-  %pools-transition  !>
+    ^-  transition:p
     :+  %update-pool  id
     [%update-pool-data fields]
   ::
@@ -443,18 +445,27 @@
     |=  [=pid:gol title=@t]
     =/  m  (strand ,~)
     ^-  form:m
-    (poke [our.gowl %goals] %goal-transition !>([%create-pool pid title]))
+    %+  poke  [our.gowl %goals]
+    :-  %goal-transition  !>
+    ^-  transition:act
+    [%create-pool pid title]
   ::
   ++  delete-goals-pool
     |=  =pid:gol
     =/  m  (strand ,~)
     ^-  form:m
-    (poke [our.gowl %goals] %goal-transition !>([%delete-pool pid]))
+    %+  poke  [our.gowl %goals]
+    :-  %goal-transition  !>
+    ^-  transition:act
+    [%delete-pool pid]
   ::
   ++  delete-pools-pool
     |=  =id:p
     =/  m  (strand ,~)
     ^-  form:m
-    (poke [our.gowl %pools] %pools-transition !>([%delete-pool id]))
+    %+  poke  [our.gowl %pools]
+    :-  %pools-transition  !>
+    ^-  transition:p
+    [%delete-pool id]
   --
 --
