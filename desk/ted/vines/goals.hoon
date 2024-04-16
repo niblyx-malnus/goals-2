@@ -451,7 +451,7 @@
     =/  =path  (en-pool-path:goals id)
     %-  pairs:enjs:format
     :~  [%pid s+(id-string:enjs:^pools id)]
-        [%title (~(gut by public.pool-data.pool) 'title' 'NO TITLE')]
+        [%title (~(gut by public.pool-data.pool) 'title' s+'NO TITLE')]
         [%host s+(rsh [3 1] (scot %p host.id))] :: redundant, but that's fine
         [%name s+name.id] :: redundant, but that's fine
         ['isValid' b+%.y]
