@@ -1,7 +1,7 @@
 /-  gol=goals, p=pools, act=action
-/+  ventio, *gol-cli-util, pools, sub-count,
+/+  ventio, pools, sub-count,
     pl=gol-cli-pool, gol-cli-node, gol-cli-traverse,
-    gol-cli-goals, gs=gol-cli-state, goj=gol-cli-json
+    goj=gol-cli-json
 |%
 ++  en-pool-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
 ++  de-pool-path
@@ -11,7 +11,7 @@
   [(slav %p host) name]
 ::
 ++  agent
-  |_  [=bowl:gall cards=(list card:agent:gall) state-5-30:gs]
+  |_  [=bowl:gall cards=(list card:agent:gall) state-0:gol]
   +*  this   .
       state  +<+>
       gols   ~(. gol-cli-goals store)
@@ -242,7 +242,7 @@
       ^-  form:m
       %+  poke  [our.gowl %goals]
       goal-compound-transition+!>(compound-transition)
-    --
+    -- 
   ::
   ++  handle-pool-action
     =,  strand=strand:spider
@@ -264,11 +264,10 @@
       ==
     :: deal with our pool
     ::
-    ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
     ?-    -.axn
         %create-goal
-      =/  =gid:gol  (~(unique-id gol-cli-goals store) pid now.gowl)
-      ;<  ~  bind:m
+      ;<  =gid:gol  bind:m  (unique-id pid)
+      ;<  ~         bind:m
         (handle-compound-pool-transition %create-goal gid upid.axn summary.axn now.gowl)
       :: mark the goal started if active and if possible
       ::
@@ -315,6 +314,19 @@
     ==
     ::
     ++  pool-path  `path`(en-pool-path pid)
+    ::
+    ++  unique-id
+      |=  =pid:gol
+      =/  m  (strand ,gid:gol)
+      ^-  form:m
+      ;<  now=@da     bind:m  get-time
+      ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+      =/  =goals:gol  goals:(~(got by pools.store) pid)
+      |-
+      =/  =gid:gol  (scot %da now)
+      ?.  (~(has by goals) gid)
+        (pure:m gid)
+      $(now (add now ~s0..0001))
     ::
     ++  handle-compound-pool-transition
       |=  =compound-pool-transition:act

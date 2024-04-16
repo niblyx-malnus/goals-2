@@ -102,25 +102,33 @@
   ?&  (check-goal-master gid mod)
       (check-root-create-perm mod)
   ==
-:: TODO: remove get-stock, just use parents
+::
+++  get-lineage
+  |=  =gid:gol
+  ^-  (list gid:gol)
+  :-  gid
+  =/  =goal:gol  (~(got by goals.pool) gid)
+  ?~  parent.goal
+    ~
+  $(gid u.parent.goal)
 ::
 ++  nearest-common-ancestor
   |=  [a=gid:gol b=gid:gol]
   ^-  (unit gid:gol)
-  =/  a-flock=stock:gol  (flop (get-stock:tv a))
-  =/  b-flock=stock:gol  (flop (get-stock:tv b))
+  =/  a-line=(list gid:gol)  (flop (get-lineage a))
+  =/  b-line=(list gid:gol)  (flop (get-lineage b))
   =|  anc=(unit gid:gol)
   |-
-  ?~  a-flock
+  ?~  a-line
     anc
-  ?~  b-flock
+  ?~  b-line
     anc
-  ?.  =(gid.i.a-flock gid.i.b-flock)
+  ?.  =(i.a-line i.b-line)
     anc
   %=  $
-    anc      [~ gid.i.a-flock]
-    a-flock  t.a-flock
-    b-flock  t.b-flock
+    anc     [~ i.a-line]
+    a-line  t.a-line
+    b-line  t.b-line
   ==
 :: checks if mod can move kid under pid
 ::

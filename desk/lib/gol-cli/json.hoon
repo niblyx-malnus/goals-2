@@ -344,29 +344,6 @@
       [%virtual b+v]
   ==
 ::
-++  enjs-stock
-  =,  enjs:format
-  |=  =stock
-  ^-  json
-  :-  %a  %+  turn  stock
-  |=  [=gid chief=@p]
-  %-  pairs
-  :~  [%gid (enjs-gid gid)]
-      [%chief (ship chief)]
-  ==
-::
-++  enjs-ranks
-  =,  enjs:format
-  |=  =ranks
-  ^-  json
-  :-  %a
-  %+  turn  ~(tap by ranks)
-  |=  [chip=@p =gid]
-  %-  pairs
-  :~  [%ship (ship chip)]
-      [%gid (enjs-gid gid)]
-  ==
-::
 ++  enjs-progress
   =,  enjs:format
   |=  [c=@ t=@]

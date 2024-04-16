@@ -684,20 +684,6 @@
     ==
   (((traverse nid:gol @ @) ginn ~) [%e gid])
 ::
-++  get-stocks
-  |=  [=gid:gol vis=(map gid:gol stock:gol)]
-  ^-  (map gid:gol stock:gol)
-  =/  gaso  [gid:gol stock:gol (map gid:gol stock:gol)]
-  =/  gine  (gine gaso)
-  =.  gine
-    %=  gine
-      flow  |=(=gid:gol =/(parent parent:(~(got by goals) gid) ?~(parent ~ [u.parent]~)))
-      land  |=([=gid:gol =stock:gol ?] [[gid chief:(~(got by goals) gid)] stock])
-      exit  |=([=gid:gol vis=(map gid:gol stock:gol)] vis)
-      prnt  print-id
-    ==
-  (((traverse gaso) gine vis) gid)
-::
 :: all nodes left or right of a given node including self
 ++  to-ends
   |=  [=nid:gol dir=?(%l %r)]
@@ -761,22 +747,4 @@
 ++  ryte-bound  |=(=nid:gol (~(got by ((get-bounds %r) nid ~)) nid))
 ++  left-plumb  |=(=nid:gol (~(got by ((plomb %l) nid ~)) nid))
 ++  ryte-plumb  |=(=nid:gol (~(got by ((plomb %r) nid ~)) nid))
-++  get-stock   |=(=gid:gol (~(got by (get-stocks gid ~)) gid))
-::
-++  get-ranks
-  |=  =stock:gol
-  ^-  ranks:gol
-  =|  =ranks:gol
-  |-
-  ?~  stock
-    ranks
-  %=  $
-    stock  t.stock
-    ranks  (~(put by ranks) [chief gid]:i.stock)
-  ==
-::
-++  get-rank
-  |=  [mod=ship =gid:gol]
-  ^-  (unit gid:gol)
-  (~(get by (get-ranks (get-stock gid))) mod)
 --

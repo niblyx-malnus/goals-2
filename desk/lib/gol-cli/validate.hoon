@@ -1,7 +1,6 @@
 /-  gol=goals
 /+  *gol-cli-util, gol-cli-node, gol-cli-traverse
 :: TODO: confirm start and end status timestamps alternate in order
-:: TODO: confirm validity of borrowed / borrowed-by
 |%
 ::
 ++  all-own-edges

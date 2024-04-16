@@ -1,6 +1,6 @@
 /-  gol=goals, act=action, p=pools
 /+  goals, vent, bout, dbug, default-agent, verb, sub-count,
-    tree=filetree, gs=gol-cli-state, gol-cli-node, default-subs,
+    gol-cli-node, default-subs,
 :: import during development to force compilation
 ::
     gol-cli-json
@@ -16,14 +16,9 @@
 ::
 |%
 +$  card     card:agent:gall
-++  non-cab
-  %+  cook
-    |=(a=tape (rap 3 ^-((list @) a)))
-  (star ;~(pose nud low hep dot sig fas))
-++  cab-split  (most cab non-cab)
 --
 ::
-=|  state-5-30:gs
+=|  state-0:gol
 =*  state  -
 ::
 %+  verb  |
@@ -32,7 +27,6 @@
 %-  (agent ,[%pool path]):sub-count
 %-  agent:vent
 ^-  agent:gall
-:: %-  agent:tree
 |_  =bowl:gall
 +*  this  .
     dus   ~(. (default-subs this %.y %.y %.n) bowl)
@@ -52,10 +46,9 @@
 ++  on-load
   |=  =old=vase
   ^-  (quip card _this)
-  :: =/  old  !<(versioned-state:gs old-vase)
-  =/  old  ;;(versioned-state:gs q.old-vase)
-  =/  new=state-5-30:gs   (convert-to-latest:gs old)
-  :_  this(state new)
+  :: =/  old  !<(state-0:gol old-vase)
+  =/  old  [%0 +:;;([@ store:gol] q.old-vase)]
+  :_  this(state old)
   ?:  (~(has by wex.bowl) [/pools-transitions our.bowl %pools])
     ~
   [%pass /pools-transitions %agent [our.bowl %pools] %watch /transitions]~
@@ -144,8 +137,6 @@
       (vent-cage:vnt cage.sign)
     ==
   ==
-::
-:: ++  on-tree   on-tree:det
 ::
 ++  on-leave  on-leave:dus
 ++  on-arvo   on-arvo:dus

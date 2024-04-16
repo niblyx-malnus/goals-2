@@ -6,6 +6,8 @@
 +$  key       [=pid =gid]
 +$  status    (lest [timestamp=@da done=?])
 +$  moment    (unit @da)
++$  edge      (pair nid nid)
++$  edges     (set edge)
 +$  node
   $:  =status
       =moment
@@ -66,8 +68,5 @@
       =local
   ==
 ::
-+$  stock  (list [=gid chief=ship]) :: lineage; youngest to oldest
-+$  ranks  (map ship gid) :: map of ship to highest ranking goal gid
-+$  edge   (pair nid nid)
-+$  edges  (set edge)
++$  state-0  [%0 =store]
 --

@@ -1,6 +1,0 @@
-/-  *views
-|%
-+$  peek
-  $%  [%store =store]
-  ==
---

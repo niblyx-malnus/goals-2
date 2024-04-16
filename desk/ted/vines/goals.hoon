@@ -1,4 +1,4 @@
-/-  p=pools, gol=goals, axn=action, pyk=peek, spider
+/-  p=pools, gol=goals, axn=action, spider
 /+  *ventio, pools, tree=filetree, goals, sub-count,
     gol-cli-membership, gol-cli-traverse, gol-cli-node, gol-cli-pool,
     goj=gol-cli-json
