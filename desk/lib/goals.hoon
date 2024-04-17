@@ -228,7 +228,7 @@
         %create-pool
       =/  data-fields  [%public ['title' ~ s+title.axn]~]~
       ;<  =id:p  bind:m  (create-pools-pool ~ data-fields)
-      =/  data-fields  [%private ['goalsPool' ~ s+(id-string:enjs:pools id)]~]~
+      =/  data-fields  [%public ['goalsPool' ~ s+(id-string:enjs:pools id)]~]~
       ;<  ~  bind:m  (update-pool-data id data-fields)
       ;<  ~  bind:m  (create-goals-pool id title.axn)
       (pure:m !>(s+(id-string:enjs:pools id)))

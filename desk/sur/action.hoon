@@ -227,6 +227,7 @@
       [%incoming-invites ~]
       [%outgoing-requests ~]
       [%setting setting=@t]
-      [%ship-discover =ship]
+      [%discover =ship]
+      [%public-data =pid]
   == 
 --

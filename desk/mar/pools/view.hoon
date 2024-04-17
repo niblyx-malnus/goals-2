@@ -7,6 +7,7 @@
 ++  grab
   |%
   ++  noun  view:p
+  ++  json  view:dejs
   --
 ++  grad  %noun
 --

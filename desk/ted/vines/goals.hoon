@@ -441,24 +441,16 @@
       %pools-index
     :: TODO: reorder this according to pool-order
     ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+    ;<  =outgoing-requests:p  bind:m
+      (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
     %-  pure:m  !>
     :-  %a
     %+  murn  ~(tap by pools)
     |=  [=id:p =pool:p]
     ^-  (unit json)
-    ?.  (~(has by private.pool-data.pool) 'goalsPool')
+    ?.  (~(has by public.pool-data.pool) 'goalsPool')
       ~
-    :-  ~
-    =/  =path  (en-pool-path:goals id)
-    %-  pairs:enjs:format
-    :~  [%pid s+(id-string:enjs:^pools id)]
-        [%title (~(gut by public.pool-data.pool) 'title' s+'ERROR: NO TITLE')]
-        [%host s+(rsh [3 1] (scot %p host.id))] :: redundant, but that's fine
-        [%name s+name.id] :: redundant, but that's fine
-        ['isValid' b+%.y]
-        ['haveCopy' b+(~(has by pools.store) id)]
-        ['areWatching' b+(~(has by wex.gowl) [path host.id dap.gowl])]
-    ==
+    [~ (give-pool-public-data store outgoing-requests id public.pool-data.pool)]
     ::
       %pool-status
     ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
@@ -466,7 +458,7 @@
     =/  =path     (en-pool-path:goals pid.vyu)
     %-  pure:m  !>
     %-  pairs:enjs:format
-    :~  ['isValid' b+(~(has by private.pool-data.pool) 'goalsPool')]
+    :~  ['isValid' b+(~(has by public.pool-data.pool) 'goalsPool')]
         ['haveCopy' b+(~(has by pools.store) pid.vyu)]
         ['areWatching' b+(~(has by wex.gowl) [path host.pid.vyu dap.gowl])]
     ==
@@ -570,8 +562,27 @@
       %setting
     (pure:m !>(?~(s=(~(get by settings.local.store) setting.vyu) ~ s+u.s)))
     ::
-      %ship-discover
-    !!
+      %discover
+    ;<  =outgoing-requests:p  bind:m
+      (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
+    ;<  jon=json  bind:m  (discover-pools ship.vyu)
+    =/  discovered=(map id:p metadata:p)
+      %.(jon (op:dejs:format [id-string metadata]:dejs:pools))
+    %-  pure:m  !>
+    :-  %a
+    %+  murn  ~(tap by discovered)
+    |=  [=id:p public=metadata:p]
+    ^-  (unit json)
+    ?.  (~(has by public) 'goalsPool')
+      ~
+    [~ (give-pool-public-data store outgoing-requests id public)]
+    ::
+      %public-data
+    ;<  =outgoing-requests:p  bind:m
+      (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
+    ;<  jon=json  bind:m  (pool-public-data pid.vyu)
+    =/  public=metadata:p  (metadata:dejs:pools jon)
+    (pure:m !>((give-pool-public-data store outgoing-requests pid.vyu public)))
   ==
 ==
 ::
@@ -585,6 +596,31 @@
   :-  %pools-view
   ^-  view:p
   [%pools ~]
+::
+++  pool-public-data
+  |=  =id:p
+  =/  m  (strand ,json)
+  ^-  form:m
+  %+  (vent ,json)
+    [host.id %pools]
+  :-  %pools-view
+  ^-  view:p
+  [%public-data id ~]
+::
+++  give-pool-public-data
+  |=  [=store:gol =outgoing-requests:p =id:p public=metadata:p]
+  ^-  json
+  =/  =path  (en-pool-path:goals id)
+  %-  pairs:enjs:format
+  :~  [%pid s+(id-string:enjs:pools id)]
+      [%title (~(gut by public) 'title' s+'ERROR: NO TITLE')]
+      [%host s+(rsh [3 1] (scot %p host.id))] :: redundant, but that's fine
+      [%name s+name.id] :: redundant, but that's fine
+      ['isValid' b+%.y]
+      ['haveCopy' b+(~(has by pools.store) id)]
+      ['areWatching' b+(~(has by wex.gowl) [path host.id dap.gowl])]
+      ['requested' b+(~(has by outgoing-requests) id)]
+  ==
 ::
 ++  encode-key  |=(key:gol (rap 3 (enjs-pid:goj pid) '/' gid ~))
 ++  decode-key

@@ -55,6 +55,8 @@
         [%incoming-invites ul]
         [%outgoing-requests ul]
         [%setting (ot ~[setting+so])]
+        [%discover (ot ~[ship+ship])]
+        [%public-data (ot ~[pid+pid])]
     ==
     ++  type
       %-  of

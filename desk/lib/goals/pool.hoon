@@ -189,8 +189,10 @@
     ~&  >>>  "Do not have host or admin perms."
     %.n
   ?.  =([~ %admin] (~(get by perms.pool) member))
+    ~&  >  "Allowed to modify perms of non-admin."
     %.y
   ?:  |(=(mod host.pid.pool) =(mod member))
+    ~&  >  "Allowed to modify admin as self or host."
     %.y
   ~&  >>>  "Must be host or self to modify admin perms."
   %.n

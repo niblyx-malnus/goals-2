@@ -32,7 +32,7 @@
     :: return pools and public data that src.gowl isn't blacklisted from
     ::
     ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-    =/  pools-list  `(list [=id:p =pool:p])`~(tap by pools)
+    =/  pools-list=(list [=id:p =pool:p])  ~(tap by pools)
     =|  discovered=(list [id:p metadata:p])
     |-
     ?~  pools-list
