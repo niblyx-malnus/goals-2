@@ -1,7 +1,7 @@
 /-  gol=goals
-/+  *gol-cli-util, gol-cli-node
+/+  goals-node
 |_  =goals:gol
-+*  nd  ~(. gol-cli-node goals)
++*  nd  ~(. goals-node goals)
 ::
 ++  iflo  iflo:nd
 ++  oflo  oflo:nd

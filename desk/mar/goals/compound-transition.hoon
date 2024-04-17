@@ -1,13 +1,13 @@
 /-  *action
-/+  *gol-cli-json
-|_  tan=transition
+/+  *goals-json
+|_  tan=compound-transition
 ++  grow
   |%
   ++  noun  tan
   --
 ++  grab
   |%
-  ++  noun  transition
+  ++  noun  compound-transition
   --
 ++  grad  %noun
 --

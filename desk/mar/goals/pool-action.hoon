@@ -1,5 +1,5 @@
 /-  *action
-/+  *gol-cli-json
+/+  *goals-json
 |_  act=[pid pool-action]
 ++  grow
   |%

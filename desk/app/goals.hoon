@@ -1,17 +1,17 @@
 /-  gol=goals, act=action, p=pools
 /+  goals, vent, bout, dbug, default-agent, verb, sub-count,
-    gol-cli-node, default-subs,
+    goals-node, default-subs,
 :: import during development to force compilation
 ::
-    gol-cli-json
-/=  x  /mar/goal/transition
-/=  x  /mar/goal/pool-transition
-/=  x  /mar/goal/compound-transition
-/=  x  /mar/goal/local-action
-/=  x  /mar/goal/pool-action
-/=  x  /mar/goal/local-membership-action
-/=  x  /mar/goal/pool-membership-action
-/=  x  /mar/goal/view
+    goals-json
+/=  x  /mar/goals/transition
+/=  x  /mar/goals/pool-transition
+/=  x  /mar/goals/compound-transition
+/=  x  /mar/goals/local-action
+/=  x  /mar/goals/pool-action
+/=  x  /mar/goals/local-membership-action
+/=  x  /mar/goals/pool-membership-action
+/=  x  /mar/goals/view
 /=  x  /ted/vines/goals
 ::
 |%
@@ -59,7 +59,7 @@
   ^-  (quip card _this)
   ~&  "poke to {<dap.bowl>} agent with mark {<mark>}"
   ?+    mark  (on-poke:dus mark vase)
-      %goal-transition
+      %goals-transition
     ?>  =(src our):bowl
     =+  !<(tan=transition:act vase)
     :: cannot update pool with a direct transition
@@ -70,7 +70,7 @@
       abet:(handle-transition:ghc tan)
     [cards this]
     ::
-      %goal-compound-transition
+      %goals-compound-transition
     ?>  =(src our):bowl
     =+  !<(tan=compound-transition:act vase)
     ~&  received-compound-transition+tan
@@ -84,8 +84,8 @@
   ^-  (unit (unit cage))
   ?+    pole  (on-peek:dus pole)
     [%x %store ~]  ``noun+!>(store)
-    [%x %pools ~]  ``json+!>((enjs-pools:gol-cli-json pools.store))
-    [%x %local ~]  ``json+!>((enjs-local:gol-cli-json local.store))
+    [%x %pools ~]  ``json+!>((enjs-pools:goals-json pools.store))
+    [%x %local ~]  ``json+!>((enjs-local:goals-json local.store))
   ==
 ::
 ++  on-watch
@@ -102,7 +102,7 @@
     ?>  (~(has by perms.pool) src.bowl)
     :: give initial update
     ::
-    :_(this [%give %fact ~ goal-pool-transition+!>([%init-pool pool])]~)
+    :_(this [%give %fact ~ goals-pool-transition+!>([%init-pool pool])]~)
   ==
 ::
 ++  on-agent
@@ -115,7 +115,7 @@
     =/  =pid:gol      [host name.pole]
     ?+    -.sign  (on-agent:dus pole sign)
         %fact
-      ?.  =(p.cage.sign %goal-pool-transition)
+      ?.  =(p.cage.sign %goals-pool-transition)
         (on-agent:dus pole sign)
       =+  !<(tan=pool-transition:act q.cage.sign)
       =^  cards  state

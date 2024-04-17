@@ -1,5 +1,5 @@
 /-  gol=goals, axn=action, p=pools, spider
-/+  *ventio, pools, gol-cli-pool, sub-count
+/+  *ventio, pools, goals-pool, sub-count
 |_  =gowl
 ++  en-pool-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
 ++  de-pool-path
@@ -78,14 +78,14 @@
       :~  [`wire`[%goals pool-path] `path`[%goals pool-path]]
           [`wire`[%pools pool-path] `path`[%pools pool-path]]
       ==
-      goal-pool-membership-action+[pid act]
+      goals-pool-membership-action+[pid act]
     ==
   :: deal with our pool
   ::
   ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   :: only host or admins can modify pool level permissions
   ::
-  =*  pl  ~(. gol-cli-pool (~(got by pools.store) pid))
+  =*  pl  ~(. goals-pool (~(got by pools.store) pid))
   ?>  (check-pool-edit-perm:pl src.gowl)
   ?-    -.act
       %kick-member
@@ -171,14 +171,14 @@
   |=  =pid:gol
   =/  m  (strand ,~)
   ^-  form:m
-  (poke [our dap]:gowl goal-transition+!>([%delete-pool pid]))
+  (poke [our dap]:gowl goals-transition+!>([%delete-pool pid]))
 ::
 ++  goals-set-role
   |=  [=id:p member=ship =role:gol mod=ship]
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our dap]:gowl
-  :-  %goal-compound-transition
+  :-  %goals-compound-transition
   ^-  compound-transition:axn
   :^  %update-pool  id  mod
   [%set-pool-role member ~ role]
@@ -221,7 +221,7 @@
   =/  m  (strand ,~)
   ^-  form:m
   %+  (vent ,~)  [our.gowl %goals]
-  :-  %goal-compound-transition
+  :-  %goals-compound-transition
   ^-  compound-transition:axn
   :^  %update-pool  pid  our.gowl
   [%set-pool-role member ~]

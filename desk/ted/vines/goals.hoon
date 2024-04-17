@@ -1,7 +1,7 @@
 /-  p=pools, gol=goals, axn=action, spider
 /+  *ventio, pools, tree=filetree, goals, sub-count,
-    gol-cli-membership, gol-cli-traverse, gol-cli-node, gol-cli-pool,
-    goj=gol-cli-json
+    goals-membership, goals-traverse, goals-node, goals-pool,
+    goj=goals-json
 =,  strand=strand:spider
 ^-  thread:spider
 ::
@@ -15,29 +15,29 @@
 ^-  form:m
 ::
 =*  hc   ~(. helper-core gowl)
-=*  mhc  ~(. gol-cli-membership gowl)
+=*  mhc  ~(. goals-membership gowl)
 =*  ghc  ~(. vine:goals gowl)
 ::
 ~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
 ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
-    %goal-local-membership-action
+    %goals-local-membership-action
   (handle-local-membership-action:mhc !<(local-membership-action:axn vase))
   ::
-    %goal-pool-membership-action
+    %goals-pool-membership-action
   (handle-pool-membership-action:mhc !<([pid:gol pool-membership-action:axn] vase))
   ::
-    %goal-local-action
+    %goals-local-action
   (handle-local-action:ghc !<(local-action:axn vase))
   ::
-    %goal-pool-action
+    %goals-pool-action
   (handle-pool-action:ghc !<([pid:gol pool-action:axn] vase))
   ::
     %pools-transition
   (handle-pools-transition:ghc !<(tan=transition:p vase))
   ::
-    %goal-view
-  =+  !<(vyu=goal-view:axn vase)
+    %goals-view
+  =+  !<(vyu=view:axn vase)
   ?>  =(src our):gowl
   ?-    -.vyu
       %archive-goal-children
@@ -49,21 +49,21 @@
       %archive-goal-borrowed
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
-    =/  nd              ~(. gol-cli-node goals.contents)
+    =/  nd              ~(. goals-node goals.contents)
     =/  =goal:gol       (~(got by goals.contents) gid.vyu)
     (send-archive-goal-data (turn ~(tap in (nest-left:nd gid.vyu)) (corl (lead pid.vyu) (lead rid.vyu))) src.gowl)
     ::
       %archive-goal-borrowed-by
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
-    =/  nd              ~(. gol-cli-node goals.contents)
+    =/  nd              ~(. goals-node goals.contents)
     =/  =goal:gol       (~(got by goals.contents) gid.vyu)
     (send-archive-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (corl (lead pid.vyu) (lead rid.vyu))) src.gowl)
     ::
       %archive-goal-progress
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
-    =/  tv              ~(. gol-cli-traverse goals.contents)
+    =/  tv              ~(. goals-traverse goals.contents)
     =/  prog=(list gid:gol)  ~(tap in (progeny:tv gid.vyu))
     =/  able=(list gid:gol)
       %+  murn  prog
@@ -101,7 +101,7 @@
       %archive-goal-harvest
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
-    =/  tv  ~(. gol-cli-traverse goals.contents)
+    =/  tv  ~(. goals-traverse goals.contents)
     =;  harvest=(list [pid:gol gid:gol gid:gol])
       (send-archive-goal-data harvest src.gowl)
     =/  order=(list gid:gol)
@@ -115,7 +115,7 @@
       (send-archive-goal-data empty src.gowl)
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
     =/  contents        (~(got by contents.archive.pool) rid.vyu)
-    =/  tv  ~(. gol-cli-traverse goals.contents)
+    =/  tv  ~(. goals-traverse goals.contents)
     =/  prog=(set gid:gol)  (progeny:tv gid.vyu)
     =;  empty=(list gid:gol)
       (turn empty (corl (lead pid.vyu) (lead rid.vyu)))
@@ -158,13 +158,13 @@
     ::
       %goal-borrowed
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  nd              ~(. gol-cli-node goals.pool)
+    =/  nd              ~(. goals-node goals.pool)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
     (send-goal-data (turn ~(tap in (nest-left:nd gid.vyu)) (lead pid.vyu)) src.gowl)
     ::
       %goal-borrowed-by
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
-    =/  nd              ~(. gol-cli-node goals.pool)
+    =/  nd              ~(. goals-node goals.pool)
     =/  =goal:gol       (~(got by goals.pool) gid.vyu)
     (send-goal-data (turn ~(tap in (nest-ryte:nd gid.vyu)) (lead pid.vyu)) src.gowl)
     ::
@@ -177,14 +177,14 @@
     ?-    -.type.vyu
         %main
       =/  all-goals=goals:gol  (all-goals store)
-      =/  tv  ~(. gol-cli-traverse all-goals)
+      =/  tv  ~(. goals-traverse all-goals)
       =/  key-order=(list gid:gol)
         (turn goal-order.local.store encode-key)
       (turn (ordered-goals-harvest:tv key-order) decode-key)
       ::
         %pool
       =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
-      =/  tv  ~(. gol-cli-traverse goals.pool)
+      =/  tv  ~(. goals-traverse goals.pool)
       =/  order=(list gid:gol)
         %+  murn  goal-order.local.store
         |=  [=pid:gol =gid:gol]
@@ -193,7 +193,7 @@
       ::
         %goal
       =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
-      =/  tv  ~(. gol-cli-traverse goals.pool)
+      =/  tv  ~(. goals-traverse goals.pool)
       =/  order=(list gid:gol)
         %+  murn  goal-order.local.store
         |=  [=pid:gol =gid:gol]
@@ -207,7 +207,7 @@
     ?-    -.type.vyu
         %main
       =/  all-goals=goals:gol  (all-goals store)
-      =/  tv  ~(. gol-cli-traverse all-goals)
+      =/  tv  ~(. goals-traverse all-goals)
       =;  empty=(list gid:gol)
         (turn empty decode-key)
       %+  murn  ~(tap by all-goals)
@@ -242,7 +242,7 @@
       ::
         %goal
       =/  =pool:gol       (~(got by pools.store) pid.type.vyu)
-      =/  tv  ~(. gol-cli-traverse goals.pool)
+      =/  tv  ~(. goals-traverse goals.pool)
       =/  prog=(set gid:gol)  (progeny:tv gid.type.vyu)
       =;  empty=(list gid:gol)
         (turn empty (lead pid.type.vyu))
@@ -285,7 +285,7 @@
       `gid
     =;  harvest=(list key:gol)
       (send-goal-data harvest src.gowl)
-    =/  tv  ~(. gol-cli-traverse goals.pool)
+    =/  tv  ~(. goals-traverse goals.pool)
     =/  order=(list gid:gol)
       %+  murn  goal-order.local.store
       |=  [=pid:gol =gid:gol]
@@ -377,7 +377,7 @@
     ::
       %goal-progress
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
-    =/  tv         ~(. gol-cli-traverse goals.pool)
+    =/  tv         ~(. goals-traverse goals.pool)
     =/  prog=(list gid:gol)  ~(tap in (progeny:tv gid.vyu))
     =/  able=(list gid:gol)
       %+  murn  prog
@@ -446,12 +446,13 @@
     %+  murn  ~(tap by pools)
     |=  [=id:p =pool:p]
     ^-  (unit json)
-    %+  morn
-      (~(has by private.pool-data.pool) 'goalsPool')
+    ?.  (~(has by private.pool-data.pool) 'goalsPool')
+      ~
+    :-  ~
     =/  =path  (en-pool-path:goals id)
     %-  pairs:enjs:format
     :~  [%pid s+(id-string:enjs:^pools id)]
-        [%title (~(gut by public.pool-data.pool) 'title' s+'NO TITLE')]
+        [%title (~(gut by public.pool-data.pool) 'title' s+'ERROR: NO TITLE')]
         [%host s+(rsh [3 1] (scot %p host.id))] :: redundant, but that's fine
         [%name s+name.id] :: redundant, but that's fine
         ['isValid' b+%.y]
@@ -590,7 +591,6 @@
       [%title s+title]
   ==
 ::
-++  morn  |*([a=? b=*] ?.(a ~ [~ b]))
 ++  convert-node
   |=  [=pid:gol node:gol]
   ^-  node:gol
@@ -721,7 +721,7 @@
       (get-goal-labels key store) :: labels (pool-specific)
       (get-goal-attributes key store) :: attributes (pool-specific)
       ?~(parent ~ `[pid.key u.parent])
-      (get-goal-permission-level:(apex:gol-cli-pool u.pul) gid.key src)
+      (get-goal-permission-level:(apex:goals-pool u.pul) gid.key src)
       chief
       ~(tap by deputies)
       open-to
@@ -776,7 +776,7 @@
       (get-archive-goal-labels pid rid gid store) :: labels (pool-specific)
       (get-archive-goal-attributes pid rid gid store) :: attributes (pool-specific)
       ?~(parent ~ `[pid u.parent])
-      (get-goal-permission-level:(apex:gol-cli-pool u.pul) gid src)
+      (get-goal-permission-level:(apex:goals-pool u.pul) gid src)
       chief
       ~(tap by deputies)
       open-to

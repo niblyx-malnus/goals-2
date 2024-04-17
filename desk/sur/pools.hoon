@@ -35,8 +35,6 @@
   $:  pools=(set id)
       hosts=(set ship)
   ==
-:: don't subscribe to foreign pools during development
-:: state-syncing is time-wasting tedium; vent-views only to start
 ::
 +$  state-0
   $:  %0

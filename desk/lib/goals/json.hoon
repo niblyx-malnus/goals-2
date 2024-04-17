@@ -223,11 +223,6 @@
       %held-yoke   %held-yoke
     ==
   --
-++  enjs
-  =,  enjs:format
-  |%
-  ++  stub  ~
-  --
 ::
 ++  enjs-store
   =,  enjs:format

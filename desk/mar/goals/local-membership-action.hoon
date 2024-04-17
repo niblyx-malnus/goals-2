@@ -1,5 +1,5 @@
 /-  *action
-/+  j=gol-cli-json
+/+  j=goals-json
 |_  act=local-membership-action
 ++  grow
   |%

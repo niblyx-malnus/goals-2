@@ -1,11 +1,11 @@
 /-  gol=goals, act=action
-/+  gol-cli-node, gol-cli-traverse, vd=gol-cli-validate
+/+  goals-node, goals-traverse, vd=goals-validate
 ::
 =|  tans=(list pool-transition:act)
 |_  =pool:gol
 +*  this  .
-    tv    ~(. gol-cli-traverse goals.pool)
-    nd    ~(. gol-cli-node goals.pool)
+    tv    ~(. goals-traverse goals.pool)
+    nd    ~(. goals-node goals.pool)
 ++  abet  [(flop tans) pool]
 ++  apex  |=(=pool:gol this(pool pool, tans ~))
 ++  emit  |=(tan=pool-transition:act this(tans [tan tans]))

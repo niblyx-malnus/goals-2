@@ -1,7 +1,19 @@
 /-  gol=goals
-/+  *gol-cli-util, gol-cli-node, gol-cli-traverse
+/+  goals-node, goals-traverse
 :: TODO: confirm start and end status timestamps alternate in order
 |%
+::
+:: Get submap associated with a list of keys
+++  gat-by
+  |*  [=(map * *) keys=(list *)]
+  =/  new  ^+(map ~)
+  |-
+  ?~  keys
+    new
+  %=  $
+    keys  t.keys
+    new  (~(put by new) i.keys (~(got by map) i.keys))
+  ==
 ::
 ++  all-own-edges
   |=  =goals:gol
@@ -108,10 +120,10 @@
 ++  check-bound-mismatch
   |=  =goals:gol
   ^-  ?
-  =/  rn  (~(root-nodes gol-cli-node goals))
+  =/  rn  (~(root-nodes goals-node goals))
   =/  vis
-    %:  (~(chain gol-cli-traverse goals) nid:gol (unit moment:gol))
-      (~(bound-visit gol-cli-traverse goals) %l)
+    %:  (~(chain goals-traverse goals) nid:gol (unit moment:gol))
+      (~(bound-visit goals-traverse goals) %l)
       rn
       ~
     ==
@@ -124,10 +136,10 @@
 ++  check-plete-mismatch
   |=  =goals:gol
   ^-  ?
-  =/  rn  (~(root-nodes gol-cli-node goals))
+  =/  rn  (~(root-nodes goals-node goals))
   =/  vis
-    %:  (~(chain gol-cli-traverse goals) nid:gol (unit ?))
-      (~(plete-visit gol-cli-traverse goals) %l)
+    %:  (~(chain goals-traverse goals) nid:gol (unit ?))
+      (~(plete-visit goals-traverse goals) %l)
       rn
       ~
     ==

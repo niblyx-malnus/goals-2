@@ -1,7 +1,7 @@
 /-  gol=goals, p=pools, act=action
 /+  ventio, pools, sub-count,
-    pl=gol-cli-pool, gol-cli-node, gol-cli-traverse,
-    goj=gol-cli-json
+    pl=goals-pool, goals-node, goals-traverse,
+    goj=goals-json
 |%
 ++  en-pool-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
 ++  de-pool-path
@@ -14,7 +14,7 @@
   |_  [=bowl:gall cards=(list card:agent:gall) state-0:gol]
   +*  this   .
       state  +<+>
-      gols   ~(. gol-cli-goals store)
+      gols   ~(. goals-goals store)
   +$  card  card:agent:gall
   ++  abet  [(flop cards) state]
   ++  emit  |=(=card this(cards [card cards]))
@@ -33,7 +33,7 @@
   ++  handle-transition
     |=  tan=transition:act
     ^-  _this
-    =.  this  (emit %give %fact ~[/transitions] goal-transition+!>(tan))
+    =.  this  (emit %give %fact ~[/transitions] goals-transition+!>(tan))
     ?-    -.tan
         %pool-order
       ?-    -.p.tan
@@ -200,7 +200,7 @@
     %-  emil
     %+  turn  tans
     |=  tan=pool-transition:act
-    [%give %fact ~[(en-pool-path pid)] goal-pool-transition+!>(tan)]
+    [%give %fact ~[(en-pool-path pid)] goals-pool-transition+!>(tan)]
   --
 ::
 ++  vine
@@ -244,14 +244,14 @@
       =/  m  (strand ,~)
       ^-  form:m
       %+  poke  [our.gowl %goals]
-      goal-transition+!>(transition)
+      goals-transition+!>(transition)
     ::
     ++  handle-compound-transition
       |=  =compound-transition:act
       =/  m  (strand ,~)
       ^-  form:m
       %+  poke  [our.gowl %goals]
-      goal-compound-transition+!>(compound-transition)
+      goals-compound-transition+!>(compound-transition)
     -- 
   ::
   ++  handle-pool-action
@@ -270,7 +270,7 @@
         :~  [`wire`[%goals pool-path] `path`[%goals pool-path]]
             [`wire`[%pools pool-path] `path`[%pools pool-path]]
         ==
-        goal-pool-action+[pid axn]
+        goals-pool-action+[pid axn]
       ==
     :: deal with our pool
     ::
@@ -343,7 +343,7 @@
       =/  m  (strand ,~)
       ^-  form:m
       %+  poke  [our.gowl %goals]
-      :-  %goal-compound-transition  !>
+      :-  %goals-compound-transition  !>
       ^-  compound-transition:act
       [%update-pool pid src.gowl compound-pool-transition]
     --
@@ -392,7 +392,7 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  (vent ,~)  [our.gowl %goals]
-    :-  %goal-local-membership-action
+    :-  %goals-local-membership-action
     ^-  local-membership-action:act
     [%watch-pool id]
   :: Adds to %goals and %pools
@@ -402,7 +402,7 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  (vent ,~)  [our.gowl %goals]
-    :-  %goal-pool-membership-action
+    :-  %goals-pool-membership-action
     :-  pid
     ^-  pool-membership-action:act
     [%set-pool-role member role]
@@ -413,7 +413,7 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  (vent ,~)  [our.gowl %goals]
-    :-  %goal-compound-transition
+    :-  %goals-compound-transition
     ^-  compound-transition:act
     :^  %update-pool  pid  our.gowl
     [%set-pool-role member ~]
@@ -446,7 +446,7 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  poke  [our.gowl %goals]
-    :-  %goal-transition  !>
+    :-  %goals-transition  !>
     ^-  transition:act
     [%create-pool pid title]
   ::
@@ -455,7 +455,7 @@
     =/  m  (strand ,~)
     ^-  form:m
     %+  poke  [our.gowl %goals]
-    :-  %goal-transition  !>
+    :-  %goals-transition  !>
     ^-  transition:act
     [%delete-pool pid]
   ::

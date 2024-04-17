@@ -1,5 +1,5 @@
 /-  *action, p=pools
-/+  j=gol-cli-json
+/+  j=goals-json
 |_  act=[pid pool-membership-action]
 ++  grow
   |%

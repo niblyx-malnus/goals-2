@@ -185,7 +185,7 @@
       [%goal =pid =gid]
   ==
 ::
-+$  goal-view
++$  view
   $%  [%pool-roots =pid]
       [%pool-archive =pid]
       [%goal-children =pid =gid]

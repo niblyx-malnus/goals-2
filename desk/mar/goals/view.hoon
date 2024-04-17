@@ -1,17 +1,17 @@
-/-  *action
-/+  j=gol-cli-json
-|_  vyu=goal-view
+/-  act=action
+/+  j=goals-json
+|_  vyu=view:act
 ++  grow
   |%
   ++  noun  vyu
   --
 ++  grab
   |%
-  ++  noun  goal-view
+  ++  noun  view:act
   ++  json
     =,  dejs:j
     |^
-    ^-  $-(json goal-view)
+    ^-  $-(json view:act)
     %-  of
     :~  [%pool-roots (ot ~[pid+pid])]
         [%pool-archive (ot ~[pid+pid])]
