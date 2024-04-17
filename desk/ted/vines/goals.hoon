@@ -19,7 +19,6 @@
 =*  ghc  ~(. vine:goals gowl)
 ::
 ~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
-;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
 ?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
     %goals-local-membership-action
   (handle-local-membership-action:mhc !<(local-membership-action:axn vase))
@@ -37,8 +36,17 @@
   (handle-pools-transition:ghc !<(tan=transition:p vase))
   ::
     %goals-view
-  =+  !<(vyu=view:axn vase)
+  (handle-view:hc !<(view:axn vase))
+==
+::
+|_  =gowl
+++  handle-view
+  |=  vyu=view:axn
+  =/  m  (strand ,vase)
+  ^-  form:m
+  ~&  "%goals vine: receiving view {(trip -.vyu)}"
   ?>  =(src our):gowl
+  ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
   ?-    -.vyu
       %archive-goal-children
     =/  =pool:gol       (~(got by pools.store) pid.vyu)
@@ -584,9 +592,7 @@
     =/  public=metadata:p  (metadata:dejs:pools jon)
     (pure:m !>((give-pool-public-data store outgoing-requests pid.vyu public)))
   ==
-==
 ::
-|_  =gowl
 ++  discover-pools
   |=  =ship
   =/  m  (strand ,json)
