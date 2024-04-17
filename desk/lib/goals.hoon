@@ -226,7 +226,7 @@
       (pure:m !>(~))
       ::
         %create-pool
-      =/  data-fields  [%public [%title ~ s+title.axn]~]~
+      =/  data-fields  [%public ['title' ~ s+title.axn]~]~
       ;<  =id:p  bind:m  (create-pools-pool ~ data-fields)
       =/  data-fields  [%private ['goalsPool' ~ s+(id-string:enjs:pools id)]~]~
       ;<  ~  bind:m  (update-pool-data id data-fields)
@@ -297,8 +297,13 @@
         (handle-compound-pool-transition %set-active gid.axn val.axn now.gowl)
       (pure:m !>(~))
       ::
-        $?  %set-pool-title
-            %archive-goal
+        %set-pool-title
+      ;<  ~  bind:m
+        (handle-compound-pool-transition ;;(compound-pool-transition:act axn))
+      ;<  ~  bind:m  (update-pool-data pid [%public ['title' ~ s+title.axn]~]~)
+      (pure:m !>(~))
+      ::
+        $?  %archive-goal
             %restore-goal
             %restore-to-root
             %delete-from-archive
