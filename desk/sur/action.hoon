@@ -31,7 +31,6 @@
       [%del-from-context context=(unit gid) =gid]
       [%reorder-archive context=(unit gid) archive=(list gid)]
       [%delete-context context=gid]
-      [%remove-context =gid]
       [%set-actionable =gid val=?]
       [%mark-done =nid now=@da]
       [%mark-undone =nid now=@da]

@@ -413,15 +413,6 @@
       (~(del by contexts.archive.pool) [~ context.tan])
     ==
     ::
-      %remove-context
-    =/  [* =goals:gol]  (~(got by contents.archive.pool) gid.tan)
-    %=  this
-        contents.archive.pool
-      %+  ~(put by contents.archive.pool)
-        gid.tan
-      [~ goals]
-    ==
-    ::
       %set-actionable
     =/  goal  (~(got by goals.pool) gid.tan)
     ?-    val.tan
@@ -917,15 +908,18 @@
       (~(got by contents.archive.pool) gid.tan)
     =.  this  (handle-transition %delete-content gid.tan)
     =.  this  (handle-transition %del-from-context context gid.tan)
-    %-  handle-transitions
-    %-  zing
-    %+  turn  ~(tap in ~(key by goals))
-    |=  =gid:gol
-    ^-  (list pool-transition:act)
-    :-  [%delete-context gid]
-    %+  turn
-      (~(gut by contexts.archive.pool) [~ gid] ~)
-    |=(=gid:gol [%remove-context gid])
+    =/  deleted=(list gid:gol)  ~(tap in ~(key by goals))
+    |-
+    ?~  deleted
+      this
+    =/  to-delete=(list gid:gol)
+      (~(gut by contexts.archive.pool) [~ i.deleted] ~)
+    |-
+    ?~  to-delete
+      =.  this  (handle-transition %delete-context i.deleted)
+      ^$(deleted t.deleted)
+    =.  this  (handle-compound-transition mod %delete-from-archive i.to-delete)
+    $(to-delete t.to-delete)
     ::
       %delete-goal
     =.  this  (handle-compound-transition mod %archive-goal gid.tan)
