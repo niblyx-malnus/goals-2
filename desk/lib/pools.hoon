@@ -1,5 +1,5 @@
-/-  *pools
-|_  [=bowl:gall cards=(list card:agent:gall) state-0]
+/-  p=pools
+|_  [=bowl:gall cards=(list card:agent:gall) state-0:p]
 +*  this   .
     state  +<+>
 +$  card   card:agent:gall
@@ -7,15 +7,15 @@
 ++  emit   |=(=card this(cards [card cards]))
 ++  emil   |=(cadz=(list card) this(cards (weld cadz cards)))
 ::
-++  en-pool-path  |=(=id `path`/pool/(scot %p host.id)/[name.id])
+++  en-pool-path  |=(=id:p `path`/pool/(scot %p host.id)/[name.id])
 ++  de-pool-path
   |=  =path
-  ^-  id
+  ^-  id:p
   =+  ;;([%pool host=@ta name=@ta ~] path)
   [(slav %p host) name]
 ::
 ++  handle-transition
-  |=  tan=transition
+  |=  tan=transition:p
   ^-  _this
   =.  this  (emit %give %fact ~[/transitions] pools-transition+!>(tan))
   ?-    -.tan
@@ -47,7 +47,7 @@
     ?<  (~(has in hosts.blocked) host.id.tan)
     :: the status of the current invite status must be undecided
     ::
-    =/  [* =status]  (~(gut by incoming-invites) id.tan [~ ~])
+    =/  [* =status:p]  (~(gut by incoming-invites) id.tan [~ ~])
     ?>  ?=(~ status)
     %=    this
         incoming-invites
@@ -63,7 +63,7 @@
       this(outgoing-requests (~(del by outgoing-requests) id.tan))
     :: the status of the current request status must be undecided
     ::
-    =/  [* =status]  (~(gut by outgoing-requests) id.tan [~ ~])
+    =/  [* =status:p]  (~(gut by outgoing-requests) id.tan [~ ~])
     ?>  ?=(~ status)
     %=    this
         outgoing-requests
@@ -73,7 +73,7 @@
     ==
     ::
       %update-incoming-invite-response
-    =/  [=invite *]  (~(got by incoming-invites) id.tan)
+    =/  [=invite:p *]  (~(got by incoming-invites) id.tan)
     %=    this
         incoming-invites
       %+  ~(put by incoming-invites)
@@ -82,7 +82,7 @@
     ==
     ::
       %update-outgoing-request-response
-    =/  [=request *]  (~(got by outgoing-requests) id.tan)
+    =/  [=request:p *]  (~(got by outgoing-requests) id.tan)
     %=    this
         outgoing-requests
       %+  ~(put by outgoing-requests)
@@ -92,7 +92,7 @@
     ::
       %create-pool
     ?>  =(our.bowl host.id.tan)
-    this(pools (~(put by pools) id.tan *pool))
+    this(pools (~(put by pools) id.tan *pool:p))
     ::
       %delete-pool
     this(pools (~(del by pools) id.tan))
@@ -105,10 +105,10 @@
   ==
 ::
 ++  handle-pool-transition
-  |=  [=id tan=pool-transition]
+  |=  [=id:p tan=pool-transition:p]
   ^-  _this
-  =/  old=pool  (~(gut by pools) id *pool)
-  =;  new=pool
+  =/  old=pool:p  (~(gut by pools) id *pool:p)
+  =;  new=pool:p
     this(pools (~(put by pools) id new))
   ?-    -.tan
     %init-pool  pool.tan
@@ -118,7 +118,7 @@
       old(members (~(del by members.old) member.tan))
     ?-    -.u.roles.tan
         %&
-      =/  =roles  (~(gut by members.old) member.tan ~)
+      =/  =roles:p  (~(gut by members.old) member.tan ~)
       %=    old
           members
         %+  ~(put by members.old)
@@ -127,7 +127,7 @@
       ==
       ::
         %|
-      =/  =roles  (~(gut by members.old) member.tan ~)
+      =/  =roles:p  (~(gut by members.old) member.tan ~)
       %=    old
           members
         %+  ~(put by members.old)
@@ -143,7 +143,7 @@
       old(outgoing-invites (~(del by outgoing-invites.old) invitee.tan))
     :: the status of the current invite status must be undecided
     ::
-    =/  [* =status]  (~(gut by outgoing-invites.old) invitee.tan [~ ~])
+    =/  [* =status:p]  (~(gut by outgoing-invites.old) invitee.tan [~ ~])
     ?>  ?=(~ status)
     %=    old
         outgoing-invites
@@ -159,7 +159,7 @@
       old(incoming-requests (~(del by incoming-requests.old) requester.tan))
     :: the status of the current request status must be undecided
     ::
-    =/  [* =status]  (~(gut by incoming-requests.old) requester.tan [~ ~])
+    =/  [* =status:p]  (~(gut by incoming-requests.old) requester.tan [~ ~])
     ?>  ?=(~ status)
     %=    old
         incoming-requests
@@ -170,7 +170,7 @@
     ::
       %update-outgoing-invite-response
     ~&  invitee+invitee.tan
-    =/  [=invite *]  (~(got by outgoing-invites.old) invitee.tan)
+    =/  [=invite:p *]  (~(got by outgoing-invites.old) invitee.tan)
     %=    old
         outgoing-invites
       %+  ~(put by outgoing-invites.old)
@@ -179,7 +179,7 @@
     ==
     ::
       %update-incoming-request-response
-    =/  [=request *]  (~(got by incoming-requests.old) requester.tan)
+    =/  [=request:p *]  (~(got by incoming-requests.old) requester.tan)
     %=    old
         incoming-requests
       %+  ~(put by incoming-requests.old)
@@ -199,7 +199,7 @@
       |-
       ?~  p.i.fields.tan
         ^$(fields.tan t.fields.tan)
-      =/  [=ship auto=(unit auto)]  i.p.i.fields.tan
+      =/  [=ship auto=(unit auto:p)]  i.p.i.fields.tan
       ?~  auto
         %=  $
           p.i.fields.tan     t.p.i.fields.tan
@@ -214,7 +214,7 @@
       |-
       ?~  p.i.fields.tan
         ^$(fields.tan t.fields.tan)
-      =/  [=rank auto=(unit auto)]  i.p.i.fields.tan
+      =/  [=rank:p auto=(unit auto:p)]  i.p.i.fields.tan
       ?~  auto
         %=  $
           p.i.fields.tan     t.p.i.fields.tan
@@ -266,9 +266,9 @@
 ++  enjs
   =,  enjs:format
   |%
-  ++  id-string  |=(=id (rap 3 '/' (scot %p host.id) '/' name.id ~))
+  ++  id-string  |=(=id:p (rap 3 '/' (scot %p host.id) '/' name.id ~))
   ++  auto
-    |=  =^auto
+    |=  =auto:p
     ^-  json
     ?@  auto
       (pairs ~[response+b/|])
@@ -289,19 +289,35 @@
     pa
   ++  pool-action
     |=  jon=json
-    ^-  ^pool-action
+    ^-  pool-action:p
     :: %.  jon
     :: %-  of
     :: :~
     :: ==
-    *^pool-action
+    *pool-action:p
   ++  local-action
     |=  jon=json
-    ^-  ^local-action
+    ^-  local-action:p
     :: %.  jon
     :: %-  of
     :: :~
     :: ==
-    *^local-action
+    *local-action:p
+  ::
+  ++  metadata
+    |=  jon=json
+    ^-  metadata:p
+    ?>  ?=(%o -.jon)
+    p.jon
+  ::
+  ++  invite   metadata
+  ++  request  metadata
+  ::
+  ++  view
+    ^-  $-(json view:p)
+    %-  of
+    :~  [%pools (ot ~[request+request])]
+        [%public-data (ot ~[id+id request+request])]
+    ==
   --
 --

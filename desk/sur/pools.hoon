@@ -120,7 +120,7 @@
 +$  delegation
   $%  [%graylist =id requester=ship =request]
   ==
-:: delegated graylist can control access conditionally based on metadata
+:: delegated graylist can control access conditionally based on request
 ::
 +$  view
   $%  [%pools =request]

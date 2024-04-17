@@ -188,9 +188,9 @@
   ?.  (check-pool-edit-perm mod)
     ~&  >>>  "Do not have host or admin perms."
     %.n
-  ?:  ?&  =([~ %admin] (~(get by perms.pool) member))
-          !|(=(mod host.pid.pool) =(mod member))
-      ==
+  ?.  =([~ %admin] (~(get by perms.pool) member))
+    %.y
+  ?:  |(=(mod host.pid.pool) =(mod member))
     %.y
   ~&  >>>  "Must be host or self to modify admin perms."
   %.n
@@ -908,6 +908,8 @@
       (~(got by contents.archive.pool) gid.tan)
     =.  this  (handle-transition %delete-content gid.tan)
     =.  this  (handle-transition %del-from-context context gid.tan)
+    :: archive contents are recursively deleted
+    ::
     =/  deleted=(list gid:gol)  ~(tap in ~(key by goals))
     |-
     ?~  deleted

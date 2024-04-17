@@ -1,12 +1,12 @@
 /+  *pools
-|_  tan=transition:p
+|_  vyu=view:p
 ++  grow
   |%
-  ++  noun  tan
+  ++  noun  vyu
   --
 ++  grab
   |%
-  ++  noun  transition:p
+  ++  noun  view:p
   --
 ++  grad  %noun
 --

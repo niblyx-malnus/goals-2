@@ -227,5 +227,6 @@
       [%incoming-invites ~]
       [%outgoing-requests ~]
       [%setting setting=@t]
+      [%ship-discover =ship]
   == 
 --

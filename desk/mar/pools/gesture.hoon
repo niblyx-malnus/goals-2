@@ -1,13 +1,12 @@
 /+  *pools
-|_  ges=gesture
+|_  ges=gesture:p
 ++  grow
   |%
   ++  noun  ges
   --
 ++  grab
   |%
-  ++  noun  gesture
+  ++  noun  gesture:p
   --
 ++  grad  %noun
 --
-

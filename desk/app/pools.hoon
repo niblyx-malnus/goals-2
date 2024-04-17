@@ -1,10 +1,12 @@
-/+  p=pools, vent, bout, dbug, default-agent, verb, default-subs, sub-count
+/-  p=pools
+/+  lib=pools, vent, bout, dbug, default-agent, verb, default-subs, sub-count
 /=  x  /ted/vines/pools
 /=  x  /mar/pools/transition
 /=  x  /mar/pools/pool-transition
 /=  x  /mar/pools/gesture
 /=  x  /mar/pools/local-action
 /=  x  /mar/pools/pool-action
+/=  x  /mar/pools/view
 ::
 |%
 +$  card     card:agent:gall
@@ -22,7 +24,7 @@
 |_  =bowl:gall
 +*  this  .
     dus   ~(. (default-subs this %.y %.y %.n) bowl)
-    pul   ~(. p bowl ~ state)
+    pul   ~(. lib bowl ~ state)
 ::
 ++  on-init   on-init:dus
 ++  on-save   !>(state)

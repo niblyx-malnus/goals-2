@@ -569,10 +569,23 @@
     ::
       %setting
     (pure:m !>(?~(s=(~(get by settings.local.store) setting.vyu) ~ s+u.s)))
+    ::
+      %ship-discover
+    !!
   ==
 ==
 ::
 |_  =gowl
+++  discover-pools
+  |=  =ship
+  =/  m  (strand ,json)
+  ^-  form:m
+  %+  (vent ,json)
+    [ship %pools]
+  :-  %pools-view
+  ^-  view:p
+  [%pools ~]
+::
 ++  encode-key  |=(key:gol (rap 3 (enjs-pid:goj pid) '/' gid ~))
 ++  decode-key
   |=  =cord
