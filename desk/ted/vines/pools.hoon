@@ -32,7 +32,12 @@
     :: return pools and public data that src.gowl isn't blacklisted from
     ::
     ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-    =/  pools-list=(list [=id:p =pool:p])  ~(tap by pools)
+    =/  pools-list=(list [=id:p =pool:p])
+      %+  murn  ~(tap by pools)
+      |=  [=id:p =pool:p]
+      ?.  =(our.gowl host.id)
+        ~
+      [~ id pool]
     =|  discovered=(list [id:p metadata:p])
     |-
     ?~  pools-list
@@ -53,6 +58,8 @@
       %public-data
     :: return public data for the pool if src.gowl isn't blacklisted
     ::
+    ?.  =(our.gowl host.id.vyu)
+      (strand-fail %not-my-pool ~)
     ;<  auto=(unit auto:p)  bind:m
       (graylist-resolution id.vyu src.gowl request.vyu)
     ?:  ?=([~ %|] auto)
