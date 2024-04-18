@@ -319,7 +319,7 @@ function ArchiveGoalPage({ host, name, rootId, goalId }: { host: string, name: s
     if (context === null) {
       try {
         await api.restoreGoal(key);
-        navigateToPool(pid);
+        navigateToPool(api.destination, pid);
       } catch (error) {
         console.error("Error processing restore to root: ", error);
       }
@@ -338,7 +338,7 @@ function ArchiveGoalPage({ host, name, rootId, goalId }: { host: string, name: s
       try {
         await api.deleteFromArchive(key);
         // TODO: should go to context page
-        navigateToPool(pid);
+        navigateToPool(api.destination, pid);
       } catch (error) {
         console.error(error);
       }
@@ -360,7 +360,7 @@ function ArchiveGoalPage({ host, name, rootId, goalId }: { host: string, name: s
               onClick={
                 () => {
                   setCurrentTreePage(`/goal${key}`);
-                  navigateToPeriod(currentPeriodType, getCurrentPeriod());
+                  navigateToPeriod(api.destination, currentPeriodType, getCurrentPeriod());
                 }
               }
               className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
@@ -373,7 +373,7 @@ function ArchiveGoalPage({ host, name, rootId, goalId }: { host: string, name: s
             { (context !== null) && (
               <div
                 className="cursor-pointer"
-                onClick={() => navigateToGoal(`${pid}/${context}`)}
+                onClick={() => navigateToGoal(api.destination, `${pid}/${context}`)}
               >
                 <h2 className="text-blue-800">Context Goal</h2>
               </div>
@@ -381,7 +381,7 @@ function ArchiveGoalPage({ host, name, rootId, goalId }: { host: string, name: s
             { (context === null) && (
               <div
                 className="cursor-pointer"
-                onClick={() => navigateToPool(pid)}
+                onClick={() => navigateToPool(api.destination, pid)}
               >
                 <h2 className="text-blue-800">Context Pool</h2>
               </div>
@@ -389,20 +389,20 @@ function ArchiveGoalPage({ host, name, rootId, goalId }: { host: string, name: s
             {goal?.parent && (
               <div
                 className="cursor-pointer"
-                onClick={() => navigateToGoal(`${goal.parent as string}`)}
+                onClick={() => navigateToGoal(api.destination, `${goal.parent as string}`)}
               >
                 <h2 className="text-blue-800">Parent Goal</h2>
               </div>
             )}
             <div
               className="cursor-pointer"
-              onClick={() => navigateToPool(pid)}
+              onClick={() => navigateToPool(api.destination, pid)}
             >
               <h2 className="text-blue-800">Parent Pool</h2>
             </div>
             <div
               className="cursor-pointer"
-              onClick={() => navigateToPools()}
+              onClick={() => navigateToPools(api.destination)}
             >
               <h2 className="text-blue-800">All Pools</h2>
             </div>
@@ -446,7 +446,7 @@ function ArchiveGoalPage({ host, name, rootId, goalId }: { host: string, name: s
                 {
                   (panel === 'restore') && (
                     <div className="absolute right-0 top-full mt-2 w-44 bg-gray-100 border border-gray-200 shadow-2xl rounded-md p-2">
-                      <RestorePanel goalKey={goal.key} refresh={() => navigateToPool(pid)} />
+                      <RestorePanel goalKey={goal.key} refresh={() => navigateToPool(api.destination, pid)} />
                     </div>
                   )
                 }

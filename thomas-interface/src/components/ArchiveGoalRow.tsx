@@ -110,7 +110,7 @@ const ArchiveGoalRow: React.FC<{
       }
       <div
         className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-1 ${goal.complete ? 'line-through' : ''}`}
-        onClick={() => navigateToArchive(pid, gid, gid)}
+        onClick={() => navigateToArchive(api.destination, pid, gid, gid)}
       >
         {goal.summary}
       </div>

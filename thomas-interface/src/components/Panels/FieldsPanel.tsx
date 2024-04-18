@@ -95,7 +95,7 @@ const FieldsPanel: React.FC<{
     // Check if we are in the "edit" tab and the selected field is of type 'duration'
     if (editField && existingFields.find(field => field.name === editField)?.attributeType.display === 'duration') {
       // Directly use the value from goal.fields for the selected editField to initialize our states
-      const currentFieldValue = goal.fields[editField] || 0; // Default to 0 if not found
+      const currentFieldValue = 0; // Default to 0 if not found
       const days = Math.floor(currentFieldValue / 86400);
       const hours = Math.floor((currentFieldValue % 86400) / 3600);
       const minutes = Math.floor((currentFieldValue % 3600) / 60);
@@ -107,7 +107,7 @@ const FieldsPanel: React.FC<{
       setEditMinutes(minutes);
       setEditSeconds(seconds);
     }
-  }, [editField, goal.fields, existingFields]);
+  }, [editField, existingFields]);
   
   // Step 2: Effect hook to convert components back to total seconds whenever any of them changes
   useEffect(() => {
@@ -127,20 +127,6 @@ const FieldsPanel: React.FC<{
       console.error('Error updating goal fields: ', error);
     }
   };
-
-
-  useEffect(() => {
-    if (activeTab === 'edit') {
-      setEditableValues(goal.fields);
-    }
-  }, [activeTab, goal.fields]);
-
-  // When edit tab is activated, initialize editableValues with goal.fields
-  useEffect(() => {
-    if (activeTab === 'edit') {
-      setEditableValues(goal.fields);
-    }
-  }, [activeTab, goal.fields]);
 
   const formatDuration = (totalSeconds: number) => {
     const days = Math.floor(totalSeconds / 86400);
@@ -453,9 +439,6 @@ const FieldsPanel: React.FC<{
             onChange={handleFieldSelectChange}
           >
             <option value="" className="text-gray-400 font-italic">Select Attribute</option>
-            {Object.keys(goal.fields).map((field, index) => (
-              <option key={index} value={field}>{field}</option>
-            ))}
           </select>
       
           {/* Directly integrated edit interface */}
@@ -594,42 +577,6 @@ const FieldsPanel: React.FC<{
               Save Changes
             </button>
           </div>
-        </div>
-      )}
-      {activeTab === 'view' && (
-        <div>
-          {Object.keys(goal.fields).length > 0 ? (
-            <ul>
-              {Object.entries(goal.fields).map(([name, value], index) => {
-                const fieldDetails = existingFields.find(field => field.name === name);
-                const fieldType = fieldDetails?.attributeType.type;
-                const attributeDisplay = fieldDetails?.attributeType.display;
-                
-                let displayValue = value;
-                
-                if (fieldType === 'boolean') {
-                  displayValue = formatBoolean(value);
-                } else if (fieldType === 'labels') {
-                  displayValue = formatLabels(value);
-                } else if (fieldType === 'number' && attributeDisplay === 'duration') {
-                  displayValue = formatDuration(Number(value));
-                } // Assume formatLabels function handles 'labels' and other types don't need special formatting
-    
-                return (
-                  <li key={index} className="flex justify-between items-center mb-1 p-2 border-b">
-                    <span className="font-semibold">
-                      {name}: {displayValue}
-                    </span>
-                    <button onClick={() => handleDeleteField(name)} className="ml-2 text-red-500 hover:text-red-700">
-                      <FiX />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-gray-600">No attributes set for this goal.</p>
-          )}
         </div>
       )}
     </div>

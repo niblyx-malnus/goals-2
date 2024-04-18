@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FiX, FiEdit, FiTrash, FiSave, FiMenu } from 'react-icons/fi';
 import { FaArrowsAltV } from 'react-icons/fa'; 
 import { CompleteIcon } from './CustomIcons';
 import GoalActionBar from './GoalActionBar';
 import { Goal } from '../types';
 import api from '../api';
+import useCustomNavigation from './useCustomNavigation';
 
 const GoalRow: React.FC<{
     goal: Goal,
@@ -24,6 +24,7 @@ const GoalRow: React.FC<{
   const [newSummary, setNewSummary] = useState(goal.summary);
   const [panel, setPanel] = useState('');
   const rowRef = useRef<HTMLDivElement>(null);
+  const { navigateToGoal } = useCustomNavigation();
 
   const toggleActionBar = () => {
     console.log(goal);
@@ -94,8 +95,6 @@ const GoalRow: React.FC<{
     }
   };
 
-  const navigate = useNavigate();
-  
   const toggleComplete = async () => {
     try {
       await api.setGoalComplete(goal.key, !goal.complete);
@@ -137,7 +136,7 @@ const GoalRow: React.FC<{
       ) : (
         <div
           className={`${truncate ? "truncate" : ""} bg-gray-100 rounded cursor-pointer flex-grow p-1 ${goal.complete ? 'line-through' : ''}`}
-          onClick={() => navigate(`/goal${goal.key}`)}
+          onClick={() => navigateToGoal(api.destination, goal.key)}
           onDoubleClick={toggleEdit}
         >
           {goal.summary}

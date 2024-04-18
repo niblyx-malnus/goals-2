@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import MarkdownEditor from './MarkdownEditor';
 import TagGoalList from './TagGoalList';
 import TagHarvestList from './TagHarvestList';
 import api from '../api';
+import useCustomNavigation from './useCustomNavigation';
 
 function TagPage({ tag }: { tag: any; }) {
   const [localTagNote, setLocalTagNote] = useState<string>('');
   const [refreshGoals, setRefreshGoals] = useState(false);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [activeTab, setActiveTab] = useState('Goals');
-
-  const navigate = useNavigate();
-
-  const navigateToAllPools = () => {
-    navigate(`/pools`);
-  };
+  const { navigateToPools } = useCustomNavigation();
 
   // Fetch pool tag details on mount
   useEffect(() => {
@@ -54,7 +49,7 @@ function TagPage({ tag }: { tag: any; }) {
         <div className="flex justify-between pb-2">
           <div
             className="cursor-pointer"
-            onClick={navigateToAllPools}
+            onClick={() => navigateToPools(api.destination)}
           >
             <h2 className="text-blue-800">All Pools</h2>
           </div>

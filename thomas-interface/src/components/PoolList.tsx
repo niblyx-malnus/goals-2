@@ -1,67 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import PoolRow from './PoolRow';
+import { Pool } from '../types';
 import api from '../api';
 import _ from 'lodash';
-import useStore from '../store';
 
-type Pool = { pid: string, title: string }; // Type for pool object
-
-function PoolList({ refresh } : { refresh: () => void; }) {
-  const [pools, setPools] = useState<Pool[]>([]); // Updated from titles to pools
-
-  // Fetch pools on mount
-  useEffect(() => {
-    const fetchPools = async () => {
-
-      try {
-        const fetchedPools = await api.getPoolsIndex();
-        setPools(fetchedPools);
-      } catch (error) {
-        console.error("Error fetching pools: ", error);
-      }
-    };
-    fetchPools();
-  }, [refresh]);
-
-  const movePoolUp = async (pid: string) => {
-    const index = _.findIndex(pools, { pid });
-    if (index > 0) {
-      const abovePoolId = pools[index - 1].pid;
-      try {
-        await api.poolsSlotAbove(pid, abovePoolId);
-        refresh();
-      } catch (error) {
-        console.error("Error reordering", error);
-      }
-    }
-  };
-  
-  const movePoolDown = async (pid: string) => {
-    const index = _.findIndex(pools, { pid });
-    if (index >= 0 && index < pools.length - 1) {
-      const belowGoalId = pools[index + 1].pid;
-      try {
-        await api.poolsSlotBelow(pid, belowGoalId);
-        refresh();
-      } catch (error) {
-        console.error("Error reordering", error);
-      }
-    }
-  };
+function PoolList({
+  destination,
+  pools,
+  refresh,
+  isLoading,
+} : {
+  destination: string,
+  pools: Pool[];
+  refresh: () => void;
+  isLoading: boolean;
+}) {
 
   return (
-    <>
-      <ul>
-        {pools.map((pool, index) => (
-          <div
-            key={pool.pid}
-            className="block text-current no-underline hover:no-underline"
-          >
-            <PoolRow pid={pool.pid} title={pool.title} refresh={refresh} movePoolUp={movePoolUp} movePoolDown={movePoolDown}/>
-          </div>
-        ))}
-      </ul>
-    </>
+    <div>
+      {pools.length > 0 && (
+        <ul>
+          {pools.map((pool, index) => (
+            <div
+              key={pool.pid}
+              className="block text-current no-underline hover:no-underline"
+            >
+              <PoolRow destination={destination} pool={pool} refresh={refresh} movePoolUp={() => console.log()} movePoolDown={() => console.log()}/>
+            </div>
+          ))}
+        </ul>
+      )}
+      {isLoading && (
+        <div className="flex justify-center m-20">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-8 border-t-transparent border-blue-500"></div>
+        </div>
+      )}
+      {pools.length == 0 && !isLoading && (
+        <div className="text-center m-5 text-lg text-gray-600">No pools found.</div>
+      )}
+    </div>
   );
 }
 

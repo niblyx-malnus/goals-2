@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FiPlus, FiEdit, FiSave, FiX, FiMinus, FiMenu } from 'react-icons/fi';
 import { FaArrowsAlt } from 'react-icons/fa'; 
 import { CompleteIcon } from '../CustomIcons';
@@ -7,6 +6,7 @@ import AddTodoPanel from './AddTodoPanel';
 import TodoActionBar from './TodoActionBar';
 import { Goal } from '../../types';
 import api from '../../api';
+import useCustomNavigation from '../useCustomNavigation';
 
 const TodoRow = ({
   goal,
@@ -25,8 +25,7 @@ const TodoRow = ({
   const [newSummary, setNewSummary] = useState(goal.summary);
   const [panel, setPanel] = useState('');
   const rowRef = useRef<HTMLDivElement>(null);
-
-  const navigate = useNavigate();
+  const { navigateToGoal } = useCustomNavigation();
 
   useEffect(() => {
     // Function to check if clicked outside of element
@@ -132,7 +131,7 @@ const TodoRow = ({
       ) : (
         <div
           className={`truncate bg-gray-100 rounded cursor-pointer flex-grow p-1 ${goal.complete ? 'line-through' : ''}`}
-          onClick={() => navigate(`/goal${goal.key}`)}
+          onClick={() => navigateToGoal(api.destination, goal.key)}
           onDoubleClick={toggleEdit}
         >
           {goal.summary}

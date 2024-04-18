@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { WeeklyTarget, Week, Weekday } from './types';
 import useStore, { StoreState, StoreActions } from './store';
+import useCustomNavigation from '../useCustomNavigation';
 import api from '../../api';
 
 const weekDays: Weekday[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -13,8 +13,7 @@ const WeeklyTargetPage = ({ id }: { id: string }) => {
   const [target, setTarget] = useState<number | null>(null);
   const [entries, setEntries] = useState({} as Record<Weekday, number>);
   const [comparisonType, setComparisonType] = useState<'==' | '>=' | '<='>('>=');
-
-  const navigate = useNavigate(); // Initialize useNavigate
+  const { navigateToPeriod, navigateToGoal, navigateToPool, navigateToPools } = useCustomNavigation();
 
   useEffect(() => {
     // Set the current week on component mount
@@ -195,7 +194,7 @@ const WeeklyTargetPage = ({ id }: { id: string }) => {
           This Week
         </button>
         <button
-          onClick={() => navigate('/weekly_targets')}
+          onClick={() => console.log()}
           className="mx-1 px-2 py-1 bg-gray-300 rounded"
         >
           Back to Weekly Targets

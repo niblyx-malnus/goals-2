@@ -109,7 +109,7 @@ const ArchiveInfoPanel: React.FC<{
               className="px-4 py-2 truncate bg-blue-100 text-blue-500 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               onClick={() => {
                   const { pid, gid } = goalKeyToPidGid(lineage[currentIndex].key);
-                  navigateToArchive(pid, rid, gid);
+                  navigateToArchive(api.destination, pid, rid, gid);
                 }
               }
             >

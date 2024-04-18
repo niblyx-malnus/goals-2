@@ -21,7 +21,7 @@ const TagPanel: React.FC<{
     try {
       // Logic to remove the tag from the goal
       // For example, update the tags array and send a request to the backend
-      await api.delGoalTag(`${goal.key}`, tagToRemove, goal.tags);
+      await api.delGoalTag(`${goal.key}`, tagToRemove, []);
       refresh();
     } catch (error) {
       console.error("Error removing tag: ", error);
@@ -32,7 +32,7 @@ const TagPanel: React.FC<{
     console.log("adding new tag");
     try {
       if (newTag.trim() !== '') {
-        await api.addGoalTag(`${goal.key}`, newTag, goal.tags);
+        await api.addGoalTag(`${goal.key}`, newTag, []);
         setNewTag('');
         refresh();
       }
@@ -56,37 +56,9 @@ const TagPanel: React.FC<{
   return (
     <div>
       {/* Display inheritedTags */}
-      {goal.inheritedTags && goal.inheritedTags.length > 0 && (
-        <ul>
-          {goal.inheritedTags.map((tag, index) => (
-            <li key={index} className="flex justify-between items-center p-1 text-gray-500">
-              <span
-                onClick={() => navigateToTag(tag)}
-                className="cursor-pointer"
-              >
-                {tag}
-              </span>
-            </li>
-          ))}
-          <hr className="my-2" /> {/* Horizontal line separator */}
-        </ul>
-      )}
 
       {/* Display tags */}
       <ul>
-        {goal.tags.map((tag, index) => (
-          <li key={index} className="flex justify-between items-center p-1">
-            <span
-              onClick={() => navigateToTag(tag)}
-              className="cursor-pointer"
-            >
-              {tag}
-            </span>
-            <button onClick={() => removeTag(tag)} className="text-xs p-1">
-              <FiX />
-            </button>
-          </li>
-        ))}
       </ul>
       <div className="flex items-center">
         <input

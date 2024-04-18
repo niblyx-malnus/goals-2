@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import MarkdownEditor from './MarkdownEditor';
 import PoolTagGoalList from './LabelGoalList';
 import PoolTagHarvestList from './LabelHarvestList';
 import api from '../api';
+import useCustomNavigation from './useCustomNavigation';
 
 function LabelPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
   const poolId = `/${host}/${name}`;
@@ -12,16 +12,7 @@ function LabelPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
   const [refreshGoals, setRefreshGoals] = useState(false);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [activeTab, setActiveTab] = useState('Goals');
-
-  const navigate = useNavigate();
-
-  const navigateToAllPools = () => {
-    navigate(`/pools`);
-  };
-
-  const navigateToPoolPage = () => {
-    navigate(`/pool/${host}/${name}`);
-  };
+  const { navigateToPools, navigateToPool } = useCustomNavigation();
 
   // Fetch pool tag details on mount
   useEffect(() => {
@@ -49,7 +40,8 @@ function LabelPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
   const handleAddTitle = async () => {
     if (newDescription.trim() !== '') {
       try {
-        await api.createGoalWithTag(`/${host}/${name}`, null, newDescription, true, tag);
+        // await api.createGoal(`/${host}/${name}`, null, newDescription, true, tag);
+        console.log("create goal with tag");
       } catch (error) {
         console.error(error);
       }
@@ -71,13 +63,13 @@ function LabelPage({ host, name, tag }: { host: any; name: any; tag: any; }) {
         <div className="flex justify-between pb-2">
           <div
             className="cursor-pointer"
-            onClick={navigateToPoolPage}
+            onClick={() => navigateToPool(api.destination, poolId)}
           >
             <h2 className="text-blue-800">Parent Pool</h2>
           </div>
           <div
             className="cursor-pointer"
-            onClick={navigateToAllPools}
+            onClick={() => navigateToPools(api.destination)}
           >
             <h2 className="text-blue-800">All Pools</h2>
           </div>

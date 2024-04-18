@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import MarkdownEditor from './MarkdownEditor';
 import useStore from '../store';
-import { useNavigate } from 'react-router-dom';
 import GoalList from './GoalList';
 import ArchiveGoalList from './ArchiveGoalList';
 import TagSearchBar from './TagSearchBar';
 import PoolUsersPanel from './Panels/PoolUsersPanel';
-import api from '../api';
-import { FiUsers, FiX, FiSave, FiEdit, FiTrash } from 'react-icons/fi';
+import LocalMembershipPanel from './Panels/LocalMembershipPanel';
+import rawApi from '../api';
+import { FiUsers, FiX, FiSave, FiEdit, FiTrash, FiMail } from 'react-icons/fi';
 import { ActiveIcon } from './CustomIcons';
 import { FaListUl } from 'react-icons/fa';
 import { Goal } from '../types';
 import { gidFromKey, goalKeyToPidGid } from '../utils';
 import useCustomNavigation from './useCustomNavigation';
 
-function Archive({ pid, refreshRoots }: { pid: string, refreshRoots: () => void }) {
+function Archive({ destination, pid, refreshRoots }: { destination: string, pid: string, refreshRoots: () => void }) {
+  const api = rawApi.setDestination(destination);
   const [refresh, setRefresh] = useState(false);
   const [archive, setArchive] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,7 +98,8 @@ function Archive({ pid, refreshRoots }: { pid: string, refreshRoots: () => void 
   );
 }
 
-function Harvest({ host, name }: { host: string, name: string }) {
+function Harvest({ destination, host, name }: { destination: string, host: string, name: string }) {
+  const api = rawApi.setDestination(destination);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [refreshEmptyGoals, setRefreshEmptyGoals] = useState(false);
   const [harvest, setHarvest] = useState<Goal[]>([]);
@@ -197,7 +199,8 @@ function Harvest({ host, name }: { host: string, name: string }) {
   );
 }
 
-function Pool({ host, name }: { host: any; name: any; }) {
+function PoolPage({ destination, host, name }: { destination: string, host: string; name: string; }) {
+  const api = rawApi.setDestination(destination);
   const pid = `/${host}/${name}`;
   const [poolSummary, setPoolTitle] = useState<string>('');
   const [poolNote, setPoolNote] = useState<string>('');
@@ -212,9 +215,10 @@ function Pool({ host, name }: { host: any; name: any; }) {
   const [rootsLoading, setRootsLoading] = useState(true);
   const [poolLoading, setPoolLoading] = useState(true);
   const [activeNewGoal, setActiveNewGoal] = useState(true);
-  const { navigateToPeriod, navigateToLabel } = useCustomNavigation();
+  const { navigateToPeriod, navigateToLabel, navigateToPools } = useCustomNavigation();
   const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
   const [showUsersPanel, setShowUsersPanel] = useState(false);
+  const [showLocalMembershipPanel, setShowLocalMembershipPanel] = useState(false);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -252,12 +256,6 @@ function Pool({ host, name }: { host: any; name: any; }) {
     if (e.key === 'Enter') {
       handleSummarySave();
     }
-  };
-  
-  const navigate = useNavigate();
-
-  const navigateToAllPools = () => {
-    navigate(`/pools`);
   };
 
   // Function to toggle refreshFlag
@@ -378,6 +376,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
   };
 
   const toggleUsersPanel = () => setShowUsersPanel(!showUsersPanel);
+  const toggleLocalMembershipPanel = () => setShowLocalMembershipPanel(!showLocalMembershipPanel);
 
   return (
     <div className="bg-[#FAF3DD] flex justify-center items-center h-screen">
@@ -391,10 +390,17 @@ function Pool({ host, name }: { host: any; name: any; }) {
           <div className="flex justify-between items-center mb-4">
             <TagSearchBar poolId={pid} />
             <button
+              onClick={toggleLocalMembershipPanel}
+              className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
+              style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+            >
+              <FiMail />
+            </button>
+            <button
               onClick={
                 () => {
                   setCurrentTreePage(`/pool${pid}`);
-                  navigateToPeriod(currentPeriodType, getCurrentPeriod());
+                  navigateToPeriod(api.destination, currentPeriodType, getCurrentPeriod());
                 }
               }
               className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
@@ -405,7 +411,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
           </div>
           <div
             className="cursor-pointer"
-            onClick={() => navigateToAllPools()}
+            onClick={() => navigateToPools(api.destination)}
           >
             <h2 className="text-blue-800">All Pools</h2>
           </div>
@@ -420,9 +426,13 @@ function Pool({ host, name }: { host: any; name: any; }) {
               {/* Conditionally render the PoolUsersPanel */}
               {showUsersPanel && (
                 <PoolUsersPanel
+                  destination={destination}
                   pid={pid}
                   exit={() => setShowUsersPanel(false)}
                 />
+              )}
+              {showLocalMembershipPanel && (
+                <LocalMembershipPanel exit={() => setShowLocalMembershipPanel(false)} />
               )}
             </div>
             {isEditingSummary ? (
@@ -479,7 +489,7 @@ function Pool({ host, name }: { host: any; name: any; }) {
               <div
                 key={index}
                 className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
-                onClick={() => navigateToLabel(pid, label)}
+                onClick={() => navigateToLabel(api.destination, pid, label)}
               >
                 {label}
               </div>
@@ -574,10 +584,10 @@ function Pool({ host, name }: { host: any; name: any; }) {
             </>
           )}
           {activeTab === 'Archive' && (
-            <Archive pid={pid} refreshRoots={() => setRefreshRoots(!refreshRoots)}/>
+            <Archive destination={destination} pid={pid} refreshRoots={() => setRefreshRoots(!refreshRoots)}/>
           )}
           {activeTab === 'Harvest' && (
-            <Harvest host={host} name={name} />
+            <Harvest destination={destination} host={host} name={name} />
            )}
         </div>
       )}
@@ -585,4 +595,4 @@ function Pool({ host, name }: { host: any; name: any; }) {
   );
 }
 
-export default Pool;
+export default PoolPage;

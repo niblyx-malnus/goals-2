@@ -142,7 +142,7 @@ const GoalPageActionBar: React.FC<{
         </button>
         {/* Conditionally render the GoalUsersPanel */}
         {showGoalUsersPanel && (
-          <GoalUsersPanel goal={goal} exit={() => setShowGoalUsersPanel(false)} />
+          <GoalUsersPanel goal={goal} exit={() => setShowGoalUsersPanel(false)} refresh={refresh} />
         )}
       </div>
       <button
@@ -169,11 +169,6 @@ const GoalPageActionBar: React.FC<{
           onClick={toggleTagPanel}
         >
           <TagIcon />
-          {goal.inheritedTags.length + goal.tags.length > 0 && (
-            <span className="absolute top-0 right-0 bg-gray-300 rounded-full text-xs px-1">
-              {goal.inheritedTags.length + goal.tags.length}
-            </span>
-          )}
         </button>
       </div>
       <div className="relative group">
@@ -182,9 +177,9 @@ const GoalPageActionBar: React.FC<{
           onClick={toggleLabelPanel}
         >
           <FiTag />
-          {goal.inheritedLabels.length + goal.labels.length > 0 && (
+          {goal.labels.length > 0 && (
             <span className="absolute top-0 right-0 bg-gray-300 rounded-full text-xs px-1">
-              {goal.inheritedLabels.length + goal.labels.length}
+              {goal.labels.length}
             </span>
           )}
         </button>

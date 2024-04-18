@@ -3,32 +3,32 @@ import { useNavigate } from 'react-router-dom';
 const useCustomNavigation = () => {
   const navigate = useNavigate();
 
-  const navigateToPeriod = (periodType: string, dateKey: string) => {
-    navigate(`/periods/${periodType}/${dateKey}`);
+  const navigateToPeriod = (destination: string, periodType: string, dateKey: string) => {
+    navigate(`/${destination}/periods/${periodType}/${dateKey}`);
   };
 
-  const navigateToLabel = (pid: string, label: string) => {
-    navigate(`/label${pid}/${label}`);
+  const navigateToLabel = ( destination: string, pid: string, label: string) => {
+    navigate(`/${destination}/label${pid}/${label}`);
   };
 
-  const navigateToTag = (tag: string) => {
-    navigate(`/tag/${tag}`);
+  const navigateToTag = (destination: string, tag: string) => {
+    navigate(`/${destination}/tag/${tag}`);
   };
 
-  const navigateToGoal = (key: string) => {
-    navigate(`/goal${key}`);
+  const navigateToGoal = (destination: string, key: string) => {
+    navigate(`/${destination}/goal${key}`);
   };
 
-  const navigateToArchive = (pid: string, rid: string, gid: string) => {
-    navigate(`/archive${pid}${rid}${gid}`);
+  const navigateToArchive = (destination: string, pid: string, rid: string, gid: string) => {
+    navigate(`/${destination}/archive${pid}${rid}${gid}`);
   };
 
-  const navigateToPool = (pid: string) => {
-    navigate(`/pool${pid}`);
+  const navigateToPool = (destination: string, pid: string) => {
+    navigate(`/${destination}/pool${pid}`);
   };
 
-  const navigateToPools = () => {
-    navigate(`/pools`);
+  const navigateToPools = (destination: string) => {
+    navigate(`/${destination}/pools`);
   };
   
   return {

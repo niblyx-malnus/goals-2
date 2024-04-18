@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FiTrash, FiEdit, FiSave, FiX, FiCalendar, FiTag } from 'react-icons/fi';
 import { WeeklyTarget, Weekday } from './types';
 import useStore, { StoreState, StoreActions } from './store';
@@ -28,10 +27,8 @@ const WeeklyTargetRow: React.FC<WeeklyTargetRowProps> = ({
 
   const rowRef = useRef<HTMLDivElement>(null);
 
-  const navigate = useNavigate();
-
   const handleRowClick = () => {
-    navigate(`/weekly_targets/${id}`);
+    console.log(id);
   };
 
   useEffect(() => {

@@ -6,15 +6,17 @@ import ArchiveGoalList from './ArchiveGoalList';
 import GoalPageActionBar from './GoalPageActionBar';
 import AttributeModal from './Panels/AttributeModal';
 import TagSearchBar from './TagSearchBar';
-import api from '../api';
+import rawApi from '../api';
 import { FiX, FiSave, FiEdit } from 'react-icons/fi';
 import { FaListUl } from 'react-icons/fa';
 import { CompleteIcon, ActiveIcon, AttributeIcon } from './CustomIcons';
 import useCustomNavigation from './useCustomNavigation';
 import { Goal } from '../types';
 import { goalKeyToPidGid, gidFromKey } from '../utils';
+import { de } from 'date-fns/locale';
 
-function Subgoals({ goal }: { goal: Goal }) {
+function Subgoals({ destination, goal }: { destination: string, goal: Goal }) {
+  const api = rawApi.setDestination(destination);
   const { pid, gid } = goalKeyToPidGid(goal.key);
 
   const [activeNewGoal, setActiveNewGoal] = useState(true);
@@ -201,7 +203,8 @@ function Subgoals({ goal }: { goal: Goal }) {
   );
 }
 
-function Archive({ goal }: { goal: Goal }) {
+function Archive({ destination, goal }: { destination: string, goal: Goal }) {
+  const api = rawApi.setDestination(destination);
   const { pid, gid } = goalKeyToPidGid(goal.key);
 
   const [refresh, setRefresh] = useState(false);
@@ -284,7 +287,8 @@ function Archive({ goal }: { goal: Goal }) {
   );
 }
 
-function Harvest({ goal }: { goal: Goal }) {
+function Harvest({ destination, goal }: { destination: string, goal: Goal }) {
+  const api = rawApi.setDestination(destination);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [refreshEmptyGoals, setRefreshEmptyGoals] = useState(false);
   const [harvest, setHarvest] = useState<Goal[]>([]);
@@ -384,7 +388,8 @@ function Harvest({ goal }: { goal: Goal }) {
   );
 }
 
-function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: string }) {
+function GoalPage({ destination, host, name, goalId }: { destination: string, host: string, name: string, goalId: string }) {
+  const api = rawApi.setDestination(destination);
   const key = `/${host}/${name}/${goalId}`;
   const pid = `/${host}/${name}`;
   const [goal, setGoal] = useState<Goal | null>(null);
@@ -486,7 +491,7 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
               onClick={
                 () => {
                   setCurrentTreePage(`/goal${key}`);
-                  navigateToPeriod(currentPeriodType, getCurrentPeriod());
+                  navigateToPeriod(api.destination, currentPeriodType, getCurrentPeriod());
                 }
               }
               className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
@@ -499,20 +504,20 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
             {goal?.parent && (
               <div
                 className="cursor-pointer"
-                onClick={() => navigateToGoal(`${goal.parent as string}`)}
+                onClick={() => navigateToGoal(api.destination, `${goal.parent as string}`)}
               >
                 <h2 className="text-blue-800">Parent Goal</h2>
               </div>
             )}
             <div
               className="cursor-pointer"
-              onClick={() => navigateToPool(pid)}
+              onClick={() => navigateToPool(api.destination, pid)}
             >
               <h2 className="text-blue-800">Parent Pool</h2>
             </div>
             <div
               className="cursor-pointer"
-              onClick={() => navigateToPools()}
+              onClick={() => navigateToPools(api.destination)}
             >
               <h2 className="text-blue-800">All Pools</h2>
             </div>
@@ -628,13 +633,13 @@ function GoalPage({ host, name, goalId }: { host: string, name: string, goalId: 
             </div>
           )}
           {activeTab === 'Archive' && (
-            <Archive goal={goal} />
+            <Archive destination={destination} goal={goal} />
           )}
           {activeTab === 'Sub-goals' && (
-            <Subgoals goal={goal} />
+            <Subgoals destination={destination} goal={goal} />
           )}
           {activeTab === 'Harvest' && (
-            <Harvest goal={goal} />
+            <Harvest destination={destination} goal={goal} />
           )}
         </div>
       )}

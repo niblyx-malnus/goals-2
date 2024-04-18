@@ -151,11 +151,6 @@ const GoalActionBar: React.FC<{
           onClick={toggleTagPanel}
         >
           <TagIcon />
-          {goal.inheritedTags.length + goal.tags.length > 0 && (
-            <span className="absolute top-0 right-0 bg-gray-300 rounded-full text-xs px-1">
-              {goal.inheritedTags.length + goal.tags.length}
-            </span>
-          )}
         </button>
       </div>
       <div className="relative group">
@@ -164,9 +159,9 @@ const GoalActionBar: React.FC<{
           onClick={toggleLabelPanel}
         >
           <FiTag />
-          {goal.inheritedLabels.length + goal.labels.length > 0 && (
+          {goal.labels.length > 0 && (
             <span className="absolute top-0 right-0 bg-gray-300 rounded-full text-xs px-1">
-              {goal.inheritedLabels.length + goal.labels.length}
+              {goal.labels.length}
             </span>
           )}
         </button>

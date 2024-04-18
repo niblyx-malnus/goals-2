@@ -1,27 +1,29 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api';
-import { FiCopy, FiEdit, FiSave, FiTrash, FiX, FiMenu, FiInfo } from 'react-icons/fi';
+import rawApi from '../api';
+import { Pool } from '../types';
+import useCustomNavigation from './useCustomNavigation';
+import { FiCopy, FiEdit, FiSave, FiTrash, FiX, FiMenu, FiInfo, FiLogIn, FiLogOut } from 'react-icons/fi';
 
 function PoolRow({
-    pid,
-    title,
+    destination,
+    pool,
     refresh,
     movePoolUp,
     movePoolDown,
   }: {
-    pid: string;
-    title: string;
+    destination: string,
+    pool: Pool;
     refresh: () => void;
     movePoolUp: (poolId: string) => void,
     movePoolDown: (poolId: string) => void
   }) {
+  const api = rawApi.setDestination(destination);
   const [isEditing, setIsEditing] = useState(false);
-  const [newTitle, setNewTitle] = useState(title);
+  const [newTitle, setNewTitle] = useState(pool.title);
 
   const updatePool = async () => {
     try {
-      await api.setPoolTitle(pid, newTitle);
+      await api.setPoolTitle(pool.pid, newTitle);
       setIsEditing(false);
       refresh();
     } catch (error) {
@@ -31,7 +33,7 @@ function PoolRow({
 
   const cancelUpdatePool = async () => {
     try {
-      setNewTitle(title);
+      setNewTitle(pool.title);
       refresh();
       setIsEditing(false);
     } catch (error) {
@@ -39,11 +41,7 @@ function PoolRow({
     }
   };
 
-  const navigate = useNavigate();
-
-  const navigateToPool = (tag: string) => {
-    navigate(`/pool/${pid}`);
-  };
+  const { navigateToPool } = useCustomNavigation();
 
   const deletePool = async () => {
     // Show confirmation dialog
@@ -52,7 +50,22 @@ function PoolRow({
     // Only proceed if the user confirms
     if (isConfirmed) {
       try {
-        await api.deletePool(pid);
+        await api.deletePool(pool.pid);
+        refresh();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  const leavePool = async () => {
+    // Show confirmation dialog
+    const isConfirmed = window.confirm("Are you sure you want to leave this pool?");
+  
+    // Only proceed if the user confirms
+    if (isConfirmed) {
+      try {
+        await api.leavePool(pool.pid);
         refresh();
       } catch (error) {
         console.error(error);
@@ -61,7 +74,7 @@ function PoolRow({
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(pid);
+    navigator.clipboard.writeText(pool.pid);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -81,10 +94,10 @@ function PoolRow({
       >
         <FiCopy />
       </button>
-      <button onClick={() => movePoolUp(pid)} className="p-1 rounded bg-gray-100 hover:bg-gray-200">
+      <button onClick={() => movePoolUp(pool.pid)} className="p-1 rounded bg-gray-100 hover:bg-gray-200">
         ↑
       </button>
-      <button onClick={() => movePoolDown(pid)} className="p-1 rounded bg-gray-100 hover:bg-gray-200">
+      <button onClick={() => movePoolDown(pool.pid)} className="p-1 rounded bg-gray-100 hover:bg-gray-200">
         ↓
       </button>
       {isEditing ? (
@@ -97,11 +110,16 @@ function PoolRow({
         />
       ) : (
         <div
-          className={"truncate bg-gray-100 rounded cursor-pointer flex-grow p-1"}
-          onClick={() => navigateToPool(pid)}
-          onDoubleClick={() => setIsEditing(true)}
+          className={`truncate rounded flex-grow p-1 ${pool.host === api.destination || pool.areWatching ? 'bg-gray-100 cursor-pointer hover:bg-gray-200' : 'bg-gray-200'}`}
+          onClick={
+            () => {
+              if (pool.host === api.destination || pool.areWatching) {
+                navigateToPool(api.destination, pool.pid);
+              }
+            }
+          }
         >
-          {title}
+          {pool.title}
         </div>
 
       )}
@@ -113,12 +131,33 @@ function PoolRow({
           >
             <FiEdit />
           </button>
-          <button
-            className="p-2 rounded bg-gray-100 hover:bg-gray-200"
-            onClick={deletePool}
-          >
-            <FiTrash />
-          </button>
+          { pool.host !== api.destination ? (
+            !pool.areWatching ? (
+              <button
+                className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+                onClick={() => api.watchPool(pool.pid)}
+                title="Watch Pool"
+              >
+                <FiLogIn />
+              </button>
+            ) : (
+              <button
+                className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+                onClick={leavePool}
+                title="Leave Pool"
+              >
+                <FiLogOut />
+              </button>
+            )
+          ) : (
+            <button
+              className="p-2 rounded bg-gray-100 hover:bg-gray-200"
+              onClick={deletePool}
+              title="Delete Pool"
+            >
+              <FiTrash />
+            </button>
+          )}
         </>
       )}
       { isEditing && (

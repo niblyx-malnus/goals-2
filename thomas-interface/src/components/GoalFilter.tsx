@@ -352,12 +352,9 @@ export const filterGoalsByFields = (
   return goals.filter(goal => {
     const filterResults = fieldFilters.map(filter => {
       // Check both direct and inherited fields if includeInherited is true
-      const directValue = goal.fields[filter.field];
-      const inheritedValue = goal.inheritedFields[filter.field];
-      const valuesToCheck = filter.includeInherited ? [directValue, inheritedValue] : [directValue];
+      // const inheritedValue = goal.inheritedFields[filter.field];
       
       // Return true if any of the valuesToCheck matches the filter value
-      return valuesToCheck.some(value => value === filter.value);
     });
 
     // Determine how to apply these results based on the mergeMethod
@@ -381,16 +378,14 @@ export const filterGoalsByTags = (
     let goalTags: string[];
     let goalLabels: string[];
     if (includeInherited) {
-      goalTags = [...goal.tags, ...goal.inheritedTags];
-      goalLabels = [...goal.labels, ...goal.inheritedLabels];
+      goalLabels = [...goal.labels];
     } else {
-      goalTags = goal.tags;
       goalLabels = goal.labels;
     }
     if (tagOrLabel === 'both') {
-      tagSet = new Set([...goalTags, ...goalLabels]);
+      tagSet = new Set([...goalLabels]);
     } else if (tagOrLabel === 'tag') {
-      tagSet = new Set(goalTags);
+      tagSet = new Set([]);
     } else if (tagOrLabel === 'label') {
       tagSet = new Set(goalLabels);
     }
@@ -415,17 +410,15 @@ export const getUniqueTags = (
     let goalTags: string[];
     let goalLabels: string[];
     if (includeInherited) {
-      goalTags = [...goal.tags, ...goal.inheritedTags];
-      goalLabels = [...goal.labels, ...goal.inheritedLabels];
+      goalLabels = [...goal.labels];
     } else {
-      goalTags = goal.tags;
       goalLabels = goal.labels;
     }
     if (tagOrLabel === 'both') {
-      acc.push(...goalLabels, ...goalTags);
+      acc.push(...goalLabels);
       return acc;
     } else if (tagOrLabel === 'tag') {
-      acc.push(...goalTags);
+      acc.push([]);
       return acc;
     } else {
       acc.push(...goalLabels);

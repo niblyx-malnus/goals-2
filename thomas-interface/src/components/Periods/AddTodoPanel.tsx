@@ -38,7 +38,7 @@ const AddTodoPanel = ({
 
   const handleClickText = (e: React.MouseEvent<HTMLSpanElement>) => {
     exit();
-    navigateToPeriod(periodType, dateKey);
+    navigateToPeriod(api.destination, periodType, dateKey);
   }
 
   const onAddToTodoList = async (jsonPath: string) => {

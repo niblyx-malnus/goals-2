@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PoolList from './PoolList';
 import GoalList from './GoalList';
 import useStore from '../store';
 import TagSearchBar from './TagSearchBar';
-import { Goal } from '../types';
-import api from '../api';
+import LocalMembershipPanel from './Panels/LocalMembershipPanel';
+import { Goal, Pool } from '../types';
+import rawApi from '../api';
+import { FiMail } from 'react-icons/fi';
 import { FaListUl } from 'react-icons/fa';
 import useCustomNavigation from './useCustomNavigation';
 
-function Harvest() {
+function Harvest({ destination } : { destination: string }) {
+  const api = rawApi.setDestination(destination);
   const [refreshHarvest, setRefreshHarvest] = useState(false);
   const [refreshEmptyGoals, setRefreshEmptyGoals] = useState(false);
   const [harvest, setHarvest] = useState<Goal[]>([]);
@@ -108,13 +111,17 @@ function Harvest() {
   );
 }
 
-function Pools() {
+function Pools({ destination } : { destination: string }) {
+  const api = rawApi.setDestination(destination);
   const [newTitle, setNewTitle] = useState<string>('');
   const [refreshPools, setRefreshPools] = useState(false);
   const [activeTab, setActiveTab] = useState('Pools'); // New state for active tab
   const [allLocalTags, setAllLocalTags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pools, setPools] = useState<Pool[]>([]);
   const { navigateToPeriod, navigateToTag } = useCustomNavigation();
   const { currentPeriodType, getCurrentPeriod, setCurrentTreePage } = useStore(state => state);
+  const [showLocalMembershipPanel, setShowLocalMembershipPanel] = useState(false);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -127,6 +134,23 @@ function Pools() {
     };
     fetchTags();
   }, []);
+
+  useEffect(() => {
+    const fetchPools = async () => {
+      setIsLoading(true);
+      try {
+        const pools = await api.getPoolsIndex();
+        console.log("pools");
+        console.log(pools);
+        setPools(pools);
+      } catch (error) {
+        console.error("Error fetching pools: ", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPools();
+  }, [refreshPools]);
 
   const triggerRefreshPools = () => {
     setRefreshPools(!refreshPools);
@@ -144,16 +168,28 @@ function Pools() {
     }
   };
 
+  const toggleLocalMembershipPanel = () => setShowLocalMembershipPanel(!showLocalMembershipPanel);
+
   return (
     <div className="bg-gray-200 h-full flex justify-center items-center h-screen">
       <div className="bg-[#DFF7DC] p-6 rounded shadow-md w-full h-screen overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <TagSearchBar poolId={null} />
           <button
+            onClick={toggleLocalMembershipPanel}
+            className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
+            style={{ height: '2rem', width: '2rem' }} // Adjust the size as needed
+          >
+            <FiMail />
+          </button>
+          {showLocalMembershipPanel && (
+            <LocalMembershipPanel exit={() => setShowLocalMembershipPanel(false)} />
+          )}
+          <button
             onClick={
               () => {
                 setCurrentTreePage(`/pools`);
-                navigateToPeriod(currentPeriodType, getCurrentPeriod());
+                navigateToPeriod(api.destination, currentPeriodType, getCurrentPeriod());
               }
             }
             className="p-2 mr-2 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 flex items-center justify-center"
@@ -168,7 +204,7 @@ function Pools() {
             <div
               key={index}
               className="flex items-center bg-gray-200 rounded px-2 py-1 m-1 cursor-pointer"
-              onClick={() => navigateToTag(tag)}
+              onClick={() => navigateToTag(api.destination, tag)}
             >
               {tag}
             </div>
@@ -217,11 +253,11 @@ function Pools() {
                 Add
               </button>
             </div>
-            <PoolList refresh={triggerRefreshPools}/>
+            <PoolList destination={destination} pools={pools} refresh={triggerRefreshPools} isLoading={isLoading}/>
           </>
         )}
         {activeTab === 'Harvest' && (
-          <Harvest />
+          <Harvest destination={destination}/>
         )}
       </div>
     </div>

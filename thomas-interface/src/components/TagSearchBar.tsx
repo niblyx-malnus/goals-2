@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import useCustomNavigation from './useCustomNavigation';
 
 function TagSearchBar({ poolId }: { poolId: string | null }) {
   const [allTags, setAllTags] = useState<string[]>([]);
@@ -9,9 +9,8 @@ function TagSearchBar({ poolId }: { poolId: string | null }) {
   const [filteredTags, setFilteredTags] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tagIsPublic, setTagIsPublic] = useState(false);
+  const { navigateToLabel } = useCustomNavigation();
   
-  const navigate = useNavigate();
-
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -34,7 +33,7 @@ function TagSearchBar({ poolId }: { poolId: string | null }) {
 
   const navigateToTagPage = (tag: string) => {
     setDropdownOpen(false);
-    navigate(`/pool-tag${poolId}/${tag}`);
+    navigateToLabel(api.destination, poolId as string, tag);
   };
 
   const handleInputFocus = async () => {

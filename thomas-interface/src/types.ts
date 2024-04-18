@@ -3,13 +3,7 @@ export type Goal = {
   summary: string,
   note: string,
   labels: string[],
-  tags: string[],
-  inheritedLabels: string[],
-  inheritedTags: string[],
   attributes: { [key: string]: any },
-  fields: { [key: string]: any },
-  inheritedAttributes: { [key: string]: any },
-  inheritedFields: { [key: string]: any },
   parent: string | null,
   yourPerms: string,
   chief: string,
@@ -19,6 +13,24 @@ export type Goal = {
   complete: boolean,
   actionable: boolean
 };
+
+export type Pool = {
+  pid: string,
+  title: string,
+  host: string,
+  name: string,
+  isValid: boolean,
+  haveCopy: boolean,
+  areWatching: boolean,
+  requested: boolean,
+};
+
+export type PoolData = {
+  private: any;
+  public: any;
+};
+
+export type PoolsData = { [pid: string]: PoolData | null };
 
 export type periodType = 'day' | 'week' | 'month' | 'quarter' | 'year';
 

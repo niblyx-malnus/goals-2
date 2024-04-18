@@ -5,11 +5,11 @@ import { periodType } from '../../types';
 import { Goal } from '../../types';
 import { ourPool } from '../../constants';
 import { getAdjacentPeriod, formatDateKeyDisplay, getCurrentPeriod, isPeriodType, formatNowDisplay } from './utils';
-import { useNavigate } from 'react-router-dom';
 import TodoRow from './TodoRow';
 import { FaSitemap } from 'react-icons/fa';
 import { ActiveIcon } from '../CustomIcons';
 import { GoalFilter } from '../GoalFilter';
+import { useNavigate } from 'react-router-dom';
 
 const TodoList: React.FC<{
   periodType: periodType,

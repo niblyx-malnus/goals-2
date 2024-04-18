@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { Collection, periodType } from './types';
 import { getCurrentPeriod } from './components/Periods/utils';
 
+const live = process.env.REACT_APP_LIVE;
+
 interface StoreState {
   placeholderLabel: string;
   

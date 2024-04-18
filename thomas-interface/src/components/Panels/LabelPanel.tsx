@@ -57,28 +57,13 @@ const LabelPanel: React.FC<{
   return (
     <div>
       {/* Display inheritedLabels */}
-      {goal.inheritedLabels && goal.inheritedLabels.length > 0 && (
-        <ul>
-          {goal.inheritedLabels.map((label, index) => (
-            <li key={index} className="flex justify-between items-center p-1 text-gray-500">
-              <span
-                onClick={() => navigateToLabel(pidFromKey(goal.key), label)}
-                className="cursor-pointer"
-              >
-                {label}
-              </span>
-            </li>
-          ))}
-          <hr className="my-2" /> {/* Horizontal line separator */}
-        </ul>
-      )}
 
       {/* Display labels */}
       <ul>
         {goal.labels.map((label, index) => (
           <li key={index} className="flex justify-between items-center p-1">
             <span
-              onClick={() => navigateToLabel(pidFromKey(goal.key), label)}
+              onClick={() => navigateToLabel(api.destination, pidFromKey(goal.key), label)}
               className="cursor-pointer"
             >
               {label}

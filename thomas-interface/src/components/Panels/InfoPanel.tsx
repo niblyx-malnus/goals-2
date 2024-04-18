@@ -103,7 +103,7 @@ const InfoPanel: React.FC<{
             </span>
             <button
               className="px-4 py-2 truncate bg-blue-100 text-blue-500 rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-              onClick={() => navigateToGoal(lineage[currentIndex].key)}
+              onClick={() => navigateToGoal(api.destination, lineage[currentIndex].key)}
             >
               {lineage[currentIndex].summary}
             </button>
