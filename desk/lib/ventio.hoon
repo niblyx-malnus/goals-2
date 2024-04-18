@@ -247,7 +247,7 @@
   ;<  [wex=boat:gall sup=bitt:gall]  bind:m
     (scry-hard ,[boat bitt]:gall /gx/[dude]/vent/subscriptions/noun)
    ?:  (~(has by wex) [wire dock])
-     ~|  %subscribe-wire-not-unique  !!
+     (pure:m ~ %subscribe-wire-not-unique ~)
   :: send %watch card
   ::
   =/  =card:agent:gall  [%pass wire %agent dock %watch path]
@@ -258,7 +258,7 @@
   ?>  ?=(%watch-ack -.sign)
   ?~  p.sign
     (pure:m ~)
-  (pure:m p.sign)
+  (pure:m ~ %agent-watch-nack u.p.sign)
   ::
   ++  take-watch-ack
     %-  %^    take-special-fact
@@ -269,12 +269,19 @@
     &(=(wyre wire) ?=(%watch-ack -.sign))
   --
 ::
+++  agent-leave-wire
+  |=  [=dude:gall =wire =dock]
+  =/  m  (strand ,~)
+  ^-  form:m
+  (agent-send-card dude %pass wire %agent dock %leave ~)
+::
 ++  agent-watch-path
   |=  [=dude:gall =wire =dock =path]
   =/  m  (strand ,~)
   ^-  form:m
+  ;<  ~  bind:m  (agent-leave-wire dude wire dock)
   ;<  p=(unit tang)  bind:m  (agent-watch-path-soft dude wire dock path)
-  ?~(p (pure:m ~) (strand-fail %agent-watch-nack u.p))
+  ?~(p (pure:m ~) (strand-fail %watch-fail u.p))
 ::
 ++  agent-kick-ship
   |=  [=dude:gall paths=(list path) ship=(unit ship)]
