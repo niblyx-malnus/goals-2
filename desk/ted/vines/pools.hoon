@@ -286,9 +286,9 @@
       %accept-request
     ?>  =(our.gowl host.id)
     ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ & metadata.act])
-    ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture id requester.act))
     ;<  ~  bind:m  (update-incoming-request-response id requester.act [~ & metadata.act])
     ;<  ~  bind:m  (update-members id requester.act ~ &+~)
+    ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture id requester.act))
     (pure:m !>(~))
     ::
       %reject-request
