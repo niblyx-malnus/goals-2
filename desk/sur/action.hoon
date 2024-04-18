@@ -229,5 +229,6 @@
       [%setting setting=@t]
       [%discover =ship]
       [%public-data =pid]
+      [%pals-targets ~]
   == 
 --

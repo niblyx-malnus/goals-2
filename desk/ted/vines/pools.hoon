@@ -174,8 +174,9 @@
     ::
       %extend-request
     ?<  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
     ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
+    ;<  ~  bind:m  (give-request-gesture [id ~ request]:act)
+    :: TODO: cancel request on gesture failure
     (pure:m !>(~))
     ::
       %cancel-request
@@ -184,8 +185,8 @@
     (pure:m !>(~))
     ::
       %accept-invite
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-invite-response id.act [~ & metadata.act])
+    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
     ;<  ~  bind:m  (watch-valid-pool id.act)
     (pure:m !>(~))
     ::
@@ -220,11 +221,11 @@
       %kick-member
     ?>  =(our.gowl host.id)
     ?<  =(our.gowl member.act) :: can't kick self as host
+    ;<  ~  bind:m  (kick-ship id member.act)
+    ;<  ~  bind:m  (update-members id member.act ~)
     ;<  *  bind:m  ((soften ,~) (cancel-invite id member.act))
     ;<  *  bind:m  ((soften ,~) (delete-request id member.act))
     ;<  *  bind:m  ((soften ,~) (give-kick-gesture id member.act))
-    ;<  ~  bind:m  (kick-ship id member.act)
-    ;<  ~  bind:m  (update-members id member.act ~)
     (pure:m !>(~))
     ::
       %kick-blacklisted
@@ -261,34 +262,35 @@
       %extend-invite
     ?>  =(our.gowl host.id)
     ?<  =(our.gowl invitee.act)
-    ;<  ~  bind:m  (give-invite-gesture id [invitee ~ invite]:act)
     ;<  ~  bind:m  (update-outgoing-invites id invitee.act ~ invite.act)
+    ;<  ~  bind:m  (give-invite-gesture id [invitee ~ invite]:act)
+    :: TODO: cancel invite on gesture failure
     (pure:m !>(~))
     ::
       %cancel-invite
     ?>  =(our.gowl host.id)
-    ;<  *  bind:m  ((soften ,~) (give-invite-gesture id invitee.act ~))
     ;<  ~  bind:m  (update-outgoing-invites id invitee.act ~)
+    ;<  *  bind:m  ((soften ,~) (give-invite-gesture id invitee.act ~))
     (pure:m !>(~))
     ::
       %accept-request
     ?>  =(our.gowl host.id)
-    ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ & metadata.act])
     ;<  ~  bind:m  (update-incoming-request-response id requester.act [~ & metadata.act])
     ;<  ~  bind:m  (update-members id requester.act ~ &+~)
+    ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ & metadata.act])
     ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture id requester.act))
     (pure:m !>(~))
     ::
       %reject-request
     ?>  =(our.gowl host.id)
-    ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ | metadata.act])
     ;<  ~  bind:m  (update-incoming-request-response id requester.act [~ | metadata.act])
+    ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ | metadata.act])
     (pure:m !>(~))
     ::
       %delete-request
     ?>  =(our.gowl host.id)
-    ;<  *  bind:m  ((soften ,~) (give-delete-request-gesture id requester.act))
     ;<  ~  bind:m  (update-incoming-requests id requester.act ~)
+    ;<  *  bind:m  ((soften ,~) (give-delete-request-gesture id requester.act))
     (pure:m !>(~))
   ==
   ::

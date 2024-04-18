@@ -57,6 +57,7 @@
         [%setting (ot ~[setting+so])]
         [%discover (ot ~[ship+ship])]
         [%public-data (ot ~[pid+pid])]
+        [%pals-targets ul]
     ==
     ++  type
       %-  of

@@ -573,7 +573,9 @@
       %discover
     ;<  =outgoing-requests:p  bind:m
       (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
+    ~&  >>   "discovering {<ship.vyu>}"
     ;<  jon=json  bind:m  (discover-pools ship.vyu)
+    ~&  >   "successfully discovered {<ship.vyu>}"
     =/  discovered=(map id:p metadata:p)
       %.(jon (op:dejs:format [id-string metadata]:dejs:pools))
     %-  pure:m  !>
@@ -591,12 +593,20 @@
     ;<  jon=json  bind:m  (pool-public-data pid.vyu)
     =/  public=metadata:p  (metadata:dejs:pools jon)
     (pure:m !>((give-pool-public-data store outgoing-requests pid.vyu public)))
+    ::
+      %pals-targets
+    ;<  targets=(unit (set ship))  bind:m
+      (unit-scry ,(set ship) /gx/pals/targets/noun)
+    (pure:m !>(a+(turn ~(tap in (fall targets ~)) |=(=@p s+(scot %p p)))))
   ==
+::
+++  timeout  ~s15
 ::
 ++  discover-pools
   |=  =ship
   =/  m  (strand ,json)
   ^-  form:m
+  %+  (set-timeout ,json)  timeout
   %+  (vent ,json)
     [ship %pools]
   :-  %pools-view
