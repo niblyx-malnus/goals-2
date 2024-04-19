@@ -1,7 +1,7 @@
 /-  gol=goals, p=pools, act=action
-/+  ventio, pools, sub-count,
+/+  ventio, pools, sub-count, goals-api, pools-api,
     pl=goals-pool, goals-node, goals-traverse,
-    goj=goals-json
+    goj=goals-json, poj=pools-json
 |%
 ++  en-pool-path  |=(=pid:gol `path`/pool/(scot %p host.pid)/[name.pid])
 ++  de-pool-path
@@ -28,7 +28,7 @@
   ::
   ++  poke-desk-into-venter
     ^-  card:agent:gall
-    [%pass / %agent [our.bowl %venter] %poke uni-desks+!>((sy ~[%goals]))]
+    [%pass /poke-desk-into-venter %agent [our.bowl %venter] %poke uni-desks+!>((sy ~[%goals]))]
   ::
   ++  handle-transition
     |=  tan=transition:act
@@ -206,6 +206,8 @@
 ++  vine
   =,  ventio
   |_  =gowl
+  +*  gap  ~(. goals-api gowl)
+      pap  ~(. pools-api gowl)
   ++  handle-local-action
     =,  strand=strand:spider
     |=  axn=local-action:act
@@ -227,15 +229,15 @@
       ::
         %create-pool
       =/  data-fields  [%public ['title' ~ s+title.axn]~]~
-      ;<  =id:p  bind:m  (create-pools-pool ~ data-fields)
-      =/  data-fields  [%public ['goalsPool' ~ s+(id-string:enjs:pools id)]~]~
-      ;<  ~  bind:m  (update-pool-data id data-fields)
-      ;<  ~  bind:m  (create-goals-pool id title.axn)
-      (pure:m !>(s+(id-string:enjs:pools id)))
+      ;<  =id:p  bind:m  (create-pool-take-id ~ data-fields)
+      =/  data-fields  [%public ['goalsPool' ~ s+(id-string:enjs:poj id)]~]~
+      ;<  ~  bind:m  (update-pool-data:pap id data-fields)
+      ;<  ~  bind:m  (create-pool:gap id title.axn)
+      (pure:m !>(s+(id-string:enjs:poj id)))
       ::
         %delete-pool
-      ;<  ~  bind:m  (delete-goals-pool pid.axn)
-      ;<  *  bind:m  ((soften ,~) (delete-pools-pool pid.axn))
+      ;<  ~  bind:m  (delete-pool:gap pid.axn)               :: %goals pool
+      ;<  *  bind:m  ((soften ,~) (delete-pool:pap pid.axn)) :: %pools pool
       (pure:m !>(~))
     ==
     ::
@@ -300,7 +302,7 @@
         %set-pool-title
       ;<  ~  bind:m
         (handle-compound-pool-transition ;;(compound-pool-transition:act axn))
-      ;<  ~  bind:m  (update-pool-data pid [%public ['title' ~ s+title.axn]~]~)
+      ;<  ~  bind:m  (update-pool-data:pap pid [%public ['title' ~ s+title.axn]~]~)
       (pure:m !>(~))
       ::
         $?  %archive-goal
@@ -375,7 +377,7 @@
       ?+    -.tan
         (pure:m !>(~))
           %init-pool
-        ;<  ~  bind:m  (watch-goals-pool id)
+        ;<  ~  bind:m  (watch-pool:mem:gap id)
         (pure:m !>(~))
         ::
           %update-members
@@ -384,93 +386,28 @@
         ?:  =(member.tan host.id)
           (pure:m !>(~))
         ?~  roles.tan
-          ;<  ~  bind:m  (del-pool-role id member.tan)
+          ;<  ~  bind:m  (del-pool-role:gap id member.tan)
           (pure:m !>(~))
+        =/  =pool:gol  (~(got by pools.store) id)
+        =/  default=role:gol
+          %+  fall
+            %-  mole  |.
+            (role:dejs:goj (~(got by metadata.pool) 'defaultRole'))
+          %viewer
         =/  =role:gol
-          (~(gut by perms:(~(got by pools.store) id)) member.tan %viewer)
-        ;<  ~  bind:m  (set-pool-role id member.tan role)
+          (~(gut by perms.pool) member.tan default)
+        ;<  ~  bind:m  (set-pool-role:mem:gap id member.tan role)
         (pure:m !>(~))
       ==
   ::
-  ++  watch-goals-pool
-    |=  =id:p
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  (vent ,~)  [our.gowl %goals]
-    :-  %goals-local-membership-action
-    ^-  local-membership-action:act
-    [%watch-pool id]
-  :: Adds to %goals and %pools
-  ::
-  ++  set-pool-role
-    |=  [=pid:gol member=ship =role:gol]
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  (vent ,~)  [our.gowl %goals]
-    :-  %goals-pool-membership-action
-    :-  pid
-    ^-  pool-membership-action:act
-    [%set-pool-role member role]
-  :: Deletes from %goals only (already removed in %pools)
-  ::
-  ++  del-pool-role
-    |=  [=pid:gol member=ship]
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  (vent ,~)  [our.gowl %goals]
-    :-  %goals-compound-transition
-    ^-  compound-transition:act
-    :^  %update-pool  pid  our.gowl
-    [%set-pool-role member ~]
-  ::
-  ++  create-pools-pool
+  ++  create-pool-take-id
     |=  $:  graylist-fields=(list graylist-field:p)
             pool-data-fields=(list pool-data-field:p)
         ==
     =/  m  (strand ,id:p)
     ^-  form:m
     ;<  jon=json  bind:m
-      %+  (vent ,json)  [our.gowl %pools]
-      :-  %pools-local-action
-      ^-  local-action:p
-      [%create-pool graylist-fields pool-data-fields]
-    (pure:m (id:dejs:pools jon))
-  ::
-  ++  update-pool-data
-    |=  [=id:p fields=(list pool-data-field:p)]
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  poke  [our.gowl %pools]
-    :-  %pools-transition  !>
-    ^-  transition:p
-    :+  %update-pool  id
-    [%update-pool-data fields]
-  ::
-  ++  create-goals-pool
-    |=  [=pid:gol title=@t]
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  poke  [our.gowl %goals]
-    :-  %goals-transition  !>
-    ^-  transition:act
-    [%create-pool pid title]
-  ::
-  ++  delete-goals-pool
-    |=  =pid:gol
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  poke  [our.gowl %goals]
-    :-  %goals-transition  !>
-    ^-  transition:act
-    [%delete-pool pid]
-  ::
-  ++  delete-pools-pool
-    |=  =id:p
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  poke  [our.gowl %pools]
-    :-  %pools-transition  !>
-    ^-  transition:p
-    [%delete-pool id]
+      (create-pool-action:pap graylist-fields pool-data-fields)
+    (pure:m (id:dejs:poj jon))
   --
 --

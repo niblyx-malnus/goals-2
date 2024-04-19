@@ -1,4 +1,5 @@
-/+  *pools
+/-  p=pools
+/+  j=pools-json
 |_  act=[id:p pool-action:p]
 ++  grow
   |%
@@ -7,7 +8,7 @@
 ++  grab
   |%
   ++  noun  ,[id:p pool-action:p]
-  ++  json  (ot:dejs:format ~[id+id:dejs axn+pool-action:dejs])
+  ++  json  (ot:dejs:format ~[id+id:dejs:j axn+pool-action:dejs:j])
   --
 ++  grad  %noun
 --

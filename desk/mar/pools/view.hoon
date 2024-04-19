@@ -1,4 +1,5 @@
-/+  *pools
+/-  p=pools
+/+  j=pools-json
 |_  vyu=view:p
 ++  grow
   |%
@@ -7,7 +8,7 @@
 ++  grab
   |%
   ++  noun  view:p
-  ++  json  view:dejs
+  ++  json  view:dejs:j
   --
 ++  grad  %noun
 --

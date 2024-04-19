@@ -33,6 +33,7 @@
         [%pool-tag-goals (ot ~[pid+pid tag+so])]
         [%pool-tag-harvest (ot ~[pid+pid tag+so])]
         [%pool-title (ot ~[pid+pid])]
+        [%pool-default-role (ot ~[pid+pid])]
         [%pool-note (ot ~[pid+pid])]
         [%pool-perms (ot ~[pid+pid])]
         [%pool-graylist (ot ~[pid+pid])]

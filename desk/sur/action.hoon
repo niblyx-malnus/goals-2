@@ -209,6 +209,7 @@
       [%pool-note =pid]
       [%pool-perms =pid]
       [%pool-graylist =pid]
+      [%pool-default-role =pid]
       [%goal =pid =gid]
       [%archive-goal =pid rid=gid =gid]
       [%pool-tags =pid]

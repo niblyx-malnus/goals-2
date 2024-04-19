@@ -1,5 +1,5 @@
 /-  p=pools, spider
-/+  *ventio, lib=pools, sub-count
+/+  *ventio, lib=pools, j=pools-json, pools-api, sub-count
 =,  strand=strand:spider
 ^-  thread:spider
 ::
@@ -22,6 +22,7 @@
 ==
 ::
 |_  =gowl
++*  pap  ~(. pools-api gowl)
 ++  handle-view
   |=  vyu=view:p
   =/  m  (strand ,vase)
@@ -45,7 +46,7 @@
       %-  pairs:enjs:format
       %+  turn  discovered
       |=  [=id:p public=metadata:p]
-      [(id-string:enjs:lib id) o+public]
+      [(id-string:enjs:j id) o+public]
     ;<  auto=(unit auto:p)  bind:m
       (graylist-resolution id.i.pools-list src.gowl request.vyu)
     ?:  ?=([~ %|] auto)
@@ -76,56 +77,56 @@
   ?-    -.ges
       %kick
     ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (delete-pool id.ges)
+    ;<  ~  bind:m  (delete-pool:pap id.ges)
     (pure:m !>(~))
     ::
       %leave
-    ;<  ~  bind:m  (update-members id.ges src.gowl ~)
+    ;<  ~  bind:m  (update-members:pap id.ges src.gowl ~)
     ;<  ~  bind:m  (kick-ship id.ges src.gowl)
     (pure:m !>(~))
     ::
       %invite
     ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-incoming-invites id.ges invite.ges)
+    ;<  ~  bind:m  (update-incoming-invites:pap id.ges invite.ges)
     (pure:m !>(~))
     ::
       %invite-response
     ?>  =(our.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-invite-response id.ges src.gowl status.ges)
+    ;<  ~  bind:m  (update-outgoing-invite-response:pap id.ges src.gowl status.ges)
     ?~  status.ges
       (pure:m !>(~))
     ?.  response.u.status.ges
       (pure:m !>(~))
-    ;<  ~  bind:m  (update-members id.ges src.gowl ~ &+~)
+    ;<  ~  bind:m  (update-members:pap id.ges src.gowl ~ &+~)
     (pure:m !>(~))
     ::
       %delete-invite
-    ;<  ~  bind:m  (update-outgoing-invites id.ges src.gowl ~)
+    ;<  ~  bind:m  (update-outgoing-invites:pap id.ges src.gowl ~)
     (pure:m !>(~))
     ::
       %request
     ?>  =(our.gowl host.id.ges)
     ?~  request.ges
-      ;<  ~  bind:m  (update-incoming-requests id.ges src.gowl ~)
+      ;<  ~  bind:m  (update-incoming-requests:pap id.ges src.gowl ~)
       (pure:m !>(~))
     ;<  auto=(unit auto:p)  bind:m
       (graylist-resolution id.ges src.gowl u.request.ges)
     ?:  ?=([~ %|] auto)
       (strand-fail %request-fail ~)
-    ;<  ~  bind:m  (update-incoming-requests id.ges src.gowl request.ges)
+    ;<  ~  bind:m  (update-incoming-requests:pap id.ges src.gowl request.ges)
     ?~  auto
       (pure:m !>(~))
-    ;<  ~  bind:m  (accept-request id.ges src.gowl metadata.u.auto)
+    ;<  ~  bind:m  (accept-request:pap id.ges src.gowl metadata.u.auto)
     (pure:m !>(~))
     ::
       %request-response
     ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-request-response id.ges status.ges)
+    ;<  ~  bind:m  (update-outgoing-request-response:pap id.ges status.ges)
     (pure:m !>(~))
     ::
       %delete-request
     ?>  =(src.gowl host.id.ges)
-    ;<  ~  bind:m  (update-outgoing-requests id.ges ~)
+    ;<  ~  bind:m  (update-outgoing-requests:pap id.ges ~)
     (pure:m !>(~))
     ::
       %watch-me
@@ -136,7 +137,6 @@
 ::
 ++  handle-local-action
   |=  act=local-action:p
-  |^
   =/  m  (strand ,vase)
   ^-  form:m
   ?>  =(src our):gowl
@@ -145,22 +145,22 @@
       %create-pool
     =/  title=@t  (extract-pool-title pool-data-fields.act)
     ;<  =id:p  bind:m  (unique-id title)
-    ;<  ~      bind:m  (create-pool id)
-    ;<  ~      bind:m  (update-graylist id graylist-fields.act)
-    ;<  ~      bind:m  (update-pool-data id pool-data-fields.act)
-    ;<  ~      bind:m  (update-members id our.gowl ~ &+(sy ~[%host]))
-    (pure:m !>(s+(id-string:enjs:lib id)))
+    ;<  ~      bind:m  (create-pool-transition:pap id)
+    ;<  ~      bind:m  (update-graylist-transition:pap id graylist-fields.act)
+    ;<  ~      bind:m  (update-pool-data:pap id pool-data-fields.act)
+    ;<  ~      bind:m  (update-members:pap id our.gowl ~ &+(sy ~[%host]))
+    (pure:m !>(s+(id-string:enjs:j id)))
     ::
       %delete-pool
-    ;<  ~  bind:m  (delete-pool id.act)
+    ;<  ~  bind:m  (delete-pool:pap id.act)
     (pure:m !>(~))
     ::
       %leave-pool
     ?<  =(our.gowl host.id.act) :: can't leave own pool
-    ;<  *  bind:m  ((soften ,~) (cancel-request id.act))
-    ;<  *  bind:m  ((soften ,~) (delete-invite id.act))
-    ;<  *  bind:m  ((soften ,~) (give-leave-gesture id.act))
-    ;<  ~  bind:m  (delete-pool id.act)
+    ;<  *  bind:m  ((soften ,~) (cancel-request:pap id.act))
+    ;<  *  bind:m  ((soften ,~) (delete-invite:pap id.act))
+    ;<  *  bind:m  ((soften ,~) (give-leave-gesture:pap id.act))
+    ;<  ~  bind:m  (delete-pool:pap id.act)
     (pure:m !>(~))
     ::
       %watch-pool
@@ -169,54 +169,45 @@
     ::
       %update-blocked
     ;<  ~  bind:m
-      (handle-transition ;;(transition:p act))
+      (handle-transition:pap ;;(transition:p act))
     (pure:m !>(~))
     ::
       %extend-request
     ?<  =(our.gowl host.id.act)
-    ;<  ~  bind:m  (update-outgoing-requests id.act ~ request.act)
+    ;<  ~  bind:m  (update-outgoing-requests:pap id.act ~ request.act)
     ;<  ges=(each ~ goof)  bind:m
-      ((soften ,~) (give-request-gesture [id ~ request]:act))
+      ((soften ,~) (give-request-gesture:pap [id ~ request]:act))
     :: cancel failed request
     ::
     ?:  ?=(%& -.ges)
       (pure:m !>(~))
-    ;<  ~  bind:m  (cancel-request id.act)
+    ;<  ~  bind:m  (cancel-request:pap id.act)
     (pure:m !>(~))
     ::
       %cancel-request
-    ;<  *  bind:m  ((soften ,~) (give-request-gesture [id ~]:act))
-    ;<  ~  bind:m  (update-outgoing-requests id.act ~)
+    ;<  *  bind:m  ((soften ,~) (give-request-gesture:pap [id ~]:act))
+    ;<  ~  bind:m  (update-outgoing-requests:pap id.act ~)
     (pure:m !>(~))
     ::
       %accept-invite
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ & metadata.act])
+    ;<  ~  bind:m  (give-invite-response-gesture:pap id.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-incoming-invite-response:pap id.act [~ & metadata.act])
     ;<  ~  bind:m  (watch-valid-pool id.act)
     (pure:m !>(~))
     ::
       %reject-invite
-    ;<  ~  bind:m  (give-invite-response-gesture id.act [~ | metadata.act])
-    ;<  ~  bind:m  (update-incoming-invite-response id.act [~ | metadata.act])
+    ;<  ~  bind:m  (give-invite-response-gesture:pap id.act [~ | metadata.act])
+    ;<  ~  bind:m  (update-incoming-invite-response:pap id.act [~ | metadata.act])
     (pure:m !>(~))
     ::
       %delete-invite
-    ;<  *  bind:m  ((soften ,~) (give-delete-invite-gesture id.act))
-    ;<  ~  bind:m  (update-incoming-invites id.act ~)
+    ;<  *  bind:m  ((soften ,~) (give-delete-invite-gesture:pap id.act))
+    ;<  ~  bind:m  (update-incoming-invites:pap id.act ~)
     (pure:m !>(~))
   ==
-  ::
-  ++  handle-transition
-    |=  =transition:p
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  poke  [our.gowl %pools]
-    pools-transition+!>(transition)
-  --
 ::
 ++  handle-pool-action
   |=  [=id:p act=pool-action:p]
-  |^
   =/  m  (strand ,vase)
   ^-  form:m
   ?>  =(src our):gowl
@@ -227,10 +218,10 @@
     ?>  =(our.gowl host.id)
     ?<  =(our.gowl member.act) :: can't kick self as host
     ;<  ~  bind:m  (kick-ship id member.act)
-    ;<  *  bind:m  ((soften ,~) (cancel-invite id member.act))
-    ;<  *  bind:m  ((soften ,~) (delete-request id member.act))
-    ;<  *  bind:m  ((soften ,~) (give-kick-gesture id member.act))
-    ;<  ~  bind:m  (update-members id member.act ~)
+    ;<  *  bind:m  ((soften ,~) (cancel-invite:pap id member.act))
+    ;<  *  bind:m  ((soften ,~) (delete-request:pap id member.act))
+    ;<  *  bind:m  ((soften ,~) (give-kick-gesture:pap id member.act))
+    ;<  ~  bind:m  (update-members:pap id member.act ~)
     (pure:m !>(~))
     ::
       %kick-blacklisted
@@ -250,69 +241,59 @@
       (graylist-resolution id ship.i.subs metadata)
     ?.  |(?=([~ %|] auto) !(~(has by members.pool) ship.i.subs))
       $(subs t.subs)
-    ;<  ~  bind:m  (kick-member id ship.i.subs)
+    ;<  ~  bind:m  (kick-member:pap id ship.i.subs)
     $(subs t.subs)
     ::
       %update-graylist
     ;<  ~  bind:m
-      (handle-pool-transition ;;(pool-transition:p act))
-    ;<  ~  bind:m  (kick-blacklisted id ~)
+      (handle-pool-transition:pap id ;;(pool-transition:p act))
+    ;<  ~  bind:m  (kick-blacklisted:pap id ~)
     (pure:m !>(~))
     ::
       %update-pool-data
     ;<  ~  bind:m
-      (handle-pool-transition ;;(pool-transition:p act))
+      (handle-pool-transition:pap id ;;(pool-transition:p act))
     (pure:m !>(~))
     ::
       %extend-invite
     ?>  =(our.gowl host.id)
     ?<  =(our.gowl invitee.act)
-    ;<  ~  bind:m  (update-outgoing-invites id invitee.act ~ invite.act)
+    ;<  ~  bind:m  (update-outgoing-invites:pap id invitee.act ~ invite.act)
     ;<  ges=(each ~ goof)  bind:m
-      ((soften ,~) (give-invite-gesture id [invitee ~ invite]:act))
+      ((soften ,~) (give-invite-gesture:pap id [invitee ~ invite]:act))
     :: cancel failed invite
     ::
     ?:  ?=(%& -.ges)
       (pure:m !>(~))
-    ;<  ~  bind:m  (cancel-invite id invitee.act)
+    ;<  ~  bind:m  (cancel-invite:pap id invitee.act)
     (pure:m !>(~))
     ::
       %cancel-invite
     ?>  =(our.gowl host.id)
-    ;<  *  bind:m  ((soften ,~) (give-invite-gesture id invitee.act ~))
-    ;<  ~  bind:m  (update-outgoing-invites id invitee.act ~)
+    ;<  *  bind:m  ((soften ,~) (give-invite-gesture:pap id invitee.act ~))
+    ;<  ~  bind:m  (update-outgoing-invites:pap id invitee.act ~)
     (pure:m !>(~))
     ::
       %accept-request
     ?>  =(our.gowl host.id)
-    ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-incoming-request-response id requester.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-members id requester.act ~ &+~)
-    ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture id requester.act))
+    ;<  ~  bind:m  (give-request-response-gesture:pap id requester.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-incoming-request-response:pap id requester.act [~ & metadata.act])
+    ;<  ~  bind:m  (update-members:pap id requester.act ~ &+~)
+    ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture:pap id requester.act))
     (pure:m !>(~))
     ::
       %reject-request
     ?>  =(our.gowl host.id)
-    ;<  ~  bind:m  (give-request-response-gesture id requester.act [~ | metadata.act])
-    ;<  ~  bind:m  (update-incoming-request-response id requester.act [~ | metadata.act])
+    ;<  ~  bind:m  (give-request-response-gesture:pap id requester.act [~ | metadata.act])
+    ;<  ~  bind:m  (update-incoming-request-response:pap id requester.act [~ | metadata.act])
     (pure:m !>(~))
     ::
       %delete-request
     ?>  =(our.gowl host.id)
-    ;<  *  bind:m  ((soften ,~) (give-delete-request-gesture id requester.act))
-    ;<  ~  bind:m  (update-incoming-requests id requester.act ~)
+    ;<  *  bind:m  ((soften ,~) (give-delete-request-gesture:pap id requester.act))
+    ;<  ~  bind:m  (update-incoming-requests:pap id requester.act ~)
     (pure:m !>(~))
   ==
-  ::
-  ++  handle-pool-transition
-    |=  =pool-transition:p
-    =/  m  (strand ,~)
-    ^-  form:m
-    %+  poke  [our.gowl %pools]
-    :-  %pools-transition  !>
-    ^-  transition:p
-    [%update-pool id pool-transition]
-  --
 ::
 ++  unique-id
   |=  name=@t
@@ -365,6 +346,16 @@
       title
     (fall (so:dejs-soft:format u.val) title)
   $(p.i.fields t.p.i.fields)
+::
+++  delegate-graylist
+  |=  [=dude:gall =id:p requester=ship =request:p]
+  =/  m  (strand ,(unit auto:p))
+  ^-  form:m
+  %+  (vent ,(unit auto:p))
+    [our.gowl dude]
+  :-  %pools-delegation
+  ^-  delegation:p
+  [%graylist id requester request]
 ::
 ++  graylist-resolution
   |=  [=id:p requester=ship =request:p]
@@ -423,302 +414,4 @@
   =/  m  (strand ,~)
   ^-  form:m
   (agent-kick-ships dap.gowl ~[(en-pool-path:lib id)] ships)
-::
-++  create-pool
-  |=  =id:p
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  [%create-pool id]
-::
-++  delete-pool
-  |=  =id:p
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  [%delete-pool id]
-::
-++  update-graylist
-  |=  [=id:p fields=(list graylist-field:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  :+  %update-pool  id
-  [%update-graylist fields]
-::
-++  update-pool-data
-  |=  [=id:p fields=(list pool-data-field:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  :+  %update-pool  id
-  [%update-pool-data fields]
-::
-++  update-members
-  |=  [=id:p member=ship roles=(unit (each roles:p roles:p))]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  :+  %update-pool  id
-  [%update-members member roles]
-::
-++  update-outgoing-invites
-  |=  [=id:p invitee=ship invite=(unit invite:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  :+  %update-pool  id
-  [%update-outgoing-invites invitee invite]
-::
-++  update-outgoing-invite-response
-  |=  [=id:p invitee=ship =status:p]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  :+  %update-pool  id
-  [%update-outgoing-invite-response invitee status]
-::
-++  update-incoming-requests
-  |=  [=id:p requester=ship request=(unit request:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  :+  %update-pool  id
-  [%update-incoming-requests requester request]
-::
-++  update-incoming-request-response
-  |=  [=id:p requester=ship =status:p]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  :+  %update-pool  id
-  [%update-incoming-request-response requester status]
-::
-++  update-incoming-invites
-  |=  [=id:p invite=(unit invite:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  [%update-incoming-invites id invite]
-::
-++  update-incoming-invite-response
-  |=  [=id:p =status:p]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  [%update-incoming-invite-response id status]
-::
-++  update-outgoing-requests
-  |=  [=id:p request=(unit request:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  [%update-outgoing-requests id request]
-::
-++  update-outgoing-request-response
-  |=  [=id:p =status:p]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  poke  [our dap]:gowl
-  :-  %pools-transition  !>
-  ^-  transition:p
-  [%update-outgoing-request-response id status]
-::
-++  timeout  ~s15
-::
-++  give-kick-gesture
-  |=  [=id:p member=ship]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [member dap.gowl]
-  :-  %pools-gesture
-  ^-  gesture:p
-  [%kick id]
-::
-++  give-leave-gesture
-  |=  =id:p
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [host.id dap.gowl]
-  :-  %pools-gesture
-  ^-  gesture:p
-  [%leave id]
-::
-++  give-invite-gesture
-  |=  [=id:p invitee=ship invite=(unit invite:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [invitee dap.gowl]
-  :-  %pools-gesture
-  ^-  gesture:p
-  [%invite id invite]
-::
-++  give-invite-response-gesture
-  |=  [=id:p =status:p]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [host.id dap.gowl]
-   :-  %pools-gesture
-  ^-  gesture:p
-  [%invite-response id status]
-::
-++  give-delete-invite-gesture
-  |=  =id:p
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [host.id dap.gowl]
-  :-  %pools-gesture
-  ^-  gesture:p
-  [%delete-invite id]
-::
-++  give-request-gesture
-  |=  [=id:p request=(unit request:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [host.id dap.gowl]
-  :-  %pools-gesture
-  ^-  gesture:p
-  [%request id request]
-::
-++  give-request-response-gesture
-  |=  [=id:p requester=ship =status:p]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [requester dap.gowl]
-  :-  %pools-gesture
-  ^-  gesture:p
-  [%request-response id status]
-::
-++  give-delete-request-gesture
-  |=  [=id:p requester=ship]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [requester dap.gowl]
-  :-  %pools-gesture
-  ^-  gesture:p
-  [%delete-request id]
-::
-++  give-watch-me-gesture
-  |=  [=id:p member=ship]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (set-timeout ,~)  timeout
-  %+  (vent ,~)  [member dap.gowl]
-  :-  %pools-gesture
-  ^-  gesture:p
-  [%watch-me id]
-::
-++  kick-member
-  |=  [=id:p member=ship]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-pool-action  :-  id
-  ^-  pool-action:p
-  [%kick-member member]
-::
-++  kick-blacklisted
-  |=  [=id:p requests=(map ship request:p)]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-pool-action  :-  id
-  ^-  pool-action:p
-  [%kick-blacklisted requests]
-::
-++  accept-request
-  |=  [=id:p requester=ship =metadata:p]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-pool-action  :-  id
-  ^-  pool-action:p
-  [%accept-request requester metadata]
-::
-++  reject-request
-  |=  [=id:p requester=ship =metadata:p]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-pool-action  :-  id
-  ^-  pool-action:p
-  [%reject-request requester metadata]
-::
-++  cancel-invite
-  |=  [=id:p invitee=ship]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-pool-action  :-  id
-  ^-  pool-action:p
-  [%cancel-invite invitee]
-::
-++  delete-invite
-  |=  =id:p
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-local-action
-  ^-  local-action:p
-  [%delete-invite id]
-::
-++  cancel-request
-  |=  =id:p
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-local-action
-  ^-  local-action:p
-  [%cancel-request id]
-::
-++  delete-request
-  |=  [=id:p requester=ship]
-  =/  m  (strand ,~)
-  ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-pool-action  :-  id
-  ^-  pool-action:p
-  [%delete-request requester]
-::
-++  delegate-graylist
-  |=  [=dude:gall =id:p requester=ship =request:p]
-  =/  m  (strand ,(unit auto:p))
-  ^-  form:m
-  %+  (vent ,(unit auto:p))
-    [our.gowl dude]
-  :-  %pools-delegation
-  ^-  delegation:p
-  [%graylist id requester request]
 --

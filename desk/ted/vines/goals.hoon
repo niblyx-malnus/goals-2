@@ -1,7 +1,7 @@
 /-  p=pools, gol=goals, axn=action, spider
 /+  *ventio, pools, tree=filetree, goals, sub-count,
     goals-membership, goals-traverse, goals-node, goals-pool,
-    goj=goals-json
+    goj=goals-json, poj=pools-json
 =,  strand=strand:spider
 ^-  thread:spider
 ::
@@ -308,6 +308,10 @@
     =/  =pool:gol  (~(got by pools.store) pid.vyu)
     (pure:m !>((~(gut by metadata.pool) 'note' s+'')))
     ::
+      %pool-default-role
+    =/  =pool:gol  (~(got by pools.store) pid.vyu)
+    (pure:m !>((~(gut by metadata.pool) 'defaultRole' ~)))
+    ::
       %pool-perms
     ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
     =/  =pool:p  (~(got by pools) pid.vyu)
@@ -329,16 +333,16 @@
         %+  turn  ~(tap by ship.graylist.pool)
         |=  [=ship =auto:p]
         :-  (scot %p ship)
-        (auto:enjs:^pools auto)
+        (auto:enjs:poj auto)
         :-  %rank
         %-  pairs:enjs:format
         %+  turn  ~(tap by rank.graylist.pool)
         |=  [=rank:title =auto:p]
-        [rank (auto:enjs:^pools auto)]
+        [rank (auto:enjs:poj auto)]
         :-  %rest
         ?~  rest.graylist.pool
           ~
-        (auto:enjs:^pools u.rest.graylist.pool)
+        (auto:enjs:poj u.rest.graylist.pool)
     ==
     ::
       %pool-tag-note
@@ -515,7 +519,7 @@
     =,  enjs:format
     %-  pure:m  !>
     %-  pairs
-    :~  [%pools a+(turn (turn ~(tap in pools.blocked) id-string:enjs:pools) (lead %s))] 
+    :~  [%pools a+(turn (turn ~(tap in pools.blocked) id-string:enjs:poj) (lead %s))] 
         [%hosts a+(turn ~(tap in hosts.blocked) |=(=@p s+(scot %p p)))]
     ==
     ::
@@ -577,7 +581,7 @@
     ;<  jon=json  bind:m  (discover-pools ship.vyu)
     ~&  >   "successfully discovered {<ship.vyu>}"
     =/  discovered=(map id:p metadata:p)
-      %.(jon (op:dejs:format [id-string metadata]:dejs:pools))
+      %.(jon (op:dejs:format [id-string metadata]:dejs:poj))
     %-  pure:m  !>
     :-  %a
     %+  murn  ~(tap by discovered)
@@ -591,7 +595,7 @@
     ;<  =outgoing-requests:p  bind:m
       (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
     ;<  jon=json  bind:m  (pool-public-data pid.vyu)
-    =/  public=metadata:p  (metadata:dejs:pools jon)
+    =/  public=metadata:p  (metadata:dejs:poj jon)
     (pure:m !>((give-pool-public-data store outgoing-requests pid.vyu public)))
     ::
       %pals-targets
@@ -628,7 +632,7 @@
   ^-  json
   =/  =path  (en-pool-path:goals id)
   %-  pairs:enjs:format
-  :~  [%pid s+(id-string:enjs:pools id)]
+  :~  [%pid s+(id-string:enjs:poj id)]
       [%title (~(gut by public) 'title' s+'ERROR: NO TITLE')]
       [%host s+(rsh [3 1] (scot %p host.id))] :: redundant, but that's fine
       [%name s+name.id] :: redundant, but that's fine
