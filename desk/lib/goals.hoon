@@ -228,8 +228,9 @@
       (pure:m !>(~))
       ::
         %create-pool
+      =/  gray-fields  [%rest ~ %|]~ :: default is secret pool
       =/  data-fields  [%public ['title' ~ s+title.axn]~]~
-      ;<  =id:p  bind:m  (create-pool-take-id ~ data-fields)
+      ;<  =id:p  bind:m  (create-pool-take-id gray-fields data-fields)
       =/  data-fields  [%public ['goalsPool' ~ s+(id-string:enjs:poj id)]~]~
       ;<  ~  bind:m  (update-pool-data:pap id data-fields)
       ;<  ~  bind:m  (create-pool:gap id title.axn)
