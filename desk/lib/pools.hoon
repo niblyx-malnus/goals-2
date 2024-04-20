@@ -262,4 +262,19 @@
       ==
     ==
   ==
+::
+++  handle-compound-transition
+  |=  tan=compound-transition:p
+  ^-  _this
+  ?-    -.tan
+      %create-pool
+    =.  this  (handle-transition %create-pool id.tan)
+    =.  this  (handle-transition %update-pool id.tan %update-graylist graylist-fields.tan)
+    =.  this  (handle-transition %update-pool id.tan %update-pool-data pool-data-fields.tan)
+    (handle-transition %update-pool id.tan %update-members our.bowl ~ &+(sy ~[%host]))
+    ::
+      %accept-request
+    =.  this  (handle-transition %update-pool id.tan %update-incoming-request-response requester.tan ~ & metadata.tan)
+    (handle-transition %update-pool id.tan %update-members requester.tan ~ &+~)
+  ==
 --

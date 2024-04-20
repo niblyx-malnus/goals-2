@@ -57,6 +57,11 @@
       [%update-pool =id p=pool-transition]
   ==
 ::
++$  compound-transition
+  $%  [%create-pool =id graylist-fields=(list graylist-field) pool-data-fields=(list pool-data-field)]
+      [%accept-request =id requester=ship =metadata]
+  ==
+::
 +$  pool-transition
   $%  [%init-pool =pool]
       [%update-members member=ship roles=(unit (each roles roles))]

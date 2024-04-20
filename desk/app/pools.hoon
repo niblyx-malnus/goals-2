@@ -3,6 +3,7 @@
 /=  x  /ted/vines/pools
 /=  x  /mar/pools/transition
 /=  x  /mar/pools/pool-transition
+/=  x  /mar/pools/compound-transition
 /=  x  /mar/pools/gesture
 /=  x  /mar/pools/local-action
 /=  x  /mar/pools/pool-action
@@ -46,6 +47,14 @@
     ~&  received-transition+tan
     =^  cards  state
       abet:(handle-transition:pul tan)
+    [cards this]
+    ::
+      %pools-compound-transition
+    ?>  =(src our):bowl
+    =+  !<(tan=compound-transition:p vase)
+    ~&  received-compound-transition+tan
+    =^  cards  state
+      abet:(handle-compound-transition:pul tan)
     [cards this]
   ==
 ::

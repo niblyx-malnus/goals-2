@@ -145,10 +145,10 @@
       %create-pool
     =/  title=@t  (extract-pool-title pool-data-fields.act)
     ;<  =id:p  bind:m  (unique-id title)
-    ;<  ~      bind:m  (create-pool-transition:pap id)
-    ;<  ~      bind:m  (update-graylist-transition:pap id graylist-fields.act)
-    ;<  ~      bind:m  (update-pool-data:pap id pool-data-fields.act)
-    ;<  ~      bind:m  (update-members:pap id our.gowl ~ &+(sy ~[%host]))
+    ;<  ~  bind:m
+      %+  create-pool-compound-transition:pap
+        id
+      [graylist-fields pool-data-fields]:act
     (pure:m !>(s+(id-string:enjs:j id)))
     ::
       %delete-pool
@@ -277,8 +277,10 @@
       %accept-request
     ?>  =(our.gowl host.id)
     ;<  ~  bind:m  (give-request-response-gesture:pap id requester.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-incoming-request-response:pap id requester.act [~ & metadata.act])
-    ;<  ~  bind:m  (update-members:pap id requester.act ~ &+~)
+    ;<  ~  bind:m
+      %+  accept-request-compound-transition:pap
+        id
+      [requester metadata]:act
     ;<  *  bind:m  ((soften ,~) (give-watch-me-gesture:pap id requester.act))
     (pure:m !>(~))
     ::

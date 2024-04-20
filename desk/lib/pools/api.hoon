@@ -56,6 +56,18 @@
   ^-  transition:p
   [%create-pool id]
 ::
+++  create-pool-compound-transition
+  |=  $:  =id:p
+          graylist-fields=(list graylist-field:p)
+          pool-data-fields=(list pool-data-field:p)
+      ==
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  poke  [our.gowl dude]
+  :-  %pools-compound-transition  !>
+  ^-  compound-transition:p
+  [%create-pool id graylist-fields pool-data-fields]
+::
 ++  create-pool-action
   |=  $:  graylist-fields=(list graylist-field:p)
           pool-data-fields=(list pool-data-field:p)
@@ -156,6 +168,15 @@
   :-  %pools-pool-action  :-  id
   ^-  pool-action:p
   [%accept-request requester metadata]
+::
+++  accept-request-compound-transition
+  |=  [=id:p requester=ship =metadata:p]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl dude]
+  :-  %pools-compound-transition
+  ^-  compound-transition:p
+  [%accept-request id requester metadata]
 ::
 ++  reject-request
   |=  [=id:p requester=ship =metadata:p]
