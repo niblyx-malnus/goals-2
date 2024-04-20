@@ -4,6 +4,7 @@
 ++  enjs
   =,  enjs:format
   |%
+  ++  ship  |=(=@p s+(scot %p p))
   ++  id-string  |=(=id:p (rap 3 '/' (scot %p host.id) '/' name.id ~))
   ++  auto
     |=  =auto:p
@@ -30,21 +31,56 @@
   ::
   ++  invite   metadata
   ++  request  metadata
+  :: TODO: implement
   ::
   ++  blocked
     |=  jon=json
     ^-  blocked:p
     *blocked:p
   ::
+  ++  rank  |=(jon=json ;;(rank:title (so jon)))
+  :: TODO: fix to handle accepting metadata
+  ::
+  ++  auto
+    |=  jon=json
+    ^-  auto:p
+    ?.  (bo:dejs:format jon)
+      %|
+    [%& ~]
+  ::
+  ++  unit-auto
+    |=  jon=json
+    ^-  (unit auto:p)
+    ?~(jon ~ [~ (auto jon)])
+  ::
   ++  graylist-field
     |=  jon=json
     ^-  graylist-field:p
-    *graylist-field:p
+    %.  jon
+    %-  of
+    :~  [%ship (ar (ot ~[ship+(su fed:ag) auto+unit-auto]))]
+        [%rank (ar (ot ~[rank+rank auto+unit-auto]))]
+        [%rest unit-auto]
+        [%dude |=(jon=json ?~(jon ~ [~ (so jon)]))]
+    ==
+  ::
+  ++  pool-data-pair
+    |=  jon=json
+    ^-  [@t (unit json)]
+    ?>  ?=(%o -.jon)
+    :-  (so (~(got by p.jon) 'field'))
+    ?~  get=(~(get by p.jon) 'data')
+      ~
+    [~ u.get]
   ::
   ++  pool-data-field
     |=  jon=json
     ^-  pool-data-field:p
-    *pool-data-field:p
+    %.  jon
+    %-  of
+    :~  [%private (ar pool-data-pair)]
+        [%public (ar pool-data-pair)]
+    ==
   ::
   ++  ud-blocked
     %+  ((each-method:dejs:u %uni %dif) blocked:p blocked:p)
@@ -80,11 +116,23 @@
         [%delete-request (ot ~[requester+ship])]
     ==
   ::
+  ++  filter
+    |=  jon=json
+    ^-  filter:p
+    ?~  jon
+      ~
+    :-  ~
+    ?>  ?=(%o -.jon)
+    %.  jon
+    %+  ((each-method:dejs:u %only %except) (set @t) (set @t))
+      (ot ~[fields+(as so)])
+    (ot ~[fields+(as so)])
+  ::
   ++  view
     ^-  $-(json view:p)
     %-  of
-    :~  [%pools (ot ~[request+request])]
-        [%public-data (ot ~[id+id request+request])]
+    :~  [%pools (ot ~[request+request filter+filter])]
+        [%public-data (ot ~[id+id request+request filter+filter])]
     ==
   --
 --

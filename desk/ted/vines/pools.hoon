@@ -46,7 +46,7 @@
       %-  pairs:enjs:format
       %+  turn  discovered
       |=  [=id:p public=metadata:p]
-      [(id-string:enjs:j id) o+public]
+      [(id-string:enjs:j id) o+(filter-metadata filter.vyu public)]
     ;<  auto=(unit auto:p)  bind:m
       (graylist-resolution id.i.pools-list src.gowl request.vyu)
     ?:  ?=([~ %|] auto)
@@ -66,7 +66,10 @@
     ?:  ?=([~ %|] auto)
       (strand-fail %view-public-data-fail ~)
     ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-    (pure:m !>(o+public.pool-data:(~(got by pools) id.vyu)))
+    %-  pure:m  !>
+    :-  %o
+    %+  filter-metadata  filter.vyu
+    public.pool-data:(~(got by pools) id.vyu)
   ==
 ::
 ++  handle-gesture
@@ -416,4 +419,26 @@
   =/  m  (strand ,~)
   ^-  form:m
   (agent-kick-ships dap.gowl ~[(en-pool-path:lib id)] ships)
+::
+++  filter-metadata
+  |=  [=filter:p =metadata:p]
+  ^-  metadata:p
+  ?~  filter
+    metadata
+  ?-    -.u.filter
+      %&
+    %-  ~(gas by *metadata:p)
+    %+  murn  ~(tap by metadata)
+    |=  [=@t =json]
+    ?.  (~(has in p.u.filter) t)
+      ~
+    [~ t json]
+      %|
+    %-  ~(gas by *metadata:p)
+    %+  murn  ~(tap by metadata)
+    |=  [=@t =json]
+    ?:  (~(has in p.u.filter) t)
+      ~
+    [~ t json]
+  ==
 --

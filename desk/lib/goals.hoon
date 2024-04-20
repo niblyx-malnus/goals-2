@@ -375,6 +375,19 @@
       =/  m  (strand ,vase)
       ^-  form:m
       ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
+      ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
+      =/  p-pool=pool:p    (~(got by pools) id)
+      =/  g-pool=pool:gol  (~(got by pools.store) id)
+      :: fix public data related to members and graylist
+      ::
+      ;<  ~  bind:m
+        ?.  ?&  =(our.gowl host.id)
+                ?=(?(%update-members %update-graylist) -.tan)
+            ==
+          (pure:(strand ,~) ~)
+        %+  update-pool-data:pap  id
+        (rectify-public-membership-data p-pool)
+      :: 
       ?+    -.tan
         (pure:m !>(~))
           %init-pool
@@ -382,24 +395,45 @@
         (pure:m !>(~))
         ::
           %update-members
-        ?.  =(our.gowl host.id)
+        ?.  =(our.gowl host.id)   :: don't edit a pool that isn't ours
           (pure:m !>(~))
-        ?:  =(member.tan host.id)
+        ?:  =(member.tan host.id) :: don't edit host role
           (pure:m !>(~))
-        ?~  roles.tan
+        ?~  roles.tan             :: deletion
           ;<  ~  bind:m  (del-pool-role:gap id member.tan)
           (pure:m !>(~))
-        =/  =pool:gol  (~(got by pools.store) id)
         =/  default=role:gol
           %+  fall
             %-  mole  |.
-            (role:dejs:goj (~(got by metadata.pool) 'defaultRole'))
+            (role:dejs:goj (~(got by metadata.g-pool) 'defaultRole'))
           %viewer
-        =/  =role:gol
-          (~(gut by perms.pool) member.tan default)
+        =/  =role:gol  (~(gut by perms.g-pool) member.tan default)
         ;<  ~  bind:m  (set-pool-role:mem:gap id member.tan role)
         (pure:m !>(~))
       ==
+  ::
+  ++  rectify-public-membership-data
+    |=  =pool:p
+    ^-  (list pool-data-field:p)
+    :_  ~
+    :-  %public
+    ?~  rest.graylist.pool
+      :~  ['accessType' ~ s+'private']
+          ['memberCount' ~ (numb:enjs:format ~(wyt by members.pool))]
+          ['members' ~ a+(turn ~(tap in ~(key by members.pool)) ship:enjs:poj)]
+      ==
+    ?-    u.rest.graylist.pool
+        [%& *]
+      :~  ['accessType' ~ s+'public']
+          ['memberCount' ~ ~]
+          ['members' ~ ~]
+      ==
+        %| :: Never publicly seen
+      :~  ['accessType' ~ s+'secret']
+          ['memberCount' ~ ~]
+          ['members' ~ ~]
+      ==
+    ==
   ::
   ++  create-pool-take-id
     |=  $:  graylist-fields=(list graylist-field:p)

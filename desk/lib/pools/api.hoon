@@ -2,6 +2,7 @@
 /+  *ventio, pools, j=pools-json
 |_  =gowl
 ++  dude  %pools
+:: +tan, +com, +pac, +lac (TODO: make cores for each mark)
 ++  handle-transition
   |=  =transition:p
   =/  m  (strand ,~)
@@ -224,6 +225,16 @@
   ^-  pool-action:p
   [%update-graylist fields]
 ::
+++  update-pool-data-action
+  |=  [=id:p fields=(list pool-data-field:p)]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our.gowl dude]
+  :-  %pools-pool-action  :-  id
+  ^-  pool-action:p
+  [%update-pool-data fields]
+::
+::
 ++  update-outgoing-invites
   |=  [=id:p invitee=ship invite=(unit invite:p)]
   =/  m  (strand ,~)
@@ -299,6 +310,15 @@
   :-  %pools-transition  !>
   ^-  transition:p
   [%update-outgoing-request-response id status]
+::
+++  kick-blacklisted
+  |=  [=id:p requests=(map ship request:p)]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  (vent ,~)  [our dap]:gowl
+  :-  %pools-pool-action  :-  id
+  ^-  pool-action:p
+  [%kick-blacklisted requests]
 ::
 ++  timeout  ~s15
 ::
@@ -392,12 +412,25 @@
   ^-  gesture:p
   [%watch-me id]
 ::
-++  kick-blacklisted
-  |=  [=id:p requests=(map ship request:p)]
-  =/  m  (strand ,~)
+++  discover-pools
+  |=  [=ship =request:p =filter:p]
+  =/  m  (strand ,json)
   ^-  form:m
-  %+  (vent ,~)  [our dap]:gowl
-  :-  %pools-pool-action  :-  id
-  ^-  pool-action:p
-  [%kick-blacklisted requests]
+  %+  (set-timeout ,json)  timeout
+  %+  (vent ,json)
+    [ship %pools]
+  :-  %pools-view
+  ^-  view:p
+  [%pools request filter]
+::
+++  pool-public-data
+  |=  [=id:p =request:p =filter:p]
+  =/  m  (strand ,json)
+  ^-  form:m
+  %+  (set-timeout ,json)  timeout
+  %+  (vent ,json)
+    [host.id %pools]
+  :-  %pools-view
+  ^-  view:p
+  [%public-data id request filter]
 --

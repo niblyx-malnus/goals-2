@@ -130,6 +130,10 @@
       %update-graylist
     ;<  ~  bind:m  (update-graylist-action:pap pid fields.act)
     (pure:m !>(~))
+    ::
+      %update-pool-data
+    ;<  ~  bind:m  (update-pool-data-action:pap pid fields.act)
+    (pure:m !>(~))
   ==
 ::
 ++  watch-valid-pool

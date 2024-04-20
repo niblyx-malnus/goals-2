@@ -125,10 +125,12 @@
 +$  delegation
   $%  [%graylist =id requester=ship =request]
   ==
+::
++$  filter  (unit (each (set @t) (set @t)))
 :: delegated graylist can control access conditionally based on request
 ::
 +$  view
-  $%  [%pools =request]
-      [%public-data =id =request]
+  $%  [%pools =request =filter]
+      [%public-data =id =request =filter]
   ==
 --

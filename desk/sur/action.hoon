@@ -171,6 +171,7 @@
   $%  [%kick-member member=ship]
       [%set-pool-role member=ship =role]
       [%update-graylist fields=(list graylist-field:p)]
+      [%update-pool-data fields=(list pool-data-field:p)]
       [%extend-invite invitee=ship]
       [%cancel-invite invitee=ship]
       [%accept-request requester=ship]

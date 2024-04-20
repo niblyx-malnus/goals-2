@@ -1,7 +1,7 @@
 /-  p=pools, gol=goals, axn=action, spider
 /+  *ventio, pools, tree=filetree, goals, sub-count,
     goals-membership, goals-traverse, goals-node, goals-pool,
-    goj=goals-json, poj=pools-json
+    goj=goals-json, poj=pools-json, pools-api
 =,  strand=strand:spider
 ^-  thread:spider
 ::
@@ -40,6 +40,7 @@
 ==
 ::
 |_  =gowl
++*  pap  ~(. pools-api gowl)
 ++  handle-view
   |=  vyu=view:axn
   =/  m  (strand ,vase)
@@ -578,7 +579,7 @@
     ;<  =outgoing-requests:p  bind:m
       (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
     ~&  >>   "discovering {<ship.vyu>}"
-    ;<  jon=json  bind:m  (discover-pools ship.vyu)
+    ;<  jon=json  bind:m  (discover-pools:pap ship.vyu ~ ~)
     ~&  >   "successfully discovered {<ship.vyu>}"
     =/  discovered=(map id:p metadata:p)
       %.(jon (op:dejs:format [id-string metadata]:dejs:poj))
@@ -594,7 +595,7 @@
       %public-data
     ;<  =outgoing-requests:p  bind:m
       (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
-    ;<  jon=json  bind:m  (pool-public-data pid.vyu)
+    ;<  jon=json  bind:m  (pool-public-data:pap pid.vyu ~ ~)
     =/  public=metadata:p  (metadata:dejs:poj jon)
     (pure:m !>((give-pool-public-data store outgoing-requests pid.vyu public)))
     ::
@@ -603,29 +604,6 @@
       (unit-scry ,(set ship) /gx/pals/targets/noun)
     (pure:m !>(a+(turn ~(tap in (fall targets ~)) |=(=@p s+(scot %p p)))))
   ==
-::
-++  timeout  ~s15
-::
-++  discover-pools
-  |=  =ship
-  =/  m  (strand ,json)
-  ^-  form:m
-  %+  (set-timeout ,json)  timeout
-  %+  (vent ,json)
-    [ship %pools]
-  :-  %pools-view
-  ^-  view:p
-  [%pools ~]
-::
-++  pool-public-data
-  |=  =id:p
-  =/  m  (strand ,json)
-  ^-  form:m
-  %+  (vent ,json)
-    [host.id %pools]
-  :-  %pools-view
-  ^-  view:p
-  [%public-data id ~]
 ::
 ++  give-pool-public-data
   |=  [=store:gol =outgoing-requests:p =id:p public=metadata:p]
