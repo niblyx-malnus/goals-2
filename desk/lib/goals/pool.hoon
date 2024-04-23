@@ -934,6 +934,8 @@
 ++  handle-transitions
   |=  tans=(list pool-transition:act)
   ^-  _this
+  =.  tans  (flop tans) :: assumes tans in reverse chronological order
+  |-
   ?~  tans
     this
   =.  this  (handle-transition i.tans)
@@ -944,7 +946,7 @@
   ^-  _this
   =/  old=pool:gol  pool
   =.  this  (handle-compound-transition mod tan)
-  =/  [* new=pool:gol]  abet:(handle-transitions:(apex old) (flop tans))
+  =/  new=pool:gol  pool:(handle-transitions:(apex old) tans)
   ?>  =(new pool)
   this
 --
