@@ -132,6 +132,7 @@
       ?.  =(p.cage.sign %goals-pool-transition)
         (on-agent:dus pole sign)
       =+  !<(tan=pool-transition:act q.cage.sign)
+      ~&  receiving-pool-transition+[pid+pid tan+tan]
       =^  cards  state
         abet:(handle-transition:ghc %update-pool pid tan)
       [cards this]
