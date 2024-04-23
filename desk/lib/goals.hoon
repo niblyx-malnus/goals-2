@@ -194,9 +194,10 @@
     =/  =pool:gol  (~(gut by pools.store) pid *pool:gol)
     =^  tans  pool
       abet:(handle-compound-transition-safe:(apex:pl pool) mod tan)
-    ~&  tans+tans
     =.  pools.store  (~(put by pools.store) pid pool)
     %-  emil
+    =;  cards=(list card)
+      ~&(cards+cards cards)
     %+  turn  tans
     |=  tan=pool-transition:act
     [%give %fact ~[(en-pool-path pid)] goals-pool-transition+!>(tan)]
