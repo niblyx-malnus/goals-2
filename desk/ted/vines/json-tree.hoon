@@ -11,7 +11,7 @@
 ^-  form:m
 ~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
 ;<  =json-tree  bind:m  (scry-hard ,json-tree /gx/json-tree/json-tree/noun)
-?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
+?+    mark  (strand-fail %bad-vent-request ~)
     %json-tree-action
   =+  !<(act=action vase)
   ~&  "%json-tree vine: receiving action {(trip -.act)}"

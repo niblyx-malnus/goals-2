@@ -14,7 +14,6 @@
   |_  [=bowl:gall cards=(list card:agent:gall) state-0:gol]
   +*  this   .
       state  +<+>
-      gols   ~(. goals-goals store)
   +$  card  card:agent:gall
   ++  abet  [(flop cards) state]
   ++  emit  |=(=card this(cards [card cards]))
@@ -198,7 +197,7 @@
       abet:(handle-compound-transition-safe:(apex:pl pool) mod tan)
     =.  pools.store  (~(put by pools.store) pid pool)
     %-  emil
-    %+  turn  tans
+    %+  turn  (flop tans) :: already correctly ordered; double flop...
     |=  tan=pool-transition:act
     [%give %fact ~[(en-pool-path pid)] goals-pool-transition+!>(tan)]
   --

@@ -14,7 +14,7 @@
 =*  hc  ~(. helper-core gowl)
 ::
 ~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
-?+  mark  (just-poke [our dap]:gowl mark vase) :: poke normally
+?+  mark  (strand-fail %bad-vent-request ~)
   %pools-view           (handle-view:hc !<(view:p vase))
   %pools-gesture        (handle-gesture:hc !<(gesture:p vase))
   %pools-local-action   (handle-local-action:hc !<(local-action:p vase))

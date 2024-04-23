@@ -1,14 +1,15 @@
 /-  p=pools, gol=goals, axn=action, spider
-/+  *ventio, pools, tree=filetree, goals, sub-count,
+/+  *ventio, pools, bind, goals, sub-count, htmx,
     goals-membership, goals-traverse, goals-node, goals-pool,
-    goj=goals-json, poj=pools-json, pools-api
+    goals-htmx, goj=goals-json, poj=pools-json, pools-api
 =,  strand=strand:spider
 ^-  thread:spider
 ::
 =<  =*  helper-core  .
 ::
 %-  vine-thread
-:: %-  vine:tree
+%-  (vine:htmx /htmx/goals poll-interval:goals-htmx)
+%-  vine:bind
 %-  vine:sub-count
 |=  [gowl=bowl:gall vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
@@ -16,10 +17,14 @@
 ::
 =*  hc   ~(. helper-core gowl)
 =*  mhc  ~(. goals-membership gowl)
+=*  htx  ~(. goals-htmx gowl)
 =*  ghc  ~(. vine:goals gowl)
 ::
 ~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
-?+    mark  (just-poke [our dap]:gowl mark vase) :: poke normally
+?+    mark  (strand-fail %bad-vent-request ~)
+    %handle-http-request
+  (handle-http-request:htx !<([@ta inbound-request:eyre] vase))
+  ::
     %goals-local-membership-action
   (handle-local-membership-action:mhc !<(local-membership-action:axn vase))
   ::
@@ -31,6 +36,7 @@
   ::
     %goals-pool-action
   (handle-pool-action:ghc !<([pid:gol pool-action:axn] vase))
+  :: respond to update from %pools
   ::
     %pools-transition
   (handle-pools-transition:ghc !<(tan=transition:p vase))

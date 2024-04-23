@@ -45,7 +45,7 @@
         =^  cards  agent  (on-poke:ag mark vase)
         =^  cards  state  abet:(process-cards:utl cards)
         [cards this]
-          %reset-path
+          %sub-count-reset-path
         ?>  =(our src):bowl
         =+  !<([=path count=@] vase)
         =.  paths  (~(put by paths) path count)

@@ -7,8 +7,10 @@
 ::      %.y to forcefully overwrite a binding which already exists.
 ::
 ::    usage: %-(agent-bind your-agent)
+::   
+::    expects to accept an agent wrapped in agent:vent
 ::
-/+  vio=ventio, server, agentio, default-agent
+/+  vio=ventio, vent, server, agentio, default-agent
 |%
 +$  card    card:agent:gall
 ++  strand  strand:vio
@@ -88,6 +90,7 @@
   +*  this  .
       ag    ~(. agent bowl)
       def   ~(. (default-agent this %|) bowl)
+      vnt   ~(. (utils:vent this) bowl)
   ::
   ++  on-init
     =^  cards  agent  on-init:ag
@@ -103,11 +106,18 @@
   ::
   ++  on-poke
     |=  [=mark =vase]
-    ?.  ?=(%handle-http-response mark)
+    ?+    mark
       =^  cards  agent  (on-poke:ag mark vase)
       [cards this]
-    =+  !<([eyre-id=@ta pay=simple-payload:http] vase)
-    :_(this (give-simple-payload:app:server eyre-id pay))
+      ::
+        %handle-http-request
+      ~&  >>  "agent-bind handling poke to {<dap.bowl>} with mark {<mark>}"
+      (vent-cage:vnt mark vase)
+      ::
+        %handle-http-response
+      =+  !<([eyre-id=@ta pay=simple-payload:http] vase)
+      :_(this (give-simple-payload:app:server eyre-id pay))
+    ==
   ::
   ++  on-peek
     |=  =path
@@ -190,6 +200,42 @@
   --
 ::
 ++  vine
+  =<
+  ::
+  |=  =vine:vio
+  ^-  vine:vio
+  |=  [=gowl:vio vid=vent-id:vio =mark =vase]
+  =/  m  (strand ,^vase)
+  ^-  form:m
+  ?+    mark  (vine gowl vid mark vase) :: delegate to original
+      %handle-http-request
+    ;<  out=(each ^vase goof)  bind:m
+      ((soften:vio ,^vase) (vine gowl vid mark vase))
+    ?:  ?=(%& -.out)
+      (pure:m p.out)
+    %-  (slog %vine-handle-http-request-fail p.out)
+    =+  !<([eyre-id=@ta req=inbound-request:eyre] vase)
+    %^    give-simple-payload
+        [our dap]:gowl
+      eyre-id
+    :-  [500 ['content-type' 'text/html']~]
+    :-  ~
+    %-  manx-to-octs:server
+    ;hmtl(lang "en")
+      ;head
+        ;title: 500 Error
+        ;meta(charset "utf-8");
+        ;meta
+          =name     "viewport"
+          =content  "width=device-width, initial-scale=1";
+      ==
+      ;body
+        ;h1: Internal Server Error (500)
+        ;p: %handle-http-request crashing in vine. agent-bind defaulting to 500 Error.
+      ==
+    ==
+  ==
+  ::
   |%
   ++  give-simple-payload
     |=  [=dock eyre-id=@ta pay=simple-payload:http]

@@ -1,6 +1,6 @@
 /-  gol=goals, act=action, p=pools
-/+  goals, vent, bout, dbug, default-agent, verb, sub-count,
-    goals-node, default-subs,
+/+  goals, vent, bind, bout, dbug, default-agent, verb, sub-count,
+    goals-node, default-subs, htmx,
 :: import during development to force compilation
 ::
     goals-json
@@ -15,7 +15,11 @@
 /=  x  /ted/vines/goals
 ::
 |%
-+$  card     card:agent:gall
++$  card        card:agent:gall
+++  agent-bind  (agent:bind & ~[[`/htmx/goals &]])
+++  agent-subc  (agent ,[%pool path]):sub-count
+++  agent-htmx  (agent:htmx ~m5)
+++  htmx-timer  |=(now=@da `card`[%pass /htmx-timer %arvo %b %wait (add now ~s1)])
 --
 ::
 =|  state-0:gol
@@ -24,12 +28,14 @@
 %+  verb  |
 :: %-  agent:bout
 %-  agent:dbug
-%-  (agent ,[%pool path]):sub-count
+%-  agent-htmx
+%-  agent-bind
+%-  agent-subc
 %-  agent:vent
 ^-  agent:gall
 |_  =bowl:gall
 +*  this  .
-    dus   ~(. (default-subs this %.y %.y %.n) bowl)
+    dus   ~(. (default-subs this %.n %.y %.n) bowl)
     det   ~(. default:tree bowl)
     ghc   ~(. agent:goals bowl ~ state)
     vnt   ~(. (utils:vent this) bowl)
@@ -38,6 +44,7 @@
   ^-  (quip card _this)
   :_  this
   ;:  weld
+    :: [(htmx-timer now.bowl)]~
     subscribe-to-pools-agent:ghc
     [poke-desk-into-venter:ghc]~
   ==
@@ -50,6 +57,7 @@
   =/  old  !<(state-0:gol old-vase)
   :_  this(state old)
   ;:  weld
+    :: [(htmx-timer now.bowl)]~
     subscribe-to-pools-agent:ghc
     [poke-desk-into-venter:ghc]~
   ==
@@ -140,6 +148,22 @@
   ==
 ::
 ++  on-leave  on-leave:dus
-++  on-arvo   on-arvo:dus
+++  on-arvo
+  |=  [=wire =sign-arvo]
+  ^-  (quip card _this)
+  ?+    wire  (on-arvo:dus wire sign-arvo)
+      [%htmx-timer ~]
+    ?+    sign-arvo  (on-arvo:dus wire sign-arvo)
+        [%behn %wake *]
+      ?^  error.sign-arvo
+        (on-arvo:dus wire sign-arvo)
+      :_  this
+      :~  :: (htmx-timer now.bowl)
+          :*  %pass  /htmx-refresh  %agent  [our dap]:bowl  %poke
+          htmx-refresh+!>(["#current-time" "/htmx/goals/current-time" ~ "#hello-world"]~)
+          ==
+      ==
+    ==
+  ==
 ++  on-fail   on-fail:dus
 --

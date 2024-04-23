@@ -68,7 +68,8 @@
 ++  get-vap
   =/  m  (strand ,dude:gall)
   ^-  form:m
-  ;<  =desk  bind:m  get-desk
+  :: DEPRECATED: ;<  =desk  bind:m  get-desk
+  =/  =desk          %goals
   :: DEPRECATED: =/  vap=dude:gall  (cat 3 desk '-venter')
   =/  vap=dude:gall  %venter
   ;<  dudes=(set [=dude:gall live=?])  bind:m
@@ -160,6 +161,7 @@
   |=  arg=vase
   =/  m  (strand ,vase)
   ^-  form:m
+  ~&  >>  %venting
   =/  pak=(unit package)  !<((unit package) arg)
   ?~  pak  (strand-fail %no-arg ~)
   =+  u.pak :: expose as-pilot, dock, input, output, and body
@@ -167,7 +169,7 @@
   =?  page  as-pilot  vent-as-pilot+page
   ;<  =vase       bind:m  ((vent-as-mark output) dock page)
   :: convert to json - this allows for the generic
-  :: /spider/realm/venter-package/vent/json thread format
+  :: /spider/[desk]/vent-package/vent/json thread format
   ::
   ;<  =tube:clay  bind:m  (build-our-tube desk.output mark.output %json)
   (pure:m (tube vase))
