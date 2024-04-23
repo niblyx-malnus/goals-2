@@ -193,7 +193,7 @@
     ^-  _this
     =/  =pool:gol  (~(gut by pools.store) pid *pool:gol)
     =^  tans  pool
-      abet:(handle-compound-transition-safe:(apex:pl pool) mod tan)
+      teba:(handle-compound-transition-safe:(apex:pl pool) mod tan)
     =.  pools.store  (~(put by pools.store) pid pool)
     %-  emil
     %+  turn  tans
