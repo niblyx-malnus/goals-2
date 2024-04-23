@@ -83,7 +83,7 @@
     =*  state  -
     |=  =agent:gall
     ^-  agent:gall
-    ::  !.
+    !.
     |_  =bowl:gall
     +*  this  .
         def   ~(. (default-agent this %.n) bowl)

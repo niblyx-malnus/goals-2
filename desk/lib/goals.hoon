@@ -151,8 +151,7 @@
     |=  [=pid:gol tan=pool-transition:act]
     ^-  _this
     =/  =pool:gol  (~(gut by pools.store) pid *pool:gol)
-    =^  tans  pool
-      abet:(handle-transition:(apex:pl pool) tan)
+    =.  pool  pool:(handle-transition:(apex:pl pool) tan)
     this(pools.store (~(put by pools.store) pid pool))
   ::
   ++  handle-compound-transition
@@ -194,7 +193,7 @@
     ^-  _this
     =/  =pool:gol  (~(gut by pools.store) pid *pool:gol)
     =^  tans  pool
-      teba:(handle-compound-transition-safe:(apex:pl pool) mod tan)
+      abet:(handle-compound-transition-safe:(apex:pl pool) mod tan)
     =.  pools.store  (~(put by pools.store) pid pool)
     %-  emil
     %+  turn  tans
