@@ -7,6 +7,7 @@
     tv    ~(. goals-traverse goals.pool)
     nd    ~(. goals-node goals.pool)
 ++  abet  [(flop tans) pool]
+++  teba  [tans pool] :: unflopped effects
 ++  apex  |=(=pool:gol this(pool pool, tans ~))
 ++  emit  |=(tan=pool-transition:act this(tans [tan tans]))
 ++  emil  |=(tanz=(list pool-transition:act) this(tans (weld tanz tans)))
