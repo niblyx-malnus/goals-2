@@ -840,11 +840,19 @@
     =/  =goal:gol  (init-goal gid.tan summary.tan mod now.tan)
     =.  this  (handle-transition %init-goal gid.tan goal)
     =.  this  (handle-transition %add-root gid.tan)
-    ?~   upid.tan
-      this
-    %+  handle-compound-transition
-      host.pid.pool :: divine intervention (host)
-    [%move-to-goal gid.tan u.upid.tan]
+    =?  this  ?=(^ upid.tan)
+      %+  handle-compound-transition
+        host.pid.pool :: divine intervention (host)
+      [%move-to-goal gid.tan u.upid.tan]
+    :: If you can set it active, do so
+    ::
+    =/  mul
+      %-  mule  |.
+      (handle-compound-transition mod %set-active gid.tan %& now.tan)
+    ?-  -.mul
+       %&  p.mul
+       %|  ((slog p.mul) this)
+    ==
     ::
     ++  init-goal
       |=  [=gid:gol summary=@t chief=ship now=@da]

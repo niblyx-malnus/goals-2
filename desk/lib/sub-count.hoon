@@ -171,9 +171,6 @@
         (emit %give %fact ~[i.paths.p.card] cage.p.card)
       =/  count=@   (~(gut by paths) i.paths.p.card 0)
       =/  upd=cage  (make-counted-update +(count) cage.p.card)
-      ~&  %emitting-counted-card
-      ~&  path+i.paths.p.card
-      ~&  mark+p.cage.p.card
       =.  this      (emit %give %fact ~[i.paths.p.card] upd)
       =.  this      (emit %give %fact ~[/sub-counts] path-count+!>([i.paths.p.card count]))
       %=  $

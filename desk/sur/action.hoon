@@ -58,7 +58,7 @@
   $%  [%reorder-roots roots=(list gid)]
       [%reorder-children =gid children=(list gid)]
       [%reorder-archive context=(unit gid) archive=(list gid)]
-      [%create-goal =gid upid=(unit gid) summary=@t now=@da]
+      [%create-goal =gid upid=(unit gid) summary=@t active=? now=@da]
       [%archive-goal =gid]
       [%restore-goal =gid]
       [%restore-to-root =gid]

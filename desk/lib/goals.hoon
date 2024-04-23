@@ -279,7 +279,8 @@
         %create-goal
       ;<  =gid:gol  bind:m  (unique-id pid)
       ;<  ~         bind:m
-        (handle-compound-pool-transition %create-goal gid upid.axn summary.axn now.gowl)
+        %-  handle-compound-pool-transition
+        [%create-goal gid upid.axn summary.axn active.axn now.gowl]
       :: mark the goal started if active and if possible
       ::
       ~&  %skipping-setting-active
