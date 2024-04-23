@@ -25,8 +25,8 @@
   |=  [=pid:gol member=ship]
   =/  m  (strand ,~)
   ^-  form:m
-  %+  (vent ,~)  [our.gowl dude]
-  :-  %goals-compound-transition
+  %+  poke  [our.gowl dude]
+  :-  %goals-compound-transition  !>
   ^-  compound-transition:act
   :^  %update-pool  pid  our.gowl
   [%set-pool-role member ~]
@@ -35,8 +35,8 @@
   |=  [=pid:gol member=ship =role:gol mod=ship]
   =/  m  (strand ,~)
   ^-  form:m
-  %+  (vent ,~)  [our.gowl dude]
-  :-  %goals-compound-transition
+  %+  poke  [our.gowl dude]
+  :-  %goals-compound-transition  !>
   ^-  compound-transition:act
   :^  %update-pool  pid  mod
   [%set-pool-role member ~ role]
