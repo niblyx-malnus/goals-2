@@ -84,6 +84,12 @@
     ~&  received-compound-transition+tan
     =^  cards  state
       abet:(handle-compound-transition:ghc tan)
+    ~&  %+  murn  cards
+        |=  =card
+        ?.  ?=([%give %fact [[%pool *] ~] *] card)
+          ~
+        [~ paths.p.card]
+        
     [cards this]
   ==
 ::
