@@ -92,15 +92,16 @@
     ++  on-poke
       |=  [=mark =vase]
       ^-  (quip card agent:gall)
-      ?>  =(src our):bowl
       ?+    mark
         =^  cards  agent  (on-poke:ag mark vase)
         [cards this]
         ::
           %htmx-fast-refresh
+        ?>  =(src our):bowl
         :_(this [%give %fact ~[/htmx/fast-refresh] noun+!>(~)]~)
         ::
           %htmx-refresh
+        ?>  =(src our):bowl
         =+  !<(refresh-list=(list hx-refresh) vase)
         :: delete non-unique
         ::
@@ -138,6 +139,7 @@
         [~ this]
         ::
           %htmx-delete-refresh
+        ?>  =(src our):bowl
         =+  !<(delete=(list @da) vase)
         =.  refresh-history
           |-
