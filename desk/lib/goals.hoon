@@ -282,10 +282,11 @@
         (handle-compound-pool-transition %create-goal gid upid.axn summary.axn now.gowl)
       :: mark the goal started if active and if possible
       ::
-      ;<  *  bind:m
-        ?.  active.axn
-          (pure:(strand ,~) ~)
-        ((soften ,~) (handle-compound-pool-transition %set-active gid %& now.gowl))
+      ~&  %skipping-setting-active
+      :: ;<  *  bind:m
+      ::   ?.  active.axn
+      ::     (pure:(strand ,~) ~)
+      ::   ((soften ,~) (handle-compound-pool-transition %set-active gid %& now.gowl))
       (pure:m !>((enjs-key:goj [pid gid])))
       ::
         %set-complete
