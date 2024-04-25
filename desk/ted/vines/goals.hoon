@@ -1,15 +1,13 @@
 /-  p=pools, gol=goals, axn=action, spider
-/+  *ventio, pools, bind, goals, sub-count, htmx,
+/+  *ventio, pools, goals, sub-count,
     goals-membership, goals-traverse, goals-node, goals-pool,
-    goals-htmx, goj=goals-json, poj=pools-json, pools-api
+    webui-main, goj=goals-json, poj=pools-json, pools-api
 =,  strand=strand:spider
 ^-  thread:spider
 ::
 =<  =*  helper-core  .
 ::
 %-  vine-thread
-%-  (vine:htmx /htmx/goals poll-interval:goals-htmx)
-%-  vine:bind
 %-  vine:sub-count
 |=  [gowl=bowl:gall vid=vent-id =mark =vase]
 =/  m  (strand ,^vase)
@@ -17,14 +15,10 @@
 ::
 =*  hc   ~(. helper-core gowl)
 =*  mhc  ~(. goals-membership gowl)
-=*  htx  ~(. goals-htmx gowl)
 =*  ghc  ~(. vine:goals gowl)
 ::
 ~&  "vent to {<dap.gowl>} vine with mark {<mark>}"
 ?+    mark  (strand-fail %bad-vent-request ~)
-    %handle-http-request
-  (handle-http-request:htx !<([@ta inbound-request:eyre] vase))
-  ::
     %goals-local-membership-action
   (handle-local-membership-action:mhc !<(local-membership-action:axn vase))
   ::

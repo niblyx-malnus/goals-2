@@ -34,6 +34,11 @@
     ^+  key-value-list
     (set-header:http key value key-value-list)
   ::
+  ++  delete-key
+    |=  [key=@t =key-value-list]
+    ^+  key-value-list
+    (delete-header:http key key-value-list)
+  ::
   ++  parse-body
     |=  body=(unit octs)
     ^-  key-value-list
@@ -41,6 +46,57 @@
     %+  rush
       `@t`(tail (fall body [0 '']))
     yquy:de-purl:html
+  --
+:: +$  mane  $@(@tas [@tas @tas])                    ::  XML name+space
+:: +$  manx  $~([[%$ ~] ~] [g=marx c=marl])          ::  dynamic XML node
+:: +$  marl  (list manx)                             ::  XML node list
+:: +$  mars  [t=[n=%$ a=[i=[n=%$ v=tape] t=~]] c=~]  ::  XML cdata
+:: +$  mart  (list [n=mane v=tape])                  ::  XML attributes
+:: +$  marx  $~([%$ ~] [n=mane a=mart])              ::  dynamic XML tag
+:: These probably already exist somewhere; too lazy to find them
+::
+++  mx
+  |%
+  ++  get-attribute
+    |=  [=mane =manx]
+    ^-  (unit tape)
+    ?~  a.g.manx
+      ~
+    ?:  =(n.i.a.g.manx mane)
+      [~ v.i.a.g.manx]
+    $(a.g.manx t.a.g.manx)
+  ::
+  ++  set-attribute
+    |=  [=mane value=tape =manx]
+    ^+  manx
+    %=    manx
+        a.g
+      |-
+      ?~  a.g.manx
+        [[mane value] ~]
+      ?:  =(n.i.a.g.manx mane)
+        [[mane value] t.a.g.manx]
+      [i.a.g.manx $(a.g.manx t.a.g.manx)]
+    ==
+  ::
+  ++  extend-attribute
+    |=  [=mane value=tape =manx]
+    ^+  manx
+    =/  new-value=tape  (weld (fall (get-attribute mane manx) ~) value)
+    (set-attribute mane new-value manx)
+  ::
+  ++  delete-attribute
+    |=  [=mane value=tape =manx]
+    ^+  manx
+    %=    manx
+        a.g
+      |-
+      ?~  a.g.manx
+        ~
+      ?:  =(n.i.a.g.manx mane)
+        t.a.g.manx
+      [i.a.g.manx $(a.g.manx t.a.g.manx)]
+    ==
   --
 :: stolen from rudder library
 ::
@@ -101,6 +157,7 @@
         :_(this [%give %fact ~[/htmx/fast-refresh] noun+!>(~)]~)
         ::
           %htmx-refresh
+        ~&  >>  %htmx-refreshing
         ?>  =(src our):bowl
         =+  !<(refresh-list=(list hx-refresh) vase)
         :: delete non-unique
@@ -119,13 +176,17 @@
         :: add unique hx-refreshes
         ::
         =/  pairs=(list [@da hx-refresh])
-          |-
-          ?:  (has:hon refresh-history now.bowl)
+         :: initialize to unused date
+          =/  now=@da
+            |-
+            ?.  (has:hon refresh-history now.bowl)
+              now.bowl
             $(now.bowl +(now.bowl))
+          |-
           ?~  refresh-list
             ~
-          :_  $(refresh-list t.refresh-list)
-          [now.bowl i.refresh-list]
+          :-  [now i.refresh-list]
+          $(now +(now), refresh-list t.refresh-list) :: increment date!
         =.  unique          
           %-  ~(gas by *(map hx-refresh @da))
           (turn pairs |=([a=@da b=hx-refresh] [b a]))
@@ -135,6 +196,7 @@
         ::
         =.  refresh-history
           (lot:hon refresh-history ~ `(sub now.bowl interval))
+        ~&  refresh-history+(tap:hon refresh-history)
         ::
         [~ this]
         ::

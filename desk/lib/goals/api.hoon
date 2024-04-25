@@ -62,5 +62,23 @@
     :-  pid
     ^-  pool-membership-action:act
     [%set-pool-role member role]
+  ::
+  ++  accept-invite
+    |=  =pid:gol
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  (vent ,~)  [our.gowl dude]
+    :-  %goals-local-membership-action
+    ^-  local-membership-action:act
+    [%accept-invite pid]
+  ::
+  ++  reject-invite
+    |=  =pid:gol
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  (vent ,~)  [our.gowl dude]
+    :-  %goals-local-membership-action
+    ^-  local-membership-action:act
+    [%reject-invite pid]
   --
 --

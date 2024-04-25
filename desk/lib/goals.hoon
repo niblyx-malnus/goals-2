@@ -368,16 +368,17 @@
           %update-pool
         (handle-pools-pool-transition [id p]:tan)
       ==
+    :: XX: possible that most of this could be handled in the agent
     ::
     ++  handle-pools-pool-transition
       =,  strand=strand:spider
       |=  [=id:p tan=pool-transition:p]
       =/  m  (strand ,vase)
       ^-  form:m
-      ;<  =store:gol  bind:m  (scry-hard ,store:gol /gx/goals/store/noun)
-      ;<  =pools:p  bind:m  (scry-hard ,pools:p /gx/pools/pools/noun)
-      =/  p-pool=pool:p    (~(got by pools) id)
-      =/  g-pool=pool:gol  (~(got by pools.store) id)
+      ;<  =store:gol  bind:m      (scry-hard ,store:gol /gx/goals/store/noun)
+      ;<  =pools:p  bind:m        (scry-hard ,pools:p /gx/pools/pools/noun)
+      =/  p-pool=pool:p           (~(got by pools) id)
+      =/  g-pool=(unit pool:gol)  (~(get by pools.store) id)
       :: fix public data related to members and graylist
       ::
       ;<  ~  bind:m
@@ -405,9 +406,11 @@
         =/  default=role:gol
           %+  fall
             %-  mole  |.
-            (role:dejs:goj (~(got by metadata.g-pool) 'defaultRole'))
+            (role:dejs:goj (~(got by metadata:(need g-pool)) 'defaultRole'))
           %viewer
-        =/  =role:gol  (~(gut by perms.g-pool) member.tan default)
+        ?~  g-pool
+          (pure:m !>(~))
+        =/  =role:gol  (~(gut by perms.u.g-pool) member.tan default)
         ;<  ~  bind:m  (set-pool-role:mem:gap id member.tan role)
         (pure:m !>(~))
       ==
