@@ -326,6 +326,7 @@
   |=  [=id:p member=ship]
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-kick-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [member dap.gowl]
   :-  %pools-gesture
@@ -336,6 +337,7 @@
   |=  =id:p
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-leave-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [host.id dap.gowl]
   :-  %pools-gesture
@@ -346,6 +348,7 @@
   |=  [=id:p invitee=ship invite=(unit invite:p)]
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-invite-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [invitee dap.gowl]
   :-  %pools-gesture
@@ -356,6 +359,7 @@
   |=  [=id:p =status:p]
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-invite-response-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [host.id dap.gowl]
    :-  %pools-gesture
@@ -366,6 +370,7 @@
   |=  =id:p
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-delete-invite-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [host.id dap.gowl]
   :-  %pools-gesture
@@ -376,6 +381,7 @@
   |=  [=id:p request=(unit request:p)]
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-request-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [host.id dap.gowl]
   :-  %pools-gesture
@@ -386,6 +392,7 @@
   |=  [=id:p requester=ship =status:p]
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-request-response-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [requester dap.gowl]
   :-  %pools-gesture
@@ -396,6 +403,7 @@
   |=  [=id:p requester=ship]
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-delete-request-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [requester dap.gowl]
   :-  %pools-gesture
@@ -406,6 +414,7 @@
   |=  [=id:p member=ship]
   =/  m  (strand ,~)
   ^-  form:m
+  %+  (map-err ,~)  (prepend-error %give-watch-me-gesture)
   %+  (set-timeout ,~)  timeout
   %+  (vent ,~)  [member dap.gowl]
   :-  %pools-gesture
@@ -416,6 +425,7 @@
   |=  [=ship =request:p =filter:p]
   =/  m  (strand ,json)
   ^-  form:m
+  %+  (map-err ,json)  (prepend-error %discover-pools)
   %+  (set-timeout ,json)  timeout
   %+  (vent ,json)
     [ship %pools]
@@ -427,6 +437,7 @@
   |=  [=id:p =request:p =filter:p]
   =/  m  (strand ,json)
   ^-  form:m
+  %+  (map-err ,json)  (prepend-error %pool-public-data)
   %+  (set-timeout ,json)  timeout
   %+  (vent ,json)
     [host.id %pools]

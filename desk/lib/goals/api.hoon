@@ -1,4 +1,4 @@
-/-  gol=goals, act=action
+/-  gol=goals, act=action, p=pools
 /+  *ventio
 |_  =gowl
 ++  dude  %goals
@@ -80,5 +80,41 @@
     :-  %goals-local-membership-action
     ^-  local-membership-action:act
     [%reject-invite pid]
+  ::
+  ++  delete-invite
+    |=  =pid:gol
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  (vent ,~)  [our.gowl dude]
+    :-  %goals-local-membership-action
+    ^-  local-membership-action:act
+    [%delete-invite pid]
+  ::
+  ++  cancel-request
+    |=  =pid:gol
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  (vent ,~)  [our.gowl dude]
+    :-  %goals-local-membership-action
+    ^-  local-membership-action:act
+    [%cancel-request pid]
+  ::
+  ++  extend-request
+    |=  =pid:gol
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  (vent ,~)  [our.gowl dude]
+    :-  %goals-local-membership-action
+    ^-  local-membership-action:act
+    [%extend-request pid]
+  ::
+  ++  update-blocked
+    |=  p=(each blocked:p blocked:p)
+    =/  m  (strand ,~)
+    ^-  form:m
+    %+  (vent ,~)  [our.gowl dude]
+    :-  %goals-local-membership-action
+    ^-  local-membership-action:act
+    [%update-blocked p]
   --
 --

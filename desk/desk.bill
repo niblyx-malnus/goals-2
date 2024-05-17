@@ -3,4 +3,8 @@
     %json-tree
     %venter
     %goals-ui
+    %calendar
+    %rule-store
+    %iana
+    %timezones
 ==

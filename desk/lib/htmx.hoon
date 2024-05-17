@@ -1,4 +1,4 @@
-/+  *ventio, server, bind
+/+  *ventio, server, bind, manx-utils
 |%
 ++  give-html-manx
   |=  [=dock eyre-id=@ta =manx cache=?]
@@ -29,6 +29,15 @@
     ^-  (unit @t)
     (get-header:http key key-value-list)
   ::
+  ++  get-all-key
+    |=  [key=@t =key-value-list]
+    ^-  (list @t)
+    =/  val=(unit @t)  (get-key key key-value-list)
+    ?~  val
+      ~
+    :-  u.val
+    $(key-value-list (delete-key key key-value-list))
+  ::
   ++  set-key
     |=  [key=@t value=@t =key-value-list]
     ^+  key-value-list
@@ -39,14 +48,33 @@
     ^+  key-value-list
     (delete-header:http key key-value-list)
   ::
+  ++  delete-all-key
+    |=  [key=@t =key-value-list]
+    ^+  key-value-list
+    =/  val=(unit @t)  (get-key key key-value-list)
+    ?~  val
+      key-value-list
+    $(key-value-list (delete-key key key-value-list))
+  ::
   ++  parse-body
     |=  body=(unit octs)
     ^-  key-value-list
-    %-  fall  :_  ~
+    %-  fall  :_  *key-value-list
     %+  rush
       `@t`(tail (fall body [0 '']))
     yquy:de-purl:html
   --
+::
+++  en-html-id  |=(=path `tape`(zing (turn (join '_' path) trip)))
+++  moup
+  |=  [i=@ud =path] 
+  ^+  path
+  ?:  =(0 i)
+    path
+  %=  $
+    i     (dec i)
+    path  (snip path)
+  ==
 :: +$  mane  $@(@tas [@tas @tas])                    ::  XML name+space
 :: +$  manx  $~([[%$ ~] ~] [g=marx c=marl])          ::  dynamic XML node
 :: +$  marl  (list manx)                             ::  XML node list
@@ -85,7 +113,7 @@
     =/  new-value=tape  (weld (fall (get-attribute mane manx) ~) value)
     (set-attribute mane new-value manx)
   ::
-  ++  delete-attribute
+  ++  remove-attribute :: TODO: change to remove attribute
     |=  [=mane value=tape =manx]
     ^+  manx
     %=    manx
@@ -97,6 +125,24 @@
         t.a.g.manx
       [i.a.g.manx $(a.g.manx t.a.g.manx)]
     ==
+    ::
+    ++  get-outer-html                 !!
+    ++  set-outer-html                 !!
+    ++  get-inner-html                 !!
+    ++  set-inner-html                 !!
+    ++  get-element-by-id              !! :: returns manx
+    ++  get-elements-by-class-name     !! :: returns marl
+    ++  get-elements-by-tag-name       !! :: returns marl
+    ++  children                       !! :: returns marl
+    ++  first-child                    !! :: returns marl
+    ++  last-child                     !! :: returns marl
+    ++  next-sibling                   !! :: returns manx
+    ++  previous-sibling               !! :: returns manx
+    ++  text-content                   !! :: preorder concatenation
+    ++  inner-text                     !! :: deals with CSS hidden stuff
+    ++  query-selector                 !! :: returns manx     CSS selector
+    ++  query-selector-all             !! :: returns marl (?) CSS selector
+    ++  closest                        !! :: returns manx     CSS selector
   --
 :: stolen from rudder library
 ::
@@ -116,13 +162,34 @@
   |-  ^-  tape
   ?:(=(0 a) ~ [(add '0' (mod a 10)) $(a (div a 10))])
 ::
+++  alphabetical
+  |=  [a=tape b=tape]
+  ^-  ?
+  =.  a  (cass a)
+  =.  b  (cass b)
+  |-
+  ?~  a  %.y
+  ?~  b  %.n
+  ?:  =(i.a i.b)
+    $(a t.a, b t.b)
+  :: Alphabetic characters come first
+  ::
+  ?+  [(rush i.a alf) (rush i.b alf)]  !!
+    [^ ~]           %.y
+    [~ ^]           %.n
+    ?([^ ^] [~ ~])  (lth i.a i.b)
+  ==
+::
 +$  hx-refresh
   $:  hx-target=tape
       hx-get=tape
+      hx-swap=(unit tape)
       hx-indicator=(unit tape)
   ==
 +$  refresh-history  ((mop @da hx-refresh) gth)
 ++  hon              ((on @da hx-refresh) gth)
++$  session  @uv :: these should expire after a day of inactivity
+:: +$  refresh-history  (map session [expire=@da refresh=(map hx-refresh @da)])
 ::
 ++  agent
   =<  agent
@@ -162,6 +229,7 @@
         =+  !<(refresh-list=(list hx-refresh) vase)
         :: delete non-unique
         ::
+        =.  refresh-list  ~(tap in (sy refresh-list))
         =.  refresh-history
           |-
           ?~  refresh-list
@@ -170,25 +238,24 @@
             $(refresh-list t.refresh-list)
           %=  $
             refresh-list     t.refresh-list
-            unique           (~(del by unique) i.refresh-list)
             refresh-history  (tail (del:hon refresh-history u.get))
           ==
         :: add unique hx-refreshes
         ::
         =/  pairs=(list [@da hx-refresh])
          :: initialize to unused date
-          =/  now=@da
-            |-
-            ?.  (has:hon refresh-history now.bowl)
+         ::
+          =/  key=@da
+            ?~  pry=(pry:hon refresh-history)
               now.bowl
-            $(now.bowl +(now.bowl))
+            (max now.bowl +(key.u.pry))
           |-
           ?~  refresh-list
             ~
-          :-  [now i.refresh-list]
-          $(now +(now), refresh-list t.refresh-list) :: increment date!
+          :-  [key i.refresh-list]
+          $(key +(key), refresh-list t.refresh-list) :: increment date!
         =.  unique          
-          %-  ~(gas by *(map hx-refresh @da))
+          %-  ~(gas by unique)
           (turn pairs |=([a=@da b=hx-refresh] [b a]))
         =.  refresh-history  (gas:hon refresh-history pairs)
 
@@ -280,10 +347,8 @@
 ++  dummy
   ;div#dummy(style "display: none;");
 ::
-++  init-refresher  |=(base=(list @t) (refresher ~ base ~))
-::
 ++  refresher
-  |=  $:  since=(unit @da)
+  |=  $:  since=@da
           base=(list @t)
           hx-refresh-list=(list hx-refresh)
       ==
@@ -291,8 +356,8 @@
   ;div#refresher
     =style  "display: none;"
     =hx-target         "this"
-    =hx-get            :(weld (spud base) "/refresher" ?~(since "" "?since={(scow %da u.since)}"))
-    =hx-trigger        "load"
+    =hx-get            (weld (spud base) "/refresher?since={(scow %da since)}")
+    =hx-trigger        "load, every 3s" :: backup with htmx polling
     =hx-swap           "outerHTML"
     ;*  =|  id=@
         |-
@@ -305,8 +370,8 @@
           =hx-target     hx-target.i.hx-refresh-list
           =hx-get        hx-get.i.hx-refresh-list
           =hx-indicator  (fall hx-indicator.i.hx-refresh-list "")
-          =hx-trigger    "load"
-          =hx-swap       "outerHTML";
+          =hx-swap       (fall hx-swap.i.hx-refresh-list "outerHTML")
+          =hx-trigger    "load";
   ==
 ::
 ++  vine
@@ -333,8 +398,7 @@
       (give-html-manx [our dap]:gowl eyre-id dummy |)
       ::
         [%'GET' [%refresher ~] *]
-      =/  since=(unit @da)
-        ?~(get=(get-key:kv 'since' args) ~ `(slav %da u.get))
+      =/  since=@da  (slav %da (need (get-key:kv 'since' args)))
       ;<  ~  bind:m  (watch /fast-refresh [our dap]:gowl /htmx/fast-refresh)
       ;<  ~  bind:m  (send-wait (add now.gowl interval))
       ;<  ~  bind:m  take-wake-or-fast-refresh
@@ -360,7 +424,7 @@
       ==
     ::
     ++  send-refresh-list
-      |=  since=(unit @da)
+      |=  since=@da
       =/  m  (strand ,^vase)
       ^-  form:m
       ;<  =refresh-history  bind:m
@@ -368,11 +432,10 @@
         /gx/[dap.gowl]/htmx/refresh-history/noun
       ::
       =/  hx-refresh-list=(list hx-refresh)
-        ?~  since  ~ :: don't refresh if no since
-        (turn (tap:hon (lot:hon refresh-history ~ since)) tail)
+        (turn (tap:hon (lot:hon refresh-history ~ `since)) tail)
       ::
-     =/  new-since=(unit @da)
-       ?~(pry=(pry:hon refresh-history) ~ `key.u.pry)
+     =/  new-since=@da
+       ?~(pry=(pry:hon refresh-history) now.gowl key.u.pry)
       =/  =manx  (refresher new-since base hx-refresh-list)
       (give-html-manx [our dap]:gowl eyre-id manx |)
     --

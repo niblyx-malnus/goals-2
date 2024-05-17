@@ -1,6 +1,8 @@
-/-  p=pools, gol=goals, act=action
-/+  *ventio, htmx, bind, server, goals-api, fi=webui-feather-icons
+/-  p=pools, gol=goals, act=action, ui=goals-ui, tz=timezones
+/+  *ventio, string, tu=time-utils, htmx, bind, server, goals-api, fi=webui-feather-icons,
+    webui-calendar-main
 |%
++$  card  $+(gall-card card:agent:gall)
 ++  poll-interval  ~s1
 ++  pool-id-to-html-id
   |=  =id:p
@@ -16,13 +18,26 @@
   ^-  id:p
   (scan tape ;~((glue (just 'X')) fed:ag (cook crip (star prn))))
 ::
+++  pretty-id-to-pool-id
+  |=  =tape
+  ^-  id:p
+  (scan tape ;~(pfix fas ;~((glue fas) ;~(pfix sig fed:ag) (cook crip (star prn)))))
+::
 ++  agent
-  |_  [=bowl:gall cards=(list card:agent:gall)]
+  |_  [=bowl:gall cards=(list card) state-0:ui]
   +*  this  .
-  +$  card  card:agent:gall
-  ++  abet  (flop cards)
+      state  +<+>
+  ++  abet  [(flop cards) state]
   ++  emit  |=(=card this(cards [card cards]))
   ++  emil  |=(cadz=(list card) this(cards (weld cadz cards)))
+  ::
+  ++  send-refresh
+    |=  refresh=(list hx-refresh:htmx)
+    ^-  _this
+    %-  emit
+    :*  %pass  /htmx-refresh  %agent  [our dap]:bowl  %poke
+        htmx-refresh+!>(refresh)
+    ==
   ::
   ++  subscribe-to-pools-agent
     ^-  (list card:agent:gall)
@@ -36,20 +51,56 @@
       ~
     [%pass /goals-transitions %agent [our.bowl %goals] %watch /transitions]~
   ::
+  ++  handle-transition
+    |=  tan=transition:ui
+    ^-  _this
+    =>  |%
+        ++  refresh-error
+          |=  id=tape
+          ^-  _this
+          %-  send-refresh
+          [(weld "#" id) "/htmx/goals/error-message?id={id}" ~ ~]~
+        --
+    ?-    -.tan
+        %del-msg
+      =.  error-messages  (~(del by error-messages) id.tan)
+      (refresh-error id.tan)
+      ::
+        %put-msg
+      =.  error-messages  (~(put by error-messages) [id error]:tan)
+      (refresh-error id.tan)
+      ::
+        %put-setting
+      this(settings (~(put by settings) [key setting]:tan))
+      ::
+        %del-setting
+      this(settings (~(del by settings) key.tan))
+    ==
+  ::
   ++  handle-pools-transition
     |=  tan=transition:p
     ^-  _this
     ?+    -.tan  this
         ?(%update-incoming-invites %update-incoming-invite-response)
       ~&  >  %handling-pools-transition-webui
-      %-  emil
-      :~  :*  %pass  /htmx-refresh  %agent  [our dap]:bowl  %poke
-              :-  %htmx-refresh  !>
-              :~  ["#local-membership-invites-pending" "/htmx/goals/local-membership/invites/pending" ~]
-                  ["#local-membership-invites-resolved" "/htmx/goals/local-membership/invites/resolved" ~]
-              ==
-          ==
-       ==
+      %-  send-refresh
+      :~  ["#local-membership-invites-pending" "/htmx/goals/local-membership/invites/pending" ~ ~]
+          ["#local-membership-invites-resolved" "/htmx/goals/local-membership/invites/resolved" ~ ~]
+      ==
+      ::
+        ?(%update-outgoing-requests %update-outgoing-request-response)
+      ~&  >  %handling-pools-transition-webui
+      %-  send-refresh
+      :~  ["#local-membership-requests-pending" "/htmx/goals/local-membership/requests/pending" ~ ~]
+          ["#local-membership-requests-resolved" "/htmx/goals/local-membership/requests/resolved" ~ ~]
+      ==
+       ::
+        %update-blocked
+      ~&  >  %handling-pools-transition-webui
+      %-  send-refresh
+      :~  ["#local-membership-blocked-pools" "/htmx/goals/local-membership/blocked/pools" ~ ~]
+          ["#local-membership-blocked-hosts" "/htmx/goals/local-membership/blocked/hosts" ~ ~]
+      ==
     ==
   ::
   ++  handle-goals-transition
@@ -61,101 +112,513 @@
 ++  vine
   |_  =gowl
   +*  gap  ~(. goals-api gowl)
-  ++  handle-http-request
-    |=  [eyre-id=@ta req=inbound-request:eyre]
-    =/  m  (strand ,vase)
+  ++  put-error
+    |=  [id=tape =error:ui]
+    =/  m  (strand ,~)
     ^-  form:m
-    =/  [[ext=(unit @ta) site=(list @t)] args=key-value-list:kv:htmx]
-      (parse-request-line:server url.request.req)
-    ::
-    ~&  >>  [site+site ext+ext args+args]
-    ::
-    ?+    [method.request.req site ext]
-      (strand-fail %bad-http-request ~)
-      ::
-        [%'GET' [%htmx %goals %current-time ~] *]
-      =/  =manx
-        ;div#current-time: Current Time {(scow %da now.gowl)}
-      (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
-      ::
-        [%'GET' [%htmx %goals ~] *]
-      (give-html-manx:htmx [our dap]:gowl eyre-id my-pools |)
-      ::
-        [%'GET' [%htmx %goals %target ~] [~ %svg]]
-      (give-svg-manx:htmx [our dap]:gowl eyre-id target-svg |)
-      ::
-        [%'GET' [%htmx %goals %local-membership ~] *]
-      =/  active-tab=@t
-        (fall (get-key:kv:htmx 'active-tab' args) 'hidden')
-      =/  =manx  (local-membership active-tab)
-      (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
-      ::
-        [%'GET' [%htmx %goals %local-membership %invites ~] *]
-      =/  active-tab=@t  (need (get-key:kv:htmx 'active-tab' args))
-      =/  =manx  (invites:local-membership active-tab '')
-      (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
-      ::
-        [%'GET' [%htmx %goals %local-membership %invites %pending ~] *]
-      ;<  =incoming-invites:p  bind:m
-        (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
-      =/  =manx  (invites-list:local-membership 'pending' incoming-invites)
-      (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
-      ::
-        [%'GET' [%htmx %goals %local-membership %invites %resolved ~] *]
-      ;<  =incoming-invites:p  bind:m
-        (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
-      =/  =manx  (invites-list:local-membership 'resolved' incoming-invites)
-      (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
-      ::
-        [%'GET' [%htmx %goals %local-membership %invites %accept ~] *]
-      =/  pool-id=@t        (need (get-key:kv:htmx 'pool-id' args))
-      =/  loading=@t        (need (get-key:kv:htmx 'loading' args))
-      =/  accept-invite=@t  (fall (get-key:kv:htmx 'accept-invite' args) 'false')
-      =/  =id:p  (html-id-to-pool-id (trip pool-id))
-      ;<  ~  bind:m
-        ?.  ?=(%true accept-invite)
-          (pure:(strand ,~) ~)
-        :: TODO: Catch and serve failures to the frontend
-        (accept-invite:mem:gap id)
-      =/  =manx  (invite-accept-button:local-membership id ?=(%true loading))
-      ;<  =vase  bind:m  (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
-      ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
-      (pure:m vase)
-      ::
-        [%'GET' [%htmx %goals %local-membership %invites %reject ~] *]
-      =/  pool-id=@t        (need (get-key:kv:htmx 'pool-id' args))
-      =/  loading=@t        (need (get-key:kv:htmx 'loading' args))
-      =/  reject-invite=@t  (fall (get-key:kv:htmx 'reject-invite' args) 'false')
-      =/  =id:p  (html-id-to-pool-id (trip pool-id))
-      ;<  ~  bind:m
-        ?.  ?=(%true reject-invite)
-          (pure:(strand ,~) ~)
-        :: TODO: Catch and serve failures to the frontend
-        (reject-invite:mem:gap id)
-      =/  =manx  (invite-reject-button:local-membership id ?=(%true loading))
-      ;<  =vase  bind:m  (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
-      ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
-      (pure:m vase)
+    (poke [our dap]:gowl goals-ui-transition+!>([%put-msg id error]))
+  ::
+  ++  del-error
+    |=  id=tape
+    =/  m  (strand ,~)
+    ^-  form:m
+    (poke [our dap]:gowl goals-ui-transition+!>([%del-msg id]))
+  ::
+  ++  give-simple-error
+    |=  id=tape
+    =/  m  (strand ,manx)
+    ^-  form:m
+    ;<  =error-messages:ui  bind:m
+      (scry-hard ,error-messages:ui /gx/goals-ui/error-messages/noun)
+    =/  =error:ui  (~(gut by error-messages) id ["" ""])
+    =/  fi-alert-circle=manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %alert-circle))
+    =.  fi-alert-circle       (extend-attribute:mx:htmx %class " inline mr-2 text-lg" fi-alert-circle)
+    =/  fi-x=manx             (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %x))
+    =.  fi-x                  (extend-attribute:mx:htmx %class " inline mr-2 text-lg" fi-x)
+    %-  pure:m
+    ^-  manx
+    ?:  &(=(0 (lent text.error)) =(0 (lent code.error)))
+      ;div.hidden
+        =id  "{id}";
+    ;div.p-2.mb-4.text-sm.text-red-700.bg-red-100.rounded-lg.flex.justify-center
+      =id  "{id}"
+      ;+  fi-alert-circle
+      ;+  ?:  =(0 (lent text.error))
+            ;div.hidden;
+          ;pre
+            {text.error}
+           ==
+      ;button
+        =hx-get      "/htmx/goals/error-message?id={id}&action=del-msg"
+        =hx-target   "#{id}"
+        =hx-trigger  "click"
+        =hx-swap     "outerHTML"
+        ;+  fi-x
+      ==
+      ;+  ?:  =(0 (lent code.error))
+            ;div.hidden;
+          ;pre
+            ;code
+              {code.error}
+            ==
+          ==
     ==
+  ::
+  ++  nooks
+    |%
+    ++  just-put
+      |=  [=path =vase]
+      =/  m  (strand ,~)
+      ^-  form:m
+      %+  poke  [our dap]:gowl
+      :-  %nooks-put
+      (slop !>(path) vase)
+    ::
+    ++  just-del
+      |=  =path
+      =/  m  (strand ,~)
+      ^-  form:m
+      %+  poke  [our dap]:gowl
+      nooks-del+!>(path)
+    ::
+    ++  just-lop
+      |=  =path
+      =/  m  (strand ,~)
+      ^-  form:m
+      %+  poke  [our dap]:gowl
+      nooks-lop+!>(path)
+    ::
+    ++  get
+      |=  =path
+      .^  (unit vase)  %gx 
+          (scot %p our.gowl)  dap.gowl  (scot %da now.gowl)
+          :(weld /nooks/get path /noun)
+      ==
+    ::
+    ++  fit
+      |=  =path
+      .^  ,[^path (unit vase)]  %gx 
+          (scot %p our.gowl)  dap.gowl  (scot %da now.gowl)
+          :(weld /nooks/fit path /noun)
+      ==
+    ::
+    ++  dip
+      |=  =path
+      .^  nooks:ui  %gx 
+          (scot %p our.gowl)  dap.gowl  (scot %da now.gowl)
+          :(weld /nooks/dip path /noun)
+      ==
+    ::
+    ++  put-raw
+      |=  [=path =vase]
+      =/  m  (strand ,(unit ^vase))
+      ^-  form:m
+      ;<  ~  bind:m  (just-put path vase)
+      (pure:m (get path))
+    ::
+    ++  del-raw
+      |=  =path
+      =/  m  (strand ,(unit vase))
+      ^-  form:m
+      ;<  ~  bind:m  (just-del path)
+      (pure:m (get path))
+    ::
+    ++  lop-raw
+      |=  =path
+      =/  m  (strand ,(unit vase))
+      ^-  form:m
+      ;<  ~  bind:m  (just-lop path)
+      (pure:m (get path))
+    ::
+    ++  put
+      |*  state=mold
+      =/  m  (strand ,state)
+      |=  [=path =state]
+      ;<  vax=(unit vase)  bind:m  (put-raw path !>(state))
+      (pure:m !<(^state (need vax)))
+    ::
+    ++  get-or-init-raw
+      =/  m  (strand ,vase)
+      |=  [=path init=form:m]
+      ^-  form:m
+      =/  vax=(unit vase)  (get path)
+      ?^  vax
+        (pure:m u.vax)
+      ~&  >>  "{<dap.gowl>}: nook at {<path>} is uninitialized"
+      ;<  nit=vase  bind:m  init
+      ;<  vas=(unit vase)  bind:m  (put-raw path nit)
+      (pure:m (need vas))
+    ::
+    ++  get-or-init
+      |*  state=mold
+      =/  m  (strand ,state)
+      |=  [=path init=form:m]
+      ^-  form:m
+      =/  vax=(unit vase)  (get path)
+      ?^  vax
+        (pure:m !<(state u.vax))
+      ~&  >>  "{<dap.gowl>}: nook at {<path>} is uninitialized"
+      ;<  nit=state  bind:m  init
+      ((put state) path nit)
+    --
+  ::
+  ++  handle-http-request
+    =|  [site=(pole @t) ext=(unit @ta) args=key-value-list:kv:htmx]
+    |_  [eyre-id=@ta req=inbound-request:eyre]
+    +*  this  .
+    ++  abed
+       ^+  this
+       =/  lin=request-line:server
+         (parse-request-line:server url.request.req)
+       this(site site.lin, ext ext.lin, args args.lin)
+    :: 
+    ++  handle-goals
+      |=  base=(pole @t)
+      =/  m  (strand ,vase)
+      ^-  form:m
+      =/  caud=(pole @t)  (need (decap:htmx base site))
+      ::
+      ;<  =nooks:ui  bind:m  (scry ,nooks:ui /gx/goals-ui/nooks/noun)
+      ~&  nook+(~(get of nooks) site)
+      ::
+      ~&  >>  [site+site ext+ext args+args]
+      ::
+      ?+    [method.request.req caud ext]
+        ~&  [method+method.request.req caud+caud ext+ext]
+        (strand-fail %bad-http-request ~)
+        ::
+          [%'GET' ~ *]
+        =/  =manx  (my-pools now.gowl)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [* [%local-membership *] *]
+        (handle-local-membership (weld base /local-membership))
+        ::
+          [* [%calendar *] *]
+        %~  handle
+          webui-calendar-main
+        :+  gowl  (weld base /calendar)
+        [[eyre-id req] [ext site] args]
+        ::
+          [%'GET' [%target ~] [~ %svg]]
+        (give-svg-manx:htmx [our dap]:gowl eyre-id target-svg |)
+        ::
+          [%'GET' [%error-message ~] *]
+        =/  id=tape  (trip (fall (get-key:kv:htmx 'id' args) ''))
+        =/  action=(unit @t)  (get-key:kv:htmx 'action' args)
+        ;<  ~  bind:m
+          ?~  action
+            (pure:(strand ,~) ~)
+          ?>  ?=(%del-msg u.action)
+          (del-error id)
+        ;<  error=manx  bind:m  (give-simple-error id)
+        (give-html-manx:htmx [our dap]:gowl eyre-id error |)
+      ==
+    ::
+    ++  handle-local-membership
+      |=  base=(pole @t)
+      =/  m  (strand ,vase)
+      ^-  form:m
+      =/  caud=(pole @t)  (need (decap:htmx base site))
+      ::
+      ;<  =nooks:ui  bind:m  (scry ,nooks:ui /gx/goals-ui/nooks/noun)
+      ::
+      ?+    [method.request.req caud ext]
+        (strand-fail %bad-http-request ~)
+        ::
+          [%'GET' ~ *]
+        =/  active-tab=@t
+          (fall (get-key:kv:htmx 'active-tab' args) 'hidden')
+        =/  =manx  (local-membership active-tab)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [* [%invites *] *]
+        (handle-local-invites (weld base /invites))
+        ::
+          [* [%requests *] *]
+        (handle-local-requests (weld base /requests))
+        ::
+          [* [%blocked *] *]
+        (handle-local-blocked (weld base /blocked))
+      ==
+    ::
+    ++  handle-local-invites
+      |=  base=(pole @t)
+      =/  m  (strand ,vase)
+      ^-  form:m
+      =/  caud=(pole @t)  (need (decap:htmx base site))
+      ::
+      ;<  =nooks:ui  bind:m  (scry ,nooks:ui /gx/goals-ui/nooks/noun)
+      ::
+      ?+    [method.request.req caud ext]
+        (strand-fail %bad-http-request ~)
+        ::
+          [%'GET' ~ *]
+        =/  active-tab=@t  (need (get-key:kv:htmx 'active-tab' args))
+        =/  =manx  (invites:local-membership active-tab)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%pending ~] *]
+        ;<  =incoming-invites:p  bind:m
+          (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
+        =/  =manx  (invites-list:local-membership 'pending' incoming-invites)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%resolved ~] *]
+        ;<  =incoming-invites:p  bind:m
+          (scry-hard ,incoming-invites:p /gx/pools/incoming-invites/noun)
+        =/  =manx  (invites-list:local-membership 'resolved' incoming-invites)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%accept ~] *]
+        =/  pool-id=@t        (need (get-key:kv:htmx 'pool-id' args))
+        =/  loading=@t        (need (get-key:kv:htmx 'loading' args))
+        =/  accept-invite=@t  (fall (get-key:kv:htmx 'accept-invite' args) 'false')
+        =/  =id:p  (html-id-to-pool-id (trip pool-id))
+        ;<  ~  bind:m
+          ?.  ?=(%true accept-invite)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (accept-invite:mem:gap id)
+        =/  =manx  (invite-accept-button:local-membership id ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%reject ~] *]
+        =/  pool-id=@t        (need (get-key:kv:htmx 'pool-id' args))
+        =/  loading=@t        (need (get-key:kv:htmx 'loading' args))
+        =/  reject-invite=@t  (fall (get-key:kv:htmx 'reject-invite' args) 'false')
+        =/  =id:p  (html-id-to-pool-id (trip pool-id))
+        ;<  ~  bind:m
+          ?.  ?=(%true reject-invite)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (reject-invite:mem:gap id)
+        =/  =manx  (invite-reject-button:local-membership id ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%delete ~] *]
+        =/  pool-id=@t        (need (get-key:kv:htmx 'pool-id' args))
+        =/  loading=@t        (need (get-key:kv:htmx 'loading' args))
+        =/  delete-invite=@t  (fall (get-key:kv:htmx 'delete-invite' args) 'false')
+        =/  =id:p  (html-id-to-pool-id (trip pool-id))
+        ;<  ~  bind:m
+          ?.  ?=(%true delete-invite)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (delete-invite:mem:gap id)
+        =/  =manx  (invite-delete-button:local-membership id ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+      ==
+    ::
+    ++  handle-local-requests
+      |=  base=(pole @t)
+      =/  m  (strand ,vase)
+      ^-  form:m
+      =/  caud=(pole @t)  (need (decap:htmx base site))
+      ::
+      ;<  =nooks:ui  bind:m  (scry ,nooks:ui /gx/goals-ui/nooks/noun)
+      ::
+      ?+    [method.request.req caud ext]
+        (strand-fail %bad-http-request ~)
+        ::
+          [%'GET' ~ *]
+        =/  active-tab=@t  (need (get-key:kv:htmx 'active-tab' args))
+        =/  =manx  (requests:local-membership active-tab)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%pending ~] *]
+        ;<  =outgoing-requests:p  bind:m
+          (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
+        =/  =manx  (requests-list:local-membership 'pending' outgoing-requests)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%resolved ~] *]
+        ;<  =outgoing-requests:p  bind:m
+          (scry-hard ,outgoing-requests:p /gx/pools/outgoing-requests/noun)
+        =/  =manx  (requests-list:local-membership 'resolved' outgoing-requests)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%cancel-trash2 ~] *]
+        =/  pool-id=@t         (need (get-key:kv:htmx 'pool-id' args))
+        =/  loading=@t         (need (get-key:kv:htmx 'loading' args))
+        =/  cancel-request=@t  (fall (get-key:kv:htmx 'cancel-request' args) 'false')
+        =/  =id:p  (html-id-to-pool-id (trip pool-id))
+        ;<  ~  bind:m
+          ?.  ?=(%true cancel-request)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (cancel-request:mem:gap id)
+        =/  =manx  (request-cancel-trash2-button:local-membership id ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%cancel ~] *]
+        =/  pool-id=@t         (need (get-key:kv:htmx 'pool-id' args))
+        =/  loading=@t         (need (get-key:kv:htmx 'loading' args))
+        =/  cancel-request=@t  (fall (get-key:kv:htmx 'cancel-request' args) 'false')
+        =/  =id:p  (html-id-to-pool-id (trip pool-id))
+        ;<  ~  bind:m
+          ?.  ?=(%true cancel-request)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (cancel-request:mem:gap id)
+        =/  =manx  (request-cancel-button:local-membership id ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'POST' [%extend ~] *]
+        =/  args=key-value-list:kv:htmx  (parse-body:kv:htmx body.request.req)
+        =/  pool-id=@t         (need (get-key:kv:htmx 'pool-id' args))
+        =/  loading=@t         (need (get-key:kv:htmx 'loading' args))
+        =/  extend-request=@t  (fall (get-key:kv:htmx 'extend-request' args) 'false')
+        =/  =id:p  (pretty-id-to-pool-id (trip pool-id))
+        ;<  ~  bind:m
+          ?.  ?=(%true extend-request)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (extend-request:mem:gap id)
+        =/  value=tape  ?:(?=(%false loading) "" (trip pool-id))
+        =/  =manx  (requests-form:local-membership value ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+      ==
+    ::
+    ++  handle-local-blocked
+      |=  base=(pole @t)
+      =/  m  (strand ,vase)
+      ^-  form:m
+      =/  caud=(pole @t)  (need (decap:htmx base site))
+      ::
+      ;<  =nooks:ui  bind:m  (scry ,nooks:ui /gx/goals-ui/nooks/noun)
+      ::
+      ?+    [method.request.req caud ext]
+        (strand-fail %bad-http-request ~)
+        ::
+          [%'GET' ~ *]
+        =/  active-tab=@t  (need (get-key:kv:htmx 'active-tab' args))
+        =/  =manx  (blocked:local-membership active-tab)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [* [%pools *] *]
+        (handle-local-blocked-pools (weld base /pools))
+        ::
+          [* [%hosts *] *]
+        (handle-local-blocked-hosts (weld base /hosts))
+      ==
+    ::
+    ++  handle-local-blocked-pools
+      |=  base=(pole @t)
+      =/  m  (strand ,vase)
+      ^-  form:m
+      =/  caud=(pole @t)  (need (decap:htmx base site))
+      ::
+      ?+    [method.request.req caud ext]
+        (strand-fail %bad-http-request ~)
+        ::
+          [%'GET' ~ *]
+        ;<  =blocked:p  bind:m
+          (scry-hard ,blocked:p /gx/pools/blocked/noun)
+        ;<  error=manx  bind:m  (give-simple-error "local-membership-blocked-pools-error")
+        =/  =manx  (blocked-list:local-membership 'pools' blocked error)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'POST' [%block ~] *]
+        =/  args=key-value-list:kv:htmx  (parse-body:kv:htmx body.request.req)
+        =/  pool-id=@t  (need (get-key:kv:htmx 'pool-id' args))
+        =/  loading=@t  (need (get-key:kv:htmx 'loading' args))
+        =/  block=@t    (fall (get-key:kv:htmx 'block' args) 'false')
+        =/  =id:p  (pretty-id-to-pool-id (trip pool-id))
+        ;<  ~  bind:m
+          ?.  ?=(%true block)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (update-blocked:mem:gap &+[(sy id ~) ~])
+        =/  value=tape  ?:(?=(%false loading) "" (trip pool-id))
+        =/  =manx  (blocked-form:local-membership %pools value ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%unblock ~] *]
+        =/  pool-id=@t  (need (get-key:kv:htmx 'pool-id' args))
+        =/  loading=@t  (need (get-key:kv:htmx 'loading' args))
+        =/  unblock=@t  (fall (get-key:kv:htmx 'unblock' args) 'false')
+        =/  =id:p  (html-id-to-pool-id (trip pool-id))
+        ;<  ~  bind:m
+          ?.  ?=(%true unblock)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (update-blocked:mem:gap |+[(sy id ~) ~])
+        =/  value=tape  ?:(?=(%false loading) "" (trip pool-id))
+        =/  =manx  (unblock-pool-button:local-membership id ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+      ==
+    ::
+    ++  handle-local-blocked-hosts
+      |=  base=(pole @t)
+      =/  m  (strand ,vase)
+      ^-  form:m
+      =/  caud=(pole @t)  (need (decap:htmx base site))
+      ::
+      ?+    [method.request.req caud ext]
+        (strand-fail %bad-http-request ~)
+        ::
+          [%'GET' ~ *]
+        ;<  =blocked:p  bind:m
+          (scry-hard ,blocked:p /gx/pools/blocked/noun)
+        ;<  error=manx  bind:m  (give-simple-error "local-membership-blocked-hosts-error")
+        =/  =manx  (blocked-list:local-membership 'hosts' blocked error)
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'POST' [%block ~] *]
+        =/  args=key-value-list:kv:htmx  (parse-body:kv:htmx body.request.req)
+        =/  host=@t     (need (get-key:kv:htmx 'host' args))
+        =/  loading=@t  (need (get-key:kv:htmx 'loading' args))
+        =/  block=@t    (fall (get-key:kv:htmx 'block' args) 'false')
+        =/  mol  (mole |.((slav %p (cat 3 '~' host))))
+        ;<  ~  bind:m
+          ?^  mol
+            (pure:(strand ,~) ~)
+          (put-error "local-membership-blocked-hosts-error" "badly formatted @p: {(trip host)}" "")
+        ;<  ~  bind:m
+          ?~  mol
+            (pure:(strand ,~) ~)
+          ?.  ?=(%true block)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (update-blocked:mem:gap &+[~ (sy u.mol ~)])
+        =/  value=tape  ?:(?=(%false loading) "" (trip host))
+        =/  =manx  (blocked-form:local-membership %hosts value ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+        ::
+          [%'GET' [%unblock ~] *]
+        =/  host=@t     (need (get-key:kv:htmx 'host' args))
+        =/  loading=@t  (need (get-key:kv:htmx 'loading' args))
+        =/  unblock=@t  (fall (get-key:kv:htmx 'unblock' args) 'false')
+        ~&  args+args
+        =/  =ship  (slav %p (cat 3 '~' host))
+        ;<  ~  bind:m
+          ?.  ?=(%true unblock)
+            (pure:(strand ,~) ~)
+          :: TODO: Catch and serve failures to the frontend
+          (update-blocked:mem:gap |+[~ (sy ship ~)])
+        ~&  %test
+        =/  value=tape  ?:(?=(%false loading) "" (trip host))
+        =/  =manx  (unblock-host-button:local-membership ship ?=(%true loading))
+        ;<  ~  bind:m  (poke [our dap]:gowl htmx-fast-refresh+!>(~))
+        (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+      ==
+    --
   --
 ::
 ++  kv-to-action
   |=  =key-value-list:kv:htmx
   ^-  [dock cage]
   *[dock cage]
-::
-++  page-header
-  |=  title=tape
-  ;head
-    ;title: {title}
-    ;script(src "https://unpkg.com/htmx.org");
-    ;script(src "https://cdn.tailwindcss.com");
-    ;meta(charset "utf-8");
-    ;meta
-      =name     "viewport"
-      =content  "width=device-width, initial-scale=1";
-    ;link(rel "icon", href "/htmx/goals/target.svg", type "image/svg+xml");
-  ==
 ::
 ++  my-pools
   =>  |%
@@ -174,13 +637,22 @@
         }
         '''
       --
-  ::
+  |=  now=@da
   ^-  manx
   ;html(lang "en")
-    ;+  (page-header "My Pools")
+    ;head
+      ;title: My Pools
+      ;script(src "https://unpkg.com/htmx.org");
+      ;script(src "https://cdn.tailwindcss.com");
+      ;meta(charset "utf-8");
+      ;meta
+        =name     "viewport"
+        =content  "width=device-width, initial-scale=1";
+      ;link(rel "icon", href "/htmx/goals/target.svg", type "image/svg+xml");
+    ==
     ;style: {style}
      ;+  dummy:htmx
-     ;+  (init-refresher:htmx /htmx/goals)
+     ;+  (refresher:htmx now /htmx/goals ~)
     ;div.bg-gray-200.h-full.flex.justify-center.items-center.h-screen
       ;div(class "bg-[#DFF7DC] p-6 rounded shadow-md w-full h-screen overflow-y-auto")
         ;div.flex.justify-between.items-center.mb-4
@@ -270,9 +742,9 @@
           ==
           ;+  ?+    active-tab
                   ;div;
-                %invites   (invites %pending '')
-                %requests  requests
-                %blocked   blocked
+                %invites   (invites %pending)
+                %requests  (requests %pending)
+                %blocked   (blocked %hosts)
                 %discover  discover
               ==
           ;div(class "px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse")
@@ -289,55 +761,41 @@
       ==
     ==
   ::
-  ++  error-message
-    |=  msg=@t
-    ^-  manx
-    ?~  msg
-      ;div.hidden;
-    ;div.p-2.mb-4.text-sm.text-red-700.bg-red-100.rounded-lg.flex.items-center
-      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %alert-circle))
-          (extend-attribute:mx:htmx %class " inline mr-2 text-lg" manx)
-      msg
-    ==
-  ::
   ++  invites
-    |=  [active-tab=@t msg=@t]
+    |=  active-tab=@t
     ^-  manx
     ;div#local-membership-invites(class "px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4")
       ;div(class "sm:flex sm:items-start")
-        ;div(class "mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full")
+        ;div(class "mt-3 text-center sm:mt-0 sm:ml-4 w-full")
           ;h3#modal-headline.text-lg.font-medium.leading-6.text-gray-900
             Incoming Pool Invites
           ==
-          ;div.mt-2
-            ;+  (error-message msg)
-            ;div.my-5
-              ;div.mb-2
-                ;button
-                  =class  "px-4 py-2 font-bold text-white rounded {?:(?=(%pending active-tab) "bg-blue-700" "bg-blue-200")}"
-                  =hx-get      "/htmx/goals/local-membership/invites?active-tab=pending"
-                  =hx-target   "#local-membership-invites"
-                  =hx-trigger  "click"
-                  =hx-swap     "outerHTML"
-                  Pending
-                ==
-                ;button
-                  =class  "px-4 py-2 ml-2 font-bold text-white rounded {?:(?=(%resolved active-tab) "bg-green-700" "bg-green-200")}"
-                  =hx-get      "/htmx/goals/local-membership/invites?active-tab=resolved"
-                  =hx-target   "#local-membership-invites"
-                  =hx-trigger  "click"
-                  =hx-swap     "outerHTML"
-                  Resolved
-                ==
-              ==
-              ;div#local-membership-invites-list.flex.justify-center
-                =hx-get      "/htmx/goals/local-membership/invites/{(trip active-tab)}"
-                =hx-target   "this"
-                =hx-trigger  "load"
+          ;div.my-4.mx-4
+            ;div.mb-4.flex.justify-center
+              ;button
+                =class  "px-4 py-2 font-bold text-white rounded {?:(?=(%pending active-tab) "bg-blue-700" "bg-blue-200")}"
+                =hx-get      "/htmx/goals/local-membership/invites?active-tab=pending"
+                =hx-target   "#local-membership-invites"
+                =hx-trigger  "click"
                 =hx-swap     "outerHTML"
-                ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-                    (extend-attribute:mx:htmx %class " text-4xl text-blue-500 animate-spin" manx)
+                Pending
               ==
+              ;button
+                =class  "px-4 py-2 ml-2 font-bold text-white rounded {?:(?=(%resolved active-tab) "bg-green-700" "bg-green-200")}"
+                =hx-get      "/htmx/goals/local-membership/invites?active-tab=resolved"
+                =hx-target   "#local-membership-invites"
+                =hx-trigger  "click"
+                =hx-swap     "outerHTML"
+                Resolved
+              ==
+            ==
+            ;div#local-membership-invites-list.flex.justify-center
+              =hx-get      "/htmx/goals/local-membership/invites/{(trip active-tab)}"
+              =hx-target   "this"
+              =hx-trigger  "load"
+              =hx-swap     "outerHTML"
+              ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
+                  (extend-attribute:mx:htmx %class " text-4xl text-blue-500 animate-spin" manx)
             ==
           ==
         ==
@@ -406,18 +864,41 @@
       ;+  (invite-reject-button id %.n)
     ==
   ::
+  ++  invite-delete-button
+    |=  [=id:p loading=?]
+    ^-  manx
+    =/  pool-id=tape  (pool-id-to-html-id id)
+    =/  html-id=tape  (weld "local-membership-invites-delete_" pool-id)
+    ?.  loading
+      ;button
+        =id          html-id
+        =class       "ml-2 text-red-500 hover:text-red-600"
+        =hx-get      "/htmx/goals/local-membership/invites/delete?pool-id={pool-id}&loading=true"
+        =hx-target   "this"
+        =hx-trigger  "click"
+        =hx-swap     "outerHTML"
+        ;+  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %trash2))
+      ==
+    ;button
+      =id          html-id
+      =disabled    "true"
+      =class       "ml-2 text-red-500 hover:text-red-600"
+      =hx-get      "/htmx/goals/local-membership/invites/delete?pool-id={pool-id}&loading=false&delete-invite=true"
+      =hx-target   "this"
+      =hx-trigger  "load"
+      =hx-swap     "outerHTML"
+      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
+          (extend-attribute:mx:htmx %class " text-red-500 animate-spin" manx)
+    ==
+  ::
   ++  invite-delete-interface
-    |=  response=?
+    |=  [=id:p response=?]
     ^-  manx
     ;div
       ;span(class "text-sm font-bold {?:(response "text-green-500" "text-red-500")}")
         {?:(response "Accepted" "Rejected")}
       ==
-      ;button
-        =disabled  "false" :: is deleting...
-        =class     "ml-2 text-red-500 hover:text-red-600"
-        ;+  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %trash-2))
-      ==
+      ;+  (invite-delete-button id %.n)
     ==
   ::
   ++  invites-list
@@ -454,7 +935,7 @@
                 ==
                 ;+  ?-  active-tab
                       %pending   (invite-response-buttons id)
-                      %resolved  (invite-delete-interface response:(need status))
+                      %resolved  (invite-delete-interface id response:(need status))
                     ==
               ==
             ==
@@ -462,10 +943,370 @@
     ==
   ::
   ++  requests
-    ;div: Requests
+    |=  active-tab=@t
+    ^-  manx
+    ;div#local-membership-requests(class "px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4")
+      ;div(class "sm:flex sm:items-start")
+        ;div(class "mt-3 text-center sm:mt-0 sm:ml-4 w-full")
+          ;h3#modal-headline.text-lg.font-medium.leading-6.text-gray-900
+            Outgoing Pool Requests
+          ==
+          ;div.my-4.mx-4
+            ;div.mb-4.flex.justify-center
+              ;button
+                =class  "px-4 py-2 font-bold text-white rounded {?:(?=(%pending active-tab) "bg-blue-700" "bg-blue-200")}"
+                =hx-get      "/htmx/goals/local-membership/requests?active-tab=pending"
+                =hx-target   "#local-membership-requests"
+                =hx-trigger  "click"
+                =hx-swap     "outerHTML"
+                Pending
+              ==
+              ;button
+                =class  "px-4 py-2 ml-2 font-bold text-white rounded {?:(?=(%resolved active-tab) "bg-green-700" "bg-green-200")}"
+                =hx-get      "/htmx/goals/local-membership/requests?active-tab=resolved"
+                =hx-target   "#local-membership-requests"
+                =hx-trigger  "click"
+                =hx-swap     "outerHTML"
+                Resolved
+              ==
+            ==
+            ;+  (requests-form "" %.n)
+            ;div#local-membership-requests-list.flex.justify-center
+              =hx-get      "/htmx/goals/local-membership/requests/{(trip active-tab)}"
+              =hx-target   "this"
+              =hx-trigger  "load"
+              =hx-swap     "outerHTML"
+              ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
+                  (extend-attribute:mx:htmx %class " text-4xl text-blue-500 animate-spin" manx)
+            ==
+          ==
+        ==
+      ==
+    ==
+  ::
+  ++  request-cancel-trash2-button
+    |=  [=id:p loading=?]
+    ^-  manx
+    =/  pool-id=tape  (pool-id-to-html-id id)
+    =/  html-id=tape  (weld "local-membership-requests-cancel-trash2_" pool-id)
+    ?.  loading
+      ;button
+        =id          html-id
+        =class       "ml-2 text-red-500 hover:text-red-600"
+        =hx-get      "/htmx/goals/local-membership/requests/cancel-trash2?pool-id={pool-id}&loading=true"
+        =hx-target   "this"
+        =hx-trigger  "click"
+        =hx-swap     "outerHTML"
+        ;+  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %trash2))
+      ==
+    ;button
+      =id          html-id
+      =class       "ml-2 text-red-500 hover:text-red-600"
+      =hx-get      "/htmx/goals/local-membership/requests/cancel-trash2?pool-id={pool-id}&loading=false&cancel-request=true"
+      =hx-target   "this"
+      =hx-trigger  "load"
+      =hx-swap     "outerHTML"
+      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
+          (extend-attribute:mx:htmx %class " text-red-500 animate-spin" manx)
+    ==
+  ::
+  ++  request-cancel-button
+    |=  [=id:p loading=?]
+    ^-  manx
+    =/  pool-id=tape  (pool-id-to-html-id id)
+    =/  html-id=tape  (weld "local-membership-requests-cancel_" pool-id)
+    ?.  loading
+      ;button
+        =id          html-id
+        =class       "px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+        =hx-get      "/htmx/goals/local-membership/requests/cancel?pool-id={pool-id}&loading=true"
+        =hx-target   "this"
+        =hx-trigger  "click"
+        =hx-swap     "outerHTML"
+        Cancel
+      ==
+    ;button
+      =id          html-id
+      =class       "px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+      =hx-get      "/htmx/goals/local-membership/requests/cancel?pool-id={pool-id}&loading=true"
+      =hx-target   "this"
+      =hx-trigger  "load"
+      =hx-swap     "outerHTML"
+      Cancel
+    ==
+  ::
+  ++  requests-list
+    |=  [active-tab=@t =outgoing-requests:p]
+    ^-  manx
+    ?.  ?=(?(%pending %resolved) active-tab)
+      ;div: error
+    ::
+    =/  requests=(list [id:p request:p status:p])
+      %+  murn  ~(tap by outgoing-requests)
+      |=  [=id:p =request:p =status:p]
+      ?.  %.  %goals  %~  has  in
+          ((as so):dejs:format (~(gut by request) 'dudes' a+~))
+        ~
+      ?-  active-tab
+        %pending   ?^(status ~ [~ id request status])
+        %resolved  ?~(status ~ [~ id request status])
+      ==
+    ::
+    ;div.flex.justify-center
+      =id  "local-membership-requests-{(trip active-tab)}"
+      ;div(class "flex justify-between items-center p-3 bg-gray-100 rounded-lg mb-2")
+        ;+  ?~  requests
+              ;div: No {(trip active-tab)} requests.
+            ;div
+              ;*
+              %+  turn  requests
+              |=  [=id:p =request:p =status:p]
+              ^-  manx
+              ?-    active-tab 
+                  %pending
+                ;div.flex.justify-between.items-center.p-3.bg-gray-100.rounded-lg.mb-2
+                  ;span.mr-2: /{(scow %p host.id)}/{(trip name.id)}
+                  ;+  (request-cancel-button id %.n)
+                ==
+                ::
+                  %resolved
+                ?>  ?=(^ status)
+                ;div.flex.justify-between.items-center.p-3.bg-gray-100.rounded-lg.mb-2
+                  ;span.mr-2: /{(scow %p host.id)}/{(trip name.id)}
+                  ;div.flex.items-center
+                    ;span(class "text-sm font-bold {?:(response.u.status "text-green-500" "text-red-500")}")
+                      {?:(response.u.status "Accepted" "Rejected")}
+                    ==
+                    ;+  (request-cancel-trash2-button id %.n)
+                  ==
+                ==
+              ==
+            ==
+      ==
+    ==
+  ::
+  ++  requests-form
+    |=  [value=tape loading=?]
+    ^-  manx
+    ?.  loading
+      ;form.flex.space-x-2.my-4
+        =id          "local-membership-requests-form"
+        =hx-post     "/htmx/goals/local-membership/requests/extend"
+        =hx-target   "this"
+        =hx-swap     "outerHTML"
+        ;input.hidden(type "hidden", name "loading", value "true");
+        ;input.hidden(type "hidden", name "extend-request", value "false");
+        ;input.flex-grow.p-2.border.rounded
+          =type         "text"
+          =name         "pool-id"
+          =placeholder  "Enter a pool id to request access to."
+          =value        "{value}";
+        ;button
+          =type         "submit"
+          =class        "px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700"
+          Request
+        ==
+      ==
+    ;form.flex.space-x-2.my-4
+      =id          "local-membership-requests-form"
+      =hx-post     "/htmx/goals/local-membership/requests/extend"
+      =hx-trigger  "load"
+      =hx-target   "this"
+      =hx-swap     "outerHTML"
+      ;input.hidden(type "hidden", name "loading", value "false");
+      ;input.hidden(type "hidden", name "extend-request", value "true");
+      ;input.flex-grow.p-2.border.rounded
+        =type         "text"
+        =name         "pool-id"
+        =placeholder  "Enter a pool id to request access to."
+        =value        "{value}";
+      ;button
+        =type         "submit"
+        =class        "px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 opacity-50 cursor-not-allowed"
+        Request
+      ==
+    ==
   ::
   ++  blocked
-    ;div: Blocked
+    |=  active-tab=@t
+    ^-  manx
+    ;div#local-membership-blocked.my-4.mx-4
+      ;div.mb-4.flex.justify-center
+        ;button
+          =class       "px-4 py-2 font-bold text-white rounded {?:(?=(%hosts active-tab) "bg-blue-700" "bg-blue-200")}"
+          =hx-get      "/htmx/goals/local-membership/blocked?active-tab=hosts"
+          =hx-target   "#local-membership-blocked"
+          =hx-trigger  "click"
+          =hx-swap     "outerHTML"
+          Hosts
+        ==
+        ;button
+          =class       "px-4 py-2 ml-2 font-bold text-white rounded {?:(?=(%pools active-tab) "bg-green-700" "bg-green-200")}"
+          =hx-get      "/htmx/goals/local-membership/blocked?active-tab=pools"
+          =hx-target   "#local-membership-blocked"
+          =hx-trigger  "click"
+          =hx-swap     "outerHTML"
+          Pools
+        ==
+      ==
+      ;+  (blocked-form active-tab "" %.n)
+      ;div#local-membership-blocked-list.flex.justify-center
+        =hx-get      "/htmx/goals/local-membership/blocked/{(trip active-tab)}"
+        =hx-target   "this"
+        =hx-trigger  "load"
+        =hx-swap     "outerHTML"
+        ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
+            (extend-attribute:mx:htmx %class " text-4xl text-blue-500 animate-spin" manx)
+      ==
+    ==
+  ::
+  ++  blocked-form
+    |=  [active-tab=@t value=tape loading=?]
+    ^-  manx
+    ?.  loading
+      ;form.flex.space-x-2.my-4
+        =id          "local-membership-blocked-{(trip active-tab)}-form"
+        =hx-post     "/htmx/goals/local-membership/blocked/{(trip active-tab)}/block"
+        =hx-target   "this"
+        =hx-swap     "outerHTML"
+        ;input.hidden(type "hidden", name "loading", value "true");
+        ;input.hidden(type "hidden", name "block", value "false");
+        ;input.flex-grow.p-2.border.rounded
+          =type         "text"
+          =name         "{?:(?=(%pools active-tab) "pool-id" "host")}"
+          =placeholder  "Enter {?+(active-tab !! %hosts "host", %pools "pool ID")} to block."
+          =value        "{value}";
+        ;button
+          =type         "submit"
+          =class        "px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700"
+          Block
+        ==
+      ==
+    ;form.flex.space-x-2.my-4
+      =id          "local-membership-blocked-{(trip active-tab)}-form"
+      =hx-post     "/htmx/goals/local-membership/blocked/{(trip active-tab)}/block"
+      =hx-trigger  "load"
+      =hx-target   "this"
+      =hx-swap     "outerHTML"
+      ;input.hidden(type "hidden", name "loading", value "false");
+      ;input.hidden(type "hidden", name "block", value "true");
+      ;input.flex-grow.p-2.border.rounded
+        =type         "text"
+        =name         "{?:(?=(%pools active-tab) "pool-id" "host")}"
+        =placeholder  "Enter {?+(active-tab !! %hosts "host", %pools "pool ID")} to block."
+        =value        "{value}";
+      ;button
+        =type         "submit"
+        =class        "px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 opacity-50 cursor-not-allowed"
+        Block
+      ==
+    ==
+  ::
+  ++  unblock-pool-button
+    |=  [=id:p loading=?]
+    ^-  manx
+    =/  pool-id=tape  (pool-id-to-html-id id)
+    =/  html-id=tape  (weld "local-membership-blocked-pools-unblock_" pool-id)
+    ?.  loading
+      ;button
+        =class       "px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+        =id          html-id
+        =hx-get      "/htmx/goals/local-membership/blocked/pools/unblock?pool-id={pool-id}&loading=true"
+        =hx-target   "this"
+        =hx-trigger  "click"
+        =hx-swap     "outerHTML"
+        Unblock
+      ==
+    ;button
+      =class       "px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+      =id          html-id
+      =hx-get      "/htmx/goals/local-membership/blocked/pools/unblock?pool-id={pool-id}&loading=false&unblock=true"
+      =hx-target   "this"
+      =hx-trigger  "load"
+      =hx-swap     "outerHTML"
+      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
+          (extend-attribute:mx:htmx %class " text-sm text-white animate-spin" manx)
+    ==
+  ::
+  ++  unblock-host-button
+    |=  [host=ship loading=?]
+    ^-  manx
+    =/  host-tape=tape  ?~(sco=(scow %p host) !! t.sco)
+    =/  html-id=tape    (weld "local-membership-blocked-hosts-unblock_" host-tape)
+    ?.  loading
+      ;button
+        =class       "px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+        =id          html-id
+        =hx-get      "/htmx/goals/local-membership/blocked/hosts/unblock?host={host-tape}&loading=true"
+        =hx-target   "this"
+        =hx-trigger  "click"
+        =hx-swap     "outerHTML"
+        Unblock
+      ==
+    ;button
+      =class       "px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
+      =id          html-id
+      =hx-get      "/htmx/goals/local-membership/blocked/hosts/unblock?host={host-tape}&loading=false&unblock=true"
+      =hx-target   "this"
+      =hx-trigger  "load"
+      =hx-swap     "outerHTML"
+      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
+          (extend-attribute:mx:htmx %class " text-sm text-white animate-spin" manx)
+    ==
+  ::
+  ++  blocked-list
+    |=  [active-tab=@t =blocked:p error=manx]
+    ^-  manx
+    ?.  ?=(?(%pools %hosts) active-tab)
+      ;div: error
+    ;div
+      =id  "local-membership-blocked-{(trip active-tab)}"
+      ;+  error
+      ;+
+      ?-    active-tab
+          %pools
+        =/  blocked=(list id:p)  ~(tap in pools.blocked)
+        ?~  blocked
+          ;div
+            No blocked {(trip active-tab)}.
+          ==
+        ;div
+          ;*
+          %+  turn  blocked
+          |=  =id:p
+          ^-  manx
+          =/  pool-id=tape  (pool-id-to-html-id id)
+          =/  html-id=tape  (weld "blocked-pool_" pool-id)
+          ;div
+            =id     html-id
+            =class  "flex justify-between items-center p-3 bg-gray-100 rounded-lg mb-2"
+            ;span: {:(weld "/" (scow %p host.id) "/" (trip name.id))}
+            ;+  (unblock-pool-button id %.n)
+          ==
+        ==
+        ::
+          %hosts
+        =/  blocked=(list ship)  ~(tap in hosts.blocked)
+        ?~  blocked
+          ;div
+            No blocked {(trip active-tab)}.
+          ==
+        ;div
+          ;*
+          %+  turn  blocked
+          |=  host=ship
+          ^-  manx
+          =/  host-tape=tape  ?~(sco=(scow %p host) !! t.sco)
+          =/  html-id=tape    (weld "blocked-host_" host-tape)
+          ;div
+            =id     html-id
+            =class  "flex justify-between items-center p-3 bg-gray-100 rounded-lg mb-2"
+            ;span: {(scow %p host)}
+            ;+  (unblock-host-button host %.n)
+          ==
+        ==
+      ==
+    ==
   ::
   ++  discover
     ;div: Discover
@@ -827,147 +1668,6 @@
 ::   );
 :: }
 :: 
-:: const BlockedTab = () => {
-::   const [blockedHosts, setBlockedHosts] = useState<string[]>([]);
-::   const [blockedPools, setBlockedPools] = useState<string[]>([]);
-::   const [activeTab, setActiveTab] = useState<'hosts' | 'pools'>('hosts');
-::   const [isLoading, setIsLoading] = useState(true);
-::   const [errorMessage, setErrorMessage] = useState('');
-::   const [refresh, setRefresh] = useState(true);
-::   const [blockId, setBlockId] = useState('');
-::   const [isBlocking, setIsBlocking] = useState(false);
-:: 
-::   useEffect(() => {
-::     const fetch = async () => {
-::       setIsLoading(true);
-::       try {
-::         const blocked = await api.getLocalBlocked();
-::         console.log("blocked");
-::         console.log(blocked);
-::         setBlockedHosts(blocked.hosts);
-::         setBlockedPools(blocked.pools);
-::       } catch (error) {
-::         console.error("Error fetching blocked info:", error);
-::         setErrorMessage("Failed to fetch blocked info.");
-::       } finally {
-::         setIsLoading(false);
-::       }
-::     };
-::     fetch();
-::   }, [refresh]);
-:: 
-::   const handleBlock = async () => {
-::     setIsBlocking(true);
-::     try {
-::       if (activeTab === 'hosts') {
-::         await api.blockHost(blockId);
-::         setBlockedHosts([...blockedHosts, blockId]);
-::       } else {
-::         await api.blockPool(blockId);
-::         setBlockedPools([...blockedPools, blockId]);
-::       }
-::       setBlockId(''); // Clear the input field
-::     } catch (error) {
-::       console.error(`Error blocking ${activeTab === 'hosts' ? 'host' : 'pool'}:`, error);
-::       setErrorMessage(`Failed to block ${activeTab === 'hosts' ? 'host' : 'pool'}.`);
-::     } finally {
-::       setIsBlocking(false);
-::       setRefresh(!refresh);
-::     }
-::   };
-:: 
-::   const handleUnblock = async (id: string) => {
-::     const type = activeTab === 'hosts' ? 'host' : 'pool';
-::     try {
-::       // Assuming the API provides methods to unblock hosts and pools
-::       if (type === 'host') {
-::         await api.unblockHost(id);
-::         setBlockedHosts(blockedHosts.filter(host => host !== id));
-::       } else {
-::         await api.unblockPool(id);
-::         setBlockedPools(blockedPools.filter(pool => pool !== id));
-::       }
-::     } catch (error) {
-::       console.error(`Error unblocking ${type}:`, error);
-::       setErrorMessage(`Failed to unblock ${type}.`);
-::     } finally {
-::       setRefresh(!refresh);
-::     }
-::   };
-:: 
-::   const renderBlockedItems = () => {
-::     const items = activeTab === 'hosts' ? blockedHosts : blockedPools;
-::     if (items.length === 0) {
-::       return <div>No blocked {activeTab}.</div>;
-::     }
-:: 
-::     return items.map((item, index) => (
-::       <div key={index} className="flex justify-between items-center p-3 bg-gray-100 rounded-lg mb-2">
-::         <span>{item}</span>
-::         <button
-::           onClick={() => handleUnblock(item)}
-::           className="px-2 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none"
-::         >
-::           Unblock
-::         </button>
-::       </div>
-::     ));
-::   };
-:: 
-::   return (
-::     <div className="my-4 mx-4">
-::       <div className="mb-4 flex justify-center">
-::         <button
-::           className={`px-4 py-2 font-bold text-white rounded ${activeTab === 'hosts' ? 'bg-blue-700' : 'bg-blue-200'}`}
-::           onClick={() => setActiveTab('hosts')}
-::         >
-::           Hosts
-::         </button>
-::         <button
-::           className={`px-4 py-2 ml-2 font-bold text-white rounded ${activeTab === 'pools' ? 'bg-green-700' : 'bg-green-200'}`}
-::           onClick={() => setActiveTab('pools')}
-::         >
-::           Pools
-::         </button>
-::       </div>
-::       <div className="flex space-x-2 my-4">
-::         <input
-::           type="text"
-::           placeholder={`Enter ${activeTab === 'hosts' ? 'host' : 'pool'} ID to block`}
-::           className="flex-grow p-2 border rounded"
-::           value={blockId}
-::           onChange={(e) => setBlockId(e.target.value)}
-::           disabled={isBlocking}
-::         />
-::         <button
-::           onClick={handleBlock}
-::           className={`px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700 ${isBlocking ? 'opacity-50 cursor-not-allowed' : ''}`}
-::           disabled={isBlocking}
-::         >
-::           Block
-::         </button>
-::       </div>
-::       {isLoading ? (
-::         <div className="flex justify-center">
-::           <FiLoader className="text-4xl text-blue-500 animate-spin"/>
-::         </div>
-::       ) : (
-::         <div>
-::           {errorMessage && (
-::             <div className="flex items-center justify-between bg-red-100 text-red-700 p-2 rounded mt-2">
-::               <div className="flex items-center">
-::                 <FiAlertCircle className="mr-2" />
-::                 {errorMessage}
-::               </div>
-::               <FiX className="cursor-pointer" onClick={() => setErrorMessage('')} />
-::             </div>
-::           )}
-::           {renderBlockedItems()}
-::         </div>
-::       )}
-::     </div>
-::   );
-:: }
 :: 
 :: const DiscoverTab = () => {
 ::   const [activeTab, setActiveTab] = useState<'pals' | 'search'>('pals');

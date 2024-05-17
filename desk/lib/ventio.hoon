@@ -550,4 +550,11 @@
     %-  (slog %soft-fail err.next.c-res)
     c-res(next [%done |+err.next.c-res])
   c-res
+::
+++  prepend-error
+  |=  new-term=term
+  |=  [=term =tang]
+  ^-  [^term ^tang]
+  :-  new-term
+  [leaf+(trip term) tang]
 --
