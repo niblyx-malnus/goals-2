@@ -39,8 +39,7 @@
     |=  [cards=(list card) =cid cal=calendar]
     (emil(calendars (~(put by calendars) cid cal)) cards)
   ::
-  ++  en-path  |=(=cid `path`/calendar/[(scot %p host.cid)]/[name.cid])
-  ++  en-ui-path  |=(=cid `path`/ui/calendar/[(scot %p host.cid)]/[name.cid])
+  ++  en-path     |=(=cid `path`/calendar/[(scot %p host.cid)]/[name.cid])
   ::
   ++  handle-transition
     |=  tan=transition
@@ -67,29 +66,28 @@
     |=  [=cid tan=calendar-transition]
     ^-  _this
     =/  =calendar  (~(gut by calendars) cid *calendar)
-    =.  calendar   calendar:(handle-transition:(apex:clib calendar cache zones) tan)
+    =.  calendar   calendar:(~(handle-transition clib bowl calendar) tan)
     this(calendars (~(put by calendars) cid calendar))
   ::
   ++  handle-compound-transition
     |=  tan=compound-transition
     ^-  _this
-    !!
+    ?-    -.tan
+        %update-calendar
+      (handle-compound-calendar-transition [cid mod p]:tan)
+    ==
   ::
-  ++  follow-calendar
-    |=  =cid
+  ++  handle-compound-calendar-transition
+    |=  [=cid mod=ship tan=compound-calendar-transition]
     ^-  _this
-    =/  =wire  (en-path cid)
-    =/  =dock  [host.cid dap.bowl]
-    ?:  (~(has by wex.bowl) wire dock)  this
-    (emit %pass wire %agent dock %watch wire)
-  ::
-  ++  leave-calendar
-    |=  =cid
-    ^-  _this
-    =/  =wire  (en-path cid)
-    =/  =dock  [host.cid dap.bowl]
-    ?.  (~(has by wex.bowl) wire dock)  this
-    (emit %pass wire %agent dock %leave ~)
+    =/  =calendar  (~(gut by calendars) cid *calendar)
+    =^  tans  calendar
+      teba:(~(handle-compound-transition clib bowl calendar) mod tan)
+    =.  calendars  (~(put by calendars) cid calendar)
+    %-  emil
+    %+  turn  tans
+    |=  tan=calendar-transition
+    [%give %fact ~[(en-path cid)] goals-calendar-transition+!>(tan)]
   ::
   ++  get-tz-to-utc
     |=  uzid=(unit zid:t)
@@ -319,7 +317,7 @@
       %+  turn
         ^-  (list iref)
         %-  zing  %+  turn
-          (tap:son:so (lot:son:so span-order.cal `r `l))
+          (tap:son:so (lot:son:so span-order.cal `+(r) `(dec l)))
         |=  [key=@da val=(set mome)]
         (turn ~(tap in val) tail)
       |=  =iref
@@ -334,7 +332,7 @@
       %+  turn
         ^-  (list iref)
         %-  zing  %+  turn
-          (tap:fon:fo (lot:fon:fo fullday-order.cal `r `l))
+          (tap:fon:fo (lot:fon:fo fullday-order.cal `+(r) `(dec l)))
         |=([key=@da val=(set iref)] ~(tap in val))
       |=  =iref
       =/  ven=event  (~(got by events.cal) eid.iref)
@@ -572,12 +570,12 @@
         ==
           %&
         ?-    -.instance.p.p.upd
-            %skip
-          %=  cal
-            span-order     (~(del so span-order.cal) [eid idx.p.p.upd])
-            fullday-order  (~(del fo fullday-order.cal) [eid idx.p.p.upd])
-          ==
-          ::
+              %skip
+            %=  cal
+              span-order     (~(del so span-order.cal) [eid idx.p.p.upd])
+              fullday-order  (~(del fo fullday-order.cal) [eid idx.p.p.upd])
+            ==
+            ::
             %fuld
           ?.  ?=(%& -.p.instance.p.p.upd)  cal :: ignore exceptions
           :: replace this instance in span-order

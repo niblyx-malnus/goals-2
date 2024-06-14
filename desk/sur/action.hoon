@@ -53,11 +53,6 @@
       [%goal-order-slot p=(each [dis=key dat=key] [dis=key dat=key])]
       [%update-pool =pid mod=ship p=compound-pool-transition]
   ==
-:: Defined Duration - left
-:: Defined End Time - both
-:: Fullday          - fuld
-:: Instantaneous    - jump
-:: Skip             - skip
 ::
 +$  compound-pool-transition
   $%  [%reorder-roots roots=(list gid)]

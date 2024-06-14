@@ -1,7 +1,8 @@
 /-  p=pools, gol=goals, act=action, ui=goals-ui, tz=timezones
 /+  *ventio, string, tu=time-utils, htmx, bind, server, goals-api, fi=webui-feather-icons,
-    webui-calendar-main
+    webui-calendar-main, html-utils
 |%
+++  mx  mx:html-utils
 +$  card  $+(gall-card card:agent:gall)
 ++  poll-interval  ~s1
 ++  pool-id-to-html-id
@@ -22,6 +23,45 @@
   |=  =tape
   ^-  id:p
   (scan tape ;~(pfix fas ;~((glue fas) ;~(pfix sig fed:ag) (cook crip (star prn)))))
+:: Icons
+::
+++  fi-loader
+  ^-  manx
+  =/  =manx  (make:fi %loader)
+  =.  manx  (pus:~(at mx manx) "height: .875em; width: .875em;")
+  (pac:~(at mx manx) "animate-spin")
+::
+++  blue-fi-loader
+  ^-  manx
+  (pac:~(at mx fi-loader) "text-4xl text-blue-500")
+::
+++  white-fi-loader
+  ^-  manx
+  (pac:~(at mx fi-loader) "text-sm text-white")
+::
+++  red-fi-loader  
+  ^-  manx
+  (pac:~(at mx fi-loader) "text-red-500")
+::
+++  fi-trash2
+  ^-  manx
+  (pus:~(at mx (make:fi %trash2)) "height: .875em; width: .875em;")
+::
+++  fi-alert-circle
+  ^-  manx
+  =/  =manx  (make:fi %alert-circle)
+  =.  manx  (pus:~(at mx manx) "height: .875em; width: .875em;")
+  (pac:~(at mx manx) " inline mr-2 text-lg")
+::
+++  fi-x
+  ^-  manx
+  =/  =manx  (make:fi %x)
+  =.  manx   (pus:~(at mx manx) "height: .875em; width: .875em;")
+  (pac:~(at mx manx) " inline mr-2 text-lg")
+::
+++  fi-mail
+  ^-  manx
+  (pus:~(at mx (make:fi %mail)) "height: .875em; width: .875em;")
 ::
 ++  agent
   |_  [=bowl:gall cards=(list card) state-0:ui]
@@ -131,10 +171,6 @@
     ;<  =error-messages:ui  bind:m
       (scry-hard ,error-messages:ui /gx/goals-ui/error-messages/noun)
     =/  =error:ui  (~(gut by error-messages) id ["" ""])
-    =/  fi-alert-circle=manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %alert-circle))
-    =.  fi-alert-circle       (extend-attribute:mx:htmx %class " inline mr-2 text-lg" fi-alert-circle)
-    =/  fi-x=manx             (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %x))
-    =.  fi-x                  (extend-attribute:mx:htmx %class " inline mr-2 text-lg" fi-x)
     %-  pure:m
     ^-  manx
     ?:  &(=(0 (lent text.error)) =(0 (lent code.error)))
@@ -279,7 +315,6 @@
       =/  caud=(pole @t)  (need (decap:htmx base site))
       ::
       ;<  =nooks:ui  bind:m  (scry ,nooks:ui /gx/goals-ui/nooks/noun)
-      ~&  nook+(~(get of nooks) site)
       ::
       ~&  >>  [site+site ext+ext args+args]
       ::
@@ -662,7 +697,7 @@
             =hx-target   "#local-membership"
             =hx-trigger  "click"
             =hx-swap     "outerHTML"
-            ;+  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %mail))
+            ;+  fi-mail
           ==
           ;div#local-membership.hidden;
         ==
@@ -794,8 +829,7 @@
               =hx-target   "this"
               =hx-trigger  "load"
               =hx-swap     "outerHTML"
-              ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-                  (extend-attribute:mx:htmx %class " text-4xl text-blue-500 animate-spin" manx)
+              ;+  blue-fi-loader
             ==
           ==
         ==
@@ -825,8 +859,7 @@
       =hx-target   "this"
       =hx-trigger  "load"
       =hx-swap     "outerHTML"
-      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-          (extend-attribute:mx:htmx %class " text-sm text-white animate-spin" manx)
+      ;+  white-fi-loader
     ==
   ::
   ++  invite-reject-button
@@ -852,8 +885,7 @@
       =hx-target   "this"
       =hx-trigger  "load"
       =hx-swap     "outerHTML"
-      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-          (extend-attribute:mx:htmx %class " text-sm text-white animate-spin" manx)
+      ;+  white-fi-loader
     ==
   ::
   ++  invite-response-buttons
@@ -877,7 +909,7 @@
         =hx-target   "this"
         =hx-trigger  "click"
         =hx-swap     "outerHTML"
-        ;+  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %trash2))
+        ;+  fi-trash2
       ==
     ;button
       =id          html-id
@@ -887,8 +919,7 @@
       =hx-target   "this"
       =hx-trigger  "load"
       =hx-swap     "outerHTML"
-      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-          (extend-attribute:mx:htmx %class " text-red-500 animate-spin" manx)
+      ;+  red-fi-loader
     ==
   ::
   ++  invite-delete-interface
@@ -976,8 +1007,7 @@
               =hx-target   "this"
               =hx-trigger  "load"
               =hx-swap     "outerHTML"
-              ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-                  (extend-attribute:mx:htmx %class " text-4xl text-blue-500 animate-spin" manx)
+              ;+  blue-fi-loader
             ==
           ==
         ==
@@ -997,7 +1027,7 @@
         =hx-target   "this"
         =hx-trigger  "click"
         =hx-swap     "outerHTML"
-        ;+  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %trash2))
+        ;+  fi-trash2
       ==
     ;button
       =id          html-id
@@ -1006,8 +1036,7 @@
       =hx-target   "this"
       =hx-trigger  "load"
       =hx-swap     "outerHTML"
-      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-          (extend-attribute:mx:htmx %class " text-red-500 animate-spin" manx)
+      ;+  red-fi-loader
     ==
   ::
   ++  request-cancel-button
@@ -1155,8 +1184,7 @@
         =hx-target   "this"
         =hx-trigger  "load"
         =hx-swap     "outerHTML"
-        ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-            (extend-attribute:mx:htmx %class " text-4xl text-blue-500 animate-spin" manx)
+        ;+  blue-fi-loader
       ==
     ==
   ::
@@ -1224,8 +1252,7 @@
       =hx-target   "this"
       =hx-trigger  "load"
       =hx-swap     "outerHTML"
-      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-          (extend-attribute:mx:htmx %class " text-sm text-white animate-spin" manx)
+      ;+  white-fi-loader
     ==
   ::
   ++  unblock-host-button
@@ -1250,8 +1277,7 @@
       =hx-target   "this"
       =hx-trigger  "load"
       =hx-swap     "outerHTML"
-      ;+  =/  =manx  (set-attribute:mx:htmx %style "height: .875em; width: .875em;" (make:fi %loader))
-          (extend-attribute:mx:htmx %class " text-sm text-white animate-spin" manx)
+      ;+  white-fi-loader
     ==
   ::
   ++  blocked-list

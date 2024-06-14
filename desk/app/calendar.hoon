@@ -19,18 +19,36 @@
 ::
 ++  on-init
   ^-  (quip card _this)
-  =.  calendars  (~(put by calendars) [our.bowl %our] *calendar:c)
-  [~ this]
+  %-  on-poke
+  :-  %calendar-transition  !>
+  ^-  transition:c
+  [%create-calendar [our.bowl %our] 'Our Calendar']
 ::
 ++  on-save   !>(state)
 ::
 ++  on-load
   |=  ole=vase
   ^-  (quip card _this)
-  :: =+  !<(old=state-0:c ole)
-  =.  state  *state-0:c
-  =.  calendars  (~(put by calendars) [our.bowl %our] *calendar:c)
-  [~ this]
+  =.  state  !<(old=state-0:c ole)
+  :: =.  state  *state-0:c
+  ?:  (~(has by calendars) [our.bowl %our])
+    [~ this]
+  %-  on-poke
+  :-  %calendar-transition  !>
+  ^-  transition:c
+  [%create-calendar [our.bowl %our] 'Our Calendar']
+::
+++  on-peek
+  |=  =(pole knot)
+  ^-  (unit (unit cage))
+  ?+    pole  (on-peek:def pole)
+    [%x %calendars ~]  ``noun+!>(calendars)
+    ::
+      [%x %calendar p=@ta q=@ta ~]
+    =/  =cid:c   [(slav %p p.pole) q.pole]
+    :-  ~  :-  ~  :-  %noun  !>
+    (~(got by calendars) cid)
+  ==
 ::
 ++  on-poke
   |=  [=mark =vase]
@@ -56,7 +74,6 @@
 ::
 ++  on-watch  on-watch:def
 ++  on-leave  on-leave:def
-++  on-peek   on-peek:def
 ++  on-agent  on-agent:def
 ++  on-arvo   on-arvo:def
 ++  on-fail   on-fail:def

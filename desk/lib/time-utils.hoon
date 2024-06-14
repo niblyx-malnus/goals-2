@@ -28,8 +28,6 @@
 +$  span     [l=@da r=@da] :: UTC datetime pair
 +$  fullday  @da           :: must be divisible by ~d1
 +$  jump     @da
-::
-+$  dom      [l=@ud r=@ud] :: instance domain
 :: CALENDAR rule; NOT TIMEZONE rule
 ::
 +$  rule-exception
@@ -46,6 +44,7 @@
       [%dr p=@dr]
       [%dl p=delta]
       [%dx p=dext]
+      [%wd p=wkd]
       [%wl p=(list wkd-num)]
   ==
 ::
@@ -132,6 +131,212 @@
   ?:  (gte d.a d.b)
     [sign.a (sub d.a d.b)]
   [sign.b (sub d.b d.a)]
+::
+++  numb :: adapted from numb:enjs:format
+  |=  a=@u
+  ^-  tape
+  ?:  =(0 a)  "0"
+  %-  flop
+  |-  ^-  tape
+  ?:(=(0 a) ~ [(add '0' (mod a 10)) $(a (div a 10))])
+::
+++  zfill
+  |=  [w=@ud t=tape]
+  ^-  tape
+  ?:  (lte w (lent t))
+    t
+  $(t ['0' t])
+::
+++  monadic-parsing
+  |%
+  :: parser bind
+  ::
+  ++  bind  
+    |*  =mold
+    |*  [sef=rule gat=$-(mold rule)]
+    |=  tub=nail
+    =/  vex  (sef tub)
+    ?~  q.vex  vex
+    ((gat p.u.q.vex) q.u.q.vex)
+  :: check if done
+  ::
+  ++  done
+    |=  tub=nail
+    ^-  (like ?)
+    ?~  q.tub
+      [p.tub ~ %.y tub]
+    [p.tub ~ %.n tub]
+  --
+:: YYYY-MM-DDTHH:MM[:SS[.SSS]]
+::
+++  datetime-local
+  |%
+  ++  en
+    |=  d=@da
+    ^-  tape
+    =+  (yore d)
+    =/  =tape
+      ;:  weld
+        (numb y)
+        "-"
+        (zfill 2 (scow %ud m))
+        "-"
+        (zfill 2 (scow %ud d.t))
+        "T"
+      ==
+    =.  d     (mod d ~d1)
+    =.  tape  :(weld tape (zfill 2 (scow %ud (div d ~h1))) ":")
+    =.  d     (mod d ~h1)
+    =.  tape  (weld tape (zfill 2 (scow %ud (div d ~m1))))
+    =.  d     (mod d ~m1)
+    ?:  =(0 d)
+      tape
+    =.  tape  :(weld tape ":" (zfill 2 (scow %ud (div d ~s1))))
+    =.  d     (mod d ~s1)
+    ?:  =(0 d)
+      tape
+    :(weld tape "." (zfill 3 (scow %ud (div (mul d 1.000) ~s1))))
+  ++  de       |=(=@t `@da`(rash t parse))
+  ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  y=@ud   bind  dem
+    ;<  *       bind  hep
+    ;<  mo=@ud  bind  dem
+    ;<  *       bind  hep
+    ;<  d=@ud   bind  dem
+    ;<  *       bind  (just 'T')
+    ;<  h=@ud   bind  dem
+    ;<  *       bind  col
+    ;<  mi=@ud  bind  dem
+    =/  d=@da   (year [& y] mo d h mi 0 ~)
+    ;<  fin=?  bind  done
+    ?:  fin
+      (easy d)
+    ;<  *      bind  col
+    ;<  s=@ud  bind  dem
+    =.  d      (add d (mul s ~s1))
+    ;<  fin=?  bind  done
+    ?:  fin
+      (easy d)
+    ;<  *      bind  dot
+    ;<  f=@ud  bind  dem
+    (easy (add d (div (mul f ~s1) 1.000)))
+  --
+:: YYYY-MM-DD
+::
+++  date-input
+  |%
+  ++  en
+    |=  d=@da
+    ^-  tape
+    ?>  =(0 (mod d ~d1))
+    =+  (yore d)
+    ;:  weld
+      (numb y)
+      "-"
+      (zfill 2 (scow %ud m))
+      "-"
+      (zfill 2 (scow %ud d.t))
+    ==
+  ++  de       |=(=@t `@da`(rash t parse))
+  ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  y=@ud   bind  dem
+    ;<  *       bind  hep
+    ;<  mo=@ud  bind  dem
+    ;<  *       bind  hep
+    ;<  d=@ud   bind  dem
+    (easy (year [& y] mo d 0 0 0 ~))
+  --
+:: HH:MM[:SS[.SSS]]
+::
+++  time-input
+  |%
+  ++  en
+    |=  d=@dr
+    ^-  tape
+    ?>  (lth d ~d1)
+    =/  =tape  (weld (zfill 2 (scow %ud (div d ~h1))) ":")
+    =.  d      (mod d ~h1)
+    =.  tape   (weld tape (zfill 2 (scow %ud (div d ~m1))))
+    =.  d      (mod d ~m1)
+    ?:  =(0 d)
+      tape
+    =.  tape  :(weld tape ":" (zfill 2 (scow %ud (div d ~s1))))
+    =.  d      (mod d ~s1)
+    ?:  =(0 d)
+      tape
+    :(weld tape "." (zfill 3 (scow %ud (div (mul d 1.000) ~s1))))
+  ++  de       |=(=@t `@dr`(rash t parse))
+  ++  de-soft  |=(=@t `(unit @dr)`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  h=@ud  bind  dem
+    ;<  *      bind  col
+    ;<  m=@ud  bind  dem
+    =/  d=@dr  (add (mul h ~h1) (mul m ~m1))
+    ;<  fin=?  bind  done
+    ?:  fin
+      (easy d)
+    ;<  *      bind  col
+    ;<  s=@ud  bind  dem
+    =.  d      (add d (mul s ~s1))
+    ;<  fin=?  bind  done
+    ?:  fin
+      (easy d)
+    ;<  *      bind  dot
+    ;<  f=@ud  bind  dem
+    (easy (add d (div (mul f ~s1) 1.000)))
+  --
+:: YYYY-MM
+::
+++  month-input
+  |%
+  ++  en
+    |=  d=@da
+    ^-  tape
+    ?>  =(0 (mod d ~d1))
+    =/  =date  (yore d)
+    ?>  =(1 d.t.date) :: accepts only first-of-month @da's
+    ;:  weld
+      (numb y.date)
+      "-"
+      (zfill 2 (scow %ud m.date))
+    ==
+  ++  de       |=(=@t `@da`(rash t parse))
+  ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  y=@ud   bind  dem
+    ;<  *       bind  hep
+    ;<  mo=@ud  bind  dem
+    (easy (year [& y] mo 1 0 0 0 ~))
+  --
+::
+++  week-input
+  |%
+  ++  en
+    |=  d=@da
+    ^-  tape
+    ?>  =(0 (mod d ~d1))
+    =+  (yore d)
+    ?>  =(1 d) :: accepts only first-of-month @da's
+    ;:  weld
+      (numb y)
+      "-"
+      (zfill 2 (scow %ud m))
+    ==
+  ++  de       |=(=@t `@da`(rash t parse))
+  ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  y=@ud   bind  dem
+    ;<  *       bind  hep
+    ;<  mo=@ud  bind  dem
+    (easy (year [& y] mo 1 0 0 0 ~))
+  --
 ::
 ++  nth-weekday
   |=  [[a=? y=@ud] m=@ud =ord w=@ud]

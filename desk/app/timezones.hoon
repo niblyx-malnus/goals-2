@@ -60,17 +60,14 @@
       [%x %zone p=@ta q=@ta ~]
     =/  =zid:t   [(slav %p p.pole) q.pole]
     :-  ~  :-  ~  :-  %noun  !>
-    (~(got by zones) zid)
+    (~(get by zones) zid)
     ::
-      [%x %zone-names ~]
-    :-  ~  :-  ~  :-  %noun  !>
-    %+  turn  ~(tap in zones)
-    |=  [=zid:t =zone:t]
-    ^-  [zid:t @t]
-    :-  zid
+      [%x %offset p=@ta q=@ta ~]
+    =/  =zid:t   [(slav %p p.pole) q.pole]
+    =/  =zone:t  (~(got by zones) zid)
     =/  pul=(unit [@ud rule=tz-rule:t])
       (~(pul or:(abed:zn:zon zid) order.zone) now.bowl)
-    (rap 3 name.rule:(need pul) ' - ' name.zone ~)
+    ``noun+!>(offset.rule:(need pul))
     ::
     [%x %zones2 ~]  ``zone-peek+!>(zones+zones)
     [%x %flags ~]   ``zone-peek+!>(flags+~(tap in ~(key by zones)))
@@ -82,17 +79,23 @@
       [%x %tz-to-utc-list p=@ta q=@ta ~]
     :-  ~  :-  ~  :-  %noun  !>
     =/  =zid:t   [(slav %p p.pole) q.pole]
-    tz-to-utc-list:(abed:zn:zon zid)
+    ?.  (~(has by zones) zid)
+      ~
+    `tz-to-utc-list:(abed:zn:zon zid)
     ::
       [%x %tz-to-utc p=@ta q=@ta ~]
     :-  ~  :-  ~  :-  %noun  !>
     =/  =zid:t   [(slav %p p.pole) q.pole]
-    tz-to-utc:(abed:zn:zon zid)
+    ?.  (~(has by zones) zid)
+      ~
+    `tz-to-utc:(abed:zn:zon zid)
     ::
       [%x %utc-to-tz p=@ta q=@ta ~]
     :-  ~  :-  ~  :-  %noun  !>
     =/  =zid:t   [(slav %p p.pole) q.pole]
-    utc-to-tz:(abed:zn:zon zid)
+    ?.  (~(has by zones) zid)
+      ~
+    `utc-to-tz:(abed:zn:zon zid)
   ==
 ::
 ++  on-agent  on-agent:def

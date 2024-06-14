@@ -1,7 +1,7 @@
 /-  c=calendar, r=rules, t=timezones
-/+  *ventio, htmx, server, nooks, html-utils, tu=time-utils,
+/+  *ventio, htmx, server, nooks, html-utils, tu=time-utils, fi=webui-feather-icons,
     inputs=webui-calendar-inputs
-|_  $:  [zid=(unit zid:t) =date]
+|_  $:  [zid=(unit zid:t) =date =cid:c =iref:c]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -10,28 +10,14 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    now  (need (get-now-tz zid))
+    calendar  (get-calendar cid)
     rules  
       .^  rules:r  %gx
         (scot %p our.gowl)  %rule-store  (scot %da now.gowl)
         /rules/noun
       ==
 ::
-++  id-num  (dedot:htmx (scow %uv (sham date)))
-::
-++  get-now-tz
-  |=  zone=(unit zid:t)
-  ^-  (unit @da)
-  ?~  zone
-    `now.gowl
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) now.gowl)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
+++  id-num  (dedot:htmx (scow %uv (sham [date cid iref])))
 ::
 ++  rid-to-tape
   |=  =rid:r
@@ -50,6 +36,23 @@
     (scot %p our.gowl)  %timezones  (scot %da now.gowl)
     /zones/noun
   ==
+::
+++  get-calendar
+  |=  =cid:c
+  .^  calendar:c  %gx
+    (scot %p our.gowl)  %calendar  (scot %da now.gowl)
+    /calendar/(scot %p host.cid)/[name.cid]/noun
+  ==
+::
+++  fi-loader
+  ^-  manx
+  =/  =manx  (make:fi %loader)
+  =.  manx  (pus:~(at mx manx) "height: .875em; width: .875em;")
+  (pac:~(at mx manx) "animate-spin")
+::
+++  blue-fi-loader
+  ^-  manx
+  (pac:~(at mx fi-loader) "text-4xl text-blue-500")
 ::
 ++  input-style-classes
   """
@@ -117,8 +120,8 @@
   ^-  calendar-action:c
   |^
   =/  =brac:kv  (de-bracket:kv l)
+  ~&  brac+~(tap of brac)
   =/  title=@t  (reed:kv (~(get of brac) /metadata/title))
-  =?  title  =('' title)  '(No title)'
   =/  =dom:r    [0 (dec (rash (reed:kv (~(get of brac) /dom)) dem))]
   =/  =rid:r    (tape-to-rid (trip (reed:kv (~(get of brac) /ruledata/rid))))
   =/  =parm:r   parm:(~(got by rules) rid)
@@ -192,6 +195,7 @@
 ::
 +$  state
   $~  :*  '(New event...)'
+          ~
           %left
           :*  [~ %both %single-0]
               [~ %left %single-0]
@@ -200,6 +204,7 @@
           ==
       ==
   $:  title=@t
+      date=(unit @da)
       kind=@t
       $=  rids
       $:  both=rid:r
@@ -215,6 +220,13 @@
   %-  pure:m
   *state
 ::
+++  send-refresh
+  |=  refresh=(list hx-refresh:htmx)
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  poke  [our dap]:gowl
+  htmx-refresh+!>(refresh)
+::
 ++  handle
   =/  m  (strand ,vase)
   ^-  form:m
@@ -228,34 +240,34 @@
   ::
   ?+    parms  (strand-fail %bad-http-request ~)
       [%'GET' ~ *]
-    =/  =manx  ~(create-event-panel components sta)
+    =/  new-kind=@t
+      (fall (get-key:kv 'ruledata[kind][head]' args) kind.sta)
+    =/  new-date=(unit @da)
+      (biff (get-key:kv 'date' args) (cury slaw %da))
+    ;<  sta=state  bind:m
+      ((put:nuk state) base sta(kind new-kind, date new-date))
+    =/  =manx  ~(update-event-panel components sta)
     (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
     ::
-      [%'POST' [%rule-kind-panel ~] *]
+      [%'POST' [%delete-event ~] *]
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
-    =/  new-kind=(unit @t)     (get-key:kv 'ruledata[kind][head]' args)
-    =/  new-rule-id=(unit @t)  (get-key:kv 'ruledata[rid]' args)
-    =/  rule-id=(unit rid:r)  (bind new-rule-id (cork trip tape-to-rid))
-    =/  new-state=state  sta
-    =?  kind.new-state  ?=(^ new-kind)  u.new-kind
-    =?  rids.new-state  ?=(^ rule-id)
-      ?+  q.u.rule-id  !!
-        %both  rids.new-state(both u.rule-id)
-        %left  rids.new-state(left u.rule-id)
-        %fuld  rids.new-state(fuld u.rule-id)
-        %jump  rids.new-state(jump u.rule-id)
+    =/  delete-option=@t  (fall (get-key:kv 'delete-option' args) 'whole-event')
+    =/  =event:c  (~(got by events.calendar) eid.iref)
+    =/  =calendar-action:c
+      ?+    delete-option  !!
+          %whole-event
+        [%delete-event eid.iref]
+        ::
+          %this-instance
+        [%update-event eid.iref %update-ruledata [i i]:iref ~ '0v0']
+        ::
+          %this-and-following-instances
+        [%update-event eid.iref %update-domain [l.dom.event i.iref]]
       ==
-    ;<  sta=state  bind:m  ((put:nuk state) base new-state)
-    =/  =manx  ~(rule-kind-panel components sta)
-    (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
-    ::
-      [%'POST' [%create-event ~] *]
-    =/  args=key-value-list:kv  (parse-body:kv body.request.req)
-    =/  =calendar-action:c  (create-event-action args)
     ;<  *  bind:m
       %+  (vent ,*)  [our.gowl %calendar]
       calendar-calendar-action+[[our.gowl %our] calendar-action]
-    =/  =manx  ~(create-event-panel components sta)
+    =/  =manx  ~(update-event-panel components sta)
     (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
   ==
 ::
@@ -264,48 +276,95 @@
   +*  this   .
       state  +<
   ::
-  ++  create-event-panel
+  ++  update-event-panel
     ^-  manx
+    ?.  (~(has by events.calendar) eid.iref)
+      ;div.flex.flex-col.items-center.p-2
+        =id  "update-event_{id-num}"
+        ;+  blue-fi-loader
+      ==
     ;div.flex.flex-col.m-2
-      =id  "create-event_{id-num}"
+      =id  "update-event_{id-num}"
       ;div.border-b.mb-4
-        ;div.text-2xl.font-semibold.text-center.text-gray-700.mb-2: Create Event
+        ;div.text-2xl.font-semibold.text-center.text-gray-700.mb-2: Delete Event
         ;form.m-2.flex.flex-col.items-center
-          =hx-post     "{(spud base)}/create-event"
+          =hx-post     "{(spud base)}/delete-event"
           =hx-trigger  "submit"
-          =hx-target   "#create-event_{id-num}"
+          =hx-target   "#update-event_{id-num}"
           =hx-swap     "outerHTML"
-          ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
-            ;span.m-2.font-medium.text-sm.text-gray-700: Add Event Title:
-            ;input
-              =type         "text"
-              =name         "metadata[title]"
-              =pattern      ".*\\S+.*" :: double bas to escape escape
-              =class        "p-2 w-60 text-sm border rounded focus:outline-none focus:border-b-4 focus:border-blue-600 caret-blue-600 !important"
-              =placeholder  "Add event title"
-              =autofocus    ""
-              ;
-            ==
-          ==
-          ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
-            ;span.m-2.font-medium.text-sm.text-gray-700: Select Rule Type:
-            ;select.p-2.w-60.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
-              =hx-post     "{(spud base)}/rule-kind-panel"
-              =hx-trigger  "change"
-              =hx-target   "#create-event_rule-kind_{id-num}"
-              =hx-swap     "outerHTML"
-              =name        "ruledata[kind][head]"
-              ;option(value "left"): By Duration
-              ;option(value "both"): By End Time
-              ;option(value "fuld"): Fullday
-              ;option(value "jump"): Instantaneous
-            ==
-          ==
-          ;+  rule-kind-panel
+          ;+  =/  =event:c  (~(got by events.calendar) eid.iref)
+              ?:  =(1 ~(wyt by instances.event))
+                ;div.flex.flex-col.mb-4
+                  ;label.flex.items-center.mb-2
+                    ;input.mr-2
+                      =type       "radio"
+                      =name       "delete-option"
+                      =value      "whole-event"
+                      =checked    ""
+                      =autofocus  ""
+                      ;
+                    ==
+                    ;span: Delete event
+                  ==
+                ==
+              ?:  =(i.iref l.dom.event)
+                ;div.flex.flex-col.mb-4
+                  ;label.flex.items-center.mb-2
+                    ;input.mr-2
+                      =type       "radio"
+                      =name       "delete-option"
+                      =value      "this-instance"
+                      =checked    ""
+                      =autofocus  ""
+                      ;
+                    ==
+                    ;span: This instance
+                  ==
+                  ;label.flex.items-center.mb-2
+                    ;input.mr-2
+                      =type   "radio"
+                      =name   "delete-option"
+                      =value  "whole-event"
+                      ;
+                    ==
+                    ;span: All instances
+                  ==
+                ==
+              ;div.flex.flex-col.mb-4
+                ;label.flex.items-center.mb-2
+                  ;input.mr-2
+                    =type       "radio"
+                    =name       "delete-option"
+                    =value      "this-instance"
+                    =checked    ""
+                    =autofocus  ""
+                    ;
+                  ==
+                  ;span: This instance
+                ==
+                ;label.flex.items-center.mb-2
+                  ;input.mr-2
+                    =type   "radio"
+                    =name   "delete-option"
+                    =value  "this-and-following-instances"
+                    ;
+                  ==
+                  ;span: This and following instances
+                ==
+                ;label.flex.items-center.mb-2
+                  ;input.mr-2
+                    =type   "radio"
+                    =name   "delete-option"
+                    =value  "whole-event"
+                    ;
+                  ==
+                  ;span: All instances
+                ==
+              ==
           ;button
             =type         "submit"
             =class        "px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-            Save
+            Delete
           ==
         ==
       ==
@@ -325,14 +384,14 @@
       |=  [[* a=rule:r] [* b=rule:r]]
       (alphabetical:htmx (trip name.a) (trip name.b))
     ;div.w-full.mx-2.flex.flex-col
-      =id  "create-event_rule-kind_{id-num}"
+      =id  "update-event_rule-kind_{id-num}"
       ;+  rule-kind-parameters
       ;div.mb-1.flex.items-center.justify-between
         ;span.m-2.font-medium.text-sm.text-gray-700: Select Rule:
         ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
           =hx-post     "{(spud base)}/rule-kind-panel"
           =hx-trigger  "change"
-          =hx-target   "#create-event_rule-kind_{id-num}"
+          =hx-target   "#update-event_rule-kind_{id-num}"
           =hx-swap     "outerHTML"
           =name   "ruledata[rid]"
           ;*  %+  turn  rule-list
@@ -428,8 +487,9 @@
             ;span.m-2.font-medium.text-sm.text-gray-700: {(trip name)}:
             ;span.flex.w-60
               ;+  =/  n=tape  "ruledata[args][{(trip name)}]"
-                  =/  day=@da     (mul ~d1 (div (year date) ~d1))
-                  =/  minute=@dr  (mul ~m30 (div (mod now ~d1) ~m30))
+                  :: TODO: make sure now is in correct timezone
+                  =/  day=@da     (mul ~d1 (div (fall date now.gowl) ~d1))
+                  =/  minute=@dr  (mul ~m1 (div (mod now.gowl ~d1) ~m1))
                   ?+  term
                          ;div: {(trip term)}
                     %ud  (unsigned-decimal n)
@@ -459,3 +519,4 @@
     ==
   --
 --
+

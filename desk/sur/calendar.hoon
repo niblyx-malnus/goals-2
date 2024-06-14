@@ -46,11 +46,11 @@
   $:  =eid  =dom
       ruledata=(map aid ruledata)
       metadata=(map mid metadata)
-      instances=(map @ud instance)
+      instances=(map @ud instance) :: TODO: should be mop
       default-ruledata=aid
       default-metadata=mid
-      ruledata-map=(map @ud aid)
-      metadata-map=(map @ud mid)
+      ruledata-map=(map @ud aid)   :: TODO: should be mop
+      metadata-map=(map @ud mid)   :: TODO: should be mop
       rsvps=(map @ud rsvps)
   ==
 +$  events  (map eid event)
@@ -75,12 +75,14 @@
 +$  state-0  [%0 =calendars]
 ::
 +$  transition
+  $+  transition
   $%  [%create-calendar =cid title=@t]
       [%delete-calendar =cid]
       [%update-calendar =cid p=calendar-transition]
   ==
 ::
 +$  calendar-transition
+  $+  calendar-transition
   $%  [%init-calendar =calendar] 
       [%create-event =eid]
       [%delete-event =eid]
@@ -88,26 +90,49 @@
   ==
 ::
 +$  event-transition
+  $+  event-transition
   $%  [%init-event =event]
       [%dom =dom]
       [%ruledata =aid =ruledata]
       [%metadata =mid =metadata]
       [%default-ruledata =aid]
       [%default-metadata =mid]
-      [%ruledata-map i=@ud =aid]
-      [%metadata-map i=@ud =mid]
+      [%ruledata-map i=@ud aid=(unit aid)]
+      [%metadata-map i=@ud mid=(unit mid)]
       [%rsvp i=@ud =ship =rsvp]
       [%instantiate idx-list=(list @ud)]
   ==
 ::
-:: single instance event:
-::  dom [0 0]
-:: =/  =rid   [~ %left %single-0]
-:: =/  =kind  [%left ~ ~h1]
-:: =/  args   (my ['Start' %dx [0 ~2010.1.5]]~)
-:: ~&  ((get-to-span:ca:cal [~ %left %single-0] left+[~ ~h1] args) idx)
++$  compound-transition
+  $+  compound-transition
+  $%  [%update-calendar =cid mod=ship p=compound-calendar-transition]
+  ==
 ::
-+$  compound-transition  *
++$  compound-calendar-transition
+  $+  compound-calendar-transition
+  $%  [%create-event =eid =dom =mid =metadata =aid =ruledata]
+      [%delete-event =eid]
+      [%update-event =eid p=compound-event-transition]
+  ==
+::
++$  compound-event-transition
+  $%  [%init =dom =mid =metadata =aid =ruledata]
+      [%update-metadata =dom mid=(unit mid)]
+      [%update-ruledata =dom aid=(unit aid)]
+      [%update-domain =dom]
+  ==
+::
++$  calendar-action
+  $%  [%create-event =dom title=@t =ruledata]
+      [%delete-event =eid]
+      [%update-event =eid p=event-action]
+  ==
+::
++$  event-action
+  $%  [%update-metadata =dom mid=(unit mid)]
+      [%update-ruledata =dom aid=(unit aid)]
+      [%update-domain =dom]
+  ==
 ::
 +$  calendar-field
   $%  [%title title=@t]
@@ -121,13 +146,6 @@
       [%color color=@t]
   ==
 ::
-+$  calendar-action
-  %+  pair  cid
-  $%  [%create title=@t description=@t]
-      [%update fields=(list calendar-field)]
-      [%delete ~]
-  ==
-::
 +$  event-field
   $%  [%def-rule =aid]
       [%def-data =mid]
@@ -138,21 +156,20 @@
       [%mid =mid]
   ==
 ::
-+$  event-action
-  %+  pair  [=cid =eid]
-  $%  [%create =dom =aid =rid =kind =args =mid =metadata]
-      [%create-until start=@ud until=@da =aid =rid =kind =args =mid =metadata]
-      [%update fields=(list event-field)]
-      [%delete ~]
-      [%create-rule =aid =rid =kind =args]
-      [%update-rule =aid =rid =kind =args]
-      [%delete-rule =aid]
-      [%create-metadata =mid metadata]
-      [%update-metadata =mid fields=(list meta-field)]
-      [%delete-metadata =mid]
-      [%update-instances =dom fields=(list instance-field)]
-      [%update-domain =dom]
-  ==
+:: +$  event-action
+::   $%  [%create =dom =aid =rid =kind =args =mid =metadata]
+::       [%create-until start=@ud until=@da =aid =rid =kind =args =mid =metadata]
+::       [%update fields=(list event-field)]
+::       [%delete ~]
+::       [%create-rule =aid =rid =kind =args]
+::       [%update-rule =aid =rid =kind =args]
+::       [%delete-rule =aid]
+::       [%create-metadata =mid metadata]
+::       [%update-metadata =mid fields=(list meta-field)]
+::       [%delete-metadata =mid]
+::       [%update-instances =dom fields=(list instance-field)]
+::       [%update-domain =dom]
+::   ==
 ::
 +$  rdate-action
   %+  pair  cid

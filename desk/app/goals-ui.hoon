@@ -3,6 +3,7 @@
     j=json-utils
 /=  x  /ted/vines/goals-ui
 /=  x  /mar/goals-ui/transition
+/=  x  /lib/fiber
 ::
 |%
 +$  card        $+(gall-card card:agent:gall)
@@ -56,28 +57,6 @@
   ~&  "poke to {<dap.bowl>} agent with mark {<mark>}"
   ?+    mark  (on-poke:dus mark vase)
       %noun
-    =/  jon=json
-      %-  need  %-  de:json:html
-      '''
-      {
-        "a": {
-          "c": 1,
-          "d": [1, 2, 3]
-        },
-        "b": 2
-      }
-      '''
-    ~&  (~(get jo:j jon) /a/d/2)
-    ~&  (~(deg jo:j jon) /a/d/2 ni:dejs:format)
-    ~&  (~(deg jo:j jon) /a/d/2 ni:dejs-soft:format)
-    ~&  (~(dug jo:j jon) /a/d/2 ni:dejs:format 4)
-    ~&  (~(dug jo:j jon) /a/d/3 ni:dejs:format 4)
-    ~&  (~(del jo:j jon) /a)
-    ~&  (~(del jo:j jon) /a/d)
-    ~&  (~(put jo:j jon) /a/hello s+%test)
-    ~&  (~(put jo:j jon) /a/hello/3/jello/4/good s+%woop)
-    ~&  (~(put jo:j jon) /a/hello/['!3']/jello/4/good s+%woop)
-    ~&  (~(dog jo:j jon) /a/d/2 ni:dejs:format)
     [~ this]
     ::
       %nooks-put

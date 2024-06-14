@@ -1,6 +1,80 @@
 :: by ~tinnus-napbus
 :: https://github.com/tinnus-napbus/manx-utils
 |_  a=manx
+:: manx data structures:
+::
+:: +$  mane  $@(@tas [@tas @tas])                    ::  XML name+space
+:: +$  manx  $~([[%$ ~] ~] [g=marx c=marl])          ::  dynamic XML node
+:: +$  marl  (list manx)                             ::  XML node list
+:: +$  mars  [t=[n=%$ a=[i=[n=%$ v=tape] t=~]] c=~]  ::  XML cdata
+:: +$  mart  (list [n=mane v=tape])                  ::  XML attributes
+:: +$  marx  $~([%$ ~] [n=mane a=mart])              ::  dynamic XML tag
+::
+:: A $mane is just a NaMe
+:: A $manx is an Xml Node and has a taG anc Contents
+:: A $marl is just a List of manx
+:: A $mart is a list of atTRibutes, of key/value pairs
+:: A $marx is a tag it has a Name and Attributes
+::
+:: Get the tag of a manx a: g.a
+:: Get the contents of a manx a: c.a
+:: Get the name of the tag of a manx a: n.g.a
+:: Get the attributes of the tag of a manx a: a.g.a
+:: Get the name of the first attribute of the tag of a manx a: n.i.a.g.a
+:: Get the value of the first attribute of the tag of a manx a: v.i.a.g.a
+::
+:: beginning of ~migrev-dolseg supplementations
+:: named
+::
+::  first desscendant with name=tape, or null
+::
+++  named
+  |=  name=tape
+  ^-  (unit manx)
+  =/  n :: a list of named XML nodes no content
+    %+  skim  pre-flatten
+    |=  =manx
+    =((~(gut by (malt a.g.manx)) %name "") name)
+  ?:  =(0 (lent n))  ~
+  `(snag 0 n)
+:: get
+::
+::   tape at attribute, or null
+::
+++  get
+  |=  =mane
+  ^-  (unit tape)
+  (~(get by (malt a.g.a)) mane)
+:: got
+::
+::   cord of attribute, or crash
+::
+++  got
+  |=  =mane
+  ^-  cord
+  ~|  (crip "cannont find attribute {<mane>}")
+  (crip (need (get mane)))
+:: val
+::
+::   value (tape) attribute of first named descendant, or null
+::
+++  val
+  |=  name=tape
+  ^-  (unit tape)
+  ?~  t=(named name)  ~
+  =.  a  u.t
+  (get %value)
+:: vol
+::
+::  value (cord) attribute of first named descendant, or crash
+::
+++  vol
+  |=  name=tape
+  ^-  cord
+  ~|  (crip "cannont find element with name '{<name>}'")
+  (crip (need (val name)))
+:: end of ~migrev-dolseg supplementations
+::
 :: whitelisted
 ::
 ::   check all tags are in whitelist

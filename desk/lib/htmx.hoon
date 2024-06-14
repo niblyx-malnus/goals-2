@@ -1,10 +1,19 @@
-/+  *ventio, server, bind, manx-utils
+/+  *ventio, server, ebind=bind, html-utils
 |%
+++  mx  mx:html-utils
+++  kv  kv:html-utils
+::
+++  give-empty-200
+  |=  [=dock eyre-id=@ta]
+  =/  m  (strand ,vase)
+  ^-  form:m
+  (give-simple-payload:vine:ebind dock eyre-id [200 ~] ~)
+::
 ++  give-html-manx
   |=  [=dock eyre-id=@ta =manx cache=?]
   =/  m  (strand ,vase)
   ^-  form:m
-  %^    give-simple-payload:vine:bind
+  %^    give-simple-payload:vine:ebind
       dock
     eyre-id
   %-  %*(. html-response:gen:server cache cache)
@@ -14,58 +23,28 @@
   |=  [=dock eyre-id=@ta =manx cache=?]
   =/  m  (strand ,vase)
   ^-  form:m
-  %^    give-simple-payload:vine:bind
+  %^    give-simple-payload:vine:ebind
       dock
     eyre-id
   %-  %*(. svg-response:gen:server cache cache)
   (manx-to-octs:server manx)
 ::
-++  kv
-  |%
-  +$  key-value-list  (list [key=@t value=@t])
-  ::
-  ++  get-key
-    |=  [key=@t =key-value-list]
-    ^-  (unit @t)
-    (get-header:http key key-value-list)
-  ::
-  ++  get-all-key
-    |=  [key=@t =key-value-list]
-    ^-  (list @t)
-    =/  val=(unit @t)  (get-key key key-value-list)
-    ?~  val
-      ~
-    :-  u.val
-    $(key-value-list (delete-key key key-value-list))
-  ::
-  ++  set-key
-    |=  [key=@t value=@t =key-value-list]
-    ^+  key-value-list
-    (set-header:http key value key-value-list)
-  ::
-  ++  delete-key
-    |=  [key=@t =key-value-list]
-    ^+  key-value-list
-    (delete-header:http key key-value-list)
-  ::
-  ++  delete-all-key
-    |=  [key=@t =key-value-list]
-    ^+  key-value-list
-    =/  val=(unit @t)  (get-key key key-value-list)
-    ?~  val
-      key-value-list
-    $(key-value-list (delete-key key key-value-list))
-  ::
-  ++  parse-body
-    |=  body=(unit octs)
-    ^-  key-value-list
-    %-  fall  :_  *key-value-list
-    %+  rush
-      `@t`(tail (fall body [0 '']))
-    yquy:de-purl:html
-  --
+++  send-refresh
+  |=  [=dock refresh=(list hx-refresh)]
+  =/  m  (strand ,~)
+  ^-  form:m
+  %+  poke  dock
+  htmx-refresh+!>(refresh)
 ::
-++  en-html-id  |=(=path `tape`(zing (turn (join '_' path) trip)))
+++  dedot
+  |=  =tape
+  ^+  tape
+  ?~  tape
+    ~
+  ?:  ?=(%'.' i.tape)
+    $(tape t.tape)
+  [i.tape $(tape t.tape)]
+::
 ++  moup
   |=  [i=@ud =path] 
   ^+  path
@@ -75,75 +54,6 @@
     i     (dec i)
     path  (snip path)
   ==
-:: +$  mane  $@(@tas [@tas @tas])                    ::  XML name+space
-:: +$  manx  $~([[%$ ~] ~] [g=marx c=marl])          ::  dynamic XML node
-:: +$  marl  (list manx)                             ::  XML node list
-:: +$  mars  [t=[n=%$ a=[i=[n=%$ v=tape] t=~]] c=~]  ::  XML cdata
-:: +$  mart  (list [n=mane v=tape])                  ::  XML attributes
-:: +$  marx  $~([%$ ~] [n=mane a=mart])              ::  dynamic XML tag
-:: These probably already exist somewhere; too lazy to find them
-::
-++  mx
-  |%
-  ++  get-attribute
-    |=  [=mane =manx]
-    ^-  (unit tape)
-    ?~  a.g.manx
-      ~
-    ?:  =(n.i.a.g.manx mane)
-      [~ v.i.a.g.manx]
-    $(a.g.manx t.a.g.manx)
-  ::
-  ++  set-attribute
-    |=  [=mane value=tape =manx]
-    ^+  manx
-    %=    manx
-        a.g
-      |-
-      ?~  a.g.manx
-        [[mane value] ~]
-      ?:  =(n.i.a.g.manx mane)
-        [[mane value] t.a.g.manx]
-      [i.a.g.manx $(a.g.manx t.a.g.manx)]
-    ==
-  ::
-  ++  extend-attribute
-    |=  [=mane value=tape =manx]
-    ^+  manx
-    =/  new-value=tape  (weld (fall (get-attribute mane manx) ~) value)
-    (set-attribute mane new-value manx)
-  ::
-  ++  remove-attribute :: TODO: change to remove attribute
-    |=  [=mane value=tape =manx]
-    ^+  manx
-    %=    manx
-        a.g
-      |-
-      ?~  a.g.manx
-        ~
-      ?:  =(n.i.a.g.manx mane)
-        t.a.g.manx
-      [i.a.g.manx $(a.g.manx t.a.g.manx)]
-    ==
-    ::
-    ++  get-outer-html                 !!
-    ++  set-outer-html                 !!
-    ++  get-inner-html                 !!
-    ++  set-inner-html                 !!
-    ++  get-element-by-id              !! :: returns manx
-    ++  get-elements-by-class-name     !! :: returns marl
-    ++  get-elements-by-tag-name       !! :: returns marl
-    ++  children                       !! :: returns marl
-    ++  first-child                    !! :: returns marl
-    ++  last-child                     !! :: returns marl
-    ++  next-sibling                   !! :: returns manx
-    ++  previous-sibling               !! :: returns manx
-    ++  text-content                   !! :: preorder concatenation
-    ++  inner-text                     !! :: deals with CSS hidden stuff
-    ++  query-selector                 !! :: returns manx     CSS selector
-    ++  query-selector-all             !! :: returns marl (?) CSS selector
-    ++  closest                        !! :: returns manx     CSS selector
-  --
 :: stolen from rudder library
 ::
 ++  decap  ::  strip leading base from full site path

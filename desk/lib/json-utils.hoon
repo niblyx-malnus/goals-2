@@ -101,21 +101,16 @@
     ?:  ?=([i=@ta t=~] path)
       ?@  jon  jon
       ?+    -.jon  jon
+        %a  [%a p=(into p.jon (rash i.path dem:ag) val)]
           %o
         :: remove leading ! to allow escaping array creation
         ::
         =?  i.path  ?=(%'!' (end 3 i.path))  (rsh [3 1] i.path)
         [%o p=(~(put by p.jon) i.path val)]
-        ::
-          %a
-        ?~  rus=(rush i.path dem:ag)
-          !! :: don't create new empty arrays / objects
-        [%a p=(into p.jon u.rus val)]
       ==
     ?@  jon  jon
     ?+    -.jon  jon
         %o
-      :: TODO: use a better escaping method
       :: remove leading ! to allow escaping array creation
       ::
       =?  i.path  ?=(%'!' (end 3 i.path))  (rsh [3 1] i.path)
@@ -126,13 +121,12 @@
       [%o p=(~(put by p.jon) i.path $(path t.path, jon o+~))]
       ::
         %a
-      ?~  rus=(rush i.path dem:ag)
-        !! :: don't create new empty arrays / objects
-      ?^  wag=(swag [u.rus 1] p.jon)
-        [%a p=(into (oust [u.rus 1] p.jon) u.rus $(path t.path, jon i.wag))]
+      =/  idx=@ud  (rash i.path dem:ag)
+      ?^  wag=(swag [idx 1] p.jon)
+        [%a p=(into (oust [idx 1] p.jon) idx $(path t.path, jon i.wag))]
       ?^  (biff (glow t.path) (curr rush dem:ag))
-        [%a p=(into p.jon u.rus $(path t.path, jon a+~))]
-      [%a p=(into p.jon u.rus $(path t.path, jon o+~))]
+        [%a p=(into p.jon idx $(path t.path, jon a+~))]
+      [%a p=(into p.jon idx $(path t.path, jon o+~))]
     ==
   ::
   ++  mar

@@ -26,6 +26,8 @@
       [%skip ~]
   ==
 ::
++$  dom   [l=@ud r=@ud] :: instance domain
+::
 +$  rule  [name=@t =parm hoon=@t]
 ::
 +$  rules  (map rid rule)

@@ -40,15 +40,16 @@
   ++  arg
     |=  =^arg
     ^-  json
-    ?-  -.arg
-      %ud  (frond %ud (numb p.arg))
-      %da  (frond %da (nimb (to-unix-ms p.arg)))
-      %od  (frond %od s+p.arg)
-      %dr  (frond %dr (numb (dr-to-unix-ms p.arg)))
-      %dl  (frond %dl (delta p.arg))
-      %dx  (frond %dx (dext p.arg))
-      %wl  (frond %wl a+(turn p.arg numb))
-    ==
+    !!
+    :: ?-  -.arg
+    ::   %ud  (frond %ud (numb p.arg))
+    ::   %da  (frond %da (nimb (to-unix-ms p.arg)))
+    ::   %od  (frond %od s+p.arg)
+    ::   %dr  (frond %dr (numb (dr-to-unix-ms p.arg)))
+    ::   %dl  (frond %dl (delta p.arg))
+    ::   %dx  (frond %dx (dext p.arg))
+    ::   %wl  (frond %wl a+(turn p.arg numb))
+    :: ==
   ::
   ++  args
     |=  =^args
