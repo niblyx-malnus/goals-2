@@ -107,7 +107,12 @@
     ;<  sta=state  bind:m  ((put:nuk state) base &)
     ;<  ~  bind:m
       %+  send-refresh:htmx  [our dap]:gowl
-      ["#month-view" "{(spud (moup:htmx 3 base))}" ~ ~]~
+      =-  ~&(- -)
+      %+  murn  ~(tap of (dip:nuk /))
+      |=  [=path *]
+      ?.  ?=([%htmx %goals %calendar @ta ~] path)
+        ~
+      [~ "#{(en-html-id:htmx path)}" (spud path) ~ ~]
     (pure:m !>(~))
     ::
       [* [%create-event-panel *] *]
@@ -120,12 +125,10 @@
   ++  add-event
     |=  hidden=?
     ^-  manx
+    =/  html-id=tape  (en-html-id:htmx base)
     ?:  hidden
-      ;div
-        =id  "day-square-add-event_{(numb:htmx (div (year date) ~d1))}";
-    ;div.relative
-      =class  "relative"
-      =id     "day-square-add-event_{(numb:htmx (div (year date) ~d1))}"
+      ;div(id html-id);
+    ;div(id html-id, class "relative")
       ;div
         =class  "shadow-lg mt-1 px-2 py-1 text-xs rounded {?:(=(m m.date) "bg-green-500 text-white shadow-gray-400" "bg-green-300 text-gray-400 shadow-gray-300")}"
         (No title)
@@ -136,6 +139,7 @@
   ++  create-modal-container
     |=  hidden=?
     ^-  manx
+    =/  html-id=tape  (en-html-id:htmx base)
     ;div.fixed.inset-0.z-10.overflow-y-auto
       ;div(class "flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0")
         ;div.fixed.inset-0.transition-opacity
@@ -151,7 +155,7 @@
             ;div.bg-gray-100.flex-1.flex.justify-end.h-12
               ;button
                 =hx-post     "{(spud base)}/hide"
-                =hx-target   "#day-square-add-event_{(numb:htmx (div (year date) ~d1))}"
+                =hx-target   "#{html-id}"
                 =class       "m-1 text-gray-500 bg-gray-100 hover:bg-gray-200 transition duration-150 ease-in-out rounded-full p-2"
                 ;+  fi-x
               ==

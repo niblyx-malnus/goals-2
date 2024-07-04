@@ -1,5 +1,5 @@
 /-  c=calendar, r=rules, t=timezones
-/+  *ventio, htmx, server, nooks, html-utils, tu=time-utils,
+/+  *ventio, htmx, server, nooks, html-utils, tu=time-utils, fi=webui-feather-icons,
     inputs=webui-calendar-inputs
 |_  $:  [zid=(unit zid:t) =date]
         =gowl 
@@ -17,7 +17,15 @@
         /rules/noun
       ==
 ::
-++  id-num  (dedot:htmx (scow %uv (sham date)))
+++  fi-loader
+  ^-  manx
+  =/  =manx  (make:fi %loader)
+  =.  manx  (pus:~(at mx manx) "height: .875em; width: .875em;")
+  (pac:~(at mx manx) "animate-spin")
+::
+++  blue-fi-loader
+  ^-  manx
+  (pac:~(at mx fi-loader) "text-4xl text-blue-500")
 ::
 ++  get-now-tz
   |=  zone=(unit zid:t)
@@ -191,16 +199,14 @@
   --
 ::
 +$  state
-  $~  :*  '(New event...)'
-          %left
+  $~  :*  %left
           :*  [~ %both %single-0]
               [~ %left %single-0]
               [~ %fuld %single-0]
               [~ %jump %single-0]
           ==
       ==
-  $:  title=@t
-      kind=@t
+  $:  kind=@t
       $=  rids
       $:  both=rid:r
           left=rid:r
@@ -255,7 +261,7 @@
     ;<  *  bind:m
       %+  (vent ,*)  [our.gowl %calendar]
       calendar-calendar-action+[[our.gowl %our] calendar-action]
-    =/  =manx  ~(create-event-panel components sta)
+    =/  =manx  ~(loading components sta)
     (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
   ==
 ::
@@ -263,17 +269,26 @@
   |_  state
   +*  this   .
       state  +<
+      panel-id      (en-html-id:htmx base)
+      rule-kind-id  (en-html-id:htmx (weld base /rule-kind))
+  ::
+  ++  loading
+    ^-  manx
+    ;div.flex.flex-col.items-center.p-2
+      =id  panel-id
+      ;+  blue-fi-loader
+    ==
   ::
   ++  create-event-panel
     ^-  manx
     ;div.flex.flex-col.m-2
-      =id  "create-event_{id-num}"
+      =id  panel-id
       ;div.border-b.mb-4
         ;div.text-2xl.font-semibold.text-center.text-gray-700.mb-2: Create Event
         ;form.m-2.flex.flex-col.items-center
           =hx-post     "{(spud base)}/create-event"
           =hx-trigger  "submit"
-          =hx-target   "#create-event_{id-num}"
+          =hx-target   "#{panel-id}"
           =hx-swap     "outerHTML"
           ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
             ;span.m-2.font-medium.text-sm.text-gray-700: Add Event Title:
@@ -292,7 +307,7 @@
             ;select.p-2.w-60.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
               =hx-post     "{(spud base)}/rule-kind-panel"
               =hx-trigger  "change"
-              =hx-target   "#create-event_rule-kind_{id-num}"
+              =hx-target   "#{rule-kind-id}"
               =hx-swap     "outerHTML"
               =name        "ruledata[kind][head]"
               ;option(value "left"): By Duration
@@ -325,14 +340,14 @@
       |=  [[* a=rule:r] [* b=rule:r]]
       (alphabetical:htmx (trip name.a) (trip name.b))
     ;div.w-full.mx-2.flex.flex-col
-      =id  "create-event_rule-kind_{id-num}"
+      =id  rule-kind-id
       ;+  rule-kind-parameters
       ;div.mb-1.flex.items-center.justify-between
         ;span.m-2.font-medium.text-sm.text-gray-700: Select Rule:
         ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
           =hx-post     "{(spud base)}/rule-kind-panel"
           =hx-trigger  "change"
-          =hx-target   "#create-event_rule-kind_{id-num}"
+          =hx-target   "#{rule-kind-id}"
           =hx-swap     "outerHTML"
           =name   "ruledata[rid]"
           ;*  %+  turn  rule-list

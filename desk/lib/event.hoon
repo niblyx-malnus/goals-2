@@ -122,20 +122,42 @@
     %dom         this(dom.event dom.tan)
     ::
       %ruledata
-    ?<  (~(has by ruledata.event) aid.tan)  
-    this(ruledata.event (~(put by ruledata.event) [aid ruledata]:tan))
+    =/  =aid:c  (scot %uv (sham ruledata.tan))
+    this(ruledata.event (~(put by ruledata.event) aid ruledata.tan))
     ::
       %metadata
-    ?<  (~(has by metadata.event) mid.tan)  
-    this(metadata.event (~(put by metadata.event) [mid metadata]:tan))
+    =/  =mid:c  (scot %uv (sham metadata.tan))
+    this(metadata.event (~(put by metadata.event) mid metadata.tan))
     ::
       %default-ruledata
     ?>  (~(has by ruledata.event) aid.tan)
-    this(default-ruledata.event aid.tan)
+    =/  dom=(list @ud)  (gulf dom.event)
+    |-
+    ?~  dom
+      this(default-ruledata.event aid.tan)
+    =/  aid=(unit aid:c)  (~(get by ruledata-map.event) i.dom)
+    =.  ruledata-map.event
+      ?~  aid
+        (~(put by ruledata-map.event) i.dom default-ruledata.event)
+      ?.  =(u.aid aid.tan)
+        ruledata-map.event
+      (~(del by ruledata-map.event) i.dom)
+    $(dom t.dom)
     ::
       %default-metadata
     ?>  (~(has by metadata.event) mid.tan)
-    this(default-metadata.event mid.tan)
+    =/  dom=(list @ud)  (gulf dom.event)
+    |-
+    ?~  dom
+      this(default-metadata.event mid.tan)
+    =/  mid=(unit mid:c)  (~(get by metadata-map.event) i.dom)
+    =.  metadata-map.event
+      ?~  mid
+        (~(put by metadata-map.event) i.dom default-metadata.event)
+      ?.  =(u.mid mid.tan)
+        metadata-map.event
+      (~(del by metadata-map.event) i.dom)
+    $(dom t.dom)
     ::
       %ruledata-map
     ?~  aid.tan
@@ -176,14 +198,18 @@
   ^-  _this
   ?-    -.tan
       %init
+    =/  =aid:c  (scot %uv (sham ruledata.tan))
+    =/  =mid:c  (scot %uv (sham metadata.tan))
     =.  this  (handle-transition %dom dom.tan)
-    =.  this  (handle-transition %metadata [mid metadata]:tan)
-    =.  this  (handle-transition %default-metadata mid.tan)
-    =.  this  (handle-transition %ruledata [aid ruledata]:tan)
-    =.  this  (handle-transition %default-ruledata aid.tan)
-    (handle-transition %instantiate (gulf dom.tan))
+    =.  this  (handle-transition %metadata metadata.tan)
+    =.  this  (handle-transition %default-metadata mid)
+    =.  this  (handle-transition %ruledata ruledata.tan)
+    =.  this  (handle-transition %default-ruledata aid)
+    =.  this  (handle-compound-transition %update-metadata dom.tan ~ mid)
+    (handle-compound-transition %update-ruledata dom.tan ~ aid)
     ::
       %update-metadata
+    ~&  >  %update-metadata
     =/  idx-list=(list @ud)  (gulf dom.tan)
     |-
     ?~  idx-list
@@ -192,11 +218,29 @@
     $(idx-list t.idx-list)
     ::
       %update-ruledata
+    ~&  >  %update-ruledata
     =/  idx-list=(list @ud)  (gulf dom.tan)
     |-
     ?~  idx-list
       (handle-transition %instantiate (gulf dom.tan))
     =.  this  (handle-transition %ruledata-map i.idx-list aid.tan)
+    $(idx-list t.idx-list)
+    ::
+      %update-new
+    ~&  >  %update-new
+    =/  idx-list=(list @ud)  (gulf dom.tan)
+    =/  =aid:c  (scot %uv (sham ruledata.tan))
+    =/  =mid:c  (scot %uv (sham metadata.tan))
+    |-
+    ?~  idx-list
+      =?  this  default.tan
+        =.  this  (handle-transition %default-ruledata aid)
+        (handle-transition %default-metadata mid)
+      (handle-transition %instantiate (gulf dom.tan))
+    =.  this  (handle-transition %ruledata ruledata.tan)
+    =.  this  (handle-transition %ruledata-map i.idx-list ~ aid)
+    =.  this  (handle-transition %metadata metadata.tan)
+    =.  this  (handle-transition %metadata-map i.idx-list ~ mid)
     $(idx-list t.idx-list)
     ::
       %update-domain

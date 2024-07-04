@@ -1,6 +1,7 @@
 /-  t=timezones
 /+  *ventio, htmx, server, nooks, html-utils, fi=webui-feather-icons,
-    iana-converter, tu=time-utils, webui-calendar-month-view
+    iana-converter, tu=time-utils,
+    webui-calendar-week-view, webui-calendar-month-view
 |_  $:  =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -10,6 +11,12 @@
     mx   mx:html-utils
     kv   kv:html-utils
 ::
+++  zones
+  .^  zones:t  %gx
+    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
+    /zones/noun
+  ==
+::
 ++  month-view
   |=  [zid=(unit zid:t) y=@ud m=@ud]
   %~  .
@@ -18,6 +25,16 @@
   :+  gowl
     %+  weld  base
     /month-view/(crip (en:month-input:tu (year [%.y y] m 1 0 0 0 ~)))
+  [[eyre-id req] [ext site] args]
+::
+++  week-view
+  |=  [zid=(unit zid:t) y=@ud w=@ud]
+  %~  .
+    webui-calendar-week-view
+  :-  [zid y w]
+  :+  gowl
+    %+  weld  base
+    /week-view/(crip (en:week-input:tu y w))
   [[eyre-id req] [ext site] args]
 ::
 ++  blue-fi-loader
@@ -47,15 +64,6 @@
     /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
   ==
 ::
-++  html-id-to-zid
-  |=  =tape
-  ^-  zid:t
-  %+  scan  tape
-  ;~  (glue (just 'X'))
-    fed:ag
-    (cook crip (star prn))
-  ==
-::
 ++  handle
   =/  m  (strand ,vase)
   ^-  form:m
@@ -75,12 +83,19 @@
     ::
       [%'GET' ~ *]
     =/  session-id=@ta  (get-unique-uv:nuk base)
-    =/  =manx  (browser-timezone session-id)
-    (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+    =.  base  (weld base /[session-id])
+    (give-html-manx:htmx [our dap]:gowl eyre-id timezone-getter |)
   ==
 ::
-+$  state  (unit zid:t)
-++  init   (pure:(strand ,state) ~)
++$  state
+  $:  view=?(%day %week %month)
+      month=(unit [y=@ud m=@ud])
+      zone=(unit zid:t)
+  ==
+::
+++  init
+  %-  pure:(strand ,state)
+  [%month ~ ~]
 ::
 ++  handle-session
   =/  m  (strand ,vase)
@@ -96,33 +111,105 @@
   ?+    parms  (strand-fail %bad-http-request ~)
       [%'POST' ~ *]
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
-    =/  iana=@t  (fall (get-key:kv 'browser-timezone' args) '')
-    =.  sta
+    =/  iana=@t  (fall (get-key:kv 'timezone-getter' args) '')
+    =.  zone.sta
       ?~  iana
         ~
       =/  =zid:t  [our.gowl (cat 3 'iana_' (enta-name:iana-converter iana))]
       ?~((get-zone zid) ~ [~ zid])
+    =/  =date  (yore (need (get-now-tz zone.sta)))
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
-    =/  =date  (yore (need (get-now-tz sta)))
-    =/  =manx  month-view:components:(month-view sta [y m]:date)
-    (give-html-manx:htmx [our dap]:gowl eyre-id (page-container manx ~) |)
+    =/  =manx  month-view:components:(month-view zone.sta [y m]:date)
+    (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
     ::
-      [%'GET' [%set-current-zone ~] *]
+      [%'GET' ~ *]
+    ?-    view.sta
+        %day
+      !!
+      ::
+        %week
+      =/  week=[@ud @ud]
+        (da-to-week-number:tu (need (get-now-tz zone.sta)))
+      =/  =manx  week-view:components:(week-view zone.sta week)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
+      ::
+        %month
+      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore (need (get-now-tz zone.sta))))
+      =/  =manx  month-view:components:(month-view zone.sta month)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
+    ==
+    ::
+      [%'POST' [%set-current-zone ~] *]
+    =/  args=key-value-list:kv  (parse-body:kv body.request.req)
     =/  zone=@t  (need (get-key:kv 'zone' args))
-    =.  sta
+    =/  zone-by-names=(map @t zid:t)
+      %-  ~(gas by *(map @t zid:t))
+      %+  turn  ~(tap by zones)
+      |=  [=zid:t =zone:t]
+      [name.zone zid]
+    =.  zone.sta
       ?:  =('' zone)
         ~
-      [~ (html-id-to-zid (trip zone))]
+      [~ (~(got by zone-by-names) zone)]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
-    (give-empty-200:htmx [our dap]:gowl eyre-id)
+    ?-    view.sta
+        %day
+      !!
+      ::
+        %week
+      =/  week=[@ud @ud]
+        (da-to-week-number:tu (need (get-now-tz zone.sta)))
+      =/  =manx  week-view:components:(week-view zone.sta week)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
+      ::
+        %month
+      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore (need (get-now-tz zone.sta))))
+      =/  =manx  month-view:components:(month-view zone.sta month)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
+    ==
+    ::
+      [%'POST' [%set-current-view ~] *]
+    =/  args=key-value-list:kv  (parse-body:kv body.request.req)
+    =/  view=@t  (fall (get-key:kv 'view' args) %month)
+    =.  view.sta  ;;(?(%day %week %month) view)
+    ;<  sta=state  bind:m  ((put:nuk state) base sta)
+    ?-    view.sta
+        %day
+      !!
+      ::
+        %week
+      =/  week=[@ud @ud]
+        (da-to-week-number:tu (need (get-now-tz zone.sta)))
+      =/  =manx  week-view:components:(week-view zone.sta week)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
+      ::
+        %month
+      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore (need (get-now-tz zone.sta))))
+      =/  =manx  month-view:components:(month-view zone.sta month)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
+    ==
+    ::
+      [* [%week-view week=@ta *] *]
+    =/  week=[@ud @ud]  (de:week-input:tu week.cad.parms)
+    handle:(week-view zone.sta week)
     ::
       [* [%month-view date=@ta *] *]
-    handle:(month-view sta [y m]:(yore (de:month-input:tu date.cad.parms)))
+    =/  month=[@ud @ud]  [y m]:(yore (de:month-input:tu date.cad.parms))
+    =.  month.sta  [~ month]
+    ;<  sta=state  bind:m  ((put:nuk state) base sta)
+    handle:(month-view zone.sta month)
+  ==
+::
+++  contain
+  |=  contents=manx
+  ;div(id (en-html-id:htmx base))
+    ;+  contents
   ==
 ::
 ++  page-container
   |=  [contents=manx scripts=(list tape)]
-  ;html(lang "en")
+  ^-  manx
+  ;html(lang "en", style "scroll-behavior: smooth;")
     ;head
       ;title: My Calendar
       ;script(src "https://unpkg.com/htmx.org");
@@ -134,19 +221,15 @@
       ;link(rel "icon", href "/htmx/goals/target.svg", type "image/svg+xml");
     ==
     ;body
-      ;+  dummy:htmx
       ;+  (refresher:htmx now.gowl /htmx/goals ~)
-      ;div#page-contents
-        ;+  contents
-      ==
+      ;+  (contain contents)
       ;*  %+  turn  scripts
           |=  script=tape
           ;script: {script}
     ==
   ==
 ::
-++  browser-timezone
-  |=  session-id=@ta
+++  timezone-getter
   ^-  manx
   %+  page-container
     ;div.flex.h-screen
@@ -154,14 +237,15 @@
         ;+  (pus:~(at mx blue-fi-loader) "height: 1em; width: 1em;")
       ==
       ;form
-        ;input#browser-timezone.hidden
+        ;input.hidden
+          =id          (en-html-id:htmx (weld base /timezone-getter))
           =type        "text"
-          =name        "browser-timezone"
+          =name        "timezone-getter"
           =value       ""
           =hx-trigger  "submit"
-          =hx-post     "{(spud base)}/{(trip session-id)}"
-          =hx-target   "#page-contents"
-          =hx-swap     "innerHTML"
+          =hx-post     "{(spud base)}"
+          =hx-target   "#{(en-html-id:htmx base)}"
+          =hx-swap     "outerHTML"
           ;
         ==
       ==
@@ -170,7 +254,7 @@
   """
   document.addEventListener("DOMContentLoaded", function() \{
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const timezoneInput = document.getElementById('browser-timezone')
+    const timezoneInput = document.getElementById('{(en-html-id:htmx (weld base /timezone-getter))}')
     timezoneInput.value = timeZone;
     htmx.trigger(timezoneInput, 'submit')
   });

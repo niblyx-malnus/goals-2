@@ -80,6 +80,17 @@
   ?:  =(5 num)  %sat
   ?:  =(6 num)  %sun
   !!
+::
+++  print-utc-offset
+  |=  offset=delta
+  ^-  tape
+  =/  hours=@ud    (div (mod d.offset ~d1) ~h1)
+  =/  minutes=@ud  (div (mod d.offset ~h1) ~m1)
+  ;:  weld
+    ?:(sign.offset "+" "-")
+    (zfill 2 (scow %ud hours))
+    ?:(=(0 minutes) "" ":{(zfill 2 (scow %ud minutes))}")
+  ==
 :: ~2000.1.1 was a saturday
 :: 0, 1, 2, 3, 4, 5, 6
 :: m, t, w, t, f, s, s
@@ -91,6 +102,14 @@
   ?:  (gth d ~2000.1.1)
     (mod (div (sub d ~2000.1.1) ~d1) 7)
   (sub 7 (mod +((div (sub ~2000.1.1 d) ~d1)) 7))
+::
+++  get-prev-monday  |=(d=@da (sub d (mul ~d1 (get-weekday d))))
+++  get-next-monday
+  |=  d=@da
+  %+  add  d
+  %+  mul  ~d1
+  =/  w=@  (get-weekday d)
+  ?:(=(0 w) 7 w)
 ::
 ++  days-in-month
   |=  [[a=? y=@ud] m=@ud]
@@ -314,28 +333,54 @@
     ;<  mo=@ud  bind  dem
     (easy (year [& y] mo 1 0 0 0 ~))
   --
+:: first day of week is monday
+:: first week is the week containing first thursday of the year
+::
+++  first-day-first-week
+  |=  y=@ud
+  ^-  @da
+  =/  f=@da  (year [%.y y] 1 1 0 0 0 ~)
+  =/  w=@    (get-weekday f)
+  ?:  (lte w 3)
+    (sub f (mul w ~d1))
+  (add f (mul (sub 7 w) ~d1))
+::
+++  da-to-week-number
+  |=  d=@da
+  ^-  [y=@ud w=@ud]
+  =/  =date  (yore d)
+  =/  dof=@da  (first-day-first-week y.date)
+  =/  dol=@da  (first-day-first-week (dec y.date))
+  ?:  (lth d dof)
+    [(dec y.date) +((div (sub d dol) ~d7))]
+  =/  don=@da  (first-day-first-week +(y.date))
+  ?:  (gte d don)
+    [+(y.date) 1]
+  [y.date +((div (sub d dof) ~d7))]
+::
+++  week-number-to-first-da
+  |=  [y=@ud w=@ud]
+  ^-  @da
+  (add (mul ~d7 (dec w)) (first-day-first-week y))
 ::
 ++  week-input
   |%
   ++  en
-    |=  d=@da
+    |=  [y=@ud w=@ud]
     ^-  tape
-    ?>  =(0 (mod d ~d1))
-    =+  (yore d)
-    ?>  =(1 d) :: accepts only first-of-month @da's
     ;:  weld
       (numb y)
-      "-"
-      (zfill 2 (scow %ud m))
+      "-W"
+      (zfill 2 (scow %ud w))
     ==
-  ++  de       |=(=@t `@da`(rash t parse))
-  ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
+  ++  de       |=(=@t `[y=@ud w=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [y=@ud w=@ud])`(rush t parse))
   ++  parse
     =,  monadic-parsing
-    ;<  y=@ud   bind  dem
-    ;<  *       bind  hep
-    ;<  mo=@ud  bind  dem
-    (easy (year [& y] mo 1 0 0 0 ~))
+    ;<  y=@ud  bind  dem
+    ;<  *      bind  ;~(plug hep (just 'W'))
+    ;<  w=@ud  bind  dem
+    (easy [y w])
   --
 ::
 ++  nth-weekday

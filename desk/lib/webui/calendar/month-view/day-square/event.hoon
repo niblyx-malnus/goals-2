@@ -15,8 +15,6 @@
     now       (need (get-now-tz zid))
     calendar  (get-calendar cid)
 ::
-++  id-num  (dedot:htmx (scow %uv (sham [date cid iref])))
-::
 ++  update-event-panel
   |=  [zid=(unit zid:t) =^date =cid:c =iref:c]
   %~  .
@@ -94,12 +92,16 @@
     ;<  sta=state  bind:m  ((put:nuk state) base |)
     (give-html-manx:htmx [our dap]:gowl eyre-id (event:components sta) |)
     ::
-      [%'POST' [%update-event-panel %delete-event ~] *]
+      [%'POST' [%update-event-panel ?(%update-event %delete-event) ~] *]
     :: send the update then hide container
     ;<  *  bind:m  handle:(update-event-panel zid date cid iref)
     ;<  ~  bind:m
       %+  send-refresh:htmx  [our dap]:gowl
-      ["#month-view" "{(spud (moup:htmx 7 base))}" ~ ~]~
+      %+  murn  ~(tap of (dip:nuk /))
+      |=  [=path *]
+      ?.  ?=([%htmx %goals %calendar @ta ~] path)
+        ~
+      [~ "#{(en-html-id:htmx path)}" (spud path) ~ ~]
     (pure:m !>(~))
     ::
       [* [%update-event-panel *] *]
@@ -111,16 +113,16 @@
   ++  event
     |=  hidden=?
     ^-  manx
+    =/  html-id=tape  (en-html-id:htmx base)
     ?.  (~(has by events.calendar) eid.iref)
-      ;div(id "day-square-event_{id-num}");
+      ;div(id html-id);
     =/  =event:c     (~(got by events.calendar) eid.iref)
     =/  =mid:c       (~(gut by metadata-map.event) i.iref default-metadata.event)
     =/  =metadata:c  (~(got by metadata.event) mid)
     =/  =aid:c       (~(gut by ruledata-map.event) i.iref default-ruledata.event)
     =/  =ruledata:c  (~(got by ruledata.event) aid)
     =/  title=tape   (trip (so:dejs:format (~(gut by metadata) 'title' s+'NO TITLE!')))
-    ;div.relative
-      =id  "day-square-event_{id-num}"
+    ;div.relative(id html-id)
       ;+  =/  class=tape
             %+  weld
               "flex-grow mt-1 px-2 py-1 text-xs rounded truncate "
@@ -131,7 +133,7 @@
             =class       class
             =hx-trigger  "click"
             =hx-post     "{(spud base)}/unhide"
-            =hx-target   "#day-square-event_{id-num}"
+            =hx-target   "#{html-id}"
             =hx-swap     "outerHTML"
             {title}
           ==
@@ -141,6 +143,7 @@
   ++  update-modal-container
     |=  hidden=?
     ^-  manx
+    =/  html-id=tape  (en-html-id:htmx base)
     ?:  hidden
       ;div;
     ;div
@@ -159,13 +162,13 @@
             ;div.bg-gray-100.flex-1.flex.justify-end.h-12
               ;button
                 =hx-post    "{(spud base)}/hide"
-                =hx-target  "#day-square-event_{id-num}"
+                =hx-target  "#{html-id}"
                 =hx-swap    "outerHTML"
                 =class      "m-1 text-gray-500 bg-gray-100 hover:bg-gray-200 transition duration-150 ease-in-out rounded-full p-2"
                 ;+  fi-x
               ==
             ==
-            ;+  update-event-panel:components:(update-event-panel zid date cid iref)
+            ;+  (update-event-panel:components:(update-event-panel zid date cid iref) %update)
           ==
         ==
       == 

@@ -45,6 +45,11 @@
     $(tape t.tape)
   [i.tape $(tape t.tape)]
 ::
+++  en-html-id
+  |=  =path
+  ^-  tape
+  ['_' (dedot (scow %uv (sham path)))]
+::
 ++  moup
   |=  [i=@ud =path] 
   ^+  path

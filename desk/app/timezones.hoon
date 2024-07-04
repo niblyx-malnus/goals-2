@@ -62,6 +62,13 @@
     :-  ~  :-  ~  :-  %noun  !>
     (~(get by zones) zid)
     ::
+      [%x %rule p=@ta q=@ta ~]
+    =/  =zid:t   [(slav %p p.pole) q.pole]
+    =/  =zone:t  (~(got by zones) zid)
+    =/  pul=(unit [@ud rule=tz-rule:t])
+      (~(pul or:(abed:zn:zon zid) order.zone) now.bowl)
+    ``noun+!>(rule:(need pul))
+    ::
       [%x %offset p=@ta q=@ta ~]
     =/  =zid:t   [(slav %p p.pole) q.pole]
     =/  =zone:t  (~(got by zones) zid)

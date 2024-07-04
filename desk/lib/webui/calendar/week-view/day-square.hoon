@@ -118,40 +118,35 @@
   ::
   ++  day-square
     ^-  manx
-    ;div.flex.flex-col.justify-between.p-2.overflow-hidden
-      =style  "border-left: 1px solid #e5e7eb; border-bottom: 1px solid #efe7eb;"
+    ;div(class "flex flex-col justify-between p-2 border border-gray-100")
       ;div.flex.justify-center.items-center.text-center
-        ;+  ;div.flex.items-center.justify-center
+        ;+  ;div.flex.items-center
               ;*  ?.  =(1 d.t.date)
                     ;
                   ;+  ;span
-                        =class  "text-[12px] mr-1 {?:(=(m m.date) "text-gray-800" "text-gray-500")}"
-                        ; {(snag (sub m.date 1) month-abbrv)}
+                        =class  "text-xs mb-2 mr-1 {?:(=(m m.date) "text-gray-700" "text-gray-400")}"
+                        {(snag (sub m.date 1) month-abbrv)}
                       ==
               ;+  ?.  =([m y d.t]:date [m y d.t]:(yore now))
                       ;span
-                        =class  "text-[12px] {?:(=(m m.date) "text-gray-800" "text-gray-500")}"
-                        ; {(scow %ud d.t.date)}
+                        =class  "text-xs mb-2 {?:(=(m m.date) "text-gray-700" "text-gray-400")}"
+                        {(scow %ud d.t.date)}
                       ==
-                  ;div.bg-blue-500.flex.items-center.justify-center.rounded-full
-                    =style  "width: 24px; height: 24px;"
-                    ;span(class "text-[12px] text-white"): {(scow %ud d.t.date)}
+                  ;div.w-6.h-6.bg-blue-500.flex.items-center.justify-center.rounded-full
+                    ;span.text-xs.text-white: {(scow %ud d.t.date)}
                   ==
             ==
       ==
-      ;div.flex.flex-col.flex-1.relative.overflow-y-auto
-        ;div
-          ;+  (add-event:components:(add-event zid y m date) &)
-          ;+  events
-        ==
-        ;div.relative.flex-1
-          ;div.absolute.inset-0
-            =hx-post     "{(spud base)}/add-event/unhide"
-            =hx-target   "#{(en-html-id:htmx (weld base /add-event))}"
-            =hx-trigger  "click"
-            =hx-swap     "outerHTML";
+      ;div.flex.flex-col.flex-1.relative
+        ;div.mt-2.relative.flex-1
+          ;*  %+  reap  24
+              ;div.flex.flex-col.border-t.border-gray-200.h-12
+                ;div.flex-1;
+                ;div.flex-1;
+              ==
         ==
       ==
     ==
   --
 --
+

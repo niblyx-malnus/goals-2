@@ -1,5 +1,6 @@
 /-  t=timezones
 /+  *ventio, server, htmx, nooks, html-utils, tu=time-utils,
+    fi=webui-feather-icons,
     webui-calendar-scripts,
     webui-calendar-month-view-day-square
 |_  $:  [zid=(unit zid:t) y=@ud m=@ud]
@@ -11,6 +12,16 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     now  (need (get-now-tz zid))
+::
+++  zones
+  .^  zones:t  %gx
+    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
+    /zones/noun
+  ==
+::
+++  globe
+  =/  =manx  (make:fi %globe)
+  (pus:~(at mx manx) "height: .875em; width: .875em;")
 ::
 ++  day-square
   |=  =date
@@ -74,7 +85,6 @@
   ?:  ?=(%'.' i.tape)
     $(tape t.tape)
   [i.tape $(tape t.tape)]
-:: /month-view/[month]/[year]
 ::
 ++  handle
   =/  m  (strand ,vase)
@@ -99,73 +109,106 @@
 ++  components
   |%
   ++  month-view
-    ;div#month-view.flex.flex-col.h-screen.w-full.overflow-auto.p-9
-      ;+  toolbar
-      ;+  month-panel
+    ;div.h-screen.w-screen.overflow-scroll.scrollbar
+      =id  (en-html-id:htmx base)
+      ;div(class "p-4 flex flex-col h-full w-full min-w-[950px] min-h-[600px]")
+        ;+  toolbar
+        ;+  month-panel
+      ==
     ==
   ::
   ++  timer
     |=  offset=delta:tu
     ^-  manx
-    =+  (yore now)
-    =/  hours=tape    (numb:htmx h.t)
-    =/  minutes=tape  (numb:htmx m.t)
-    =/  seconds=tape  (numb:htmx s.t)
-    =/  initial-time=tape
-      ;:  weld
-        "{(zfill:tu 2 hours)}:"
-        "{(zfill:tu 2 minutes)}:"
-        "{(zfill:tu 2 seconds)}"
-      ==
+    =/  id=tape  (en-html-id:htmx (weld base /timer))
     ;div
-      ;span#timer.text-gray-700.text-xl: {initial-time}
-      ;script: {(start-timer:webui-calendar-scripts "timer" offset)}
+      ;span.text-gray-800.text-xl(id id);
+      ;script: {(start-timer:webui-calendar-scripts id offset)}
     ==
   ::
   ++  toolbar
-      ^-  manx
-      =/  last-month=@da
-        =/  [m=@ y=@]  ?:(=(m 1) [12 (sub y 1)] [(sub m 1) y])
-        (year [& y] m 1 0 0 0 ~)
-      ::
-      =/  next-month=@da
-        =/  [m=@ y=@]  ?:(=(m 12) [1 (add y 1)] [(add m 1) y])
-        (year [& y] m 1 0 0 0 ~)
-      ::
-      ;div(class "flex items-center p-2 space-x-4")
-        ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu (year [[& y] m 1 0 0 0 ~]:(yore now)))}"
-          =hx-target   "#month-view"
-          =hx-trigger  "click" 
-          =hx-swap     "outerHTML"
-          ;span.text-sm.font-semi-bold: Today
-        ==
-        ;div(class "flex items-center space-x-1")
-          ;button
-            =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu last-month)}"
-            =hx-target   "#month-view"
-            =hx-trigger  "click"
-            =hx-swap     "outerHTML"
-            =alt         "Previous month"
-            =title       "Previous month"
-            =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
-            ;+  (~(set-style mx left-arrow) "height: .95em; width: .95em;")
-          ==
-          ;button
-            =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu next-month)}"
-            =hx-target   "#month-view"
-            =hx-trigger  "click"
-            =hx-swap     "outerHTML"
-            =alt         "Next month"
-            =title       "Next month"
-            =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
-            ;+  (~(set-style mx right-arrow) "height: .95em; width: .95em;")
-          ==
-        ==
-        ;+  timezone-bar=*manx
-        ;span.text-gray-700.text-2xl: {(snag (sub m 1) month-fullname)} {(numb:htmx y)}
-        ;+  (timer (get-offset zid))
+    ^-  manx
+    =/  last-month=@da
+      =/  [m=@ y=@]  ?:(=(m 1) [12 (sub y 1)] [(sub m 1) y])
+      (year [& y] m 1 0 0 0 ~)
+    ::
+    =/  next-month=@da
+      =/  [m=@ y=@]  ?:(=(m 12) [1 (add y 1)] [(add m 1) y])
+      (year [& y] m 1 0 0 0 ~)
+    ::
+    ;div(class "p-2 flex items-center space-x-4")
+      ;select.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
+        =name     "view"
+        =hx-post  "{(spud (moup:htmx 2 base))}/set-current-view"
+        =hx-target  "#{(en-html-id:htmx (moup:htmx 2 base))}"
+        =hx-swap    "outerHTML"
+        ;option(value "day"): Day
+        ;option(value "week"): Week
+        ;option(value "month", selected ""): Month
       ==
+      ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
+        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu (year [[& y] m 1 0 0 0 ~]:(yore now)))}"
+        =hx-target   "#{(en-html-id:htmx base)}"
+        =hx-trigger  "click" 
+        =hx-swap     "outerHTML"
+        ;span.text-sm.font-semi-bold: Today
+      ==
+      ;div(class "flex items-center space-x-1")
+        ;button
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu last-month)}"
+          =hx-target   "#{(en-html-id:htmx base)}"
+          =hx-trigger  "click"
+          =hx-swap     "outerHTML"
+          =alt         "Previous month"
+          =title       "Previous month"
+          =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
+          ;+  (~(set-style mx left-arrow) "height: .95em; width: .95em;")
+        ==
+        ;button
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu next-month)}"
+          =hx-target   "#{(en-html-id:htmx base)}"
+          =hx-trigger  "click"
+          =hx-swap     "outerHTML"
+          =alt         "Next month"
+          =title       "Next month"
+          =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
+          ;+  (~(set-style mx right-arrow) "height: .95em; width: .95em;")
+        ==
+      ==
+      ;+  =/  timezones=(list [zid:t tape])
+            %+  sort
+              %+  turn  ~(tap by zones)
+              |=([=zid:t =zone:t] [zid (trip name.zone)])
+            |=  [[* a=tape] [* b=tape]]
+            (alphabetical:htmx a b)
+          ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
+            =name       "zone"
+            =hx-post    "{(spud (moup:htmx 2 base))}/set-current-zone"
+            =hx-target  "#{(en-html-id:htmx (moup:htmx 2 base))}"
+            =hx-swap    "outerHTML"
+            ;+  ?^  zid
+                  ;option(value ""): UTC
+                ;option(value "", selected ""): UTC
+            ;*  %+  turn  timezones
+                |=  [=zid:t name=tape]
+                ?.  =(^zid [~ zid])
+                  ;option(value "{name}"): {name}
+                ;option(value "{name}", selected ""): {name}
+          ==
+      ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
+        =id          "{(en-html-id:htmx (weld base /here))}"
+        =name        "zone"
+        =onclick     "this.setAttribute('value', Intl.DateTimeFormat().resolvedOptions().timeZone);"
+        =title       "Set timezone according to browser."
+        =hx-post     "{(spud (moup:htmx 2 base))}/set-current-zone"
+        =hx-target   "#{(en-html-id:htmx (moup:htmx 2 base))}"
+        =hx-trigger  "click" 
+        =hx-swap     "outerHTML"
+        ;+  globe
+      ==
+      ;span.text-gray-800.text-2xl: {(snag (sub m 1) month-fullname)} {(numb:htmx y)}
+      ;+  (timer (get-offset zid))
+    ==
   ::
   ++  month-panel
     ^-  manx
@@ -181,40 +224,41 @@
     =/  days=(list date)
       %+  turn  (gulf 1 total-cells)
       |=(idx=@ (yore (add start-time (mul (sub idx 1) ~d1))))
-  
-    =/  first-week=@
-      (div (sub first-time (year [%.y y] 1 1 0 0 0 ~)) ~d7) :: zero-indexed
+    ::
     =/  weeks=(list @ud)
       %+  turn  (gulf 1 (div total-cells 7))
-      |=(idx=@ +((mod (add first-week (sub idx 1)) 52)))
+      |=  idx=@
+      w:(da-to-week-number:tu (add start-time (mul ~d1 +((mul 7 (dec idx))))))
     ::
-    ;div.flex.items-center.h-full.bg-white.shadow-lg.rounded-lg.border.border-gray-100
-      ;div#week-numbers.w-6.flex.flex-col.overflow-auto.h-full
-        ;div(class "h-10 p-2 border border-gray-100"); :: space for headers
-        ;div(class "flex-1 h-full grid grid-cols-1 gap-0")
+    ;div.flex-grow.flex.flex-col
+      =style  "border-right: 1px solid #e5e7eb;"
+      :: Headers
+      ::
+      ;div
+        =style  "display: grid; grid-template-columns: 20px repeat(7, 1fr);"
+        ;div.empty-column.bg-gray-100;
+        ;*  %+  turn  weekday-headers
+            |=  weekday=tape
+            ;div
+               =class  "p-2 text-center text-gray-500 text-xs font-semi-bold"
+               =style  "border-left: 1px solid #e5e7eb; border-top: 1px solid #efe7eb;"
+              ; {weekday}
+            ==
+      ==
+      ;div.flex.flex-grow
+        ;div
+          =class  "grid grid-cols-1 grid-rows-{(numb:htmx (lent weeks))} gap-0"
+          =style  "width: 20px; min-width: 20px;"
           ;*  %+  turn  weeks
               |=  week=@ud
-              ;div(class "bg-gray-100 pt-2 text-center text-gray-500 text-xs font-semi-bold border border-gray-200")
+              ;div(class "bg-gray-100 pt-2 text-center text-gray-500 text-xs font-semi-bold")
                 {(scow %ud week)}
               ==
         ==
-      ==
-      ;div.flex-1.flex.flex-col.h-full
-        ;div.flex-1.h-full.flex.flex-col
-          :: Headers
-          ::
-          ;div(class "grid grid-cols-7 gap-0 h-10")
-            ;*  %+  turn  weekday-headers
-                |=  weekday=tape
-                ;div(class "text-center text-gray-500 text-xs font-semi-bold p-2 border border-gray-100")
-                  ; {weekday}
-                ==
-          ==
-          ;div(class "grid grid-cols-7 grid-rows-{(numb:htmx (lent weeks))} gap-0 h-full")
-            ;*  %+  turn  days
-                |=  =date
-                day-square:components:(day-square date)
-          ==
+        ;div(class "flex-grow grid grid-cols-7 grid-rows-{(numb:htmx (lent weeks))} gap-0")
+          ;*  %+  turn  days
+              |=  =date
+              day-square:components:(day-square date)
         ==
       ==
     ==

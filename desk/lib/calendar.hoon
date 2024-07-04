@@ -18,9 +18,10 @@
       %create-event
     ?<  (~(has by events.calendar) eid.tan)
     =|  =event:c
-    =:  eid.event        eid.tan
-        ruledata.event   (~(put by ruledata.event) '0v0' [~ %skip ''] [%skip ~] ~)
-        instances.event  (~(put by instances.event) 0 %skip ~)
+    =:  eid.event               eid.tan
+        ruledata.event          (~(put by ruledata.event) skip-id:c skip:c)
+        instances.event         (~(put by instances.event) 0 %skip ~)
+        default-ruledata.event  skip-id:c
       ==
     this(events.calendar (~(put by events.calendar) eid.tan event))
     ::
@@ -48,8 +49,15 @@
     =.  event
         =-  event
         %-  ~(handle-compound-transition vlib bowl event)
-        [%init [dom mid metadata aid ruledata]:tan]
-    (rap:or eid.tan (gulf dom.tan))
+        [%init [dom metadata ruledata]:tan]
+    =.  this
+      %+  rap:or  eid.tan
+      %+  murn  ~(tap by instances.event)
+      |=  [i=@ud n=instance:c]
+      ?.  &((gte i l.dom.tan) (lte i r.dom.tan))
+        ~
+      [~ i n]
+    this(events.calendar (~(put by events.calendar) eid.tan event))
     ::
       %delete-event
     =/  =event:c  (~(got by events.calendar) eid.tan)
@@ -61,22 +69,65 @@
         %init
       =/  =event:c  (~(got by events.calendar) eid.tan)
       =.  event   event:(~(handle-compound-transition vlib bowl event) p.tan)
-      (rap:or eid.tan (gulf dom.p.tan))
+      =.  this
+        %+  rap:or  eid.tan
+        %+  murn  ~(tap by instances.event)
+        |=  [i=@ud n=instance:c]
+        ?.  &((gte i l.dom.p.tan) (lte i r.dom.p.tan))
+          ~
+        [~ i n]
+      this(events.calendar (~(put by events.calendar) eid.tan event))
       ::
         %update-metadata
       =/  =event:c  (~(got by events.calendar) eid.tan)
       =.  event   event:(~(handle-compound-transition vlib bowl event) p.tan)
-      (rap:or eid.tan (gulf dom.p.tan))
+      =.  this
+        %+  rap:or  eid.tan
+        %+  murn  ~(tap by instances.event)
+        |=  [i=@ud n=instance:c]
+        ?.  &((gte i l.dom.p.tan) (lte i r.dom.p.tan))
+          ~
+        [~ i n]
+      this(events.calendar (~(put by events.calendar) eid.tan event))
       ::
         %update-ruledata
       =/  =event:c  (~(got by events.calendar) eid.tan)
       =.  event   event:(~(handle-compound-transition vlib bowl event) p.tan)
-      (rap:or eid.tan (gulf dom.p.tan))
+      =.  this
+        %+  rap:or  eid.tan
+        %+  murn  ~(tap by instances.event)
+        |=  [i=@ud n=instance:c]
+        ?.  &((gte i l.dom.p.tan) (lte i r.dom.p.tan))
+          ~
+        [~ i n]
+      this(events.calendar (~(put by events.calendar) eid.tan event))
+      ::
+        %update-new
+      =/  =event:c  (~(got by events.calendar) eid.tan)
+      =.  event   event:(~(handle-compound-transition vlib bowl event) p.tan)
+      =.  this
+        %+  rap:or  eid.tan
+        %+  murn  ~(tap by instances.event)
+        |=  [i=@ud n=instance:c]
+        ?.  &((gte i l.dom.p.tan) (lte i r.dom.p.tan))
+          ~
+        [~ i n]
+      this(events.calendar (~(put by events.calendar) eid.tan event))
       ::
         %update-domain
       =/  =event:c  (~(got by events.calendar) eid.tan)
+      =.  this
+        %+  pur:or  eid.tan
+        ~(tap in (~(dif in (sy (gulf dom.event))) (sy (gulf dom.p.tan))))
       =.  event   event:(~(handle-compound-transition vlib bowl event) p.tan)
-      (rap:or eid.tan (gulf dom.p.tan))
+      =.  this
+        %+  rap:or  eid.tan
+        %+  murn  ~(tap by instances.event)
+        |=  [i=@ud n=instance:c]
+        ?.  &((gte i l.dom.p.tan) (lte i r.dom.p.tan))
+          ~
+        [~ i n]
+      this(events.calendar (~(put by events.calendar) eid.tan event))
     ==
   ==
 ::
@@ -110,6 +161,7 @@
   ++  del
     |=  =iref:c
     ^-  _this
+    ~&  %deleting
     %=  this
       span-order.calendar     (~(del so span-order.calendar) iref)
       fullday-order.calendar  (~(del fo fullday-order.calendar) iref)
@@ -126,7 +178,7 @@
     |=  [=iref:c =instance:c]
     ^-  _this
     ?-    -.instance
-      %skip  (del iref)
+      %skip  ~&(%skipping (del iref))
         ::
         %fuld
       ?:  ?=(%| -.p.instance)
@@ -159,14 +211,15 @@
     (rip iref instance)
   ::
   ++  rap
-    |=  [=eid:c idx-list=(list @ud)]
+    |=  [=eid:c instances=(list (pair @ud instance:c))]
     ^-  _this
-    =/  =event:c     (~(got by events.calendar) eid)
     |-
-    ?~  idx-list
+    ?~  instances
       this
-    =/  =instance:c  (~(got by instances.event) i.idx-list)
-    $(idx-list t.idx-list, this (rip [eid i.idx-list] instance))
+    %=  $
+      instances  t.instances
+      this       (rip [eid p.i.instances] q.i.instances)
+    ==
   :: span-order core
   ::
   ++  so

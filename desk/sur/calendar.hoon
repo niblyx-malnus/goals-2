@@ -13,6 +13,9 @@
 +$  ruledata  [=rid =kind =args]
 +$  metadata  (map @t json)
 ::
+++  skip     [[~ %skip ''] [%skip ~] ~]
+++  skip-id  (scot %uv (sham skip))
+::
 +$  rsvp   ?(%yes %no %maybe)
 +$  rsvps  (map ship rsvp)
 :: %host   host of pool, can do anything...
@@ -93,8 +96,8 @@
   $+  event-transition
   $%  [%init-event =event]
       [%dom =dom]
-      [%ruledata =aid =ruledata]
-      [%metadata =mid =metadata]
+      [%ruledata =ruledata]
+      [%metadata =metadata]
       [%default-ruledata =aid]
       [%default-metadata =mid]
       [%ruledata-map i=@ud aid=(unit aid)]
@@ -110,15 +113,16 @@
 ::
 +$  compound-calendar-transition
   $+  compound-calendar-transition
-  $%  [%create-event =eid =dom =mid =metadata =aid =ruledata]
+  $%  [%create-event =eid =dom =metadata =ruledata]
       [%delete-event =eid]
       [%update-event =eid p=compound-event-transition]
   ==
 ::
 +$  compound-event-transition
-  $%  [%init =dom =mid =metadata =aid =ruledata]
+  $%  [%init =dom =metadata =ruledata]
       [%update-metadata =dom mid=(unit mid)]
       [%update-ruledata =dom aid=(unit aid)]
+      [%update-new =dom default=? =metadata =ruledata]
       [%update-domain =dom]
   ==
 ::
@@ -131,6 +135,7 @@
 +$  event-action
   $%  [%update-metadata =dom mid=(unit mid)]
       [%update-ruledata =dom aid=(unit aid)]
+      [%update-new =dom default=? =metadata =ruledata]
       [%update-domain =dom]
   ==
 ::

@@ -11,13 +11,12 @@
     mx   mx:html-utils
     kv   kv:html-utils
     calendar  (get-calendar cid)
+    event     (~(got by events:calendar) eid.iref)
     rules  
       .^  rules:r  %gx
         (scot %p our.gowl)  %rule-store  (scot %da now.gowl)
         /rules/noun
       ==
-::
-++  id-num  (dedot:htmx (scow %uv (sham [date cid iref])))
 ::
 ++  rid-to-tape
   |=  =rid:r
@@ -115,19 +114,19 @@
   =/  m=manx  (week-input:inputs name &)
   (pac:~(at mx m) input-style-classes)
 ::
-++  create-event-action
+++  update-event-parms
   |=  l=key-value-list:kv
-  ^-  calendar-action:c
+  ^-  [metadata:c ruledata:c]
   |^
   =/  =brac:kv  (de-bracket:kv l)
   ~&  brac+~(tap of brac)
   =/  title=@t  (reed:kv (~(get of brac) /metadata/title))
-  =/  =dom:r    [0 (dec (rash (reed:kv (~(get of brac) /dom)) dem))]
   =/  =rid:r    (tape-to-rid (trip (reed:kv (~(get of brac) /ruledata/rid))))
   =/  =parm:r   parm:(~(got by rules) rid)
   =/  =args:r   (extract-rule-args parm (~(dip of brac) /ruledata/args)) 
   =/  =kind:r   (extract-rule-kind (~(dip of brac) /ruledata/kind))
-  [%create-event dom title rid kind args]
+  :_  [rid kind args]
+  (~(put by *metadata:c) %title s+title)
   ::
   ++  extract-rule-args
     =|  =args:r
@@ -194,8 +193,7 @@
   --
 ::
 +$  state
-  $~  :*  '(New event...)'
-          ~
+  $~  :*  ~
           %left
           :*  [~ %both %single-0]
               [~ %left %single-0]
@@ -203,8 +201,7 @@
               [~ %jump %single-0]
           ==
       ==
-  $:  title=@t
-      date=(unit @da)
+  $:  date=(unit @da)
       kind=@t
       $=  rids
       $:  both=rid:r
@@ -217,8 +214,16 @@
 ++  init
   =/  m  (strand ,state)
   ^-  form:m
+  =|  =state
+  =/  =aid:c  (~(gut by ruledata-map.event) i.iref default-ruledata.event)
+  =/  =ruledata:c  (~(got by ruledata.event) aid)
   %-  pure:m
-  *state
+  ?-  -.kind.ruledata
+    %skip  state
+    %both  state(both.rids rid.ruledata)
+    %left  state(left.rids rid.ruledata)
+    %fuld  state(fuld.rids rid.ruledata)
+  ==
 ::
 ++  send-refresh
   |=  refresh=(list hx-refresh:htmx)
@@ -240,34 +245,76 @@
   ::
   ?+    parms  (strand-fail %bad-http-request ~)
       [%'GET' ~ *]
+    =/  active-tab=?(%loading %update %delete)
+      ;;  ?(%loading %update %delete)
+      (fall (get-key:kv 'active-tab' args) %update)
     =/  new-kind=@t
       (fall (get-key:kv 'ruledata[kind][head]' args) kind.sta)
     =/  new-date=(unit @da)
       (biff (get-key:kv 'date' args) (cury slaw %da))
     ;<  sta=state  bind:m
       ((put:nuk state) base sta(kind new-kind, date new-date))
-    =/  =manx  ~(update-event-panel components sta)
+    =/  =manx  (~(update-event-panel components sta) active-tab)
+    (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+    ::
+      [%'POST' [%rule-kind-panel ~] *]
+    =/  args=key-value-list:kv  (parse-body:kv body.request.req)
+    =/  new-kind=(unit @t)     (get-key:kv 'ruledata[kind][head]' args)
+    =/  new-rule-id=(unit @t)  (get-key:kv 'ruledata[rid]' args)
+    =/  rule-id=(unit rid:r)  (bind new-rule-id (cork trip tape-to-rid))
+    =/  new-state=state  sta
+    =?  kind.new-state  ?=(^ new-kind)  u.new-kind
+    =?  rids.new-state  ?=(^ rule-id)
+      ?+  q.u.rule-id  !!
+        %both  rids.new-state(both u.rule-id)
+        %left  rids.new-state(left u.rule-id)
+        %fuld  rids.new-state(fuld u.rule-id)
+        %jump  rids.new-state(jump u.rule-id)
+      ==
+    ;<  sta=state  bind:m  ((put:nuk state) base new-state)
+    =/  =manx  ~(rule-kind-panel components sta)
     (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
     ::
       [%'POST' [%delete-event ~] *]
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
     =/  delete-option=@t  (fall (get-key:kv 'delete-option' args) 'whole-event')
-    =/  =event:c  (~(got by events.calendar) eid.iref)
     =/  =calendar-action:c
       ?+    delete-option  !!
           %whole-event
         [%delete-event eid.iref]
         ::
           %this-instance
-        [%update-event eid.iref %update-ruledata [i i]:iref ~ '0v0']
+        [%update-event eid.iref %update-ruledata [i i]:iref ~ skip-id:c]
         ::
           %this-and-following-instances
-        [%update-event eid.iref %update-domain [l.dom.event i.iref]]
+        [%update-event eid.iref %update-domain [l.dom.event (dec i.iref)]]
       ==
     ;<  *  bind:m
       %+  (vent ,*)  [our.gowl %calendar]
       calendar-calendar-action+[[our.gowl %our] calendar-action]
-    =/  =manx  ~(update-event-panel components sta)
+    =/  =manx  (~(update-event-panel components sta) %loading)
+    (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
+    ::
+      [%'POST' [%update-event ~] *]
+    =/  args=key-value-list:kv  (parse-body:kv body.request.req)
+    =/  delete-option=@t  (fall (get-key:kv 'update-option' args) 'whole-event')
+    =/  [=metadata:c =ruledata:c]  (update-event-parms args)
+    =/  =calendar-action:c
+      ?+    delete-option  !!
+          %whole-event
+        [%update-event eid.iref %update-new dom.event & metadata ruledata]
+        ::
+          %this-instance
+        [%update-event eid.iref %update-new [i i]:iref | metadata ruledata]
+        ::
+          %this-and-following-instances
+        ?>  (lte i.iref r.dom.event)
+        [%update-event eid.iref %update-new [i.iref r.dom.event] & metadata ruledata]
+      ==
+    ;<  *  bind:m
+      %+  (vent ,*)  [our.gowl %calendar]
+      calendar-calendar-action+[[our.gowl %our] calendar-action]
+    =/  =manx  (~(update-event-panel components sta) %loading)
     (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
   ==
 ::
@@ -275,96 +322,256 @@
   |_  state
   +*  this   .
       state  +<
+      panel-id      (en-html-id:htmx base)
+      rule-kind-id  (en-html-id:htmx (weld base /rule-kind))
   ::
   ++  update-event-panel
+    |=  active-tab=?(%loading %update %delete)
     ^-  manx
-    ?.  (~(has by events.calendar) eid.iref)
+    ?-    active-tab
+        %loading
       ;div.flex.flex-col.items-center.p-2
-        =id  "update-event_{id-num}"
+        =id  panel-id
         ;+  blue-fi-loader
       ==
-    ;div.flex.flex-col.m-2
-      =id  "update-event_{id-num}"
-      ;div.border-b.mb-4
-        ;div.text-2xl.font-semibold.text-center.text-gray-700.mb-2: Delete Event
-        ;form.m-2.flex.flex-col.items-center
-          =hx-post     "{(spud base)}/delete-event"
-          =hx-trigger  "submit"
-          =hx-target   "#update-event_{id-num}"
-          =hx-swap     "outerHTML"
-          ;+  =/  =event:c  (~(got by events.calendar) eid.iref)
-              ?:  =(1 ~(wyt by instances.event))
-                ;div.flex.flex-col.mb-4
-                  ;label.flex.items-center.mb-2
-                    ;input.mr-2
-                      =type       "radio"
-                      =name       "delete-option"
-                      =value      "whole-event"
-                      =checked    ""
-                      =autofocus  ""
-                      ;
+      ::
+        ?(%update %delete)
+      ;div.flex.flex-col.m-2
+        =id  panel-id
+        ;div.flex.flex-col.justify-center.border-b.mb-4
+          ;div.text-2xl.font-semibold.text-center.text-gray-700.mb-2: Update Event
+          ;nav.border-b.flex.pb-2.justify-center.items-center.space-x-4
+            ;div
+              =hx-get     "{(spud base)}?active-tab=update"
+              =hx-trigger  "click"
+              =hx-target   "#{panel-id}"
+              =hx-swap     "outerHTML"
+              =class  """
+                      px-2 py-1 rounded
+                      text-center text-lg
+                      {?:(?=(%update active-tab) "bg-blue-100 hover:bg-blue-200 text-blue-700" "bg-gray-100 hover:bg-gray-200 text-gray-700")}
+                      cursor-pointer
+                      """
+              ; Update
+            ==
+            ;div
+              =hx-get     "{(spud base)}?active-tab=delete"
+              =hx-trigger  "click"
+              =hx-target   "#{panel-id}"
+              =hx-swap     "outerHTML"
+              =class  """
+                      px-2 py-1 rounded
+                      text-center text-lg
+                      {?:(?=(%delete active-tab) "bg-blue-100 hover:bg-blue-200 text-blue-700" "bg-gray-100 hover:bg-gray-200 text-gray-700")}
+                      cursor-pointer
+                      """
+              ; Delete
+            ==
+
+          ==
+          ;+
+          ?-    active-tab
+              %delete
+            ;form.m-2.flex.flex-col.items-center
+              =hx-post     "{(spud base)}/delete-event"
+              =hx-trigger  "submit"
+              =hx-target   "#{panel-id}"
+              =hx-swap     "outerHTML"
+              =hx-confirm  "Are you sure you want to delete this event?"
+              ;+  ?:  =(1 ~(wyt by instances.event))
+                    ;div.flex.flex-col
+                      ;label.flex.items-center.mb-2
+                        ;input.mr-2
+                          =type       "hidden"
+                          =name       "delete-option"
+                          =value      "whole-event"
+                          ;
+                        ==
+                      ==
                     ==
-                    ;span: Delete event
-                  ==
-                ==
-              ?:  =(i.iref l.dom.event)
-                ;div.flex.flex-col.mb-4
-                  ;label.flex.items-center.mb-2
-                    ;input.mr-2
-                      =type       "radio"
-                      =name       "delete-option"
-                      =value      "this-instance"
-                      =checked    ""
-                      =autofocus  ""
-                      ;
+                  ?:  =(i.iref l.dom.event)
+                    ;div.flex.flex-col.mb-4
+                      ;label.flex.items-center.mb-2
+                        ;input.mr-2
+                          =type       "radio"
+                          =name       "delete-option"
+                          =value      "this-instance"
+                          =checked    ""
+                          =autofocus  ""
+                          ;
+                        ==
+                        ;span: This instance
+                      ==
+                      ;label.flex.items-center.mb-2
+                        ;input.mr-2
+                          =type   "radio"
+                          =name   "delete-option"
+                          =value  "whole-event"
+                          ;
+                        ==
+                        ;span: All instances
+                      ==
                     ==
-                    ;span: This instance
-                  ==
-                  ;label.flex.items-center.mb-2
-                    ;input.mr-2
-                      =type   "radio"
-                      =name   "delete-option"
-                      =value  "whole-event"
-                      ;
+                  ;div.flex.flex-col
+                    ;label.flex.items-center.mb-2
+                      ;input.mr-2
+                        =type       "radio"
+                        =name       "delete-option"
+                        =value      "this-instance"
+                        =checked    ""
+                        =autofocus  ""
+                        ;
+                      ==
+                      ;span: This instance
                     ==
-                    ;span: All instances
+                    ;label.flex.items-center.mb-2
+                      ;input.mr-2
+                        =type   "radio"
+                        =name   "delete-option"
+                        =value  "this-and-following-instances"
+                        ;
+                      ==
+                      ;span: This and following instances
+                    ==
+                    ;label.flex.items-center.mb-2
+                      ;input.mr-2
+                        =type   "radio"
+                        =name   "delete-option"
+                        =value  "whole-event"
+                        ;
+                      ==
+                      ;span: All instances
+                    ==
                   ==
-                ==
-              ;div.flex.flex-col.mb-4
-                ;label.flex.items-center.mb-2
-                  ;input.mr-2
-                    =type       "radio"
-                    =name       "delete-option"
-                    =value      "this-instance"
-                    =checked    ""
-                    =autofocus  ""
+              ;button
+                =type         "submit"
+                =class        "px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+                ; Delete
+              ==
+            ==
+            ::
+              %update
+            =/  =mid:c  (~(gut by metadata-map.event) i.iref default-metadata.event)
+            =/  =metadata:c  (~(got by metadata.event) mid)
+            =/  title=tape
+              (trip (so:dejs:format (~(gut by metadata) %title s+'')))
+            =/  =aid:c  (~(gut by ruledata-map.event) i.iref default-ruledata.event)
+            =/  =ruledata:c  (~(got by ruledata.event) aid)
+            =/  args=(unit args:c)
+              ?:  ?-  -.kind.ruledata
+                    %both  =(rid.ruledata both.rids.state)
+                    %left  =(rid.ruledata left.rids.state)
+                    %fuld  =(rid.ruledata fuld.rids.state)
+                    %skip  %.n
+                  ==
+                ~
+              `args.ruledata
+            ;div
+              ;form.m-2.flex.flex-col.items-center
+                =hx-post     "{(spud base)}/update-event"
+                =hx-trigger  "submit"
+                =hx-target   "#{panel-id}"
+                =hx-swap     "outerHTML"
+                ;+  ?:  =(1 ~(wyt by instances.event))
+                      ;div.flex.flex-col
+                        ;label.flex.items-center.mb-2
+                          ;input.mr-2
+                            =type       "hidden"
+                            =name       "update-option"
+                            =value      "whole-event"
+                            ;
+                          ==
+                        ==
+                      ==
+                    ?:  =(i.iref l.dom.event)
+                      ;div.flex.flex-col.mb-4
+                        ;label.flex.items-center.mb-2
+                          ;input.mr-2
+                            =type       "radio"
+                            =name       "update-option"
+                            =value      "this-instance"
+                            =checked    ""
+                            =autofocus  ""
+                            ;
+                          ==
+                          ;span: This instance
+                        ==
+                        ;label.flex.items-center.mb-2
+                          ;input.mr-2
+                            =type   "radio"
+                            =name   "update-option"
+                            =value  "whole-event"
+                            ;
+                          ==
+                          ;span: All instances
+                        ==
+                      ==
+                    ;div.flex.flex-col
+                      ;label.flex.items-center.mb-2
+                        ;input.mr-2
+                          =type       "radio"
+                          =name       "update-option"
+                          =value      "this-instance"
+                          =checked    ""
+                          =autofocus  ""
+                          ;
+                        ==
+                        ;span: This instance
+                      ==
+                      ;label.flex.items-center.mb-2
+                        ;input.mr-2
+                          =type   "radio"
+                          =name   "update-option"
+                          =value  "this-and-following-instances"
+                          ;
+                        ==
+                        ;span: This and following instances
+                      ==
+                      ;label.flex.items-center.mb-2
+                        ;input.mr-2
+                          =type   "radio"
+                          =name   "update-option"
+                          =value  "whole-event"
+                          ;
+                        ==
+                        ;span: All instances
+                      ==
+                    ==
+                ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
+                  ;span.m-2.font-medium.text-sm.text-gray-700: Update Event Title:
+                  ;input
+                    =type         "text"
+                    =name         "metadata[title]"
+                    =pattern      ".*\\S+.*" :: double bas to escape escape
+                    =class        "p-2 w-60 text-sm border rounded focus:outline-none focus:border-b-4 focus:border-blue-600 caret-blue-600 !important"
+                    =placeholder  "Update event title"
+                    =autofocus    ""
+                    =value        title
                     ;
                   ==
-                  ;span: This instance
                 ==
-                ;label.flex.items-center.mb-2
-                  ;input.mr-2
-                    =type   "radio"
-                    =name   "delete-option"
-                    =value  "this-and-following-instances"
-                    ;
+                ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
+                  ;span.m-2.font-medium.text-sm.text-gray-700: Select Rule Type:
+                  ;select.p-2.w-60.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
+                    =hx-post     "{(spud base)}/rule-kind-panel"
+                    =hx-trigger  "change"
+                    =hx-target   "#{rule-kind-id}"
+                    =hx-swap     "outerHTML"
+                    =name        "ruledata[kind][head]"
+                    ;option(value "left"): By Duration
+                    ;option(value "both"): By End Time
+                    ;option(value "fuld"): Fullday
+                    ;option(value "jump"): Instantaneous
                   ==
-                  ;span: This and following instances
                 ==
-                ;label.flex.items-center.mb-2
-                  ;input.mr-2
-                    =type   "radio"
-                    =name   "delete-option"
-                    =value  "whole-event"
-                    ;
-                  ==
-                  ;span: All instances
+                ;+  rule-kind-panel
+                ;button
+                  =type         "submit"
+                  =class        "px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+                  Save
                 ==
               ==
-          ;button
-            =type         "submit"
-            =class        "px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-            Delete
+            ==
           ==
         ==
       ==
@@ -383,15 +590,15 @@
         rule-list
       |=  [[* a=rule:r] [* b=rule:r]]
       (alphabetical:htmx (trip name.a) (trip name.b))
-    ;div.w-full.mx-2.flex.flex-col
-      =id  "update-event_rule-kind_{id-num}"
+    ;div.w-full.mb-2.mx-2.flex.flex-col
+      =id  rule-kind-id
       ;+  rule-kind-parameters
       ;div.mb-1.flex.items-center.justify-between
         ;span.m-2.font-medium.text-sm.text-gray-700: Select Rule:
         ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
           =hx-post     "{(spud base)}/rule-kind-panel"
           =hx-trigger  "change"
-          =hx-target   "#update-event_rule-kind_{id-num}"
+          =hx-target   "#{rule-kind-id}"
           =hx-swap     "outerHTML"
           =name   "ruledata[rid]"
           ;*  %+  turn  rule-list
@@ -502,20 +709,6 @@
                   ==
             ==
           ==
-      ;div
-        =class  "{?:(=('Single' name.rule) "hidden" "")} w-full mx-2 mb-1 flex items-center justify-between"
-        ;span.m-2.font-medium.text-sm.text-gray-700: Instances:
-        ;input
-          =type         "number"
-          =name         "dom"
-          =value        "1"
-          =required     ""
-          =min          "1"
-          =max          "{(numb:htmx max-instances:c)}"
-          =class        "p-2 w-60 text-sm border rounded focus:outline-none focus:border-b-4 focus:border-blue-600 caret-blue-600 !important"
-          ;
-        ==
-      ==
     ==
   --
 --
