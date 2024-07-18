@@ -137,10 +137,12 @@
   ~?  (gth d.delta ~d1)  [%delta-more-than-day d.delta]
   (?:(sign.delta add sub) time d.delta)
 ::
-++  invert-delta
+++  invert-delta  |=(=delta delta(sign !sign.delta))
+::
+++  apply-invert-delta
   |=  [=time =delta]
   ^-  ^time
-  (apply-delta time delta(sign !sign.delta))
+  (apply-delta time (invert-delta delta))
 ::
 ++  compose-deltas
   |=  [a=delta b=delta]
@@ -165,6 +167,18 @@
   ?:  (lte w (lent t))
     t
   $(t ['0' t])
+::
+++  utc-relative-name
+  |=  =delta
+  ^-  tape
+  ?:  =(0 d.delta)
+    "UTC"
+  =/  hours=@ud    (div (mod d.delta ~d1) ~h1)
+  =/  minutes=@ud  (div (mod d.delta ~h1) ~m1)
+  =/  start=tape  [?:(sign.delta '+' '-') (zfill 2 (numb hours))]
+  ?:  =(0 minutes)
+    start
+  :(weld start ":" (zfill 2 (numb minutes)))
 ::
 ++  monadic-parsing
   |%
@@ -269,6 +283,38 @@
     ;<  d=@ud   bind  dem
     (easy (year [& y] mo d 0 0 0 ~))
   --
+::
+++  dr-format
+  |=  [as=@t d=@dr]
+  ^-  tape
+  ?+    as  !!
+      %'24'
+    ?>  (lth d ~d1)
+    :: unlike time-input (ISO-8601), no leading hour zero
+    ::
+    =/  =tape  (scow %ud (div d ~h1))
+    =.  d      (mod d ~h1)
+    ?:  =(0 d)
+      tape
+    =.  tape   :(weld tape ":" (zfill 2 (scow %ud (div d ~m1))))
+    =.  d      (mod d ~m1)
+    ?:  =(0 d)
+      tape
+    =.  tape  :(weld tape ":" (zfill 2 (scow %ud (div d ~s1))))
+    =.  d      (mod d ~s1)
+    ?:  =(0 d)
+      tape
+    :(weld tape "." (zfill 3 (scow %ud (div (mul d 1.000) ~s1))))
+    ::
+      %'12'
+    ?:  (lth d ~h1)
+      "{(dr-format '24' (add d ~h12))}am"
+    ?:  (lth d ~h12)
+      "{(dr-format '24' d)}am"
+    ?:  (lth d ~h13)
+      "{(dr-format '24' d)}pm"
+    "{(dr-format '24' (sub d ~h12))}pm"
+  ==
 :: HH:MM[:SS[.SSS]]
 ::
 ++  time-input

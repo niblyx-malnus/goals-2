@@ -2,8 +2,8 @@
 /+  *ventio, server, htmx, nooks, fi=webui-feather-icons, html-utils,
     tu=time-utils, clib=calendar,
     webui-calendar-scripts,
-    webui-calendar-create-event-panel
-|_  $:  [zid=(unit zid:t) y=@ud m=@ud =date]
+    webui-calendar-update-event-panel
+|_  $:  [zid=(unit zid:t) y=@ud w=@ud =date =cid:c =iref:c]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -12,16 +12,16 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    now           (need (get-now-tz zid))
-    calendar      (get-calendar cid)
+    now       (need (get-now-tz zid))
+    calendar  (get-calendar cid)
 ::
-++  create-event-panel
-  |=  [zid=(unit zid:t) =^date]
+++  update-event-panel
+  |=  [zid=(unit zid:t) =^date =cid:c =iref:c]
   %~  .
-    webui-calendar-create-event-panel
-  :-  [zid date]
+    webui-calendar-update-event-panel
+  :-  [zid date cid iref]
   :+  gowl
-    (weld base /create-event-panel)
+    (weld base /update-event-panel)
   [[eyre-id req] [ext site] args]
 ::
 ++  fi-x
@@ -63,16 +63,7 @@
     /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
   ==
 ::
-++  dedot
-  |=  =tape
-  ^+  tape
-  ?~  tape
-    ~
-  ?:  ?=(%'.' i.tape)
-    $(tape t.tape)
-  [i.tape $(tape t.tape)]
-::
-+$  state  ? :: hidden create-event-panel
++$  state  ? :: hidden update-event-panel
 ++  init   (pure:(strand ,state) &)
 ::
 ++  handle
@@ -91,23 +82,21 @@
     (strand-fail %bad-http-request ~)
     ::
       [%'GET' ~ *]
-    (give-html-manx:htmx [our dap]:gowl eyre-id (add-event:components sta) |)
+    (give-html-manx:htmx [our dap]:gowl eyre-id (event:components sta) |)
     ::
-      [%'POST' [%hide ~] *]
+      [* [%hide ~] *]
     ;<  sta=state  bind:m  ((put:nuk state) base &)
-    (give-html-manx:htmx [our dap]:gowl eyre-id (add-event:components sta) |)
+    (give-html-manx:htmx [our dap]:gowl eyre-id (event:components sta) |)
     ::
-      [%'POST' [%unhide ~] *]
+      [* [%unhide ~] *]
     ;<  sta=state  bind:m  ((put:nuk state) base |)
-    (give-html-manx:htmx [our dap]:gowl eyre-id (add-event:components sta) |)
+    (give-html-manx:htmx [our dap]:gowl eyre-id (event:components sta) |)
     ::
-      [%'POST' [%create-event-panel %create-event ~] *]
+      [%'POST' [%update-event-panel ?(%update-event %delete-event) ~] *]
     :: send the update then hide container
-    ;<  *  bind:m  handle:(create-event-panel zid date)
-    ;<  sta=state  bind:m  ((put:nuk state) base &)
+    ;<  *  bind:m  handle:(update-event-panel zid date cid iref)
     ;<  ~  bind:m
       %+  send-refresh:htmx  [our dap]:gowl
-      =-  ~&(- -)
       %+  murn  ~(tap of (dip:nuk /))
       |=  [=path *]
       ?.  ?=([%htmx %goals %calendar @ta ~] path)
@@ -115,31 +104,43 @@
       [~ "#{(en-html-id:htmx path)}" (spud path) ~ ~]
     (pure:m !>(~))
     ::
-      [* [%create-event-panel *] *]
-    handle:(create-event-panel zid date)
+      [* [%update-event-panel *] *]
+    handle:(update-event-panel zid date cid iref)
   ==
 ::
 ++  components
   |%
-  ++  add-event
+  ++  event
+    |=  hidden=?
+    ^-  manx
+    =/  html-id=tape  (en-html-id:htmx base)
+    ?.  (~(has by events.calendar) eid.iref)
+      ;div(id html-id);
+    =/  =event:c     (~(got by events.calendar) eid.iref)
+    =/  =mid:c       (~(gut by metadata-map.event) i.iref default-metadata.event)
+    =/  =metadata:c  (~(got by metadata.event) mid)
+    =/  title=tape   (trip (so:dejs:format (~(gut by metadata) 'title' s+'NO TITLE!')))
+    ;div.relative(id html-id)
+      =style       "width: calc(100% - 12px);"
+      ;div
+        =class       "cursor-pointer mb-[4px] flex-grow px-2 py-1 text-xs rounded truncate bg-green-500 text-white"
+        =hx-trigger  "click"
+        =hx-post     "{(spud base)}/unhide"
+        =hx-target   "#{html-id}"
+        =hx-swap     "outerHTML"
+        {title}
+      ==
+      ;+  (update-modal-container hidden)
+    ==
+  ::
+  ++  update-modal-container
     |=  hidden=?
     ^-  manx
     =/  html-id=tape  (en-html-id:htmx base)
     ?:  hidden
-      ;div(id html-id);
-    ;div(id html-id, class "relative")
-      ;div
-        =class  "shadow-lg mt-1 px-2 py-1 text-xs rounded {?:(=(m m.date) "bg-green-500 text-white shadow-gray-400" "bg-green-300 text-gray-400 shadow-gray-300")}"
-        (No title)
-      ==
-      ;+  (create-modal-container hidden)
-    ==
-  ::
-  ++  create-modal-container
-    |=  hidden=?
-    ^-  manx
-    =/  html-id=tape  (en-html-id:htmx base)
-    ;div.fixed.inset-0.z-10.overflow-y-auto
+      ;div;
+    ;div
+      =class  "fixed inset-0 z-50 overflow-y-auto"
       ;div(class "flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0")
         ;div.fixed.inset-0.transition-opacity
           ;div.absolute.inset-0.bg-gray-300.opacity-50;
@@ -153,13 +154,14 @@
           ;div.flex.flex-col
             ;div.bg-gray-100.flex-1.flex.justify-end.h-12
               ;button
-                =hx-post     "{(spud base)}/hide"
-                =hx-target   "#{html-id}"
-                =class       "m-1 text-gray-500 bg-gray-100 hover:bg-gray-200 transition duration-150 ease-in-out rounded-full p-2"
+                =hx-post    "{(spud base)}/hide"
+                =hx-target  "#{html-id}"
+                =hx-swap    "outerHTML"
+                =class      "m-1 text-gray-500 bg-gray-100 hover:bg-gray-200 transition duration-150 ease-in-out rounded-full p-2"
                 ;+  fi-x
               ==
             ==
-            ;+  create-event-panel:components:(create-event-panel zid date)
+            ;+  (update-event-panel:components:(update-event-panel zid date cid iref) %update)
           ==
         ==
       == 

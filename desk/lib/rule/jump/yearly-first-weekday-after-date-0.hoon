@@ -4,7 +4,7 @@
       ['Day' %ud]
       ['Weekday' %ud]
       ['Time' %dr]
-      ['Offset' %dl]
+      ['Offset' %dl] :: as if we were in this offset from UTC
   ==
 '''
 |=  args=(map @t arg)
@@ -19,5 +19,5 @@
 =/  day=(unit @da)  (first-weekday-after [& (add year idx)] month date w)
 ?~  day
   [%| %rule-error (crip "This date does not exist.")]
-[%& (apply-delta (add u.day time) delta)]
+[%& (apply-invert-delta (add u.day time) delta)]
 '''

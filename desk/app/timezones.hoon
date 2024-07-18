@@ -2,7 +2,7 @@
 :: as well as any other custom timezones in that format
 ::
 /-  t=timezones, iana, r=rules
-/+  timezones, vent, verb, dbug, default-agent
+/+  tlib=timezones, vent, verb, dbug, default-agent, timezones-json
 :: import to force compilation during development
 ::
 /=  x  /ted/vines/timezones
@@ -23,7 +23,7 @@
 +*  this  .
     def   ~(. (default-agent this %.n) bowl)
     vnt   ~(. (utils:vent this) bowl)
-    zon   ~(. timezones zones .^((map rid:r to-to-jump:r) %gx (scot %p our.bowl) %rule-store (scot %da now.bowl) /to-to-jumps/noun))
+    zon   ~(. tlib zones .^((map rid:r to-to-jump:r) %gx (scot %p our.bowl) %rule-store (scot %da now.bowl) /to-to-jumps/noun))
 ::
 ++  on-init   on-init:def
 ::
@@ -44,8 +44,10 @@
     ::
       %timezones-transition
     =+  !<(tan=transition:t vase)
-    ?>  ?=(%put-zones -.tan)
-    [~ this(zones zones.tan)]
+    ?-    -.tan
+      %put-zones  [~ this(zones zones.tan)]
+      %uni-zones  [~ this(zones (~(uni by zones) zones.tan))]
+    ==
   ==
 ::
 ++  on-watch  on-watch:def
@@ -62,11 +64,12 @@
     :-  ~  :-  ~  :-  %noun  !>
     (~(get by zones) zid)
     ::
-      [%x %rule p=@ta q=@ta ~]
+      [%x %rule p=@ta q=@ta w=@ta ~]
+    =/  when=@da  (slav %da w.pole)
     =/  =zid:t   [(slav %p p.pole) q.pole]
     =/  =zone:t  (~(got by zones) zid)
     =/  pul=(unit [@ud rule=tz-rule:t])
-      (~(pul or:(abed:zn:zon zid) order.zone) now.bowl)
+      (~(pul or:(abed:zn:zon zid) order.zone) when)
     ``noun+!>(rule:(need pul))
     ::
       [%x %offset p=@ta q=@ta ~]
@@ -103,6 +106,16 @@
     ?.  (~(has by zones) zid)
       ~
     `utc-to-tz:(abed:zn:zon zid)
+    ::
+      [%x %jumps p=@ta q=@ta l=@ta r=@ta ~]
+    =/  ron  ((on @da iref:t) lth)
+    :-  ~  :-  ~  :-  %noun  !>
+    =/  =zid:t   [(slav %p p.pole) q.pole]
+    ?.  (~(has by zones) zid)
+      ~
+    =/  l=@da  (slav %da l.pole)
+    =/  r=@da  (slav %da r.pole)
+    (get-range:(abed:zn:zon zid) l r)
   ==
 ::
 ++  on-agent  on-agent:def

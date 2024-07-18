@@ -1,7 +1,9 @@
 /-  t=timezones
 /+  *ventio, htmx, server, nooks, html-utils, fi=webui-feather-icons,
     iana-converter, tu=time-utils,
-    webui-calendar-week-view, webui-calendar-month-view
+    webui-calendar-month-view,
+    webui-calendar-week-view,
+    webui-calendar-day-view
 |_  $:  =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -35,6 +37,16 @@
   :+  gowl
     %+  weld  base
     /week-view/(crip (en:week-input:tu y w))
+  [[eyre-id req] [ext site] args]
+::
+++  day-view
+  |=  [zid=(unit zid:t) y=@ud m=@ud d=@ud]
+  %~  .
+    webui-calendar-day-view
+  :-  [zid y m d]
+  :+  gowl
+    %+  weld  base
+    /day-view/(crip (en:date-input:tu (year [[& y] m d 0 0 0 ~])))
   [[eyre-id req] [ext site] args]
 ::
 ++  blue-fi-loader
@@ -90,12 +102,14 @@
 +$  state
   $:  view=?(%day %week %month)
       month=(unit [y=@ud m=@ud])
+      week=(unit [y=@ud w=@ud])
+      day=(unit [y=@ud m=@ud d=@ud])
       zone=(unit zid:t)
   ==
 ::
 ++  init
   %-  pure:(strand ,state)
-  [%month ~ ~]
+  [%month ~ ~ ~ ~]
 ::
 ++  handle-session
   =/  m  (strand ,vase)
@@ -115,7 +129,7 @@
     =.  zone.sta
       ?~  iana
         ~
-      =/  =zid:t  [our.gowl (cat 3 'iana_' (enta-name:iana-converter iana))]
+      =/  =zid:t  [our.gowl (cat 3 'iana_' (sane-ta-iana-name:iana-converter iana))]
       ?~((get-zone zid) ~ [~ zid])
     =/  =date  (yore (need (get-now-tz zone.sta)))
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
@@ -125,11 +139,12 @@
       [%'GET' ~ *]
     ?-    view.sta
         %day
-      !!
+      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore (need (get-now-tz zone.sta))))
+      =/  =manx  day-view:components:(day-view zone.sta day)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]
-        (da-to-week-number:tu (need (get-now-tz zone.sta)))
+      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu (need (get-now-tz zone.sta))))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
@@ -154,11 +169,12 @@
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     ?-    view.sta
         %day
-      !!
+      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore (need (get-now-tz zone.sta))))
+      =/  =manx  day-view:components:(day-view zone.sta day)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]
-        (da-to-week-number:tu (need (get-now-tz zone.sta)))
+      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu (need (get-now-tz zone.sta))))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
@@ -175,11 +191,12 @@
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     ?-    view.sta
         %day
-      !!
+      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore (need (get-now-tz zone.sta))))
+      =/  =manx  day-view:components:(day-view zone.sta day)
+      (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]
-        (da-to-week-number:tu (need (get-now-tz zone.sta)))
+      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu (need (get-now-tz zone.sta))))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
@@ -189,8 +206,16 @@
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
     ==
     ::
+      [* [%day-view date=@ta *] *]
+    =/  day=[@ud @ud @ud]  [y m d.t]:(yore (de:date-input:tu date.cad.parms))
+    =.  day.sta  [~ day]
+    ;<  sta=state  bind:m  ((put:nuk state) base sta)
+    handle:(day-view zone.sta day)
+    ::
       [* [%week-view week=@ta *] *]
     =/  week=[@ud @ud]  (de:week-input:tu week.cad.parms)
+    =.  week.sta  [~ week]
+    ;<  sta=state  bind:m  ((put:nuk state) base sta)
     handle:(week-view zone.sta week)
     ::
       [* [%month-view date=@ta *] *]

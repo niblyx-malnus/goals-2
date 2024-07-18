@@ -3,7 +3,7 @@
     tu=time-utils, clib=calendar,
     webui-calendar-scripts,
     webui-calendar-create-event-panel
-|_  $:  [zid=(unit zid:t) y=@ud m=@ud =date]
+|_  $:  [zid=(unit zid:t) y=@ud w=@ud =date]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -127,9 +127,10 @@
     =/  html-id=tape  (en-html-id:htmx base)
     ?:  hidden
       ;div(id html-id);
-    ;div(id html-id, class "relative")
+    ;div.relative(id html-id)
+        =style  "width: calc(100% - 12px);"
       ;div
-        =class  "shadow-lg mt-1 px-2 py-1 text-xs rounded {?:(=(m m.date) "bg-green-500 text-white shadow-gray-400" "bg-green-300 text-gray-400 shadow-gray-300")}"
+        =class  "mb-[4px] shadow-lg px-2 py-1 text-xs rounded bg-green-500 text-white shadow-gray-400"
         (No title)
       ==
       ;+  (create-modal-container hidden)
@@ -139,7 +140,7 @@
     |=  hidden=?
     ^-  manx
     =/  html-id=tape  (en-html-id:htmx base)
-    ;div.fixed.inset-0.z-10.overflow-y-auto
+    ;div.fixed.inset-0.z-50.overflow-y-auto
       ;div(class "flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0")
         ;div.fixed.inset-0.transition-opacity
           ;div.absolute.inset-0.bg-gray-300.opacity-50;

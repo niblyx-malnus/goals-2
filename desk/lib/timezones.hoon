@@ -24,29 +24,33 @@
 ++  create-rule
   |=  [=zid =tid dom=[l=@ud r=@ud] name=@t offset=delta =rid =args]
   ^-  _this
-  (emil-zon abot:(create-rule:(abed:zn zid) tid dom name offset rid args))
+  =/  [cards=(list card) =zone]
+    abot:(create-rule:(abed:zn zid) tid dom name offset rid args)
+  (emil-zon cards zid zone)
 ::
 ++  delete-rule
   |=  [=zid =tid]
   ^-  _this
-  (emil-zon abot:(delete-rule:(abed:zn zid) tid))
+  =/  [cards=(list card) =zone]
+    abot:(delete-rule:(abed:zn zid) tid)
+  (emil-zon cards zid zone)
 ::
 ++  zn
   =|  [upds=(list zone-update) old=zone]
-  |_  [=zid zon=zone]
+  |_  zon=zone
   +*  this  .
   ++  abed
-    |=  =^zid
+    |=  =zid
     ^-  _this
     =/  zon=zone
       (~(got by zones) zid)
-    this(zid zid, zon zon, old zon)
+    this(zon zon, old zon)
   ++  abet
-    ^-  [upds=(list zone-update) =^zid zon=zone]
-    [upds zid zon]
+    ^-  [upds=(list zone-update) zon=zone]
+    [upds zon]
   ++  card-abet
-    ^-  [cadz=(list card) =^zid zon=zone]
-    :_  [zid zon]
+    ^-  [cadz=(list card) zon=zone]
+    :_  zon
     %+  turn  (flop upds)
     |=  upd=zone-update
     `card`[%give %fact ~[/temp] zone-update+!>(upd)]
@@ -98,11 +102,21 @@
     $(tids t.tids, this (update-rule-domain i.tids u.get))
   ::
   ++  delete-rule  |=(=tid `_this`(do-update %rule %d tid))
+  ::
+  ++  get-range
+    |=  [l=@da r=@da]
+    ^-  (list [@da iref])
+    (~(ran or order.zon) l r)
   :: order core
   ::
   ++  or
     |_  ord=((mop @da iref) lth)
     ++  ron  ((on @da iref) lth)
+    ++  ran
+      |=  [l=@da r=@da]
+      ^-  (list [@da iref])
+      (tap:ron (lot:ron ord `(dec l) `r))
+    ::
     ++  get-time
       |=  =iref
       ^-  (unit time)
@@ -179,7 +193,7 @@
       %+  murn  ~(tap in ~(key by offsets.zon))
       |=  offset=delta
       ^-  (unit @da)
-      =/  candidate=@da  (invert-delta time offset)
+      =/  candidate=@da  (apply-invert-delta time offset)
       ?.  (validate-time candidate offset)
         ~
       [~ candidate]

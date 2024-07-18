@@ -35,21 +35,24 @@
         [%d (nimb (to-unix-ms d.dext))]
     ==
   ::
-  ++  delta  |=(=^delta `json`(nimb sign.delta (dr-to-unix-ms d.delta)))
+  ++  delta  :: |=(=^delta `json`(nimb sign.delta (dr-to-unix-ms d.delta)))
+    |=  =^delta
+    ^-  json
+    s+(crip "{?:(sign.delta "" "- ")}{(trip (scot %dr d.delta))}")
   ::
   ++  arg
     |=  =^arg
     ^-  json
-    !!
-    :: ?-  -.arg
-    ::   %ud  (frond %ud (numb p.arg))
-    ::   %da  (frond %da (nimb (to-unix-ms p.arg)))
-    ::   %od  (frond %od s+p.arg)
-    ::   %dr  (frond %dr (numb (dr-to-unix-ms p.arg)))
-    ::   %dl  (frond %dl (delta p.arg))
-    ::   %dx  (frond %dx (dext p.arg))
-    ::   %wl  (frond %wl a+(turn p.arg numb))
-    :: ==
+    ?+  -.arg
+      s+'placeholder-arg'
+      %ud  (frond %ud (numb p.arg))
+      %od  (frond %od s+p.arg)
+      %da  (frond %da s+(scot %da p.arg)) :: (nimb (to-unix-ms p.arg)))
+      %dr  (frond %dr s+(scot %dr p.arg)) :: (numb (dr-to-unix-ms p.arg)))
+      %dl  (frond %dl (delta p.arg))
+      %dx  (frond %dx (dext p.arg))
+      %wl  (frond %wl a+(turn p.arg numb))
+    ==
   ::
   ++  args
     |=  =^args
@@ -60,7 +63,9 @@
     ^-  [@t json]
     [t (arg a)]
   ::
-  ++  jump  |=(jmp=^jump `json`(nimb (to-unix-ms jmp)))
+  ++  jump :: |=(jmp=^jump `json`(nimb (to-unix-ms jmp)))
+    |=  jmp=^jump
+    s+(scot %da jmp)
   ::
   ++  rule-exception
     |=  rex=^rule-exception

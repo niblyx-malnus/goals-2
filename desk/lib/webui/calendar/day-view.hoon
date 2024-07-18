@@ -2,12 +2,12 @@
 /+  *ventio, server, htmx, nooks, html-utils, tu=time-utils, clib=calendar,
     fi=webui-feather-icons,
     webui-calendar-scripts,
-    webui-calendar-week-view-day-square,
-    webui-calendar-week-view-fullday-square
+    webui-calendar-day-view-day-square,
+    webui-calendar-day-view-fullday-square
 :: specified by the date of the monday
 :: (even though we display with Sunday first)
 ::
-|_  $:  [zid=(unit zid:t) y=@ud w=@ud]
+|_  $:  [zid=(unit zid:t) y=@ud m=@ud d=@ud]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -39,19 +39,18 @@
   (pus:~(at mx manx) "height: .875em; width: .875em;")
 ::
 ++  day-square
-  |=  =date
   %~  .
-    webui-calendar-week-view-day-square
-  :-  [zid y w date]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:tu (year date))))
+    webui-calendar-day-view-day-square
+  :-  [zid y m d]
+  :+  gowl  (weld base /day-square/(crip (en:date-input:tu (year [[& y] m d 0 0 0 ~]))))
   [[eyre-id req] [ext site] args]
 ::
 ++  fullday-square
-  |=  [=date collapse=?]
+  |=  collapse=?
   %~  .
-    webui-calendar-week-view-fullday-square
-  :-  [zid y w date collapse]
-  :+  gowl  (weld base /fullday-square/(crip (en:date-input:tu (year date))))
+    webui-calendar-day-view-fullday-square
+  :-  [zid y m d collapse]
+  :+  gowl  (weld base /fullday-square/(crip (en:date-input:tu (year [[& y] m d 0 0 0 ~]))))
   [[eyre-id req] [ext site] args]
 ::
 ++  get-now-tz
@@ -114,6 +113,7 @@
 ++  init   (pure:(strand ,state) &)
 ::
 ++  handle
+  =/  =date  [[& y] m d 0 0 0 ~]
   =/  m  (strand ,vase)
   ^-  form:m
   ::
@@ -129,30 +129,31 @@
     (strand-fail %bad-http-request ~)
     ::
       [%'GET' ~ *]
-    (give-html-manx:htmx [our dap]:gowl eyre-id ~(week-view components sta) |)
+    (give-html-manx:htmx [our dap]:gowl eyre-id ~(day-view components sta) |)
     ::
       [%'POST' [%collapse ~] *]
     ;<  sta=state  bind:m  ((put:nuk state) base &)
-    (give-html-manx:htmx [our dap]:gowl eyre-id ~(week-view components sta) |)
+    (give-html-manx:htmx [our dap]:gowl eyre-id ~(day-view components sta) |)
     ::
       [%'POST' [%uncollapse ~] *]
     ;<  sta=state  bind:m  ((put:nuk state) base |)
-    (give-html-manx:htmx [our dap]:gowl eyre-id ~(week-view components sta) |)
+    (give-html-manx:htmx [our dap]:gowl eyre-id ~(day-view components sta) |)
     ::
       [* [%day-square date=@ta *] *]
-    handle:(day-square (yore (de:date-input:tu date.cad.parms)))
+    handle:day-square
     ::
       [* [%fullday-square date=@ta *] *]
-    handle:(fullday-square (yore (de:date-input:tu date.cad.parms)) sta)
+    handle:(fullday-square sta)
   ==
 ::
 ++  components
+  =/  =date  [[& y] m d 0 0 0 ~]
   |_  state
   +*  state  +<
-  ++  week-view
+  ++  day-view
     ;div.h-screen.w-screen
       =id  (en-html-id:htmx base)
-      ;+  week-panel
+      ;+  day-panel
     ==
   ::
   ++  timer
@@ -166,20 +167,10 @@
   ::
   ++  toolbar
     ^-  manx
-    =/  this-week=@da  (week-number-to-first-da:tu y w)
-    =/  last-week=[y=@ud w=@ud]  (da-to-week-number:tu (sub this-week ~d7))
-    =/  next-week=[y=@ud w=@ud]  (da-to-week-number:tu (add this-week ~d7))
-    =/  today=[y=@ud w=@ud]  (da-to-week-number:tu now)
-    =/  sunday=date    (yore (sub this-week ~d1))
-    =/  saturday=date  (yore (add this-week ~d5))
-    =/  [y1=@ud m1=@ud]  [y m]:sunday
-    =/  [y2=@ud m2=@ud]  [y m]:saturday
-    =/  month-title=tape
-      ?:  =(m1 m2)
-        "{(snag (sub m1 1) month-abbrv)} {(numb:htmx y1)}"
-      ?.  =(y1 y2)
-        "{(snag (sub m1 1) month-abbrv)}-{(snag (sub m2 1) month-abbrv)} {(numb:htmx y1)}-{(numb:htmx y2)}"
-      "{(snag (sub m1 1) month-abbrv)}-{(snag (sub m2 1) month-abbrv)} {(numb:htmx y1)}"
+    =/  today=@da      (year [& y] m d 0 0 0 ~)
+    =/  yesterday=@da  (sub today ~d1)
+    =/  tomorrow=@da   (add today ~d1)
+    =/  month-title=tape  "{(snag (sub m 1) month-abbrv)} {(numb:htmx y)}"
     ::
     ;div(class "p-2 flex items-center space-x-4")
       ;select.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
@@ -187,12 +178,12 @@
         =hx-post    "{(spud (moup:htmx 2 base))}/set-current-view"
         =hx-target  "#{(en-html-id:htmx (moup:htmx 2 base))}"
         =hx-swap    "outerHTML"
-        ;option(value "day"): Day
-        ;option(value "week", selected ""): Week
+        ;option(value "day", selected ""): Day
+        ;option(value "week"): Week
         ;option(value "month"): Month
       ==
       ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
-        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:week-input:tu today)}"
+        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu (mul ~d1 (div now ~d1)))}"
         =hx-target   "#{(en-html-id:htmx base)}"
         =hx-trigger  "click" 
         =hx-swap     "outerHTML"
@@ -200,22 +191,22 @@
       ==
       ;div(class "flex items-center space-x-1")
         ;button
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:week-input:tu last-week)}"
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu yesterday)}"
           =hx-target   "#{(en-html-id:htmx base)}"
           =hx-trigger  "click"
           =hx-swap     "outerHTML"
-          =alt         "Previous month"
-          =title       "Previous month"
+          =alt         "Yesterday"
+          =title       "Yesterday"
           =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
           ;+  (~(set-style mx left-arrow) "height: .95em; width: .95em;")
         ==
         ;button
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:week-input:tu next-week)}"
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu tomorrow)}"
           =hx-target   "#{(en-html-id:htmx base)}"
           =hx-trigger  "click"
           =hx-swap     "outerHTML"
-          =alt         "Next month"
-          =title       "Next month"
+          =alt         "Tomorrow"
+          =title       "Tomorrow"
           =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
           ;+  (~(set-style mx right-arrow) "height: .95em; width: .95em;")
         ==
@@ -255,14 +246,11 @@
       ;+  (timer (get-offset zid))
     ==
   ::
-  ++  week-panel
+  ++  day-panel
     ^-  manx
-    =/  sunday=@da  (sub (week-number-to-first-da:tu y w) ~d1)
-    =/  thursday=@da  (add sunday ~d4)
-    =/  days=(list date)
-      %+  turn  (gulf 0 6)
-      |=(idx=@ (yore (add sunday (mul idx ~d1))))
-    =/  rul=(unit tz-rule:t)  (active-rule thursday)
+    =/  today=@da  (year [[& y] m d 0 0 0 ~])
+    =/  this-week=[y=@ud w=@ud]  (da-to-week-number:tu today)
+    =/  rul=(unit tz-rule:t)  (active-rule today)
     =/  rule-name=tape  ?~(rul "" (trip name.u.rul))
     =/  offset-name=tape
       ?~(rul "UTC" (weld "UTC" (print-utc-offset:tu offset.u.rul)))
@@ -274,33 +262,29 @@
       ;div.weekday-labels
         ;div.relative.min-w-0
           ;div.flex.flex-col
-            ;span.text-xs.text-gray-400: Week {(numb:htmx w)}
+            ;span.text-xs.text-gray-400: Week {(numb:htmx w.this-week)}
             ;span.text-xs.text-gray-400: {(numb:htmx y)}
           ==
         ==
-        ;*  |-
-            ?~  days
-              ~
-            :_  $(days t.days)
-            =/  weekday=tape  (snag (sub 7 (lent days)) weekday-headers)
-            =/  today=?   =([m y d.t]:i.days [m y d.t]:(yore now))
-            =/  before=?  (lth (year i.days) now)
+        ;+  =/  weekday=tape  (snag (get-weekday:tu today) weekday-headers)
+            =/  is-today=?   =([m y d.t]:(yore today) [m y d.t]:(yore now))
+            =/  is-before=?  (lth today now)
             ;div.flex.flex-col.items-center.justify-center
               ;span
-                =class  "text-center text-{?:(today "blue" "gray")}-500 text-xs font-semi-bold p-1"
+                =class  "text-center text-{?:(is-today "blue" "gray")}-500 text-xs font-semi-bold p-1"
                 ; {weekday}
               ==
               ;div
-                =class  "bg-{?:(today "blue" "white")}-500 hover:bg-{?:(today "blue-700" "gray-100")} flex items-center justify-center rounded-full"
+                =class  "bg-{?:(is-today "blue" "white")}-500 hover:bg-{?:(is-today "blue-700" "gray-100")} flex items-center justify-center rounded-full"
                 =style  "width: 48px; height: 48px;"
-                ;span(class "text-[24px] text-{?:(today "white" ?:(before "gray-500" "gray-800"))}"): {(scow %ud d.t.i.days)}
+                ;span(class "text-[24px] text-{?:(is-today "white" ?:(is-before "gray-500" "gray-800"))}"): {(scow %ud d.t:(yore today))}
               ==
             ==
       ==
       :: Fullday display
       ::
       ;div.grid.h-auto
-        =style  "grid-template-columns: 70px repeat(7, 1fr);"
+        =style  "grid-template-columns: 70px repeat(1, 1fr);"
         ;div.flex.flex-col.h-full.justify-center
           =style  "border-right: 1px solid #e5e7eb; border-bottom: 1px solid $e5e7eb;"
           ;+  ?:  =(offset-name (weld "UTC" rule-name))
@@ -334,9 +318,7 @@
                 ==
           ==
         ==
-        ;*  %+  turn  days
-            |=  =date
-            fullday-square:components:(fullday-square date state)
+        ;+  fullday-square:components:(fullday-square state)
       ==
       :: Scrollable content
       ::
@@ -374,12 +356,10 @@
 
         :: Day columns
         ::
-        ;div.flex-auto.grid.grid-cols-7.relative
+        ;div.flex-auto.grid.grid-cols-1.relative
           ;+  cursor
-          ;script: {(position-cursor:webui-calendar-scripts (en-html-id:htmx (weld base /cursor)) (get-offset zid) (yore sunday))}
-          ;*  %+  turn  days
-              |=  =date
-              day-square:components:(day-square date)
+          ;script: {(position-cursor:webui-calendar-scripts (en-html-id:htmx (weld base /cursor)) (get-offset zid) (yore today))}
+          ;+  day-square:components:day-square
         ==
       ==
     ==
@@ -419,7 +399,7 @@
     }
     .weekday-labels {
         display: grid;
-        grid-template-columns: 70px repeat(7, 1fr);
+        grid-template-columns: 70px repeat(1, 1fr);
         border-right: 1px solid #e5e7eb;
         border-top: 1px solid #e5e7eb;
         padding: 8px 0;

@@ -47,9 +47,11 @@
 ::
 +$  transition
   $%  [%put-zones =zones]
+      [%uni-zones =zones]
   ==
 ::
 +$  action
   $%  [%convert-iana ~]
+      [%convert-iana-zone keys=(list @t)]
   ==
 --

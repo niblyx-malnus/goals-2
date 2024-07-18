@@ -3,7 +3,7 @@
     tu=time-utils, clib=calendar,
     webui-calendar-scripts,
     webui-calendar-update-event-panel
-|_  $:  [zid=(unit zid:t) y=@ud m=@ud =date =cid:c =iref:c]
+|_  $:  [zid=(unit zid:t) y=@ud w=@ud =date =cid:c =iref:c]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -121,42 +121,37 @@
     =/  =event:c     (~(got by events.calendar) eid.iref)
     =/  =mid:c       (~(gut by metadata-map.event) i.iref default-metadata.event)
     =/  =metadata:c  (~(got by metadata.event) mid)
-    =/  =aid:c       (~(gut by ruledata-map.event) i.iref default-ruledata.event)
-    =/  =ruledata:c  (~(got by ruledata.event) aid)
     =/  title=tape   (trip (so:dejs:format (~(gut by metadata) 'title' s+'NO TITLE!')))
     =/  =instance:c  (~(got by instances.event) i.iref)
     :: TODO: handle exceptions; handle nulls;
     ::
-    ?:  ?=(%span -.instance)
-      ?>  ?=(%& -.p.instance)
-      =/  start=@da    (max (need (get-utc-to-tz l.p.p.instance zid)) (year date))
-      ;div(id html-id)
-        ;div
-          =class       "flex gap-1 items-center overflow-hidden hover:bg-gray-100 rounded cursor-pointer mb-[4px] px-2 py-1"
-          =hx-trigger  "click"
-          =hx-post     "{(spud base)}/unhide"
-          =hx-target   "#{html-id}"
-          =hx-swap     "outerHTML"
-          ;div.bg-green-500.rounded-full.flex-shrink-0
-            =style  "width: 8px; height: 8px;"
-            ;
-          ==
-          ;div.flex.gap-1.items-center
-            ;+  %-  need  %-  de-xml:html  %-  crip
-                "<span class=\"text-xs text-gray-800 truncate\">{(dr-format:tu '12' (mod start ~d1))} <strong>{title}</strong></span>"
-          ==
-        ==
-        ;+  (modal-container hidden)
-      ==
-    ?>  ?=(%fuld -.instance)
-    ;div(id html-id)
+    ?>  ?=(%span -.instance)
+    ?>  ?=(%& -.p.instance)
+    =/  start=^date
+      (yore (max (need (get-utc-to-tz l.p.p.instance zid)) (year date)))
+    =/  end=^date
+      (yore (min (need (get-utc-to-tz r.p.p.instance zid)) (add ~d1 (year date))))
+    ?:  =(start end)
+      ;div(id html-id);
+    =/  start-px=@ud   (add (mul 50 h.t.start) (div (mul 50 m.t.start) 60))
+    =/  end-px=@ud
+      ?:  =(d.t.end +(d.t.date))
+        1.200
+      (add (mul 50 h.t.end) (div (mul 50 m.t.end) 60))
+    =/  dif-px=@ud     (sub end-px start-px)
+    =/  start-hr=tape  (dr-format:tu '12' (mod (year start) ~d1))
+    =/  end-hr=tape    (dr-format:tu '12' (mod (year end) ~d1))
+    ;div.relative(id html-id)
       ;div
-        =class       "cursor-pointer flex-grow mb-[4px] px-2 py-1 text-xs rounded truncate bg-green-500 hover:bg-green-600 text-white"
+        :: TODO: border-white only when not z-0 (bottom layer)
+        =class       "absolute flex flex-col cursor-pointer mb-[4px] px-2 py-1 text-xs rounded truncate bg-green-500 text-white border border-white border-solid"
+        =style       "top: {(numb:tu start-px)}px; height: {(numb:tu dif-px)}px; z-index: 1; width: calc(100% - 12px);"
         =hx-trigger  "click"
         =hx-post     "{(spud base)}/unhide"
         =hx-target   "#{html-id}"
         =hx-swap     "outerHTML"
-        {title}
+        ;span: {title}
+        ;span(class "text-[0.9em]"): {start-hr} - {end-hr}
       ==
       ;+  (modal-container hidden)
     ==
@@ -167,8 +162,8 @@
     =/  html-id=tape  (en-html-id:htmx base)
     ?:  hidden
       ;div;
-    ;div
-      =class  "fixed inset-0 z-10 overflow-y-auto"
+    ;div.fixed.inset-0.overflow-y-auto
+      =style  "z-index: 100000;"
       ;div(class "flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0")
         ;div.fixed.inset-0.transition-opacity
           ;div.absolute.inset-0.bg-gray-300.opacity-50;

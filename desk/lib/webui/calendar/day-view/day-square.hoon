@@ -1,10 +1,10 @@
 /-  t=timezones, c=calendar
 /+  *ventio, server, htmx, nooks, fi=webui-feather-icons, html-utils,
     tu=time-utils, clib=calendar,
-    webui-calendar-week-view-day-square-event,
-    webui-calendar-week-view-day-square-add-event
+    webui-calendar-day-view-day-square-event,
+    webui-calendar-day-view-day-square-add-event
 ::
-|_  $:  [zid=(unit zid:t) y=@ud w=@ud =date]
+|_  $:  [zid=(unit zid:t) y=@ud m=@ud d=@ud]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -24,20 +24,20 @@
   ==
 ::
 ++  event
-  |=  [zid=(unit zid:t) y=@ud w=@ud =^date =cid:c =iref:c]
+  |=  [zid=(unit zid:t) y=@ud m=@ud d=@ud =cid:c =iref:c]
   %~  .
-    webui-calendar-week-view-day-square-event
-  :-  [zid y w date cid iref]
+    webui-calendar-day-view-day-square-event
+  :-  [zid y m d cid iref]
   :+  gowl
     %+  weld  base
     /event/(scot %p host.cid)/[name.cid]/[`@ta`eid.iref]/(scot %ud i.iref)
   [[eyre-id req] [ext site] args]
 ::
 ++  add-event
-  |=  [zid=(unit zid:t) y=@ud w=@ud =^date chunk=@ud]
+  |=  [zid=(unit zid:t) y=@ud m=@ud d=@ud chunk=@ud]
   %~  .
-    webui-calendar-week-view-day-square-add-event
-  :-  [zid y w date chunk]
+    webui-calendar-day-view-day-square-add-event
+  :-  [zid y m d chunk]
   :+  gowl
     %+  weld  base
     /add-event/(scot %ud chunk)
@@ -118,6 +118,7 @@
   [i.tape $(tape t.tape)]
 ::
 ++  handle
+  =/  =date  [[& y] m d 0 0 0 ~]
   =/  m  (strand ,vase)
   ^-  form:m
   ::
@@ -134,15 +135,16 @@
     (give-html-manx:htmx [our dap]:gowl eyre-id day-square:components |)
     ::
       [* [%add-event chunk=@ta *] *]
-    handle:(add-event zid y w date (slav %ud chunk.cad.parms))
+    handle:(add-event zid y ^m d (slav %ud chunk.cad.parms))
     ::
       [* [%event host=@t name=@t eid=@t i=@t *] *]
     =/  =cid:c   [(slav %p host.cad.parms) name.cad.parms]
     =/  =iref:c  [eid.cad.parms (slav %ud i.cad.parms)] 
-    handle:(event zid y w date cid iref)
+    handle:(event zid y ^m d cid iref)
   ==
 ::
 ++  components
+  =/  =date  [[& y] m d 0 0 0 ~]
   |%
   ++  jumps
     ^-  manx
@@ -181,7 +183,7 @@
     ;div
       ;*  %+  turn  ~(tap in irefs)
           |=  =iref:c
-          (event:components:(event zid y w date cid iref) &)
+          (event:components:(event zid y m d cid iref) &)
     ==
   ::
   ++  chunks
@@ -189,7 +191,7 @@
     %+  turn  (gulf 0 47)
     |=  chunk=@ud
     ;div
-      ;+  (add-event:components:(add-event zid y w date chunk) &)
+      ;+  (add-event:components:(add-event zid y m d chunk) &)
       ;div
         =id          "{(en-html-id:htmx (weld base /chunk/(scot %ud chunk)))}"
         =class       "absolute w-full h-[25px] z-0"

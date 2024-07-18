@@ -3,7 +3,7 @@
     tu=time-utils, clib=calendar,
     webui-calendar-scripts,
     webui-calendar-create-event-panel
-|_  $:  [zid=(unit zid:t) y=@ud m=@ud =date]
+|_  $:  [zid=(unit zid:t) y=@ud w=@ud =date chunk=@ud]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -125,31 +125,34 @@
     |=  hidden=?
     ^-  manx
     =/  html-id=tape  (en-html-id:htmx base)
+    =/  start=@dr  (mul ~m30 chunk)
+    =/  end=@dr    (min (add ~h1 start) ~d1)
+    =/  start-hr=tape  (dr-format:tu '12' start)
+    =/  end-hr=tape    (dr-format:tu '12' end)
+    =/  height=tape    (numb:tu ?:((lth ~d1 end) 25 50))
     ?:  hidden
       ;div(id html-id);
     ;div(id html-id, class "relative")
       ;div
-        =class  "shadow-lg mt-1 px-2 py-1 text-xs rounded {?:(=(m m.date) "bg-green-500 text-white shadow-gray-400" "bg-green-300 text-gray-400 shadow-gray-300")}"
-        (No title)
+        =class  "shadow-lg shadow-gray-400 absolute flex flex-col cursor-pointer mb-[4px] px-2 py-1 text-xs rounded truncate bg-green-500 text-white border border-white border-solid"
+        =style  "top: {(numb:tu (mul chunk 25))}px; height: {height}px; z-index: 10000; width: calc(100% - 12px);"
+        ;span: (No title)
+        ;span(class "text-[0.9em]"): {start-hr} - {end-hr}
       ==
-      ;+  (create-modal-container hidden)
+      ;+  modal-container
     ==
   ::
-  ++  create-modal-container
-    |=  hidden=?
+  ++  modal-container
     ^-  manx
     =/  html-id=tape  (en-html-id:htmx base)
-    ;div.fixed.inset-0.z-10.overflow-y-auto
+    ;div.fixed.inset-0.overflow-y-auto
+      =style  "z-index: 100000;"
       ;div(class "flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0")
         ;div.fixed.inset-0.transition-opacity
           ;div.absolute.inset-0.bg-gray-300.opacity-50;
         ==
-        ;span(class "hidden sm:inline-block sm:align-middle sm:h-screen"): ​
         ;div
           =class            "fixed top-20 left-1/2 -translate-x-1/2 inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-          =role             "dialog"
-          =aria-modal       "true"
-          =aria-labelledby  "modal-headline"
           ;div.flex.flex-col
             ;div.bg-gray-100.flex-1.flex.justify-end.h-12
               ;button
