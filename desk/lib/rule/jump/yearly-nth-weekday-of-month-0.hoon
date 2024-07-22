@@ -1,22 +1,20 @@
 :+  'Yearly nth Weekday of Month'
-  :~  ['Start Year' %ud]
-      ['Month' %ud]
+  :~  ['Start Month' %mt]
       ['Ordinal' %od]
-      ['Weekday' %ud]
-      ['Time' %dr]
+      ['Weekday' %wd]
+      ['Clocktime' %ct]
       ['Offset' %dl] :: as if we were in this offset from UTC
   ==
 '''
 |=  args=(map @t arg)
-=/  year=@ud   +:;;($>(%ud arg) (~(got by args) 'Start Year'))
-=/  month=@ud  +:;;($>(%ud arg) (~(got by args) 'Month'))
-=/  =ord       +:;;($>(%od arg) (~(got by args) 'Ordinal'))
-=/  w=@ud      +:;;($>(%ud arg) (~(got by args) 'Weekday'))
-=/  time=@dr   +:;;($>(%dr arg) (~(got by args) 'Time'))
-=/  =delta     +:;;($>(%dl arg) (~(got by args) 'Offset'))
+=/  sm=[y=@ud m=@ud]  +:;;($>(%mt arg) (~(got by args) 'Start Month'))
+=/  =ord              +:;;($>(%od arg) (~(got by args) 'Ordinal'))
+=/  =wkd              +:;;($>(%wd arg) (~(got by args) 'Weekday'))
+=/  time=@dr          +:;;($>(%ct arg) (~(got by args) 'Clocktime'))
+=/  =delta            +:;;($>(%dl arg) (~(got by args) 'Offset'))
 ^-  $-(@ud (each jump rule-exception))
 |=  idx=@ud
-=/  day=(unit @da)  (nth-weekday [& (add year idx)] month ord w)
+=/  day=(unit @da)  (nth-weekday [& (add y.sm idx)] m.sm ord wkd)
 ?~  day
   [%| %rule-error (crip "This date does not exist.")]
 [%& (apply-invert-delta (add u.day time) delta)]

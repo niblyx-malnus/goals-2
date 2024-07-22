@@ -51,7 +51,8 @@
       %dr  (frond %dr s+(scot %dr p.arg)) :: (numb (dr-to-unix-ms p.arg)))
       %dl  (frond %dl (delta p.arg))
       %dx  (frond %dx (dext p.arg))
-      %wl  (frond %wl a+(turn p.arg numb))
+      %wd  (frond %wd s+p.arg)
+      %wl  (frond %wl a+(turn p.arg (lead %s)))
     ==
   ::
   ++  args
@@ -117,7 +118,7 @@
     |=  [t=@da i=^iref]
     ^-  json
     %-  pairs
-    :~  [%t (nimb (to-unix-ms t))]
+    :~  [%t s+(scot %da t)] :: (nimb (to-unix-ms t))]
         [%i s+(iref i)]
     ==
   ::

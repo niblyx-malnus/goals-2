@@ -19,7 +19,7 @@
   |=  [zid=(unit zid:t) =^date]
   %~  .
     webui-calendar-create-event-panel
-  :-  [zid date]
+  :-  [zid date ~ %fuld]
   :+  gowl
     (weld base /create-event-panel)
   [[eyre-id req] [ext site] args]
@@ -153,7 +153,7 @@
                 ;+  fi-x
               ==
             ==
-            ;+  create-event-panel:components:(create-event-panel zid date)
+            ;+  default:components:(create-event-panel zid date)
           ==
         ==
       == 

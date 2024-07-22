@@ -1,19 +1,21 @@
 :+  'Monthly nth Weekday'
-  :~  ['Start' %da]
-      ['Offset' %dl]
+  :~  ['Start Date' %dt]
+      ['Clocktime' %ct]
       ['Ordinal' %od]
-      ['Weekday' %ud]
+      ['Weekday' %wd]
   ==
 '''
 |=  args=(map @t arg)
-=/  start=@da  +:;;($>(%da arg) (~(got by args) 'Start'))
-=/  =delta     +:;;($>(%dl arg) (~(got by args) 'Offset'))
+=/  sd=[y=@ud m=@ud d=@ud]
+               +:;;($>(%dt arg) (~(got by args) 'Start Date'))
+=/  ct=@dr     +:;;($>(%ct arg) (~(got by args) 'Clocktime'))
 =/  =ord       +:;;($>(%od arg) (~(got by args) 'Ordinal'))
-=/  w=@        +:;;($>(%ud arg) (~(got by args) 'Weekday'))
+=/  =wkd       +:;;($>(%wd arg) (~(got by args) 'Weekday'))
 ^-  $-(@ud (each dext rule-exception))
 |=  idx=@ud
-=/  day=(unit @da)  ((monthly-nth-weekday start ord w) idx)
+=/  start=@da  (year [& y.sd] m.sd d.sd 0 0 0 ~)
+=/  day=(unit @da)  ((monthly-nth-weekday start ord wkd) idx)
 ?~  day
   [%| %rule-error 'This day does not exist in this month.']
-[%& 0 (apply-delta u.day delta)]
+[%& 0 (add u.day ct)]
 '''

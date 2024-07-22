@@ -10,6 +10,7 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
+    now  (need (get-now-tz zid))
     calendar  (get-calendar cid)
     event     (~(got by events:calendar) eid.iref)
     rules  
@@ -53,6 +54,36 @@
   ^-  manx
   (pac:~(at mx fi-loader) "text-4xl text-blue-500")
 ::
+++  get-now-tz  |=(zone=(unit zid:t) (get-utc-to-tz now.gowl zone))
+::
+++  get-utc-to-tz
+  |=  [=time zone=(unit zid:t)]
+  ^-  (unit @da)
+  ?~  zone
+    `time
+  =;  utc-to-tz
+    ?~  utz=((need utc-to-tz) time)
+      ~
+    `d.u.utz
+  .^  (unit utc-to-tz:t)  %gx
+    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
+    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
+  ==
+::
+++  get-tz-to-utc
+  |=  [=time zone=(unit zid:t)]
+  ^-  (unit @da)
+  ?~  zone
+    `time
+  =;  tz-to-utc
+    :: assume first occurence of time in timezone (0 in dext)
+    ::
+    ((need tz-to-utc) 0 time)
+  .^  (unit tz-to-utc:t)  %gx
+    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
+    /tz-to-utc/(scot %p p.u.zone)/[q.u.zone]/noun
+  ==
+::
 ++  input-style-classes
   """
   p-2 text-sm border rounded
@@ -75,27 +106,32 @@
   (pac:tan:mx input-style-classes)
 ::
 ++  ordinal
-  |=  name=tape
-  =/  m=manx  (ordinal:inputs name &)
+  |=  [name=tape default=ord:tu]
+  =/  m=manx  (ordinal:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  unsigned-decimal
-  |=  name=tape
-  =/  m=manx  (unsigned-decimal:inputs name &)
+  |=  [name=tape default=@ud]
+  =/  m=manx  (unsigned-decimal:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  weekday-list
-  |=  name=tape
-  =/  m=manx  (weekday-list:inputs name &)
+  |=  [name=tape default=(list wkd:tu)]
+  =/  m=manx  (weekday-list:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
-++  weekday
-  |=  name=tape
-  =/  m=manx  (weekday:inputs name &)
+++  weekday-input
+  |=  [name=tape default=wkd:tu]
+  =/  m=manx  (weekday:inputs name & default)
+  (pac:~(at mx m) input-style-classes)
+::
+++  datetime-local
+  |=  [name=tape default=@da]
+  =/  m=manx  (datetime-local:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  date-input
-  |=  [name=tape default=@da]
+  |=  [name=tape default=[y=@ud m=@ud d=@ud]]
   =/  m=manx  (date-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
@@ -104,14 +140,22 @@
   =/  m=manx  (time-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
+++  delta-input
+  |=  [name=tape default=delta:tu]
+  =/  m=manx  (delta-input:inputs name & default)
+  %+  ~(wit mx m)
+    |=  [* m=manx] 
+    ?=(?(%input %select) n.g.m)
+  (pac:tan:mx input-style-classes)
+::
 ++  month-input
-  |=  name=tape
-  =/  m=manx  (month-input:inputs name &)
+  |=  [name=tape default=[y=@ud w=@ud]]
+  =/  m=manx  (month-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  week-input
-  |=  name=tape
-  =/  m=manx  (week-input:inputs name &)
+  |=  [name=tape default=[y=@ud w=@ud]]
+  =/  m=manx  (week-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  update-event-parms
@@ -143,14 +187,19 @@
       ?+    q.i.parm  !!
         %ud  ud+(rash (reed:kv (~(get of brac) /[p.i.parm])) dem)
         %od  od+;;(ord:tu (reed:kv (~(get of brac) /[p.i.parm])))
-        %da  da+(de:date-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %da  da+(de:datetime-local:tu (reed:kv (~(get of brac) /[p.i.parm])))
         %dr  dr+(extract-duration (~(dip of brac) /[p.i.parm]))
-        %dl  dl+&+(de:time-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %dl  dl+(extract-delta (~(dip of brac) /[p.i.parm]))
         %dx  dx+(extract-dext (~(dip of brac) /[p.i.parm]))
-        %wl  wl+(extract-weekday-list (need (~(get of brac) /[p.i.parm])))
+        %wd  wd+;;(wkd:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %wl  wl+;;((list wkd:tu) (need (~(get of brac) /[p.i.parm])))
+        %dt  dt+(de:date-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %ct  ct+(de:time-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %mt  mt+(de:month-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %wk  wk+(de:week-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
       ==
     ==
-    ::
+  ::
   ++  extract-duration
     |=  =brac:kv
     ^-  @dr
@@ -161,20 +210,19 @@
     =/  =@dr  ?+(t !! %d ~d1, %h ~h1, %m ~m1, %s ~s1)
     (mul dr (fall (rush (reed:kv (~(get of brac) ~)) dem) 0))
   ::
+  ++  extract-delta
+    |=  =brac:kv
+    ^-  delta:tu
+    =/  sign=?  =('+' (reed:kv (~(get of brac) /sign)))
+    =/  h=@ud   (mul ~h1 (fall (rush (reed:kv (~(get of brac) /h)) dem) 0))
+    =/  m=@ud   (mul ~m1 (fall (rush (reed:kv (~(get of brac) /m)) dem) 0))
+    [sign (add h m)]
+  ::
   ++  extract-dext
     |=  =brac:kv
     ^-  dext:tu
     :-  (rash (reed:kv (~(get of brac) /i)) dem)
     (de:datetime-local:tu (reed:kv (~(get of brac) /d)))
-  ::
-  ++  extract-weekday-list
-    =,  tu
-    |=  l=(list @t)
-    ^-  (list wkd-num)
-    ?~  l
-      ~
-    :_  $(l t.l)
-    ;;(wkd-num (wkd-to-num ;;(wkd i.l)))
   ::
   ++  extract-rule-kind
     |=  =brac:kv
@@ -185,45 +233,60 @@
     ?+    head  !!
       %fuld  ~
       %skip  ~
-      %left  [~ (extract-duration (~(dip of brac) /d))]
+      ::
+        %left
+      :-  (extract-timezone (reed:kv (~(get of brac) /tz)))
+      (extract-duration (~(dip of brac) /d))
       ::
         %both
-      [~ ~]
+      :-  (extract-timezone (reed:kv (~(get of brac) /lz)))
+      (extract-timezone (reed:kv (~(get of brac) /rz)))
     ==
+  ::
+  ++  extract-timezone
+    |=  zone=@t
+    ^-  (unit zid:t)
+    =/  zone-by-names=(map @t zid:t)
+      %-  ~(gas by *(map @t zid:t))
+      %+  turn  ~(tap by zones)
+      |=  [=zid:t =zone:t]
+      [name.zone zid]
+    ?:  =('' zone)
+      ~
+    [~ (~(got by zone-by-names) zone)]
   --
 ::
 +$  state
-  $~  :*  ~
-          %left
-          :*  [~ %both %single-0]
-              [~ %left %single-0]
-              [~ %fuld %single-0]
-              [~ %jump %single-0]
-          ==
-      ==
   $:  date=(unit @da)
       kind=@t
       $=  rids
-      $:  both=rid:r
-          left=rid:r
+      $:  both=[lz=(unit zid:t) rz=(unit zid:t) =rid:r]
+          left=[tz=(unit zid:t) d=@dr =rid:r]
           fuld=rid:r
           jump=rid:r
+      ==
+  ==
+::
+++  default-state
+  ^-  state
+  =/  =aid:c  (~(gut by ruledata-map.event) i.iref default-ruledata.event)
+  =/  =ruledata:c  (~(got by ruledata.event) aid)
+  =/  =kind:c  kind.ruledata
+  =/  =rid:r   rid.ruledata
+  :*  ~
+      -.kind
+      :*  ?:(?=(%both -.kind) [lz.kind rz.kind rid] [zid zid [~ %both %single-0]])
+          ?:(?=(%left -.kind) [tz.kind d.kind rid] [zid ~h1 [~ %left %single-0]])
+          ?:(?=(%fuld -.kind) rid [~ %fuld %single-0])
+          [~ %jump %single-0]
       ==
   ==
 ::
 ++  init
   =/  m  (strand ,state)
   ^-  form:m
-  =|  =state
-  =/  =aid:c  (~(gut by ruledata-map.event) i.iref default-ruledata.event)
-  =/  =ruledata:c  (~(got by ruledata.event) aid)
   %-  pure:m
-  ?-  -.kind.ruledata
-    %skip  state
-    %both  state(both.rids rid.ruledata)
-    %left  state(left.rids rid.ruledata)
-    %fuld  state(fuld.rids rid.ruledata)
-  ==
+  default-state
 ::
 ++  send-refresh
   |=  refresh=(list hx-refresh:htmx)
@@ -266,8 +329,8 @@
     =?  kind.new-state  ?=(^ new-kind)  u.new-kind
     =?  rids.new-state  ?=(^ rule-id)
       ?+  q.u.rule-id  !!
-        %both  rids.new-state(both u.rule-id)
-        %left  rids.new-state(left u.rule-id)
+        %both  rids.new-state(rid.both u.rule-id)
+        %left  rids.new-state(rid.left u.rule-id)
         %fuld  rids.new-state(fuld u.rule-id)
         %jump  rids.new-state(jump u.rule-id)
       ==
@@ -277,9 +340,9 @@
     ::
       [%'POST' [%delete-event ~] *]
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
-    =/  delete-option=@t  (fall (get-key:kv 'delete-option' args) 'whole-event')
+    =/  instance-option=@t  (fall (get-key:kv 'instance-option' args) 'whole-event')
     =/  =calendar-action:c
-      ?+    delete-option  !!
+      ?+    instance-option  !!
           %whole-event
         [%delete-event eid.iref]
         ::
@@ -297,10 +360,10 @@
     ::
       [%'POST' [%update-event ~] *]
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
-    =/  delete-option=@t  (fall (get-key:kv 'update-option' args) 'whole-event')
+    =/  instance-option=@t  (fall (get-key:kv 'instance-option' args) 'whole-event')
     =/  [=metadata:c =ruledata:c]  (update-event-parms args)
     =/  =calendar-action:c
-      ?+    delete-option  !!
+      ?+    instance-option  !!
           %whole-event
         [%update-event eid.iref %update-new dom.event & metadata ruledata]
         ::
@@ -319,11 +382,12 @@
   ==
 ::
 ++  components
-  |_  state
+  |_  sta=state
   +*  this   .
-      state  +<
       panel-id      (en-html-id:htmx base)
       rule-kind-id  (en-html-id:htmx (weld base /rule-kind))
+  ::
+  ++  default  update-event-panel:this(sta default-state)
   ::
   ++  update-event-panel
     |=  active-tab=?(%loading %update %delete)
@@ -340,155 +404,51 @@
         =id  panel-id
         ;div.flex.flex-col.justify-center.border-b.mb-4
           ;div.text-2xl.font-semibold.text-center.text-gray-700.mb-2: Update Event
-          ;nav.border-b.flex.pb-2.justify-center.items-center.space-x-4
-            ;div
-              =hx-get     "{(spud base)}?active-tab=update"
-              =hx-trigger  "click"
-              =hx-target   "#{panel-id}"
-              =hx-swap     "outerHTML"
-              =class  """
-                      px-2 py-1 rounded
-                      text-center text-lg
-                      {?:(?=(%update active-tab) "bg-blue-100 hover:bg-blue-200 text-blue-700" "bg-gray-100 hover:bg-gray-200 text-gray-700")}
-                      cursor-pointer
-                      """
-              ; Update
-            ==
-            ;div
-              =hx-get     "{(spud base)}?active-tab=delete"
-              =hx-trigger  "click"
-              =hx-target   "#{panel-id}"
-              =hx-swap     "outerHTML"
-              =class  """
-                      px-2 py-1 rounded
-                      text-center text-lg
-                      {?:(?=(%delete active-tab) "bg-blue-100 hover:bg-blue-200 text-blue-700" "bg-gray-100 hover:bg-gray-200 text-gray-700")}
-                      cursor-pointer
-                      """
-              ; Delete
-            ==
-
-          ==
-          ;+
-          ?-    active-tab
-              %delete
-            ;form.m-2.flex.flex-col.items-center
-              =hx-post     "{(spud base)}/delete-event"
-              =hx-trigger  "submit"
-              =hx-target   "#{panel-id}"
-              =hx-swap     "outerHTML"
-              =hx-confirm  "Are you sure you want to delete this event?"
-              ;+  ?:  =(1 ~(wyt by instances.event))
-                    ;div.flex.flex-col
-                      ;label.flex.items-center.mb-2
-                        ;input.mr-2
-                          =type       "hidden"
-                          =name       "delete-option"
-                          =value      "whole-event"
-                          ;
+          ;+  =/  =mid:c  (~(gut by metadata-map.event) i.iref default-metadata.event)
+              =/  =metadata:c  (~(got by metadata.event) mid)
+              =/  title=tape
+                (trip (so:dejs:format (~(gut by metadata) %title s+'')))
+              ;div
+                ;form.m-2.flex.flex-col.items-center
+                  ;+  ?:  =(1 ~(wyt by instances.event))
+                        ;div.flex.flex-col
+                          ;label.flex.items-center.mb-2
+                            ;input.mr-2
+                              =type       "hidden"
+                              =name       "instance-option"
+                              =value      "whole-event"
+                              ;
+                            ==
+                          ==
                         ==
-                      ==
-                    ==
-                  ?:  =(i.iref l.dom.event)
-                    ;div.flex.flex-col.mb-4
-                      ;label.flex.items-center.mb-2
-                        ;input.mr-2
-                          =type       "radio"
-                          =name       "delete-option"
-                          =value      "this-instance"
-                          =checked    ""
-                          =autofocus  ""
-                          ;
+                      ?:  =(i.iref l.dom.event)
+                        ;div.flex.flex-col.mb-4
+                          ;label.flex.items-center.mb-2
+                            ;input.mr-2
+                              =type       "radio"
+                              =name       "instance-option"
+                              =value      "this-instance"
+                              =checked    ""
+                              =autofocus  ""
+                              ;
+                            ==
+                            ;span: This instance
+                          ==
+                          ;label.flex.items-center.mb-2
+                            ;input.mr-2
+                              =type   "radio"
+                              =name   "instance-option"
+                              =value  "whole-event"
+                              ;
+                            ==
+                            ;span: All instances
+                          ==
                         ==
-                        ;span: This instance
-                      ==
-                      ;label.flex.items-center.mb-2
-                        ;input.mr-2
-                          =type   "radio"
-                          =name   "delete-option"
-                          =value  "whole-event"
-                          ;
-                        ==
-                        ;span: All instances
-                      ==
-                    ==
-                  ;div.flex.flex-col
-                    ;label.flex.items-center.mb-2
-                      ;input.mr-2
-                        =type       "radio"
-                        =name       "delete-option"
-                        =value      "this-instance"
-                        =checked    ""
-                        =autofocus  ""
-                        ;
-                      ==
-                      ;span: This instance
-                    ==
-                    ;label.flex.items-center.mb-2
-                      ;input.mr-2
-                        =type   "radio"
-                        =name   "delete-option"
-                        =value  "this-and-following-instances"
-                        ;
-                      ==
-                      ;span: This and following instances
-                    ==
-                    ;label.flex.items-center.mb-2
-                      ;input.mr-2
-                        =type   "radio"
-                        =name   "delete-option"
-                        =value  "whole-event"
-                        ;
-                      ==
-                      ;span: All instances
-                    ==
-                  ==
-              ;button
-                =type         "submit"
-                =class        "px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-                ; Delete
-              ==
-            ==
-            ::
-              %update
-            =/  =mid:c  (~(gut by metadata-map.event) i.iref default-metadata.event)
-            =/  =metadata:c  (~(got by metadata.event) mid)
-            =/  title=tape
-              (trip (so:dejs:format (~(gut by metadata) %title s+'')))
-            =/  =aid:c  (~(gut by ruledata-map.event) i.iref default-ruledata.event)
-            =/  =ruledata:c  (~(got by ruledata.event) aid)
-            =/  args=(unit args:c)
-              ?:  ?-  -.kind.ruledata
-                    %both  =(rid.ruledata both.rids.state)
-                    %left  =(rid.ruledata left.rids.state)
-                    %fuld  =(rid.ruledata fuld.rids.state)
-                    %skip  %.n
-                  ==
-                ~
-              `args.ruledata
-            ;div
-              ;form.m-2.flex.flex-col.items-center
-                =hx-post     "{(spud base)}/update-event"
-                =hx-trigger  "submit"
-                =hx-target   "#{panel-id}"
-                =hx-swap     "outerHTML"
-                ;+  ?:  =(1 ~(wyt by instances.event))
                       ;div.flex.flex-col
                         ;label.flex.items-center.mb-2
                           ;input.mr-2
-                            =type       "hidden"
-                            =name       "update-option"
-                            =value      "whole-event"
-                            ;
-                          ==
-                        ==
-                      ==
-                    ?:  =(i.iref l.dom.event)
-                      ;div.flex.flex-col.mb-4
-                        ;label.flex.items-center.mb-2
-                          ;input.mr-2
                             =type       "radio"
-                            =name       "update-option"
+                            =name       "instance-option"
                             =value      "this-instance"
                             =checked    ""
                             =autofocus  ""
@@ -499,80 +459,78 @@
                         ;label.flex.items-center.mb-2
                           ;input.mr-2
                             =type   "radio"
-                            =name   "update-option"
+                            =name   "instance-option"
+                            =value  "this-and-following-instances"
+                            ;
+                          ==
+                          ;span: This and following instances
+                        ==
+                        ;label.flex.items-center.mb-2
+                          ;input.mr-2
+                            =type   "radio"
+                            =name   "instance-option"
                             =value  "whole-event"
                             ;
                           ==
                           ;span: All instances
                         ==
                       ==
-                    ;div.flex.flex-col
-                      ;label.flex.items-center.mb-2
-                        ;input.mr-2
-                          =type       "radio"
-                          =name       "update-option"
-                          =value      "this-instance"
-                          =checked    ""
-                          =autofocus  ""
-                          ;
-                        ==
-                        ;span: This instance
-                      ==
-                      ;label.flex.items-center.mb-2
-                        ;input.mr-2
-                          =type   "radio"
-                          =name   "update-option"
-                          =value  "this-and-following-instances"
-                          ;
-                        ==
-                        ;span: This and following instances
-                      ==
-                      ;label.flex.items-center.mb-2
-                        ;input.mr-2
-                          =type   "radio"
-                          =name   "update-option"
-                          =value  "whole-event"
-                          ;
-                        ==
-                        ;span: All instances
-                      ==
+                  ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
+                    ;span.m-2.font-medium.text-sm.text-gray-700: Update Event Title:
+                    ;input
+                      =type         "text"
+                      =name         "metadata[title]"
+                      =pattern      ".*\\S+.*" :: double bas to escape escape
+                      =class        "p-2 w-60 text-sm border rounded focus:outline-none focus:border-b-4 focus:border-blue-600 caret-blue-600 !important"
+                      =placeholder  "Update event title"
+                      =autofocus    ""
+                      =value        title
+                      ;
                     ==
-                ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
-                  ;span.m-2.font-medium.text-sm.text-gray-700: Update Event Title:
-                  ;input
-                    =type         "text"
-                    =name         "metadata[title]"
-                    =pattern      ".*\\S+.*" :: double bas to escape escape
-                    =class        "p-2 w-60 text-sm border rounded focus:outline-none focus:border-b-4 focus:border-blue-600 caret-blue-600 !important"
-                    =placeholder  "Update event title"
-                    =autofocus    ""
-                    =value        title
-                    ;
                   ==
-                ==
-                ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
-                  ;span.m-2.font-medium.text-sm.text-gray-700: Select Rule Type:
-                  ;select.p-2.w-60.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
-                    =hx-post     "{(spud base)}/rule-kind-panel"
-                    =hx-trigger  "change"
-                    =hx-target   "#{rule-kind-id}"
-                    =hx-swap     "outerHTML"
-                    =name        "ruledata[kind][head]"
-                    ;option(value "left"): By Duration
-                    ;option(value "both"): By End Time
-                    ;option(value "fuld"): Fullday
-                    ;option(value "jump"): Instantaneous
+                  ;div.w-full.mx-2.mb-1.flex.items-center.justify-between
+                    ;span.m-2.font-medium.text-sm.text-gray-700: Select Rule Type:
+                    ;select.p-2.w-60.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
+                      =hx-post     "{(spud base)}/rule-kind-panel"
+                      =hx-trigger  "change"
+                      =hx-target   "#{rule-kind-id}"
+                      =hx-swap     "outerHTML"
+                      =name        "ruledata[kind][head]"
+                      ;+  ?.  =(%left kind.sta)
+                            ;option(value "left"): By Duration
+                          ;option(value "left", selected ""): By Duration
+                      ;+  ?.  =(%both kind.sta)
+                            ;option(value "both"): By End Time
+                          ;option(value "both", selected ""): By End Time
+                      ;+  ?.  =(%fuld kind.sta)
+                            ;option(value "fuld"): Fullday
+                          ;option(value "fuld", selected ""): Fullday
+                      ;+  ?.  =(%jump kind.sta)
+                            ;option(value "jump"): Instantaneous
+                          ;option(value "jump", selected ""): Instantaneous
+                    ==
                   ==
-                ==
-                ;+  rule-kind-panel
-                ;button
-                  =type         "submit"
-                  =class        "px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-                  Save
+                  ;+  rule-kind-panel
+                  ;div.flex.gap-4
+                    ;button
+                      =hx-post     "{(spud base)}/update-event"
+                      =hx-trigger  "click"
+                      =hx-target   "#{panel-id}"
+                      =hx-swap     "outerHTML"
+                      =class        "px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                      Save
+                    ==
+                    ;button
+                      =hx-post     "{(spud base)}/delete-event"
+                      =hx-trigger  "click"
+                      =hx-target   "#{panel-id}"
+                      =hx-swap     "outerHTML"
+                      =class        "px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600"
+                      Delete
+                    ==
+                  ==
                 ==
               ==
-            ==
-          ==
         ==
       ==
     ==
@@ -582,7 +540,7 @@
     =/  rule-list=(list [rid:r rule:r])
       %+  murn  ~(tap by rules)
       |=  [=rid:r =rule:r]
-      ?.  =(kind q.rid)
+      ?.  =(kind.sta q.rid)
         ~
       [~ rid rule]
     =.  rule-list
@@ -603,10 +561,10 @@
           =name   "ruledata[rid]"
           ;*  %+  turn  rule-list
               |=  [=rid:r =rule:r]
-              ?.  ?|  &(?=(%both kind) =(rid both.rids))
-                      &(?=(%left kind) =(rid left.rids))
-                      &(?=(%fuld kind) =(rid fuld.rids))
-                      &(?=(%jump kind) =(rid jump.rids))
+              ?.  ?|  &(?=(%both kind.sta) =(rid rid.both.rids.sta))
+                      &(?=(%left kind.sta) =(rid rid.left.rids.sta))
+                      &(?=(%fuld kind.sta) =(rid fuld.rids.sta))
+                      &(?=(%jump kind.sta) =(rid jump.rids.sta))
                   ==
                 ;option(value (rid-to-tape rid)): {(trip name.rule)}
               ;option(value (rid-to-tape rid), selected ""): {(trip name.rule)}
@@ -617,7 +575,7 @@
   ::
   ++  rule-kind-parameters
     ^-  manx
-    ?.  ?=(?(%left %both) kind)
+    ?.  ?=(?(%left %both) kind.sta)
       ;div.hidden;
     =/  timezones=(list [zid:t tape])
       %+  sort
@@ -625,21 +583,22 @@
         |=([=zid:t =zone:t] [zid (trip name.zone)])
       |=  [[* a=tape] [* b=tape]]
       (alphabetical:htmx a b)
-    ?-    kind
+    ?-    kind.sta
       ::
         %left
       ;div.w-full.flex.flex-col
         ;div.mb-1.w-full.flex.items-center.justify-between
           ;span.m-2.font-medium.text-sm.text-gray-700: Select Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
-            ;+  ?^  zid
-                  ;option(value "test"): UTC
-                ;option(value "test", selected ""): UTC
+            =name  "ruledata[kind][tz]"
+            ;+  ?^  tz.left.rids.sta
+                  ;option(value ""): UTC
+                ;option(value "", selected ""): UTC
             ;*  %+  turn  timezones
                 |=  [=zid:t name=tape]
-                ?.  =(^zid [~ zid])
-                  ;option(value "test"): {name}
-                ;option(value "test", selected ""): {name}
+                ?.  =([~ zid] tz.left.rids.sta)
+                  ;option(value "{name}"): {name}
+                ;option(value "{name}", selected ""): {name}
           ==
         ==
         ;div.mb-1.w-full.flex.items-center.justify-between
@@ -655,37 +614,49 @@
         ;div.mb-1.w-full.flex.items-center.justify-between
           ;span.m-2.font-medium.text-sm.text-gray-700: Select Start Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
-            ;+  ?^  zid
-                  ;option(value "test"): UTC
-                ;option(value "test", selected ""): UTC
+            =name  "ruledata[kind][lz]"
+            ;+  ?^  lz.both.rids.sta
+                  ;option(value ""): UTC
+                ;option(value "", selected ""): UTC
             ;*  %+  turn  timezones
                 |=  [=zid:t name=tape]
-                ?.  =(^zid [~ zid])
-                  ;option(value "test"): {name}
-                ;option(value "test", selected ""): {name}
+                ?.  =([~ zid] lz.both.rids.sta)
+                  ;option(value "{name}"): {name}
+                ;option(value "{name}", selected ""): {name}
           ==
         ==
         ;div.mb-1.w-full.flex.items-center.justify-between
           ;span.m-2.font-medium.text-sm.text-gray-700: Select End Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
-            ;option(value "test"): UTC
-            ;+  ?^  zid
-                  ;option(value "test"): UTC
-                ;option(value "test", selected ""): UTC
+            =name  "ruledata[kind][rz]"
+            ;+  ?^  rz.both.rids.sta
+                  ;option(value ""): UTC
+                ;option(value "", selected ""): UTC
             ;*  %+  turn  timezones
                 |=  [=zid:t name=tape]
-                ?.  =(^zid [~ zid])
-                  ;option(value "test"): {name}
-                ;option(value "test", selected ""): {name}
+                ?.  =([~ zid] rz.both.rids.sta)
+                  ;option(value "{name}"): {name}
+                ;option(value "{name}", selected ""): {name}
           ==
         ==
       ==
     ==
   ::
   ++  rule-specific-parameters
-    =/  =rid:r   ?+(kind !! %left left.rids, %both both.rids, %fuld fuld.rids, %jump jump.rids)
-    =/  =rule:r  (~(got by rules) rid)
     ^-  manx
+    =/  =rid:r   ?+(kind.sta !! %left rid.left.rids.sta, %both rid.both.rids.sta, %fuld fuld.rids.sta, %jump jump.rids.sta)
+    =/  =rule:r  (~(got by rules) rid)
+    =/  =aid:c  (~(gut by ruledata-map.event) i.iref default-ruledata.event)
+    =/  =ruledata:c  (~(got by ruledata.event) aid)
+    =/  args=(unit args:c)
+      ?.  ?-  -.kind.ruledata
+            %both  =(rid.ruledata rid.both.rids.sta)
+            %left  =(rid.ruledata rid.left.rids.sta)
+            %fuld  =(rid.ruledata fuld.rids.sta)
+            %skip  %.n
+          ==
+        ~
+      `args.ruledata
     ;div.w-full.flex.flex-col
       ;*  %+  turn  parm.rule
           |=  [name=@t =term]
@@ -694,18 +665,82 @@
             ;span.m-2.font-medium.text-sm.text-gray-700: {(trip name)}:
             ;span.flex.w-60
               ;+  =/  n=tape  "ruledata[args][{(trip name)}]"
-                  :: TODO: make sure now is in correct timezone
-                  =/  day=@da     (mul ~d1 (div (fall date now.gowl) ~d1))
-                  =/  minute=@dr  (mul ~m1 (div (mod now.gowl ~d1) ~m1))
+                  =/  day=@da         (mul ~d1 (div (fall date.sta now.gowl) ~d1))
+                  =/  minute=@dr      (mul ~m30 (div (mod now ~d1) ~m30))
+                  =/  weekday=wkd:tu  (num-to-wkd:tu (get-weekday:tu day))
                   ?+  term
-                         ;div: {(trip term)}
-                    %ud  (unsigned-decimal n)
-                    %od  (ordinal n)
-                    %da  (date-input n day)
-                    %dr  (duration n ~d1)
-                    %dl  (time-input n minute)
-                    %dx  (indexed-time n (add day minute))
-                    %wl  (weekday-list n)
+                    ;div: {(trip term)}
+                      %ud
+                    ?~  args
+                      (unsigned-decimal n 0)
+                    %+  unsigned-decimal  n
+                    +:;;($>(%ud arg:tu) (~(got by u.args) name))
+                    ::
+                      %od
+                    ?~  args
+                      (ordinal n %first)
+                    %+  ordinal  n
+                    +:;;($>(%od arg:tu) (~(got by u.args) name))
+                    ::
+                      %wd
+                    ?~  args
+                      (weekday-input n weekday)
+                    %+  weekday-input  n
+                    +:;;($>(%wd arg:tu) (~(got by u.args) name))
+                    ::
+                      %wl
+                    ?~  args
+                      (weekday-list n ~[weekday])
+                    %+  weekday-list  n
+                    +:;;($>(%wl arg:tu) (~(got by u.args) name))
+                    ::
+                      %da
+                    ?~  args
+                      (datetime-local n day)
+                    %+  datetime-local  n
+                    +:;;($>(%da arg:tu) (~(got by u.args) name))
+                    ::
+                      %dr
+                    ?~  args
+                      (duration n ~d1)
+                    %+  duration  n
+                    +:;;($>(%dr arg:tu) (~(got by u.args) name))
+                    ::
+                      %dl
+                    ?~  args
+                      (delta-input n *delta:tu)
+                    %+  delta-input  n
+                    p:;;($>(%dl arg:tu) (~(got by u.args) name))
+                    ::
+                      %dx
+                    ?~  args
+                      (indexed-time n (add day minute))
+                    %+  indexed-time  n
+                    d.p:;;($>(%dx arg:tu) (~(got by u.args) name))
+                    ::
+                      %dt
+                    ?~  args
+                      (date-input n [y m d.t]:(yore day))
+                    %+  date-input  n
+                    p:;;($>(%dt arg:tu) (~(got by u.args) name))
+                    ::
+                      %ct
+                    ?~  args
+                      (time-input n minute)
+                    %+  time-input  n
+                    p:;;($>(%ct arg:tu) (~(got by u.args) name))
+                    ::
+                      %mt
+                    ?~  args
+                      (month-input n [y m]:(yore day))
+                    %+  month-input  n
+                    p:;;($>(%mt arg:tu) (~(got by u.args) name))
+                    ::
+                      %wk
+                    ?~  args
+                      (week-input n (da-to-week-number:tu day))
+                    %+  week-input  n
+                    p:;;($>(%wk arg:tu) (~(got by u.args) name))
                   ==
             ==
           ==

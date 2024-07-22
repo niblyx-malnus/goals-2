@@ -36,13 +36,23 @@
 :: %od
 ::
 ++  ordinal
-  |=  [name=tape r=?]
+  |=  [name=tape r=? default=ord:tu]
   ^-  manx
-  =;  m=manx  (req:~(at mx m) r)
+  =;  m=manx
+    :: mark option with value of default ord as selected
+    ::
+    =.  m
+      %+  ~(kit mx m)
+        (tir:con:mx %value (trip default))
+      (sec:tan:mx &)
+    :: require this form input or not depending on r flag
+    ::
+    (req:~(at mx m) r)
+  ::
   ;select
     =style  "width: 100%"
     =name   "{name}"
-    ;option(value "first", selected ""): First
+    ;option(value "first"): First
     ;option(value "second"): Second
     ;option(value "third"): Third
     ;option(value "fourth"): Fourth
@@ -51,13 +61,13 @@
 :: %ud
 ::
 ++  unsigned-decimal
-  |=  [name=tape r=?]
+  |=  [name=tape r=? default=@ud]
   ^-  manx
   =;  m=manx  (req:~(at mx m) r)
   ;input
     =style        "width: 100%"
     =name         "{name}"
-    =value        "0"
+    =value        "{(numb:tu default)}"
     =placeholder  "0"
     =min          "0"
     ;
@@ -65,16 +75,27 @@
 :: %wl
 ::
 ++  weekday-list
-  |=  [name=tape r=?]
+  |=  [name=tape r=? default=(list wkd:tu)]
   ^-  manx
-  =;  m=manx  (req:~(at mx m) r)
+  =;  m=manx
+    :: mark option with value of default wkds as selected
+    ::
+    =.  m
+      %+  ~(kit mx m)
+        |=  [* m=manx]
+        ?~  get=(get:~(at mx m) %value)
+          %.n
+        (~(has in (sy default)) ;;(wkd:tu (crip u.get)))
+      (sec:tan:mx &)
+    :: require this form input or not depending on r flag
+    ::
+    (req:~(at mx m) r)
+  ::
   ;select
     =style     "width: 100%"
     =name      "{name}"
     =multiple  ""
-    :: TODO: selected should be TODAY's weekday
-    ::
-    ;option(value "mon", selected ""): Monday
+    ;option(value "mon"): Monday
     ;option(value "tue"): Tuesday
     ;option(value "wed"): Wednesday
     ;option(value "thu"): Thursday
@@ -85,26 +106,34 @@
 :: %wd !!
 ::
 ++  weekday
-  |=  [name=tape r=?]
+  |=  [name=tape r=? default=wkd:tu]
   ^-  manx
-  =;  m=manx  (req:~(at mx m) r)
+  =;  m=manx
+    :: mark option with value of default wkd as selected
+    ::
+    =.  m
+      %+  ~(kit mx m)
+        (tir:con:mx %value (trip default))
+      (sec:tan:mx &)
+    :: require this form input or not depending on r flag
+    ::
+    (req:~(at mx m) r)
+  ::
   ;select
     =style     "width: 100%"
     =name      "{name}"
-    :: TODO: selected should be TODAY's weekday
-    ::
-    ;option(value "monday", selected ""): Monday
-    ;option(value "tuesday"): Tuesday
-    ;option(value "wednesday"): Wednesday
-    ;option(value "thursday"): Thursday
-    ;option(value "friday"): Friday
-    ;option(value "saturday"): Saturday
-    ;option(value "sunday"): Sunday
+    ;option(value "mon"): Monday
+    ;option(value "tue"): Tuesday
+    ;option(value "wed"): Wednesday
+    ;option(value "thu"): Thursday
+    ;option(value "fri"): Friday
+    ;option(value "sat"): Saturday
+    ;option(value "sun"): Sunday
   == 
-:: %da
+:: %dt
 ::
 ++  date-input
-  |=  [name=tape r=? default=@da]
+  |=  [name=tape r=? default=[y=@ud m=@ud d=@ud]]
   ^-  manx
   =;  m=manx  (req:~(at mx m) r)
   ;input
@@ -115,6 +144,47 @@
     ;
   ==
 :: %dl
+::
+++  delta-input
+  |=  [name=tape r=? default=delta:tu]
+  ^-  manx
+  |^
+  %+  ~(wit mx raw-html)
+    |=  [* m=manx] 
+    ?=(?(%input %select) n.g.m)
+  (req:tan:mx r)
+  ::
+  ++  raw-html
+    ;span(style "display: flex; width: 100%; gap: 0.25rem")
+      ;+  =;  m=manx
+            :: mark option with value of default as selected
+            ::
+            %+  ~(kit mx m)
+              (tir:con:mx %value ?:(sign.default "+" "-"))
+            (sec:tan:mx &)
+          ::
+          ;select(style "width: 20%", name "{name}[sign]")
+            ;option(value "+"): +
+            ;option(value "-"): -
+          == 
+      ;+  =+  defaults
+          ;span(style "display: flex; width: 80%; gap: 0.25rem")
+            ;input(type "number", value h, min "0", max "23", name "{name}[h]", placeholder "HH", style "width: 50%");
+            ;input(type "number", value m, min "0", max "59", name "{name}[m]", placeholder "MM", style "width: 50%");
+          ==
+    ==
+  ::
+  ++  defaults
+    ^-  [h=tape m=tape]
+    =.  d.default  (mod d.default ~d1)
+    =/  h-num      (div d.default ~h1)
+    =/  h          ?:(=(0 h-num) "" (scow %ud h-num))
+    =.  d.default  (mod d.default ~h1)
+    =/  m-num      (div d.default ~m1)
+    =/  m          ?:(=(0 m-num) "" (scow %ud m-num))
+    [h m]
+  --
+:: %cl
 ::
 ++  time-input
   |=  [name=tape r=? default=@dr]
@@ -127,28 +197,43 @@
     =value        "{(en:time-input:tu default)}"
     ;
   ==
-:: %mn !!
+::  %da
+::
+++  datetime-local
+  |=  [name=tape r=? default=@da]
+  ^-  manx
+  =;  m=manx  (req:~(at mx m) r)
+  ;input
+    =style        "width: 100%"
+    =type         "datetime-local"
+    =name         "{name}"
+    =value        "{(en:datetime-local:tu default)}"
+    ;
+  ==
+:: %mt
 ::
 ++  month-input
-  |=  [name=tape r=?]
+  |=  [name=tape r=? default=[y=@ud m=@ud]]
   ^-  manx
   =;  m=manx  (req:~(at mx m) r)
   ;input
     =style        "width: 100%"
     =type         "month"
     =name         "{name}"
+    =value        "{(en:month-input:tu default)}"
     ;
   ==
-:: %wk !!
+:: %wk
 ::
 ++  week-input
-  |=  [name=tape r=?]
+  |=  [name=tape r=? default=[y=@ud w=@ud]]
   ^-  manx
   =;  m=manx  (req:~(at mx m) r)
   ;input
     =style        "width: 100%"
     =type         "week"
     =name         "{name}"
+    =value        "{(en:week-input:tu default)}"
     ;
   ==
 :: %dx

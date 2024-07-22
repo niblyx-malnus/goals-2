@@ -1,7 +1,7 @@
 /-  c=calendar, r=rules, t=timezones
 /+  *ventio, htmx, server, nooks, html-utils, tu=time-utils, fi=webui-feather-icons,
     inputs=webui-calendar-inputs
-|_  $:  [zid=(unit zid:t) =date]
+|_  $:  [zid=(unit zid:t) =date minute=(unit @dr) default=?(%fuld %left)]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -27,18 +27,34 @@
   ^-  manx
   (pac:~(at mx fi-loader) "text-4xl text-blue-500")
 ::
-++  get-now-tz
-  |=  zone=(unit zid:t)
+++  get-now-tz  |=(zone=(unit zid:t) (get-utc-to-tz now.gowl zone))
+::
+++  get-utc-to-tz
+  |=  [=time zone=(unit zid:t)]
   ^-  (unit @da)
   ?~  zone
-    `now.gowl
+    `time
   =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) now.gowl)
+    ?~  utz=((need utc-to-tz) time)
       ~
     `d.u.utz
   .^  (unit utc-to-tz:t)  %gx
     (scot %p our.gowl)  %timezones  (scot %da now.gowl)
     /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
+  ==
+::
+++  get-tz-to-utc
+  |=  [=time zone=(unit zid:t)]
+  ^-  (unit @da)
+  ?~  zone
+    `time
+  =;  tz-to-utc
+    :: assume first occurence of time in timezone (0 in dext)
+    ::
+    ((need tz-to-utc) 0 time)
+  .^  (unit tz-to-utc:t)  %gx
+    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
+    /tz-to-utc/(scot %p p.u.zone)/[q.u.zone]/noun
   ==
 ::
 ++  rid-to-tape
@@ -82,26 +98,31 @@
 ::
 ++  ordinal
   |=  name=tape
-  =/  m=manx  (ordinal:inputs name &)
+  =/  m=manx  (ordinal:inputs name & %first)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  unsigned-decimal
   |=  name=tape
-  =/  m=manx  (unsigned-decimal:inputs name &)
+  =/  m=manx  (unsigned-decimal:inputs name & 0)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  weekday-list
-  |=  name=tape
-  =/  m=manx  (weekday-list:inputs name &)
+  |=  [name=tape default=(list wkd:tu)]
+  =/  m=manx  (weekday-list:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
-++  weekday
-  |=  name=tape
-  =/  m=manx  (weekday:inputs name &)
+++  weekday-input
+  |=  [name=tape default=wkd:tu]
+  =/  m=manx  (weekday:inputs name & default)
+  (pac:~(at mx m) input-style-classes)
+::
+++  datetime-local
+  |=  [name=tape default=@da]
+  =/  m=manx  (datetime-local:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  date-input
-  |=  [name=tape default=@da]
+  |=  [name=tape default=[y=@ud m=@ud d=@ud]]
   =/  m=manx  (date-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
@@ -110,14 +131,22 @@
   =/  m=manx  (time-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
+++  delta-input
+  |=  [name=tape default=delta:tu]
+  =/  m=manx  (delta-input:inputs name & default)
+  %+  ~(wit mx m)
+    |=  [* m=manx] 
+    ?=(?(%input %select) n.g.m)
+  (pac:tan:mx input-style-classes)
+::
 ++  month-input
-  |=  name=tape
-  =/  m=manx  (month-input:inputs name &)
+  |=  [name=tape default=[y=@ud w=@ud]]
+  =/  m=manx  (month-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  week-input
-  |=  name=tape
-  =/  m=manx  (week-input:inputs name &)
+  |=  [name=tape default=[y=@ud w=@ud]]
+  =/  m=manx  (week-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  create-event-action
@@ -138,6 +167,8 @@
     =|  =args:r
     |=  [=parm:r =brac:kv]
     ^-  args:r
+    ~&  brac+brac
+    ~&  parm+parm
     ?~  parm
       args
     %=    $
@@ -146,14 +177,20 @@
       %+  ~(put by args)
         p.i.parm
       ^-  arg:tu
+      ~&  iparm+p.i.parm
       ?+    q.i.parm  !!
         %ud  ud+(rash (reed:kv (~(get of brac) /[p.i.parm])) dem)
         %od  od+;;(ord:tu (reed:kv (~(get of brac) /[p.i.parm])))
-        %da  da+(de:date-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %da  da+(de:datetime-local:tu (reed:kv (~(get of brac) /[p.i.parm])))
         %dr  dr+(extract-duration (~(dip of brac) /[p.i.parm]))
-        %dl  dl+&+(de:time-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %dl  dl+(extract-delta (~(dip of brac) /[p.i.parm]))
         %dx  dx+(extract-dext (~(dip of brac) /[p.i.parm]))
-        %wl  wl+(extract-weekday-list (need (~(get of brac) /[p.i.parm])))
+        %wd  wd+;;(wkd:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %wl  wl+;;((list wkd:tu) (need (~(get of brac) /[p.i.parm])))
+        %dt  dt+(de:date-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %ct  ct+(de:time-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %mt  mt+(de:month-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %wk  wk+(de:week-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
       ==
     ==
     ::
@@ -167,20 +204,21 @@
     =/  =@dr  ?+(t !! %d ~d1, %h ~h1, %m ~m1, %s ~s1)
     (mul dr (fall (rush (reed:kv (~(get of brac) ~)) dem) 0))
   ::
+  ++  extract-delta
+    |=  =brac:kv
+    ^-  delta:tu
+    =/  sign=?  =('+' (reed:kv (~(get of brac) /sign)))
+    =/  h=@ud   (mul ~h1 (fall (rush (reed:kv (~(get of brac) /h)) dem) 0))
+    =/  m=@ud   (mul ~m1 (fall (rush (reed:kv (~(get of brac) /m)) dem) 0))
+    [sign (add h m)]
+  ::
   ++  extract-dext
     |=  =brac:kv
     ^-  dext:tu
     :-  (rash (reed:kv (~(get of brac) /i)) dem)
     (de:datetime-local:tu (reed:kv (~(get of brac) /d)))
   ::
-  ++  extract-weekday-list
-    =,  tu
-    |=  l=(list @t)
-    ^-  (list wkd-num)
-    ?~  l
-      ~
-    :_  $(l t.l)
-    ;;(wkd-num (wkd-to-num ;;(wkd i.l)))
+  ++  extract-weekday-list  |=(l=(list @t) ;;((list wkd:tu) l))
   ::
   ++  extract-rule-kind
     |=  =brac:kv
@@ -191,27 +229,46 @@
     ?+    head  !!
       %fuld  ~
       %skip  ~
-      %left  [~ (extract-duration (~(dip of brac) /d))]
+      ::
+        %left
+      :-  (extract-timezone (reed:kv (~(get of brac) /tz)))
+      (extract-duration (~(dip of brac) /d))
       ::
         %both
-      [~ ~]
+      :-  (extract-timezone (reed:kv (~(get of brac) /lz)))
+      (extract-timezone (reed:kv (~(get of brac) /rz)))
     ==
+  ::
+  ++  extract-timezone
+    |=  zone=@t
+    ^-  (unit zid:t)
+    =/  zone-by-names=(map @t zid:t)
+      %-  ~(gas by *(map @t zid:t))
+      %+  turn  ~(tap by zones)
+      |=  [=zid:t =zone:t]
+      [name.zone zid]
+    ?:  =('' zone)
+      ~
+    [~ (~(got by zone-by-names) zone)]
   --
 ::
 +$  state
-  $~  :*  %left
-          :*  [~ %both %single-0]
-              [~ %left %single-0]
-              [~ %fuld %single-0]
-              [~ %jump %single-0]
-          ==
-      ==
   $:  kind=@t
       $=  rids
-      $:  both=rid:r
-          left=rid:r
+      $:  both=[lz=(unit zid:t) rz=(unit zid:t) =rid:r]
+          left=[tz=(unit zid:t) d=@dr =rid:r]
           fuld=rid:r
           jump=rid:r
+      ==
+  ==
+::
+++  default-state
+  ^-  state
+  :*  default
+      :*  [zid zid [~ %both %single-0]]
+          [zid ~h1 [~ %left %single-0]]
+          [~ %fuld %single-0]
+          [~ %jump %single-0]
       ==
   ==
 ::
@@ -219,7 +276,7 @@
   =/  m  (strand ,state)
   ^-  form:m
   %-  pure:m
-  *state
+  default-state
 ::
 ++  handle
   =/  m  (strand ,vase)
@@ -246,8 +303,8 @@
     =?  kind.new-state  ?=(^ new-kind)  u.new-kind
     =?  rids.new-state  ?=(^ rule-id)
       ?+  q.u.rule-id  !!
-        %both  rids.new-state(both u.rule-id)
-        %left  rids.new-state(left u.rule-id)
+        %both  rids.new-state(rid.both u.rule-id)
+        %left  rids.new-state(rid.left u.rule-id)
         %fuld  rids.new-state(fuld u.rule-id)
         %jump  rids.new-state(jump u.rule-id)
       ==
@@ -266,11 +323,12 @@
   ==
 ::
 ++  components
-  |_  state
+  |_  sta=state
   +*  this   .
-      state  +<
       panel-id      (en-html-id:htmx base)
       rule-kind-id  (en-html-id:htmx (weld base /rule-kind))
+  ::
+  ++  default  create-event-panel:this(sta default-state)
   ::
   ++  loading
     ^-  manx
@@ -310,10 +368,18 @@
               =hx-target   "#{rule-kind-id}"
               =hx-swap     "outerHTML"
               =name        "ruledata[kind][head]"
-              ;option(value "left"): By Duration
-              ;option(value "both"): By End Time
-              ;option(value "fuld"): Fullday
-              ;option(value "jump"): Instantaneous
+              ;+  ?.  =(%left kind.sta)
+                    ;option(value "left"): By Duration
+                  ;option(value "left", selected ""): By Duration
+              ;+  ?.  =(%both kind.sta)
+                    ;option(value "both"): By End Time
+                  ;option(value "both", selected ""): By End Time
+              ;+  ?.  =(%fuld kind.sta)
+                    ;option(value "fuld"): Fullday
+                  ;option(value "fuld", selected ""): Fullday
+              ;+  ?.  =(%jump kind.sta)
+                    ;option(value "jump"): Instantaneous
+                  ;option(value "jump", selected ""): Instantaneous
             ==
           ==
           ;+  rule-kind-panel
@@ -331,7 +397,7 @@
     =/  rule-list=(list [rid:r rule:r])
       %+  murn  ~(tap by rules)
       |=  [=rid:r =rule:r]
-      ?.  =(kind q.rid)
+      ?.  =(kind.sta q.rid)
         ~
       [~ rid rule]
     =.  rule-list
@@ -352,10 +418,10 @@
           =name   "ruledata[rid]"
           ;*  %+  turn  rule-list
               |=  [=rid:r =rule:r]
-              ?.  ?|  &(?=(%both kind) =(rid both.rids))
-                      &(?=(%left kind) =(rid left.rids))
-                      &(?=(%fuld kind) =(rid fuld.rids))
-                      &(?=(%jump kind) =(rid jump.rids))
+              ?.  ?|  &(?=(%both kind.sta) =(rid rid.both.rids.sta))
+                      &(?=(%left kind.sta) =(rid rid.left.rids.sta))
+                      &(?=(%fuld kind.sta) =(rid fuld.rids.sta))
+                      &(?=(%jump kind.sta) =(rid jump.rids.sta))
                   ==
                 ;option(value (rid-to-tape rid)): {(trip name.rule)}
               ;option(value (rid-to-tape rid), selected ""): {(trip name.rule)}
@@ -366,7 +432,7 @@
   ::
   ++  rule-kind-parameters
     ^-  manx
-    ?.  ?=(?(%left %both) kind)
+    ?.  ?=(?(%left %both) kind.sta)
       ;div.hidden;
     =/  timezones=(list [zid:t tape])
       %+  sort
@@ -374,21 +440,22 @@
         |=([=zid:t =zone:t] [zid (trip name.zone)])
       |=  [[* a=tape] [* b=tape]]
       (alphabetical:htmx a b)
-    ?-    kind
+    ?-    kind.sta
       ::
         %left
       ;div.w-full.flex.flex-col
         ;div.mb-1.w-full.flex.items-center.justify-between
           ;span.m-2.font-medium.text-sm.text-gray-700: Select Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
-            ;+  ?^  zid
-                  ;option(value "test"): UTC
-                ;option(value "test", selected ""): UTC
+            =name  "ruledata[kind][tz]"
+            ;+  ?^  tz.left.rids.sta
+                  ;option(value ""): UTC
+                ;option(value "", selected ""): UTC
             ;*  %+  turn  timezones
                 |=  [=zid:t name=tape]
-                ?.  =(^zid [~ zid])
-                  ;option(value "test"): {name}
-                ;option(value "test", selected ""): {name}
+                ?.  =([~ zid] tz.left.rids.sta)
+                  ;option(value "{name}"): {name}
+                ;option(value "{name}", selected ""): {name}
           ==
         ==
         ;div.mb-1.w-full.flex.items-center.justify-between
@@ -404,35 +471,36 @@
         ;div.mb-1.w-full.flex.items-center.justify-between
           ;span.m-2.font-medium.text-sm.text-gray-700: Select Start Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
-            ;+  ?^  zid
-                  ;option(value "test"): UTC
-                ;option(value "test", selected ""): UTC
+            =name  "ruledata[kind][lz]"
+            ;+  ?^  lz.both.rids.sta
+                  ;option(value ""): UTC
+                ;option(value "", selected ""): UTC
             ;*  %+  turn  timezones
                 |=  [=zid:t name=tape]
-                ?.  =(^zid [~ zid])
-                  ;option(value "test"): {name}
-                ;option(value "test", selected ""): {name}
+                ?.  =([~ zid] lz.both.rids.sta)
+                  ;option(value "{name}"): {name}
+                ;option(value "{name}", selected ""): {name}
           ==
         ==
         ;div.mb-1.w-full.flex.items-center.justify-between
           ;span.m-2.font-medium.text-sm.text-gray-700: Select End Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
-            ;option(value "test"): UTC
-            ;+  ?^  zid
-                  ;option(value "test"): UTC
-                ;option(value "test", selected ""): UTC
+            =name  "ruledata[kind][rz]"
+            ;+  ?^  rz.both.rids.sta
+                  ;option(value ""): UTC
+                ;option(value "", selected ""): UTC
             ;*  %+  turn  timezones
                 |=  [=zid:t name=tape]
-                ?.  =(^zid [~ zid])
-                  ;option(value "test"): {name}
-                ;option(value "test", selected ""): {name}
+                ?.  =([~ zid] rz.both.rids.sta)
+                  ;option(value "{name}"): {name}
+                ;option(value "{name}", selected ""): {name}
           ==
         ==
       ==
     ==
   ::
   ++  rule-specific-parameters
-    =/  =rid:r   ?+(kind !! %left left.rids, %both both.rids, %fuld fuld.rids, %jump jump.rids)
+    =/  =rid:r   ?+(kind.sta !! %left rid.left.rids.sta, %both rid.both.rids.sta, %fuld fuld.rids.sta, %jump jump.rids.sta)
     =/  =rule:r  (~(got by rules) rid)
     ^-  manx
     ;div.w-full.flex.flex-col
@@ -443,17 +511,23 @@
             ;span.m-2.font-medium.text-sm.text-gray-700: {(trip name)}:
             ;span.flex.w-60
               ;+  =/  n=tape  "ruledata[args][{(trip name)}]"
-                  =/  day=@da     (mul ~d1 (div (year date) ~d1))
-                  =/  minute=@dr  (mul ~m30 (div (mod now ~d1) ~m30))
+                  =/  day=@da         (mul ~d1 (div (year date) ~d1))
+                  =/  min=@dr         (fall minute (mul ~m30 (div (mod now ~d1) ~m30)))
+                  =/  weekday=wkd:tu  (num-to-wkd:tu (get-weekday:tu day))
                   ?+  term
                          ;div: {(trip term)}
                     %ud  (unsigned-decimal n)
                     %od  (ordinal n)
-                    %da  (date-input n day)
+                    %da  (datetime-local n day)
                     %dr  (duration n ~d1)
-                    %dl  (time-input n minute)
-                    %dx  (indexed-time n (add day minute))
-                    %wl  (weekday-list n)
+                    %dl  (delta-input n *delta:tu)
+                    %dx  (indexed-time n (add day min))
+                    %wd  (weekday-input n weekday)
+                    %wl  (weekday-list n ~[weekday])
+                    %dt  (date-input n [y m d.t]:(yore day))
+                    %ct  (time-input n min)
+                    %mt  (month-input n [y m]:(yore day))
+                    %wk  (week-input n (da-to-week-number:tu day))
                   ==
             ==
           ==

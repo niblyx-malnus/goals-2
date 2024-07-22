@@ -38,18 +38,22 @@
 :: If need to update an arg, add a version like %ud-1...
 ::
 +$  arg
-  $%  [%ud p=@ud]
-      [%od p=ord]
-      [%da p=@da]
-      [%dr p=@dr]
-      [%dl p=delta]
-      [%dx p=dext]
-      [%wd p=wkd]
-      [%wl p=(list wkd-num)]
+  $%  [%ud p=@ud]                 :: natural number (unsigned decimal)
+      [%od p=ord]                 :: ordinal numbers for weekday in a month
+      [%da p=@da]                 :: datetime-local
+      [%dr p=@dr]                 :: duration (?)
+      [%dl p=delta]               :: delta (signed @dr)
+      [%dx p=dext]                :: indexed datetime
+      [%wd p=wkd]                 :: weekday
+      [%wl p=(list wkd)]          :: weekday list
+      [%dt p=[y=@ud m=@ud d=@ud]] :: date-input
+      [%ct p=@dr]                 :: clocktime / time-input
+      [%mt p=[y=@ud m=@ud]]       :: month-input
+      [%wk p=[y=@ud w=@ud]]       :: week-input
   ==
 ::
 ++  wkd-to-num
-  |=(=wkd `@ud`?-(wkd %mon 0, %tue 1, %wed 2, %thu 3, %fri 4, %sat 5, %sun 6))
+  |=(=wkd `wkd-num`?-(wkd %mon %0, %tue %1, %wed %2, %thu %3, %fri %4, %sat %5, %sun %6))
 ::
 ++  mnt-to-num
   |=  =mnt
@@ -97,7 +101,7 @@
 ::
 ++  get-weekday
   |=  d=@da
-  ^-  @
+  ;;  wkd-num
   %-  (curr mod 7)  %+  add  5  :: center on saturday
   ?:  (gth d ~2000.1.1)
     (mod (div (sub d ~2000.1.1) ~d1) 7)
@@ -113,7 +117,44 @@
 ::
 ++  days-in-month
   |=  [[a=? y=@ud] m=@ud]
-  `@ud`?>(a (snag (dec m) ?:((yelp y) moy:yo moh:yo)))
+  :: m is in range 1-12 (not zero-indexed)
+  ::
+  ?>  &((gte m 1) (lte m 12))
+  `@ud`(snag (dec m) ?:((yelp y) moy:yo moh:yo))
+::
+++  days-left-in-year
+  |=  =time
+  ^-  @ud
+  (div (sub (year [a +(y)]:(yore time) 1 1 0 0 0 ~) time) ~d1)
+::
+++  is-leap-year  yelp
+::
+++  timespan-description
+  |=  [a=? d=@dr]
+  ^-  tape
+  =;  time=tape
+    "{time} {?.(a "ago" "from now")}"
+  ?:  (lth d ~s45)
+    "a few seconds"
+  ?:  (lth d ~m1.s30)
+    "a minute"
+  ?:  (lth d ~m45)
+    "{(numb (div (add d ~s30) ~m1))} minutes"
+  ?:  (lth d ~h1.m30)
+    "an hour"
+  ?:  (lth d ~h21)
+    "{(numb (div (add d ~m30) ~h1))} hours"
+  ?:  (lth d ~d1.h11)
+    "a day"
+  ?:  (lth d ~d25)
+    "{(numb (div (add d ~h12) ~d1))} days"
+  ?:  (lth d ~d45)
+    "a month"
+  ?:  (lth d ~d320)
+    "{(numb (div (add d ~d15) ~d30))} days"
+  ?:  (lth d ~d548)
+    "a year"
+  "{(numb (div (add d ~d182.h15) ~d365.h6))} days"
 ::
 ++  sub-wkd
   |=  [a=@ud b=@ud]
@@ -200,6 +241,22 @@
       [p.tub ~ %.y tub]
     [p.tub ~ %.n tub]
   --
+:: TODO: parse basic (non-extended) format for ISO 8601 (no separators)
+:: TODO: implement ordinal date parsing (YYYY-DDD)
+:: TODO: implement week date parsing (YYYY-Www-D)
+:: TODO: implement offset parsing (Z and +-hh:mm)
+:: TODO: implement duration parsing (PnYnMnDTnHnMnS)
+:: TODO: implement recurring intervals (Rn/PnYnMnDTnHnMnS)
+:: TODO: implement start/end, start/duration, duration/end intervals
+:: TODO: recurring intervals WITH start or end [of recurrence]
+:: (None of the above are valid for any standard HTML inputs)
+::
+:: TODO: separate into an ISO 8601 library
+:: TODO: make sure to handle 24:00 as 00:00 of the next day
+:: TODO: a comma is a valid fractional separator in the HH:MM... portion
+:: TODO: parameterize number of decimal places (datetime-local uses 3)
+:: TODO: datetime-local should reuse code from date and time parsers
+::
 :: YYYY-MM-DDTHH:MM[:SS[.SSS]]
 ::
 ++  datetime-local
@@ -261,27 +318,19 @@
 ++  date-input
   |%
   ++  en
-    |=  d=@da
+    |=  [y=@ud m=@ud d=@ud]
     ^-  tape
-    ?>  =(0 (mod d ~d1))
-    =+  (yore d)
-    ;:  weld
-      (numb y)
-      "-"
-      (zfill 2 (scow %ud m))
-      "-"
-      (zfill 2 (scow %ud d.t))
-    ==
-  ++  de       |=(=@t `@da`(rash t parse))
-  ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
+    "{(numb y)}-{(zfill 2 (numb m))}-{(zfill 2 (numb d))}"
+  ++  de       |=(=@t `[y=@ud m=@ud d=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [y=@ud m=@ud d=@ud])`(rush t parse))
   ++  parse
     =,  monadic-parsing
-    ;<  y=@ud   bind  dem
-    ;<  *       bind  hep
-    ;<  mo=@ud  bind  dem
-    ;<  *       bind  hep
-    ;<  d=@ud   bind  dem
-    (easy (year [& y] mo d 0 0 0 ~))
+    ;<  y=@ud  bind  dem
+    ;<  *      bind  hep
+    ;<  m=@ud  bind  dem
+    ;<  *      bind  hep
+    ;<  d=@ud  bind  dem
+    (easy [y m d])
   --
 ::
 ++  dr-format
@@ -360,24 +409,17 @@
 ++  month-input
   |%
   ++  en
-    |=  d=@da
+    |=  [y=@ud m=@ud]
     ^-  tape
-    ?>  =(0 (mod d ~d1))
-    =/  =date  (yore d)
-    ?>  =(1 d.t.date) :: accepts only first-of-month @da's
-    ;:  weld
-      (numb y.date)
-      "-"
-      (zfill 2 (scow %ud m.date))
-    ==
-  ++  de       |=(=@t `@da`(rash t parse))
-  ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
+    "{(numb y)}-{(zfill 2 (numb m))}"
+  ++  de       |=(=@t `[y=@ud m=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [y=@ud m=@ud])`(rush t parse))
   ++  parse
     =,  monadic-parsing
-    ;<  y=@ud   bind  dem
-    ;<  *       bind  hep
-    ;<  mo=@ud  bind  dem
-    (easy (year [& y] mo 1 0 0 0 ~))
+    ;<  y=@ud  bind  dem
+    ;<  *      bind  hep
+    ;<  m=@ud  bind  dem
+    (easy [y m])
   --
 :: first day of week is monday
 :: first week is the week containing first thursday of the year
@@ -430,13 +472,13 @@
   --
 ::
 ++  nth-weekday
-  |=  [[a=? y=@ud] m=@ud =ord w=@ud]
+  |=  [[a=? y=@ud] m=@ud =ord =wkd]
   ^-  (unit @da)
   =/  nwkd=date  [[a y] m 1 0 0 0 ~]
   :: shift to first w
   ::
   =/  v  (get-weekday (year nwkd))
-  =.  d.t.nwkd  (add d.t.nwkd (sub-wkd w v))
+  =.  d.t.nwkd  (add d.t.nwkd (sub-wkd (wkd-to-num wkd) v))
   =.  nwkd
     ?+    ord  nwkd
       %second  nwkd(d.t (add 7 d.t.nwkd))
@@ -453,12 +495,12 @@
   ?.(=(nwkd (yore (year nwkd))) ~ `(year nwkd))
 ::
 ++  first-weekday-after
-  |=  [[a=? y=@ud] m=@ud d=@ud w=@ud]
+  |=  [[a=? y=@ud] m=@ud d=@ud =wkd]
   ^-  (unit @da)
   =/  nwkd=date  [[a y] m d 0 0 0 ~]
   ?.  =(nwkd (yore (year nwkd)))  ~  :: assert date existence/correctness
   =/  v  (get-weekday (year nwkd))
-  =.  d.t.nwkd  (add d.t.nwkd (sub-wkd w v))
+  =.  d.t.nwkd  (add d.t.nwkd (sub-wkd (wkd-to-num wkd) v))
   :: assert date existence/correctness
   ::
   ?.(=(nwkd (yore (year nwkd))) ~ `(year nwkd))
@@ -472,7 +514,8 @@
   ?.(=(nwkd (yore (year nwkd))) ~ `(year nwkd))
 ::
 ++  days-of-week
-  |=  [start=@da weekdays=(list wkd-num)]
+  |=  [start=@da weekdays=(list wkd)]
+  =/  weekdays=(list wkd-num)  (turn weekdays wkd-to-num)
   |=  idx=@ud
   |^  ^-  @da
   =.  start               (sane-fd start)
@@ -490,7 +533,7 @@
   --
 ::
 ++  monthly-nth-weekday
-  |=  [start=@da =ord w=@]
+  |=  [start=@da =ord =wkd]
   |=  idx=@ud
   ^-  (unit @da) :: null if does not exist
   =.  start            (sane-fd start)
@@ -500,7 +543,7 @@
   =/  curr-month=@ud   +((mod (add idx start-month) 12))
   :: Assumes date is A.D.
   ::
-  (nth-weekday [& curr-year] curr-month ord w)
+  (nth-weekday [& curr-year] curr-month ord wkd)
 ::
 ++  monthly-on-day
   |=  start=@da

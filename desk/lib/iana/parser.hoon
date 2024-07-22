@@ -163,8 +163,8 @@
       =;  =time  [usw time]
       %+  add  hmsf  %-  need
       ?-    -.u.on
-        %int  (nth-weekday:tz [& y] m ord.u.on (wkd-to-num:util wkd.u.on))
-        %aft  (first-weekday-after:tz [& y] m d.u.on (wkd-to-num:util wkd.u.on))
+        %int  (nth-weekday:tz [& y] m ord.u.on wkd.u.on)
+        %aft  (first-weekday-after:tz [& y] m d.u.on wkd.u.on)
         %dat  (date-of-month:tz [& y] m d.u.on)
       ==
     --

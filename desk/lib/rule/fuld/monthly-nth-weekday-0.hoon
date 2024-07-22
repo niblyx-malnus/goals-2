@@ -1,16 +1,18 @@
 :+  'Monthly nth Weekday'
-  :~  ['Start' %da]
+  :~  ['Start' %dt]
       ['Ordinal' %od]
-      ['Weekday' %ud]
+      ['Weekday' %wd]
   ==
 '''
 |=  args=(map @t arg)
-=/  start=@da  +:;;($>(%da arg) (~(got by args) 'Start'))
+=/  sd=[y=@ud m=@ud d=@ud]
+               +:;;($>(%dt arg) (~(got by args) 'Start'))
 =/  =ord       +:;;($>(%od arg) (~(got by args) 'Ordinal'))
-=/  w=@        +:;;($>(%ud arg) (~(got by args) 'Weekday'))
+=/  =wkd       +:;;($>(%wd arg) (~(got by args) 'Weekday'))
 ^-  $-(@ud (each fullday rule-exception))
 |=  idx=@ud
-=/  day=(unit @da)  ((monthly-nth-weekday start ord w) idx)
+=/  start=@da  (year [& y.sd] m.sd d.sd 0 0 0 ~)
+=/  day=(unit @da)  ((monthly-nth-weekday start ord wkd) idx)
 ?~  day
   [%| %rule-error 'This day does not exist in this month.']
 [%& (sane-fd u.day)]

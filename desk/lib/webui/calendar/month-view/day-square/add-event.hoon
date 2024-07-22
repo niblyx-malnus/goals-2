@@ -19,7 +19,7 @@
   |=  [zid=(unit zid:t) =^date]
   %~  .
     webui-calendar-create-event-panel
-  :-  [zid date]
+  :-  [zid date ~ %fuld]
   :+  gowl
     (weld base /create-event-panel)
   [[eyre-id req] [ext site] args]
@@ -107,7 +107,6 @@
     ;<  sta=state  bind:m  ((put:nuk state) base &)
     ;<  ~  bind:m
       %+  send-refresh:htmx  [our dap]:gowl
-      =-  ~&(- -)
       %+  murn  ~(tap of (dip:nuk /))
       |=  [=path *]
       ?.  ?=([%htmx %goals %calendar @ta ~] path)
@@ -159,7 +158,7 @@
                 ;+  fi-x
               ==
             ==
-            ;+  create-event-panel:components:(create-event-panel zid date)
+            ;+  default:components:(create-event-panel zid date)
           ==
         ==
       == 

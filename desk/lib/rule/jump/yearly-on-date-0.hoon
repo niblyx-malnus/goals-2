@@ -1,20 +1,17 @@
-:+  'Yearly First Weekday After Date'
-  :~  ['Start Year' %ud]
-      ['Month' %ud]
-      ['Day' %ud]
-      ['Time' %dr]
+:+  'Yearly On Date'
+  :~  ['Start Date' %dt]
+      ['Clocktime' %ct]
       ['Offset' %dl] :: as if we were in this offset from UTC
   ==
 '''
 |=  args=(map @t arg)
-=/  year=@ud   +:;;($>(%ud arg) (~(got by args) 'Start Year'))
-=/  month=@ud  +:;;($>(%ud arg) (~(got by args) 'Month'))
-=/  date=@ud   +:;;($>(%ud arg) (~(got by args) 'Day'))
-=/  time=@dr   +:;;($>(%dr arg) (~(got by args) 'Time'))
+=/  sd=[y=@ud m=@ud d=@ud]
+               +:;;($>(%dt arg) (~(got by args) 'Start Date'))
+=/  time=@dr   +:;;($>(%ct arg) (~(got by args) 'Clocktime'))
 =/  =delta     +:;;($>(%dl arg) (~(got by args) 'Offset'))
 ^-  $-(@ud (each jump rule-exception))
 |=  idx=@ud
-=/  day=(unit @da)  (date-of-month [& (add year idx)] month date)
+=/  day=(unit @da)  (date-of-month [& (add y.sd idx)] m.sd d.sd)
 ?~  day
   [%| %rule-error (crip "This date does not exist.")]
 [%& (apply-invert-delta (add u.day time) delta)]

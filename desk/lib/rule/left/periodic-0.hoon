@@ -1,15 +1,17 @@
 :+  'Periodic'
-  :~  ['Start' %da]
-      ['Offset' %dl]
+  :~  ['Start Date' %dt]
+      ['Clocktime' %ct]
       ['Period' %dr]
   ==
 '''
 |=  args=(map @t arg)
-=/  start=@da   +:;;($>(%da arg) (~(got by args) 'Start'))
-=/  =delta      +:;;($>(%dl arg) (~(got by args) 'Offset'))
+=/  sd=[y=@ud m=@ud d=@ud]
+                +:;;($>(%dt arg) (~(got by args) 'Start Date'))
+=/  ct=@dr      +:;;($>(%ct arg) (~(got by args) 'Clocktime'))
 =/  period=@dr  +:;;($>(%dr arg) (~(got by args) 'Period'))
 ^-  $-(@ud (each dext rule-exception))
 |=  idx=@ud
+=/  start=@da  (year [& y.sd] m.sd d.sd 0 0 0 ~)
 =/  =time  (add (sane-fd start) (mul idx period))
-[%& 0 (apply-delta time delta)]
+[%& 0 (add time ct)]
 '''

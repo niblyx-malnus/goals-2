@@ -1,13 +1,14 @@
 :+  'Days of Week'
-  :~  ['Start' %da]
+  :~  ['Start' %dt]
       ['Weekdays' %wl]
   ==
 '''
 |=  args=(map @t arg)
-=/  start=@da                +:;;($>(%da arg) (~(got by args) 'Start'))
-=/  weekdays=(list wkd-num)  +:;;($>(%wl arg) (~(got by args) 'Weekdays'))
+=/  sd=[y=@ud m=@ud d=@ud]  +:;;($>(%dt arg) (~(got by args) 'Start'))
+=/  weekdays=(list wkd)     +:;;($>(%wl arg) (~(got by args) 'Weekdays'))
+=/  start=@da  (year [& y.sd] m.sd d.sd 0 0 0 ~)
 ^-  $-(@ud (each fullday rule-exception))
 |=  idx=@ud
 =/  day=@da  ((days-of-week start weekdays) idx)
-[%& (sane-fd ((days-of-week start weekdays) idx))]
+[%& (sane-fd day)]
 '''

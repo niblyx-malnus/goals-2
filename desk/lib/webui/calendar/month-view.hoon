@@ -28,7 +28,7 @@
   %~  .
     webui-calendar-month-view-day-square
   :-  [zid y m date]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:tu (year date))))
+  :+  gowl  (weld base /day-square/(crip (en:date-input:tu [y m d.t]:date)))
   [[eyre-id req] [ext site] args]
 ::
 ++  get-now-tz
@@ -103,7 +103,8 @@
     (give-html-manx:htmx [our dap]:gowl eyre-id month-view:components |)
     ::
       [* [%day-square date=@ta *] *]
-    handle:(day-square (yore (de:date-input:tu date.cad.parms)))
+    =/  [y=@ud m=@ud d=@ud]  (de:date-input:tu date.cad.parms)
+    handle:(day-square [& y] m d 0 0 0 ~)
   ==
 ::
 ++  components
@@ -128,13 +129,11 @@
   ::
   ++  toolbar
     ^-  manx
-    =/  last-month=@da
-      =/  [m=@ y=@]  ?:(=(m 1) [12 (sub y 1)] [(sub m 1) y])
-      (year [& y] m 1 0 0 0 ~)
+    =/  last-month=[y=@ud m=@ud]
+      ?:(=(m 1) [(sub y 1) 12] [y (sub m 1)])
     ::
-    =/  next-month=@da
-      =/  [m=@ y=@]  ?:(=(m 12) [1 (add y 1)] [(add m 1) y])
-      (year [& y] m 1 0 0 0 ~)
+    =/  next-month=[y=@ud m=@ud]
+      ?:(=(m 12) [(add y 1) 1] [y (add m 1)])
     ::
     ;div(class "p-2 flex items-center space-x-4")
       ;select.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
@@ -147,7 +146,7 @@
         ;option(value "month", selected ""): Month
       ==
       ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
-        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu (year [[& y] m 1 0 0 0 ~]:(yore now)))}"
+        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu [y m]:(yore now))}"
         =hx-target   "#{(en-html-id:htmx base)}"
         =hx-trigger  "click" 
         =hx-swap     "outerHTML"

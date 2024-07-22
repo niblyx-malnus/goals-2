@@ -1,15 +1,17 @@
 :+  'Yearly on Date'
-  :~  ['Start' %da]
-      ['Offset' %dl]
+  :~  ['Start Date' %dt]
+      ['Clocktime' %ct]
   ==
 '''
 |=  args=(map @t arg)
-=/  start=@da  +:;;($>(%da arg) (~(got by args) 'Start'))
-=/  =delta     +:;;($>(%dl arg) (~(got by args) 'Offset'))
+=/  sd=[y=@ud m=@ud d=@ud]
+               +:;;($>(%dt arg) (~(got by args) 'Start Date'))
+=/  ct=@dr     +:;;($>(%ct arg) (~(got by args) 'Clocktime'))
 ^-  $-(@ud (each dext rule-exception))
 |=  idx=@ud
+=/  start=@da  (year [& y.sd] m.sd d.sd 0 0 0 ~)
 =/  day=(unit @da)  ((yearly-on-date start) idx)
 ?~  day
   [%| %rule-error (crip "This date does not exist.")]
-[%& 0 (apply-delta u.day delta)]
+[%& 0 (add u.day ct)]
 '''

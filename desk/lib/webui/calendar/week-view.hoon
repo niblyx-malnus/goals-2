@@ -43,7 +43,7 @@
   %~  .
     webui-calendar-week-view-day-square
   :-  [zid y w date]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:tu (year date))))
+  :+  gowl  (weld base /day-square/(crip (en:date-input:tu [y m d.t]:date)))
   [[eyre-id req] [ext site] args]
 ::
 ++  fullday-square
@@ -51,7 +51,7 @@
   %~  .
     webui-calendar-week-view-fullday-square
   :-  [zid y w date collapse]
-  :+  gowl  (weld base /fullday-square/(crip (en:date-input:tu (year date))))
+  :+  gowl  (weld base /fullday-square/(crip (en:date-input:tu [y m d.t]:date)))
   [[eyre-id req] [ext site] args]
 ::
 ++  get-now-tz
@@ -140,10 +140,12 @@
     (give-html-manx:htmx [our dap]:gowl eyre-id ~(week-view components sta) |)
     ::
       [* [%day-square date=@ta *] *]
-    handle:(day-square (yore (de:date-input:tu date.cad.parms)))
+    =/  [y=@ud m=@ud d=@ud]  (de:date-input:tu date.cad.parms)
+    handle:(day-square [& y] m d 0 0 0 ~)
     ::
       [* [%fullday-square date=@ta *] *]
-    handle:(fullday-square (yore (de:date-input:tu date.cad.parms)) sta)
+    =/  [y=@ud m=@ud d=@ud]  (de:date-input:tu date.cad.parms)
+    handle:(fullday-square [[& y] m d 0 0 0 ~] sta)
   ==
 ::
 ++  components

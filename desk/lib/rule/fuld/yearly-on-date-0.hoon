@@ -1,9 +1,10 @@
 :+  'Yearly on Date'
-  :~  ['Start' %da]
+  :~  ['Start' %dt]
   ==
 '''
 |=  args=(map @t arg)
-=/  start=@da  +:;;($>(%da arg) (~(got by args) 'Start'))
+=/  sd=[y=@ud m=@ud d=@ud]  +:;;($>(%dt arg) (~(got by args) 'Start'))
+=/  start=@da  (year [& y.sd] m.sd d.sd 0 0 0 ~)
 ^-  $-(@ud (each fullday rule-exception))
 |=  idx=@ud
 =/  day=(unit @da)  ((yearly-on-date start) idx)

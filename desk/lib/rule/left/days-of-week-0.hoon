@@ -1,15 +1,17 @@
 :+  'Days of Week'
-  :~  ['Start' %da]
-      ['Offset' %dl]
+  :~  ['Start Date' %dt]
+      ['Clocktime' %ct]
       ['Weekdays' %wl]
   ==
 '''
 |=  args=(map @t arg)
-=/  start=@da                +:;;($>(%da arg) (~(got by args) 'Start'))
-=/  =delta                   +:;;($>(%dl arg) (~(got by args) 'Offset'))
-=/  weekdays=(list wkd-num)  +:;;($>(%wl arg) (~(got by args) 'Weekdays'))
+=/  sd=[y=@ud m=@ud d=@ud]
+                         +:;;($>(%dt arg) (~(got by args) 'Start Date'))
+=/  ct=@dr               +:;;($>(%ct arg) (~(got by args) 'Clocktime'))
+=/  weekdays=(list wkd)  +:;;($>(%wl arg) (~(got by args) 'Weekdays'))
 ^-  $-(@ud (each dext rule-exception))
 |=  idx=@ud
-=/  day=@da  ((days-of-week start weekdays) idx)
-[%& 0 (apply-delta day delta)]
+=/  start=@da  (year [& y.sd] m.sd d.sd 0 0 0 ~)
+=/  day=@da    ((days-of-week start weekdays) idx)
+[%& 0 (add day ct)]
 '''

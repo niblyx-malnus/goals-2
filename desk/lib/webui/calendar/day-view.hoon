@@ -42,7 +42,7 @@
   %~  .
     webui-calendar-day-view-day-square
   :-  [zid y m d]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:tu (year [[& y] m d 0 0 0 ~]))))
+  :+  gowl  (weld base /day-square/(crip (en:date-input:tu y m d)))
   [[eyre-id req] [ext site] args]
 ::
 ++  fullday-square
@@ -50,7 +50,7 @@
   %~  .
     webui-calendar-day-view-fullday-square
   :-  [zid y m d collapse]
-  :+  gowl  (weld base /fullday-square/(crip (en:date-input:tu (year [[& y] m d 0 0 0 ~]))))
+  :+  gowl  (weld base /fullday-square/(crip (en:date-input:tu y m d)))
   [[eyre-id req] [ext site] args]
 ::
 ++  get-now-tz
@@ -167,9 +167,10 @@
   ::
   ++  toolbar
     ^-  manx
-    =/  today=@da      (year [& y] m d 0 0 0 ~)
-    =/  yesterday=@da  (sub today ~d1)
-    =/  tomorrow=@da   (add today ~d1)
+    =/  today=[y=@ud m=@ud d=@ud]  [y m d.t]:(yore now)
+    =/  this-day=@da  (year [& y] m d 0 0 0 ~)
+    =/  day-before=[y=@ud m=@ud d=@ud]  [y m d.t]:(yore (sub this-day ~d1))
+    =/  day-after=[y=@ud m=@ud d=@ud]   [y m d.t]:(yore (add this-day ~d1))
     =/  month-title=tape  "{(snag (sub m 1) month-abbrv)} {(numb:htmx y)}"
     ::
     ;div(class "p-2 flex items-center space-x-4")
@@ -183,7 +184,7 @@
         ;option(value "month"): Month
       ==
       ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
-        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu (mul ~d1 (div now ~d1)))}"
+        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu [y m d.t]:(yore now))}"
         =hx-target   "#{(en-html-id:htmx base)}"
         =hx-trigger  "click" 
         =hx-swap     "outerHTML"
@@ -191,22 +192,22 @@
       ==
       ;div(class "flex items-center space-x-1")
         ;button
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu yesterday)}"
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu day-before)}"
           =hx-target   "#{(en-html-id:htmx base)}"
           =hx-trigger  "click"
           =hx-swap     "outerHTML"
-          =alt         "Yesterday"
-          =title       "Yesterday"
+          =alt         "Day Before"
+          =title       "Day Before"
           =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
           ;+  (~(set-style mx left-arrow) "height: .95em; width: .95em;")
         ==
         ;button
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu tomorrow)}"
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu day-after)}"
           =hx-target   "#{(en-html-id:htmx base)}"
           =hx-trigger  "click"
           =hx-swap     "outerHTML"
-          =alt         "Tomorrow"
-          =title       "Tomorrow"
+          =alt         "Day After"
+          =title       "Day After"
           =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
           ;+  (~(set-style mx right-arrow) "height: .95em; width: .95em;")
         ==
@@ -266,7 +267,7 @@
             ;span.text-xs.text-gray-400: {(numb:htmx y)}
           ==
         ==
-        ;+  =/  weekday=tape  (snag (get-weekday:tu today) weekday-headers)
+        ;+  =/  weekday=tape  (snag `@`(get-weekday:tu today) weekday-headers)
             =/  is-today=?   =([m y d.t]:(yore today) [m y d.t]:(yore now))
             =/  is-before=?  (lth today now)
             ;div.flex.flex-col.items-center.justify-center

@@ -161,7 +161,7 @@
                 ;+  fi-x
               ==
             ==
-            ;+  (update-event-panel:components:(update-event-panel zid date cid iref) %update)
+            ;+  (default:components:(update-event-panel zid date cid iref) %update)
           ==
         ==
       == 

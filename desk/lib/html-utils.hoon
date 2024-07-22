@@ -279,6 +279,9 @@
     :: Add or remove boolean attribute "required"
     ::
     ++  req  |=(r=? (mar:at %required ((flit _r) "")))
+    :: Add or remove boolean attribute "selected"
+    ::
+    ++  sec  |=(r=? (mar:at %selected ((flit _r) "")))
     --
   :: An address is a list of knots which can be parsed to a @ud.
   :: This allows us to manually enter paths with e.g. /3/6/5/0.
@@ -752,6 +755,7 @@
     ++  pun  |=(n=tape |=([* m=manx] (pun:~(at mx m) n)))
     ++  puv  |=(v=tape |=([* m=manx] (puv:~(at mx m) v)))
     ++  req  |=(r=? |=([* m=manx] (req:~(at mx m) r)))
+    ++  sec  |=(s=? |=([* m=manx] (sec:~(at mx m) s)))
     --
   :: Some common getters
   ::
@@ -776,6 +780,9 @@
   :: First descendant with given name attribute
   ::
   ++  gen  |=(v=tape (wif (tir:con %name v)))
+  :: First descendant with given value attribute
+  ::
+  ++  gev  |=(v=tape (wif (tir:con %value v)))
   :: Value attribute of first descendant with given name attribute
   ::
   ++  val  |=(v=tape ?~(m=(gen v) ~ (get:~(at mx q.u.m) %value)))

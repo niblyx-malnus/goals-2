@@ -26,7 +26,7 @@
   :-  [zid y m]
   :+  gowl
     %+  weld  base
-    /month-view/(crip (en:month-input:tu (year [%.y y] m 1 0 0 0 ~)))
+    /month-view/(crip (en:month-input:tu y m))
   [[eyre-id req] [ext site] args]
 ::
 ++  week-view
@@ -46,7 +46,7 @@
   :-  [zid y m d]
   :+  gowl
     %+  weld  base
-    /day-view/(crip (en:date-input:tu (year [[& y] m d 0 0 0 ~])))
+    /day-view/(crip (en:date-input:tu y m d))
   [[eyre-id req] [ext site] args]
 ::
 ++  blue-fi-loader
@@ -207,7 +207,7 @@
     ==
     ::
       [* [%day-view date=@ta *] *]
-    =/  day=[@ud @ud @ud]  [y m d.t]:(yore (de:date-input:tu date.cad.parms))
+    =/  day=[@ud @ud @ud]  (de:date-input:tu date.cad.parms)
     =.  day.sta  [~ day]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     handle:(day-view zone.sta day)
@@ -219,7 +219,7 @@
     handle:(week-view zone.sta week)
     ::
       [* [%month-view date=@ta *] *]
-    =/  month=[@ud @ud]  [y m]:(yore (de:month-input:tu date.cad.parms))
+    =/  month=[@ud @ud]  (de:month-input:tu date.cad.parms)
     =.  month.sta  [~ month]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     handle:(month-view zone.sta month)

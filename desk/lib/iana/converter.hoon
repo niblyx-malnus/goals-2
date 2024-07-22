@@ -67,8 +67,7 @@
   ^-  (list tz-rule-parms)
   =/  name=@t          letter.re :: This name will be fixed in a later pass...
   =/  offset=delta:tu  save.re   :: This will be updated in a later pass...
-  =/  [=rid:r =args:r]  (rule-entry-to-rid-args re)
-  =/  num=@ud
+  =/  diff=@ud
     ?-  -.to.re
       %year  (sub y.to.re from.re)
       %only  0
@@ -76,45 +75,40 @@
     ==
   :: Return rule creation parms one for each year of this rule-entry
   |-
-  =.  args  (~(put by args) 'Start Year' ud+(add from.re num))
-  :-  [(scot %uv (sham [re num])) [0 0] name offset rid args]
-  ?:  =(0 num)  ~
-  $(num (dec num))
+  =/  [=rid:r =args:r]  (rule-entry-to-rid-args re diff)
+  :-  [(scot %uv (sham [re diff])) [0 0] name offset rid args]
+  ?:  =(0 diff)  ~
+  $(diff (dec diff))
 :: Given a rule entry, get a first pass at the rule parameters
 ::
 ++  rule-entry-to-rid-args
-  |=  rule-entry:iana
+  |=  [rule-entry:iana diff=@ud]
   ^-  [rid:r args:r]
   ?-    -.on
       %int
     :-  [~ %jump %yearly-nth-weekday-of-month-0]
     %-  ~(gas by *args:r)
-    :~  ['Start Year' ud+from]
-        ['Month' ud+(mnt-to-num:tu in)]
+    :~  ['Start Month' mt+[(add from diff) (mnt-to-num:tu in)]]
         ['Ordinal' od+ord.on]
-        ['Weekday' ud+(wkd-to-num:tu wkd.on)]
-        ['Time' dr+q.at]
+        ['Weekday' wd+wkd.on]
+        ['Clocktime' ct+q.at]
         ['Offset' dl+*delta:tu] :: This is updated in a later pass...
     ==
     ::
       %aft
     :-  [~ %jump %yearly-first-weekday-after-date-0]
     %-  ~(gas by *args:r)
-    :~  ['Start Year' ud+from]
-        ['Month' ud+(mnt-to-num:tu in)]
-        ['Day' ud+d.on]
-        ['Weekday' ud+(wkd-to-num:tu wkd.on)]
-        ['Time' dr+q.at]
+    :~  ['Start Date' dt+[(add from diff) (mnt-to-num:tu in) d.on]]
+        ['Weekday' wd+wkd.on]
+        ['Clocktime' ct+q.at]
         ['Offset' dl+*delta:tu] :: This is updated in a later pass...
     ==
     ::
       %dat
     :-  [~ %jump %yearly-on-date-0]
     %-  ~(gas by *args:r)
-    :~  ['Start Year' ud+from]
-        ['Month' ud+(mnt-to-num:tu in)]
-        ['Day' ud+d.on]
-        ['Time' dr+q.at]
+    :~  ['Start Date' dt+[(add from diff) (mnt-to-num:tu in) d.on]]
+        ['Clocktime' ct+q.at]
         ['Offset' dl+*delta:tu] :: This is updated in a later pass...
     ==
   ==
@@ -183,11 +177,11 @@
 :: based on raw-rule and zone offset, get the properly adjusted
 :: rule (where the offset is ABSOLUTE relative to UTC)
 ::
-++  raw-rule-zone-adjust-offset
-  |=  [offset=delta:tu =rule:iana =zone:t]
-  ^-  zone:t
-  =/  old   ~(. zn:n zone)
-  =/  core  ~(. zn:n zone)
+++  raw-rule-adjust-offset
+  |=  [offset=delta:tu =rule:iana =raw-rule]
+  ^+  raw-rule
+  =/  old   ~(. zn:n raw-rule)
+  =/  core  ~(. zn:n raw-rule)
   =/  rules=(list rule-entry:iana)  ~(tap in entries.rule)
   |-
   ?~  rules
@@ -195,8 +189,8 @@
   =/  tids=(list tid:t)  (get-rule-entry-tids i.rules)
   |-
   ?~  tids  ^$(rules t.rules)
-  =/  =tz-rule:t  (~(got by rules.zone) i.tids)
-  :: update offset according to zone
+  =/  =tz-rule:t  (~(got by rules.raw-rule) i.tids)
+  :: update offset according to raw-rule
   ::
   =/  new-offset=delta:tu  (compose-deltas:tu offset offset.tz-rule)
   =.  core  (update-rule:core i.tids [%offset new-offset]~)
@@ -217,7 +211,7 @@
         +:;;($>(%dl arg:tu) (~(got by args) 'Offset'))
       :: get previous offset
       ::
-      ?~  pof=(~(pof or:old order.zone) p.jmp)
+      ?~  pof=(~(pof or:old order.raw-rule) p.jmp)
         offset
       (compose-deltas:tu offset u.pof)
     ==
@@ -235,7 +229,7 @@
   =/  old=rule:iana  (~(got by rules) name)
   :: adjust offset with zone offset
   ::
-  (raw-rule-zone-adjust-offset stdoff old rule)
+  (raw-rule-adjust-offset stdoff old rule)
 :: convert a iana zone to our zone format
 ::
 ++  iana-zone-to-tz-zone
