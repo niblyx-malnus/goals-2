@@ -50,9 +50,23 @@
   =.  manx  (pus:~(at mx manx) "height: .875em; width: .875em;")
   (pac:~(at mx manx) "animate-spin")
 ::
+++  fi-info
+  ^-  manx
+  (pac:~(at mx (make:fi %info)) "text-4xl text-gray-500")
+::
 ++  blue-fi-loader
   ^-  manx
   (pac:~(at mx fi-loader) "text-4xl text-blue-500")
+::
+++  left-arrow
+  ^-  manx
+  =-  (fall (de-xml:html -) *manx)
+  '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>'
+::
+++  right-arrow
+  ^-  manx
+  =-  (fall (de-xml:html -) *manx)
+  '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>'
 ::
 ++  get-now-tz  |=(zone=(unit zid:t) (get-utc-to-tz now.gowl zone))
 ::
@@ -308,8 +322,8 @@
   ::
   ?+    parms  (strand-fail %bad-http-request ~)
       [%'GET' ~ *]
-    =/  active-tab=?(%loading %update %delete)
-      ;;  ?(%loading %update %delete)
+    =/  active-tab=?(%loading %update %exceptions)
+      ;;  ?(%loading %update %exceptions)
       (fall (get-key:kv 'active-tab' args) %update)
     =/  new-kind=@t
       (fall (get-key:kv 'ruledata[kind][head]' args) kind.sta)
@@ -390,7 +404,7 @@
   ++  default  update-event-panel:this(sta default-state)
   ::
   ++  update-event-panel
-    |=  active-tab=?(%loading %update %delete)
+    |=  active-tab=?(%loading %update %exceptions)
     ^-  manx
     ?-    active-tab
         %loading
@@ -399,16 +413,75 @@
         ;+  blue-fi-loader
       ==
       ::
-        ?(%update %delete)
+        %exceptions
+      ;div: Exceptions
+      ::
+        %update
       ;div.flex.flex-col.m-2
         =id  panel-id
         ;div.flex.flex-col.justify-center.border-b.mb-4
-          ;div.text-2xl.font-semibold.text-center.text-gray-700.mb-2: Update Event
+          ;div.flex.items-center.gap-2.justify-center.mb-2
+            ;span.text-center.font-semibold.text-2xl.text-gray-700
+              Update Event
+            ==
+            ;+  fi-info
+          ==
           ;+  =/  =mid:c  (~(gut by metadata-map.event) i.iref default-metadata.event)
+              =/  =aid:c  (~(gut by ruledata-map.event) i.iref default-ruledata.event)
               =/  =metadata:c  (~(got by metadata.event) mid)
               =/  title=tape
                 (trip (so:dejs:format (~(gut by metadata) %title s+'')))
-              ;div
+              ;div.flex.flex-col
+                ;div.w-full.flex.items-center.space-x-1
+                  ;+  =/  class=tape
+                        ;:  weld
+                          "bg-white"
+                          ?:  =(i.iref l.dom.event)
+                            "text-white"
+                          "text-gray-500 hover:bg-gray-100"
+                          """
+                          transition duration-150 ease-in-out
+                          rounded-full p-2
+                          """
+                        ==
+                      ;button
+                        =class       class
+                        =hx-get      "{(spud (moup:htmx 1 base))}"
+                        =hx-target   "#{(en-html-id:htmx base)}"
+                        =hx-trigger  "click"
+                        =hx-swap     "outerHTML"
+                        =alt         "Previous instance"
+                        =title       "Previous instance"
+                        ;+  (~(set-style mx left-arrow) "height: .95em; width: .95em;")
+                      ==
+                  ;span.m-2.font-medium.text-sm.text-gray-700
+                    {(numb:tu i.iref)}
+                  ==
+                  ;button
+                    =hx-get      "{(spud (moup:htmx 1 base))}"
+                    =hx-target   "#{(en-html-id:htmx base)}"
+                    =hx-trigger  "click"
+                    =hx-swap     "outerHTML"
+                    =alt         "Next instance"
+                    =title       "Next instance"
+                    =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
+                    ;+  (~(set-style mx right-arrow) "height: .95em; width: .95em;")
+                  ==
+                ==
+                ;div.m-2.flex.flex-col 
+                  ;span.m-2.font-medium.text-sm.text-gray-700
+                    Calendar ID: {(scow %p host.cid)}/{(trip name.cid)}
+                  ==
+                  ;span.m-2.font-medium.text-sm.text-gray-700
+                    Event ID: {(trip eid.iref)}
+                  ==
+                  ;span.m-2.font-medium.text-sm.text-gray-700
+                    Metadata ID: {(trip mid)}
+                  ==
+                  ;span.m-2.font-medium.text-sm.text-gray-700
+                    Ruledata ID: {(trip aid)}
+                  ==
+                ==
                 ;form.m-2.flex.flex-col.items-center
                   ;+  ?:  =(1 ~(wyt by instances.event))
                         ;div.flex.flex-col
