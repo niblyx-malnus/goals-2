@@ -3,7 +3,9 @@
 +$  iana   [=zones =rules =links]
 +$  links  (map @t @t)
 +$  rules  (map @ta rule)
-+$  rule   [name=@ta entries=(set rule-entry)]
+:: NOTE: rule-entry order IS NOT important
+::
++$  rule   [name=@ta entries=(list rule-entry)]
 +$  usw    ?(%utc %standard %wallclock)
 ::
 +$  rule-entry
@@ -31,6 +33,7 @@
   ==
 ::
 +$  zones  (map @ta zone)
+:: NOTE: zone-entry order IS important
 ::
 +$  zone   [name=@ta entries=(list zone-entry)]
 ::

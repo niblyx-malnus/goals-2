@@ -21,6 +21,7 @@
 ::    (give or take on the order of 24 hours) are not finalized
 ::    (as these are defined in the context of the zone offset).
 ::
++$  rrid       zid:t
 +$  raw-rule   zone:t
 +$  raw-rules  (map zid:t zone:t)
 :: Parameters for an Urbit-native jump rule
@@ -46,24 +47,28 @@
 ::
 ++  iana-rule-to-raw-rule
   |=  =rule:iana
-  ^-  [zid:t zone:t]
-  =/  =zid:t
+  ^-  [rrid raw-rule]
+  =/  =rrid
     [our.bowl (cat 3 'iana_raw-rule_' (sane-ta-iana-name name.rule))]
-  ~&  [%making-raw-rule zid]
-  =|  =zone:t
-  =.  name.zone  name.rule
+  ~&  [%making-raw-rule rrid]
+  =|  =raw-rule
+  =.  name.raw-rule  name.rule
   =/  rules
     %-  zing
-    %+  turn  ~(tap in entries.rule)
-    rule-entry-to-tz-rule-parms
-  [zid (create-rules-in-zone zone rules)]
+    =|  idx=@
+    |-
+    ?~  entries.rule
+      ~
+    :_  $(idx +(idx), entries.rule t.entries.rule)
+    (rule-entry-to-tz-rule-parms name.rule idx i.entries.rule)
+  [rrid (create-rules-in-zone raw-rule rules)]
 :: Given a rule entry, get the parameters for creating a
 :: "rule" of our explicit instance-based kind.
 :: Add one rule for each year so that specific
 :: utc/standard/wallclock jump time is handled for each instance
 ::
 ++  rule-entry-to-tz-rule-parms
-  |=  re=rule-entry:iana
+  |=  [iana-rule-name=@t i=@ud re=rule-entry:iana]
   ^-  (list tz-rule-parms)
   =/  name=@t          letter.re :: This name will be fixed in a later pass...
   =/  offset=delta:tu  save.re   :: This will be updated in a later pass...
@@ -76,9 +81,33 @@
   :: Return rule creation parms one for each year of this rule-entry
   |-
   =/  [=rid:r =args:r]  (rule-entry-to-rid-args re diff)
-  :-  [(scot %uv (sham [re diff])) [0 0] name offset rid args]
+  =/  =tid:t  (make-raw-rule-tid iana-rule-name i diff)
+  :: NOTE: Why must each rule here contain only a single instance?
+  :: Because rule instances (jumps to new offsets) are interspersed
+  :: with other rules and a rule which is defined according to the
+  :: wallclock (most rules) will CHANGE if the offset of an interspersed
+  :: rule changes. But we do not want to allow for this kind of
+  :: relativism in our formal recurrence rule definition. We don't want
+  :: to deal with "wallclock" relativism on Urbit.
+  ::
+  :-  [tid [0 0] name offset rid args]
   ?:  =(0 diff)  ~
   $(diff (dec diff))
+::
+++  make-raw-rule-tid
+  |=  [name=@t i=@ud diff=@ud]
+  ^-  tid:t
+  (rap 3 name '/' (scot %ud i) '/' (scot %ud diff) ~)
+::
+++  take-raw-rule-tid
+  |=  =tid:t
+  ^-  [name=@t i=@ud diff=@ud]
+  %+  rash  tid
+  ;~  (glue fas)
+    (cook crip (plus ;~(pose low hig hep cab)))
+    dem
+    dem
+  ==
 :: Given a rule entry, get a first pass at the rule parameters
 ::
 ++  rule-entry-to-rid-args
@@ -125,22 +154,6 @@
     rules  t.rules
     core   (create-rule:core i.rules)
   ==
-:: Use this to reference already-created rules
-::
-++  get-rule-entry-tids
-  |=  re=rule-entry:iana
-  ^-  (list tid:t)
-  =/  num=@ud
-    ?-  -.to.re
-      %year  (sub y.to.re from.re)
-      %only  0
-      %max   100 :: only 100 iterations if it goes into present time
-    ==
-  |-
-  :-  (scot %uv (sham [re num]))
-  ?:  =(0 num)
-    ~
-  $(num (dec num))
 :: all lowercase; fas replaced by cab
 ::
 ++  sane-ta-iana-name
@@ -174,31 +187,38 @@
   ?.  |(=('-' name.tz-rule) =('' name.tz-rule))
     name.tz-rule
   (crip name)
+::
+++  get-rule-at
+  |=  [name=@t i=@ud]
+  ^-  at:iana
+  =/  =rule:iana  (~(got by rules) name)
+  at:(snag i entries.rule)
 :: based on raw-rule and zone offset, get the properly adjusted
 :: rule (where the offset is ABSOLUTE relative to UTC)
+:: (this works because only one IANA rule is active at a time)
 ::
-++  raw-rule-adjust-offset
-  |=  [offset=delta:tu =rule:iana =raw-rule]
-  ^+  raw-rule
+++  get-finalized-rule
+  |=  [name=@t offset=delta:tu]
+  ^-  raw-rule
+  =/  rule-id=zid:t  [our.bowl (rap 3 'iana_raw-rule_' (sane-ta-iana-name name) ~)]
+  =/  =raw-rule  (~(got by all-raw-rules) rule-id)
   =/  old   ~(. zn:n raw-rule)
   =/  core  ~(. zn:n raw-rule)
-  =/  rules=(list rule-entry:iana)  ~(tap in entries.rule)
+  =/  tz-rules=(list [tid:t tz-rule:t])  ~(tap by rules.raw-rule)
   |-
-  ?~  rules
+  ?~  tz-rules
     zon:abet:core
-  =/  tids=(list tid:t)  (get-rule-entry-tids i.rules)
-  |-
-  ?~  tids  ^$(rules t.rules)
-  =/  =tz-rule:t  (~(got by rules.raw-rule) i.tids)
+  =/  [=tid:t =tz-rule:t]  i.tz-rules
   :: update offset according to raw-rule
   ::
   =/  new-offset=delta:tu  (compose-deltas:tu offset offset.tz-rule)
-  =.  core  (update-rule:core i.tids [%offset new-offset]~)
+  =.  core  (update-rule:core tid [%offset new-offset]~)
   :: update args according to zone offset
   ::
   =/  [=rid:r =args:r]  rule.tz-rule
+  =/  =at:iana  (get-rule-at [name i]:(take-raw-rule-tid tid))
   =/  offset-arg=delta:tu
-    ?-    p.at.i.rules
+    ?-    p.at
       %utc       *delta:tu
       %standard  offset
       ::
@@ -208,7 +228,11 @@
       =/  jmp=jump-instance:r
         (~(got by instances.tz-rule) l.dom.tz-rule)
       ?.  ?=(%& -.jmp)
-        +:;;($>(%dl arg:tu) (~(got by args) 'Offset'))
+        :: if the jump is not defined, default to the standard offset
+        :: which we've updated
+        ::
+        ~&  %undefined-jump
+        offset
       :: get previous offset
       ::
       ?~  pof=(~(pof or:old order.raw-rule) p.jmp)
@@ -216,20 +240,7 @@
       (compose-deltas:tu offset u.pof)
     ==
   =.  args  (~(put by args) 'Offset' dl+offset-arg)
-  $(tids t.tids, core (update-rule-args:core i.tids rid args))
-:: based on all raw rules, a rule name and the zone offset
-:: get the properly adjusted rule
-:: (where the offset is ABSOLUTE relative to UTC)
-::
-++  get-finalized-rule
-  |=  [name=@t stdoff=delta:tu]
-  ^-  zone:t
-  =/  rule-id=zid:t  [our.bowl (rap 3 'iana_raw-rule_' (sane-ta-iana-name name) ~)]
-  =/  rule=zone:t    (~(got by all-raw-rules) rule-id)
-  =/  old=rule:iana  (~(got by rules) name)
-  :: adjust offset with zone offset
-  ::
-  (raw-rule-adjust-offset stdoff old rule)
+  $(tz-rules t.tz-rules, core (update-rule-args:core tid rid args))
 :: convert a iana zone to our zone format
 ::
 ++  iana-zone-to-tz-zone
@@ -240,25 +251,24 @@
   ~&  [%converting zid]
   =|  =zone:t
   =.  name.zone  name.z
-  =/  entries=(list zone-entry:iana)  (flop entries.z)
   =|  last=(unit @da)
   =|  next=(unit @da)
   |-
-  ?~  entries
+  ?~  entries.z
     [zid zone]
-  =.  next  (get-next i.entries)
+  =.  next  (get-next i.entries.z)
   :: Add a single rule which jumps at the beginning of the zone's rules
   ::
-  =/  start=tz-rule-parms  (get-start last next i.entries)
+  =/  start=tz-rule-parms  (get-start last next i.entries.z)
   :: Add overlapping rules if they exist
   ::
-  =/  rules=(list tz-rule-parms)  (get-clipped-rules last next i.entries)
+  =/  rules=(list tz-rule-parms)  (get-clipped-rules last next i.entries.z)
   :: Create rules and iterate
   ::
   %=  $
-    last     next
-    entries  t.entries
-    zone     (create-rules-in-zone zone [start rules])
+    last       next
+    entries.z  t.entries.z
+    zone       (create-rules-in-zone zone [start rules])
   ==
   ::
   ++  get-next

@@ -93,20 +93,25 @@
 ::
 ++  parse-zone
   |=  lines=wall
-  |^  ^-  [zone:iana wall]
+  ^-  [zone:iana wall]
+  |^
   ?>  ?=(^ lines)
   ::  first line is different than continuation line so we process it
   ::  separately.
   =/  [name=@t first-line=tape]  (parse-first-line i.lines)
   =|  entries=(list zone-entry:iana)
   =/  lines=wall  [first-line t.lines]
-  |-  ?~  lines  [[name entries] ~]
+  |-
+  ?~  lines
+    [[name (flop entries)] ~]
   ?:  (can-skip i.lines)  $(lines t.lines)
   =/  entry=(unit zone-entry:iana)  (parse-zone-entry i.lines)
   ::  if entry is ~, then the line was not parseable as a continuation
   ::  to the current zone - bail out.
-  ?~  entry          [[name entries] lines]
-  ?~  until.u.entry  [[name [u.entry entries]] t.lines]
+  ?~  entry
+    [[name (flop entries)] lines]
+  ?~  until.u.entry
+    [[name (flop `(list zone-entry:iana)`[u.entry entries])] t.lines]
   $(lines t.lines, entries [u.entry entries])
   ::
   ++  parse-name  (plus ;~(pose aln cab fas hep))
@@ -172,31 +177,37 @@
 ::
 ++  parse-rule
   |=  lines=wall
-  |^  ^-  [rule:iana wall]
-  =;  [entries=(list rule-entry:iana) name=@ta continuation=wall]
-    ?~  entries  !! :: must have at least one entry
-    [`rule:iana`[name (sy entries)] continuation]
+  ^-  [rule:iana wall]
+  |^
   =|  entries=(list rule-entry:iana)
   =|  rule-name=@ta
-  |-  ?~  lines  [entries rule-name ~]
-  ::  FIXME: currently special cases out lines containing '<=' as well.
+  |-
+  ?~  lines
+    ?~  entries  !! :: must have at least one entry
+    [[rule-name (flop entries)] ~]
+  ::  TODO: currently special cases out lines containing '<=' as well.
   ::  This is only used once as of 02/21/2021 - for Rule 'Zion'
   ::  and isn't currently supported.
+  ::
   ?:  ?|  (can-skip i.lines)
           =-  ~?(- skip-lte+i.lines -)
           !=((find "<=" i.lines) ~)
       ==
     $(lines t.lines)
-  ?.  (is-rule-line i.lines)  [entries rule-name lines]
+  ?.  (is-rule-line i.lines)
+    [[rule-name (flop entries)] lines]
   =/  [name=@ta entry=rule-entry:iana]  (parse-rule-entry i.lines)
-  ?:  =(*@ta name)  ~|(%need-rule-name !!)
-  ?:  &(?=(^ entries) !=(name rule-name))  [entries rule-name lines]
+  ?:  =(*@ta name)
+    ~|(%need-rule-name !!)
+  ?:  &(?=(^ entries) !=(name rule-name))
+    [[rule-name (flop entries)] lines]
   $(lines t.lines, entries [entry entries], rule-name name)
   ::  +parse-rule-entry: produce rule entry and name from a line
   ::
   ++  parse-rule-entry
     |=  line=tape
-    |^  ^-  [@ta rule-entry:iana]
+    ^-  [@ta rule-entry:iana]
+    |^
     %+  scan  line
     ;~  pfix
       ;~(plug (jest 'Rule') whitespace) :: ignore 'Rule' identifier
@@ -246,7 +257,9 @@
   ^-  iana
   =|  iana-data=iana
   =.  lines  (turn lines clean-line)
-  |-  ?~  lines  iana-data
+  |-
+  ?~  lines
+    iana-data
   :: SKIP LINES
   :: 
   ?:  (can-skip i.lines)  $(lines t.lines)
@@ -259,7 +272,7 @@
         rules.iana-data
       ?~  get=(~(get by rules.iana-data) name.rule)
         (~(put by rules.iana-data) name.rule rule)
-      =.  rule  [name.rule (~(uni in entries.rule) entries.u.get)]
+      =.  rule  [name.rule (weld entries.u.get entries.rule)]
       (~(put by rules.iana-data) name.rule rule)
     ==
   :: PARSE ZONE

@@ -96,7 +96,7 @@
     ^-  json
     %-  pairs
     :~  name+s+name.rule
-        entries+a+(turn ~(tap in entries.rule) enjs-rule-entry)
+        entries+a+(turn entries.rule enjs-rule-entry)
     ==
   ::
   ++  enjs-iana-zone
