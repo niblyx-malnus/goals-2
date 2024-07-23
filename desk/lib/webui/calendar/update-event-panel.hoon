@@ -432,21 +432,21 @@
               =/  title=tape
                 (trip (so:dejs:format (~(gut by metadata) %title s+'')))
               ;div.flex.flex-col
-                ;div.w-full.flex.items-center.space-x-1
+                ;div.w-full.flex.items-center.justify-center.space-x-1
                   ;+  =/  class=tape
                         ;:  weld
-                          "bg-white"
+                          "bg-white "
                           ?:  =(i.iref l.dom.event)
-                            "text-white"
-                          "text-gray-500 hover:bg-gray-100"
+                            "text-white "
+                          "cursor-pointer text-gray-500 hover:bg-gray-100 "
                           """
                           transition duration-150 ease-in-out
                           rounded-full p-2
                           """
                         ==
-                      ;button
+                      ;span
                         =class       class
-                        =hx-get      "{(spud (moup:htmx 1 base))}"
+                        :: =hx-get      "{(spud (moup:htmx 1 base))}"
                         =hx-target   "#{(en-html-id:htmx base)}"
                         =hx-trigger  "click"
                         =hx-swap     "outerHTML"
@@ -454,17 +454,17 @@
                         =title       "Previous instance"
                         ;+  (~(set-style mx left-arrow) "height: .95em; width: .95em;")
                       ==
-                  ;span.m-2.font-medium.text-sm.text-gray-700
+                  ;span(class "py-1 px-2 text-gray-500 bg-white rounded-md border border-gray-20")
                     {(numb:tu i.iref)}
                   ==
-                  ;button
-                    =hx-get      "{(spud (moup:htmx 1 base))}"
+                  ;span
+                    :: =hx-get      "{(spud (moup:htmx 1 base))}"
                     =hx-target   "#{(en-html-id:htmx base)}"
                     =hx-trigger  "click"
                     =hx-swap     "outerHTML"
                     =alt         "Next instance"
                     =title       "Next instance"
-                    =class       "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
+                    =class       "cursor-pointer text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-full p-2"
                     ;+  (~(set-style mx right-arrow) "height: .95em; width: .95em;")
                   ==
                 ==

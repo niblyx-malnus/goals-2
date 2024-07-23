@@ -107,6 +107,8 @@
     (pure:m !>(~))
     ::
       [* [%update-event-panel *] *]
+    =/  =cid:c   [(slav %p host.cad.parms) name.cad.parms]
+    =/  =iref:c  [eid.cad.parms (slav %ud i.cad.parms)] 
     handle:(update-event-panel zid date cid iref)
   ==
 ::
