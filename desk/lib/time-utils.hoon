@@ -26,6 +26,9 @@
 +$  utc-to-tz       $-(@da (unit dext))
 ::
 +$  span     [l=@da r=@da] :: UTC datetime pair
+:: This should be [[a=? y=@ud] m=@ud d=@ud]
+:: and any order should be based on a @ud number of days
+::
 +$  fullday  @da           :: must be divisible by ~d1
 +$  jump     @da
 :: CALENDAR rule; NOT TIMEZONE rule

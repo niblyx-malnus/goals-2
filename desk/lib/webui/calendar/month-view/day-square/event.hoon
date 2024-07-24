@@ -21,7 +21,7 @@
     webui-calendar-update-event-panel
   :-  [zid date cid iref]
   :+  gowl
-    (weld base /update-event-panel)
+    (weld base /update-event-panel/(scot %p host.cid)/[name.cid]/[`@ta`eid.iref]/(scot %ud i.iref))
   [[eyre-id req] [ext site] args]
 ::
 ++  fi-x
@@ -94,7 +94,9 @@
     ;<  sta=state  bind:m  ((put:nuk state) base |)
     (give-html-manx:htmx [our dap]:gowl eyre-id (event:components sta) |)
     ::
-      [%'POST' [%update-event-panel ?(%update-event %delete-event) ~] *]
+      [%'POST' [%update-event-panel host=@t name=@t eid=@t i=@t ?(%update-event %delete-event) ~] *]
+    =/  =cid:c   [(slav %p host.cad.parms) name.cad.parms]
+    =/  =iref:c  [eid.cad.parms (slav %ud i.cad.parms)] 
     :: send the update then hide container
     ;<  *  bind:m  handle:(update-event-panel zid date cid iref)
     ;<  ~  bind:m
@@ -106,7 +108,7 @@
       [~ "#{(en-html-id:htmx path)}" (spud path) ~ ~]
     (pure:m !>(~))
     ::
-      [* [%update-event-panel *] *]
+      [* [%update-event-panel host=@t name=@t eid=@t i=@t *] *]
     =/  =cid:c   [(slav %p host.cad.parms) name.cad.parms]
     =/  =iref:c  [eid.cad.parms (slav %ud i.cad.parms)] 
     handle:(update-event-panel zid date cid iref)
