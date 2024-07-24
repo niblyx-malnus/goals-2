@@ -1,8 +1,8 @@
 :+  'Single'
-  ['Date' %da]~
+  ['Date' %dt]~
 '''
 |=  args=(map @t arg)
-=/  d=@da  +:;;($>(%da arg) (~(got by args) 'Date'))
+=/  [y=@ud m=@ud d=@ud]  +:;;($>(%dt arg) (~(got by args) 'Date'))
 ^-  $-(@ud (each fullday rule-exception))
-|=(@ud [%& (sane-fd d)])
+|=(@ud [%& (year [& y] m d 0 0 0 ~)])
 '''

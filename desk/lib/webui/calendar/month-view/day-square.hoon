@@ -143,7 +143,7 @@
     =/  l=@da  (need (get-tz-to-utc (year date) zid))
     =/  r=@da  (add l ~d1)
     =/  irefs=(set iref:c)  (spa:~(or clib gowl calendar) l r)
-    =.  irefs  (~(uni in irefs) (sy (ful:~(or clib gowl calendar) l r)))
+    =.  irefs  (~(uni in irefs) (sy (ful:~(or clib gowl calendar) (year date) (add (year date) ~d1))))
     ;div
       ;*  %+  turn  ~(tap in irefs)
           |=  =iref:c
