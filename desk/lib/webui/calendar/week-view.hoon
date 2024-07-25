@@ -1,13 +1,13 @@
-/-  t=timezones, c=calendar
-/+  *ventio, server, htmx, nooks, html-utils, tu=time-utils, clib=calendar,
-    fi=webui-feather-icons,
+/-  c=calendar
+/+  *ventio, server, htmx, nooks, pytz,
+    html-utils, tu=time-utils, clib=calendar, fi=webui-feather-icons,
     webui-calendar-scripts,
     webui-calendar-week-view-day-square,
     webui-calendar-week-view-fullday-square
 :: specified by the date of the monday
 :: (even though we display with Sunday first)
 ::
-|_  $:  [zid=(unit zid:t) y=@ud w=@ud]
+|_  $:  [zid=@t y=@ud w=@ud]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -15,24 +15,7 @@
     ==
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
-    now  (need (get-now-tz zid))
-::
-++  active-rule
-  |=  when=@da
-  ^-  (unit tz-rule:t)
-  ?~  zid
-    ~
-  :-  ~
-  .^  tz-rule:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /rule/(scot %p p.u.zid)/[q.u.zid]/(scot %da when)/noun
-  ==
-::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
+    now  (fall (~(utc-to-tz zn:pytz zid) now.gowl) now.gowl)
 ::
 ++  globe
   =/  =manx  (make:fi %globe)
@@ -53,30 +36,6 @@
   :-  [zid y w date collapse]
   :+  gowl  (weld base /fullday-square/(crip (en:date-input:tu [y m d.t]:date)))
   [[eyre-id req] [ext site] args]
-::
-++  get-now-tz
-  |=  zone=(unit zid:t)
-  ^-  (unit @da)
-  ?~  zone
-    `now.gowl
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) now.gowl)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
-::
-++  get-offset
-  |=  zone=(unit zid:t)
-  ^-  delta:tu
-  ?~  zone
-    [%& ~s0]
-  .^  delta:tu  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /offset/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
 ::
 ++  left-arrow
   ^-  manx
@@ -222,13 +181,7 @@
           ;+  (~(set-style mx right-arrow) "height: .95em; width: .95em;")
         ==
       ==
-      ;+  =/  timezones=(list [zid:t tape])
-            %+  sort
-              %+  turn  ~(tap by zones)
-              |=([=zid:t =zone:t] [zid (trip name.zone)])
-            |=  [[* a=tape] [* b=tape]]
-            (alphabetical:htmx a b)
-          ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
+      ;+  ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
             =name       "zone"
             =hx-post    "{(spud (moup:htmx 2 base))}/set-current-zone"
             =hx-target  "#{(en-html-id:htmx (moup:htmx 2 base))}"
@@ -236,9 +189,10 @@
             ;+  ?^  zid
                   ;option(value ""): UTC
                 ;option(value "", selected ""): UTC
-            ;*  %+  turn  timezones
-                |=  [=zid:t name=tape]
-                ?.  =(^zid [~ zid])
+            ;*  %+  turn  names.pytz
+                |=  n=@t
+                =/  name=tape  (trip n)
+                ?.  =(n zid)
                   ;option(value "{name}"): {name}
                 ;option(value "{name}", selected ""): {name}
           ==
@@ -378,7 +332,7 @@
         ::
         ;div.flex-auto.grid.grid-cols-7.relative
           ;+  cursor
-          ;script: {(position-cursor:webui-calendar-scripts (en-html-id:htmx (weld base /cursor)) (get-offset zid) (yore sunday))}
+          ;script: {(position-cursor:webui-calendar-scripts (en-html-id:htmx (weld base /cursor)) (~(active-offset zn zid) now.gowl) (yore sunday))}
           ;*  %+  turn  days
               |=  =date
               day-square:components:(day-square date)

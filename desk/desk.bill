@@ -5,7 +5,4 @@
     %goals-ui
     %calendar
     %rule-store
-    %iana
-    %timezones
-    %pytz
 ==

@@ -3,6 +3,7 @@
 :: Import to force compilation during development.
 ::
 /=  x  /ted/vines/calendar
+/=  x  /lib/pytz
 |%
 +$  card     card:agent:gall
 --

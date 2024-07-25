@@ -1,6 +1,5 @@
-/-  t=timezones
-/+  *ventio, htmx, server, nooks, html-utils, fi=webui-feather-icons,
-    iana-converter, tu=time-utils,
+/+  *ventio, htmx, pytz, server, nooks, html-utils, fi=webui-feather-icons,
+    tu=time-utils,
     webui-calendar-month-view,
     webui-calendar-week-view,
     webui-calendar-day-view
@@ -13,14 +12,8 @@
     mx   mx:html-utils
     kv   kv:html-utils
 ::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
-::
 ++  month-view
-  |=  [zid=(unit zid:t) y=@ud m=@ud]
+  |=  [zid=@t y=@ud m=@ud]
   %~  .
     webui-calendar-month-view
   :-  [zid y m]
@@ -30,7 +23,7 @@
   [[eyre-id req] [ext site] args]
 ::
 ++  week-view
-  |=  [zid=(unit zid:t) y=@ud w=@ud]
+  |=  [zid=@t y=@ud w=@ud]
   %~  .
     webui-calendar-week-view
   :-  [zid y w]
@@ -40,7 +33,7 @@
   [[eyre-id req] [ext site] args]
 ::
 ++  day-view
-  |=  [zid=(unit zid:t) y=@ud m=@ud d=@ud]
+  |=  [zid=@t y=@ud m=@ud d=@ud]
   %~  .
     webui-calendar-day-view
   :-  [zid y m d]
@@ -104,12 +97,12 @@
       month=(unit [y=@ud m=@ud])
       week=(unit [y=@ud w=@ud])
       day=(unit [y=@ud m=@ud d=@ud])
-      zone=(unit zid:t)
+      zone=@t
   ==
 ::
 ++  init
   %-  pure:(strand ,state)
-  [%month ~ ~ ~ ~]
+  [%month ~ ~ ~ 'UTC']
 ::
 ++  handle-session
   =/  m  (strand ,vase)
@@ -125,12 +118,8 @@
   ?+    parms  (strand-fail %bad-http-request ~)
       [%'POST' ~ *]
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
-    =/  iana=@t  (fall (get-key:kv 'timezone-getter' args) '')
-    =.  zone.sta
-      ?~  iana
-        ~
-      =/  =zid:t  [our.gowl (cat 3 'iana_' (sane-ta-iana-name:iana-converter iana))]
-      ?~((get-zone zid) ~ [~ zid])
+    =/  iana-zone=@t  (fall (get-key:kv 'timezone-getter' args) 'UTC')
+    =.  zone.sta  iana-zone
     =/  =date  (yore (need (get-now-tz zone.sta)))
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     =/  =manx  month-view:components:(month-view zone.sta [y m]:date)
