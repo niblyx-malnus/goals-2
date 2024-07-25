@@ -35,18 +35,19 @@
     (scry ,(unit iana:iana) /gx/iana/iana/iana-data)
   ;<  =cache:r  bind:m
     (scry ,cache:r /gx/rule-store/cache/noun)
-  :: this process is simply too long
-  :: it should be broken into pieces
-  ::
-  =/  =zones:t
-    %~    convert-iana-zones-new
-        iana-converter
-     [gowl (fall uiana [~ ~ ~]) to-to-jumps.cache]
-  ::
-  %+  poke  [our dap]:gowl
-  :-  %timezones-transition  !>
-  ^-  transition:t
-  [%put-zones zones]
+  =/  data=iana:iana  (need uiana)
+  =/  zones=(list [@t zone:iana])  ~(tap by zones.data)
+  =/  core  ~(abet iana-converter [gowl data to-to-jumps.cache])
+  |-
+  ?~  zones
+    (pure:m ~)
+  ;<  ~  bind:m
+    %+  poke  [our dap]:gowl
+    :-  %timezones-transition  !>
+    ^-  transition:t
+    [%put-zone (convert-zone:core -.i.zones)]
+  ;<  ~  bind:m  (sleep ~s2)
+  $(zones t.zones)
 ::
 ++  convert-iana-zone
   |=  keys=(list @ta)
@@ -69,10 +70,7 @@
       (~(put by zones) i.keys (~(got by zones.input) i.keys))
     ==
   =/  =zones:t
-    %~    convert-iana-zones-new
-        iana-converter
-     [gowl input to-to-jumps.cache]
-  ::
+    convert-zones:~(abet iana-converter [gowl input to-to-jumps.cache])
   %+  poke  [our dap]:gowl
   :-  %timezones-transition  !>
   ^-  transition:t

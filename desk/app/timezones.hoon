@@ -46,6 +46,7 @@
     =+  !<(tan=transition:t vase)
     ?-    -.tan
       %put-zones  [~ this(zones zones.tan)]
+      %put-zone   [~ this(zones (~(put by zones) [zid zone]:tan))]
       %uni-zones  [~ this(zones (~(uni by zones) zones.tan))]
     ==
   ==

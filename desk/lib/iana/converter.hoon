@@ -1,47 +1,52 @@
 /-  t=timezones, r=rules, iana
 /+  tlib=timezones, tu=time-utils
+=>  |%
+    :: A $raw-rule is simply a IANA rule represented as its own
+    :: timezone using our own $zone format. This is done because
+    :: these rules are used separately in the generation of many
+    :: different timezones and in principle the underlying offsets
+    :: for actual instantiations of a given rule in two different
+    :: timezones could be different.
+    :: In a $raw-rule, several things are left incomplete as these
+    :: depend on the zone context:
+    :: 1. The name of the rule is not finalized.
+    :: 2. The rule's offset from UTC is not finalized
+    ::    (it contains what may be a relative offset; but not necessarily
+    ::    relative to UTC).
+    :: 3. The actual time of the "jumps" to and from daylight savings time
+    ::    (give or take on the order of 24 hours) are not finalized
+    ::    (as these are defined in the context of the zone offset).
+    ::
+    +$  rrid       zid:t
+    +$  raw-rule   zone:t
+    +$  raw-rules  (map rrid raw-rule)
+    :: Parameters for an Urbit-native jump rule
+    ::
+    +$  tz-rule-parms
+      $:  =tid:t
+          dom=[l=@ud r=@ud]
+          name=@t
+          offset=delta:tu
+          =rid:r
+          =args:r
+      ==
+    --
+=|  all-raw-rules=raw-rules
 |_  $:  =bowl:gall
         [=zones:iana =rules:iana =links:iana]
         to-to-jumps=(map rid:r to-to-jump:r)
     ==
-+*  n  ~(. tlib [~ to-to-jumps])
-:: A $raw-rule is simply a IANA rule represented as its own
-:: timezone using our own $zone format. This is done because
-:: these rules are used separately in the generation of many
-:: different timezones and in principle the underlying offsets
-:: for actual instantiations of a given rule in two different
-:: timezones could be different.
-:: In a $raw-rule, several things are left incomplete as these
-:: depend on the zone context:
-:: 1. The name of the rule is not finalized.
-:: 2. The rule's offset from UTC is not finalized
-::    (it contains what may be a relative offset; but not necessarily
-::    relative to UTC).
-:: 3. The actual time of the "jumps" to and from daylight savings time
-::    (give or take on the order of 24 hours) are not finalized
-::    (as these are defined in the context of the zone offset).
-::
-+$  rrid       zid:t
-+$  raw-rule   zone:t
-+$  raw-rules  (map zid:t zone:t)
-:: Parameters for an Urbit-native jump rule
-::
-+$  tz-rule-parms
-  $:  =tid:t
-      dom=[l=@ud r=@ud]
-      name=@t
-      offset=delta:tu
-      =rid:r
-      =args:r
-  ==
++*  this  .
+    n     ~(. tlib [~ to-to-jumps])
 :: Initialize all the existing iana rules as "raw rule" zones
-:: Each IANA "rule" can be interpreted as its own timezone
 ::
-++  all-raw-rules
-  ~+  ^-  raw-rules
-  %-  ~(gas by *(map zid:t zone:t))
-  %+  turn  ~(val by rules)
-  iana-rule-to-raw-rule
+++  abet
+  %=    this
+      all-raw-rules
+    %-  ~(gas by *(map zid:t zone:t))
+    %+  turn  ~(val by rules)
+    iana-rule-to-raw-rule
+  ==
 :: A "raw rule" is a rule which has not been updated with the zone
 :: offset yet...
 ::
@@ -349,9 +354,14 @@
     =.  name.tz-rule  (new-rule-name tz-rule format.entry)
     [tid [dom name offset rid.rule args.rule]:tz-rule]
   --
-:: Initialize rules to "raw rules" and convert all zones
 ::
-++  convert-iana-zones-new
+++  convert-zone
+  |=  name=@t
+  ^-  [zid:t zone:t]
+  =/  =zone:iana  (~(got by zones) name)
+  (iana-zone-to-tz-zone name zone)
+::
+++  convert-zones
   ^-  (map zid:t zone:t)
   %-  ~(gas by *(map zid:t zone:t))
   %+  turn  ~(tap by zones)

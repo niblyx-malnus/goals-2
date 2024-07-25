@@ -47,6 +47,7 @@
 ::
 +$  transition
   $%  [%put-zones =zones]
+      [%put-zone =zid =zone]
       [%uni-zones =zones]
   ==
 ::

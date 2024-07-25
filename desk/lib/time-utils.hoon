@@ -240,7 +240,28 @@
     ?~  q.tub
       [p.tub ~ %.y tub]
     [p.tub ~ %.n tub]
+  :: lookahead arbitrary rule
+  ::
+  ++  peek
+    |*  sef=rule
+    |=  tub=nail
+    =+  vex=(sef tub)
+    ?~  q.vex
+      [p=p.vex q=[~ u=[p=~ q=tub]]]
+    [p=p.vex q=[~ u=[p=[~ p.u.q.vex] q=tub]]]
   --
+::
+++  exact-dem
+|=  n=@ud
+=,  monadic-parsing
+=|  digits=(list @ud)
+|-
+?:  =(0 n)
+  :: code from +bass
+  ::
+  (easy (roll (flop digits) =|([p=@ q=@] |.((add p (mul 10 q))))))
+;<  d=@ud  bind  dit
+$(n (dec n), digits [d digits])
 :: TODO: parse basic (non-extended) format for ISO 8601 (no separators)
 :: TODO: implement ordinal date parsing (YYYY-DDD)
 :: TODO: implement week date parsing (YYYY-Www-D)
@@ -260,32 +281,32 @@
 :: YYYY-MM-DDTHH:MM[:SS[.SSS]]
 ::
 ++  datetime-local
-  |%
-  ++  en
-    |=  d=@da
-    ^-  tape
-    =+  (yore d)
-    =/  =tape
-      ;:  weld
-        (numb y)
-        "-"
-        (zfill 2 (scow %ud m))
-        "-"
-        (zfill 2 (scow %ud d.t))
-        "T"
-      ==
-    =.  d     (mod d ~d1)
-    =.  tape  :(weld tape (zfill 2 (scow %ud (div d ~h1))) ":")
-    =.  d     (mod d ~h1)
-    =.  tape  (weld tape (zfill 2 (scow %ud (div d ~m1))))
-    =.  d     (mod d ~m1)
-    ?:  =(0 d)
-      tape
-    =.  tape  :(weld tape ":" (zfill 2 (scow %ud (div d ~s1))))
-    =.  d     (mod d ~s1)
-    ?:  =(0 d)
-      tape
-    :(weld tape "." (zfill 3 (scow %ud (div (mul d 1.000) ~s1))))
+|%
+++  en
+  |=  d=@da
+  ^-  tape
+  =+  (yore d)
+  =/  =tape
+  ;:  weld
+  (numb y)
+  "-"
+  (zfill 2 (scow %ud m))
+  "-"
+  (zfill 2 (scow %ud d.t))
+  "T"
+  ==
+  =.  d     (mod d ~d1)
+  =.  tape  :(weld tape (zfill 2 (scow %ud (div d ~h1))) ":")
+  =.  d     (mod d ~h1)
+  =.  tape  (weld tape (zfill 2 (scow %ud (div d ~m1))))
+  =.  d     (mod d ~m1)
+  ?:  =(0 d)
+  tape
+  =.  tape  :(weld tape ":" (zfill 2 (scow %ud (div d ~s1))))
+  =.  d     (mod d ~s1)
+  ?:  =(0 d)
+  tape
+  :(weld tape "." (zfill 3 (scow %ud (div (mul d 1.000) ~s1))))
   ++  de       |=(=@t `@da`(rash t parse))
   ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
   ++  parse
@@ -300,18 +321,43 @@
     ;<  *       bind  col
     ;<  mi=@ud  bind  dem
     =/  d=@da   (year [& y] mo d h mi 0 ~)
-    ;<  fin=?  bind  done
-    ?:  fin
-      (easy d)
+    ;<  is-col=(unit *)  bind  (peek col)
+    ?~  is-col
+    (easy d)
     ;<  *      bind  col
     ;<  s=@ud  bind  dem
     =.  d      (add d (mul s ~s1))
-    ;<  fin=?  bind  done
-    ?:  fin
-      (easy d)
+    ;<  is-dot=(unit *)  bind  (peek dot)
+    ?~  is-dot
+    (easy d)
     ;<  *      bind  dot
     ;<  f=@ud  bind  dem
     (easy (add d (div (mul f ~s1) 1.000)))
+    --
+::
+++  offset
+  |%
+  ++  en
+    |=  =delta
+    ^-  @t
+    ~?  >>  (gth (mod d.delta ~m1) 0)
+      "granularity exceeds minute scale"
+    %+  rap  3
+    :~  ?:(sign.delta '+' '-')
+        (crip (zfill 2 (numb (div d.delta ~h1))))
+        ':'
+        (crip (zfill 2 (numb (div (mod d.delta ~h1) ~m1))))
+    ==
+
+  ++  de       |=(=@t `delta`(rash t parse))
+  ++  de-soft  |=(=@t `(unit delta)`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  sign=?  bind  (cook |=(=@t =(t '+')) ;~(pose lus hep))
+    ;<  h=@ud   bind  (exact-dem 2)
+    ;<  *       bind  col
+    ;<  m=@ud   bind  (exact-dem 2)
+    (easy `delta`[sign (add (mul h ~h1) (mul m ~m1))])
   --
 :: YYYY-MM-DD
 ::
@@ -391,14 +437,14 @@
     ;<  *      bind  col
     ;<  m=@ud  bind  dem
     =/  d=@dr  (add (mul h ~h1) (mul m ~m1))
-    ;<  fin=?  bind  done
-    ?:  fin
+    ;<  is-col=(unit *)  bind  (peek col)
+    ?~  is-col
       (easy d)
     ;<  *      bind  col
     ;<  s=@ud  bind  dem
     =.  d      (add d (mul s ~s1))
-    ;<  fin=?  bind  done
-    ?:  fin
+    ;<  is-dot=(unit *)  bind  (peek dot)
+    ?~  is-dot
       (easy d)
     ;<  *      bind  dot
     ;<  f=@ud  bind  dem
