@@ -1,9 +1,9 @@
-/-  t=timezones, c=calendar
+/-  c=calendar
 /+  *ventio, server, htmx, nooks, fi=webui-feather-icons, html-utils,
     tu=time-utils, clib=calendar,
     webui-calendar-scripts,
     webui-calendar-create-event-panel
-|_  $:  [zid=(unit zid:t) y=@ud m=@ud =date]
+|_  $:  [zid=@t y=@ud m=@ud =date]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -12,11 +12,10 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    now           (need (get-now-tz zid))
+    now  (fall (bind (~(utc-to-tz zn:pytz zid) now.gowl) tail) now.gowl)
     calendar      (get-calendar cid)
 ::
 ++  create-event-panel
-  |=  [zid=(unit zid:t) =^date]
   %~  .
     webui-calendar-create-event-panel
   :-  [zid date ~ %fuld]
@@ -36,41 +35,12 @@
   =.  manx   (pus:~(at mx manx) "height: .875em; width: .875em;")
   (pac:~(at mx manx) "text-4xl text-blue-500 animate-spin")
 ::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
-::
 ++  get-calendar
   |=  =cid:c
   .^  calendar:c  %gx
     (scot %p our.gowl)  %calendar  (scot %da now.gowl)
     /calendar/(scot %p host.cid)/[name.cid]/noun
   ==
-::
-++  get-now-tz
-  |=  zone=(unit zid:t)
-  ^-  (unit @da)
-  ?~  zone
-    `now.gowl
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) now.gowl)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
-::
-++  dedot
-  |=  =tape
-  ^+  tape
-  ?~  tape
-    ~
-  ?:  ?=(%'.' i.tape)
-    $(tape t.tape)
-  [i.tape $(tape t.tape)]
 ::
 +$  state  ? :: hidden create-event-panel
 ++  init   (pure:(strand ,state) &)
@@ -103,7 +73,7 @@
     ::
       [%'POST' [%create-event-panel %create-event ~] *]
     :: send the update then hide container
-    ;<  *  bind:m  handle:(create-event-panel zid date)
+    ;<  *  bind:m  handle:create-event-panel
     ;<  sta=state  bind:m  ((put:nuk state) base &)
     ;<  ~  bind:m
       %+  send-refresh:htmx  [our dap]:gowl
@@ -115,7 +85,7 @@
     (pure:m !>(~))
     ::
       [* [%create-event-panel *] *]
-    handle:(create-event-panel zid date)
+    handle:create-event-panel
   ==
 ::
 ++  components
@@ -158,7 +128,7 @@
                 ;+  fi-x
               ==
             ==
-            ;+  default:components:(create-event-panel zid date)
+            ;+  default:components:create-event-panel
           ==
         ==
       == 

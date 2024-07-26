@@ -17,8 +17,7 @@
 +$  dext     [i=@ud d=@da] :: indexed time
 +$  delta    [sign=? d=@dr] :: positive or negative offset
 ::
-+$  zone-flag  (pair ship term)
-+$  localtime  [tz=(unit zone-flag) dext] :: ~ is UTC
++$  localtime  [tz=@t dext]
 :: types for basic timezone functions
 ::
 +$  tz-to-utc-list  $-(@da (list @da))

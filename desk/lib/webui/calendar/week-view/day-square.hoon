@@ -1,10 +1,11 @@
-/-  t=timezones, c=calendar
-/+  *ventio, server, htmx, nooks, fi=webui-feather-icons, html-utils,
-    tu=time-utils, clib=calendar,
+/-  c=calendar
+/+  *ventio, server, htmx, nooks, pytz,
+    html-utils, tu=time-utils, clib=calendar,
+    fi=webui-feather-icons,
     webui-calendar-week-view-day-square-event,
     webui-calendar-week-view-day-square-add-event
 ::
-|_  $:  [zid=(unit zid:t) y=@ud w=@ud =date]
+|_  $:  [zid=@t y=@ud w=@ud =date]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -13,18 +14,13 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    now           (need (get-now-tz zid))
+    ez   ~(ez zn:pytz zid)
+    now  (fall (to-tz:~(ez zn:pytz zid) now.gowl) now.gowl)
     cid           [our.gowl %our]
     calendar      (get-calendar cid) :: just %our calendar for now
 ::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
-::
 ++  event
-  |=  [zid=(unit zid:t) y=@ud w=@ud =^date =cid:c =iref:c]
+  |=  [=cid:c =iref:c]
   %~  .
     webui-calendar-week-view-day-square-event
   :-  [zid y w date cid iref]
@@ -34,7 +30,7 @@
   [[eyre-id req] [ext site] args]
 ::
 ++  add-event
-  |=  [zid=(unit zid:t) y=@ud w=@ud =^date chunk=@ud]
+  |=  chunk=@ud
   %~  .
     webui-calendar-week-view-day-square-add-event
   :-  [zid y w date chunk]
@@ -48,60 +44,6 @@
   .^  calendar:c  %gx
     (scot %p our.gowl)  %calendar  (scot %da now.gowl)
     /calendar/(scot %p host.cid)/[name.cid]/noun
-  ==
-::
-++  get-zone-jumps
-  |=  [zone=(unit zid:t) l=@da r=@da]
-  ^-  (list [@da iref:t])
-  ?~  zone
-    ~
-  .^  (list [@da iref:t])  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /jumps/(scot %p p.u.zone)/[q.u.zone]/(scot %da l)/(scot %da r)/noun
-  ==
-::
-++  get-now-tz  |=(zone=(unit zid:t) (get-utc-to-tz now.gowl zone))
-::
-++  get-utc-to-tz
-  |=  [=time zone=(unit zid:t)]
-  ^-  (unit @da)
-  ?~  zone
-    `time
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) time)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
-::
-++  get-tz-to-utc
-  |=  [=time zone=(unit zid:t)]
-  ^-  (unit @da)
-  ?~  zone
-    `time
-  =;  tz-to-utc
-    :: assume first occurence of time in timezone (0 in dext)
-    ::
-    ((need tz-to-utc) 0 time)
-  .^  (unit tz-to-utc:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /tz-to-utc/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
-::
-++  get-tz-time
-  |=  [=time zone=(unit zid:t)]
-  ^-  (unit @da)
-  ?~  zone
-    `time
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) time)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
   ==
 ::
 ++  month-abbrv
@@ -134,54 +76,27 @@
     (give-html-manx:htmx [our dap]:gowl eyre-id day-square:components |)
     ::
       [* [%add-event chunk=@ta *] *]
-    handle:(add-event zid y w date (slav %ud chunk.cad.parms))
+    handle:(add-event (slav %ud chunk.cad.parms))
     ::
       [* [%event host=@t name=@t eid=@t i=@t *] *]
     =/  =cid:c   [(slav %p host.cad.parms) name.cad.parms]
     =/  =iref:c  [eid.cad.parms (slav %ud i.cad.parms)] 
-    handle:(event zid y w date cid iref)
+    handle:(event cid iref)
   ==
 ::
 ++  components
   |%
-  ++  jumps
-    ^-  manx
-    =/  l=@da  (need (get-tz-to-utc (year date) zid))
-    =/  r=@da  (add l ~d1)
-    =/  jumps=(list [@da iref:t])  (get-zone-jumps zid l r)
-    ~&  jumps+jumps
-    ;div
-      ;*  %+  turn  jumps
-          |=  [=time *]
-          (jump (need (get-utc-to-tz time zid)))
-    ==
-  ::
-  ++  jump
-    |=  =time
-    ^-  manx
-    ~&  time+time
-    =/  px-sec=@ud   (div :(mul 60 60 24 ~s1) 1.200)
-    ~&  px-sec+`@dr`px-sec
-    ~&  blah+`@dr`(mod time ~d1)
-    =/  dow=@  (mod +((get-weekday:tu time)) 7) :: sunday 0-indexed
-    =/  hp=tape  "col-start-{(numb:tu +(dow))} col-end-{(numb:tu (add dow 2))}"
-    =/  vp=tape
-      =/  v=@ud  (div (mod time ~d1) px-sec)
-      ~&  v+v
-      "top-[{(numb:tu v)}px]"
-    ;div(class "absolute {hp} {vp} z-50 w-full h-2 bg-blue-500");
-  ::
   ++  events
     ^-  manx
     :: TODO: handle nulls
     ::
-    =/  l=@da  (need (get-tz-to-utc (year date) zid))
+    =/  l=@da  (need (to-utc:ez (year date)))
     =/  r=@da  (add l ~d1)
     =/  irefs=(set iref:c)  (spa:~(or clib gowl calendar) l r)
     ;div
       ;*  %+  turn  ~(tap in irefs)
           |=  =iref:c
-          (event:components:(event zid y w date cid iref) &)
+          (event:components:(event cid iref) &)
     ==
   ::
   ++  chunks
@@ -189,7 +104,7 @@
     %+  turn  (gulf 0 47)
     |=  chunk=@ud
     ;div
-      ;+  (add-event:components:(add-event zid y w date chunk) &)
+      ;+  (add-event:components:(add-event chunk) &)
       ;div
         =id          "{(en-html-id:htmx (weld base /chunk/(scot %ud chunk)))}"
         =class       "absolute w-full h-[25px] z-0"
@@ -216,7 +131,6 @@
       =class  "relative h-[1200px] min-w-0"
       ;*  chunks
       ;+  events
-      ;+  jumps
     ==
   --
 --

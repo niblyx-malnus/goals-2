@@ -48,27 +48,6 @@
   =.  manx   (pus:~(at mx manx) "height: .875em; width: .875em;")
   (pac:~(at mx manx) "text-4xl text-blue-500 animate-spin")
 ::
-++  get-zone
-  |=  =zid:t
-  .^  (unit zone:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zone/(scot %p p.zid)/[q.zid]/noun
-  ==
-::
-++  get-now-tz
-  |=  zone=(unit zid:t)
-  ^-  (unit @da)
-  ?~  zone
-    `now.gowl
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) now.gowl)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
-::
 ++  handle
   =/  m  (strand ,vase)
   ^-  form:m
@@ -120,25 +99,27 @@
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
     =/  iana-zone=@t  (fall (get-key:kv 'timezone-getter' args) 'UTC')
     =.  zone.sta  iana-zone
-    =/  =date  (yore (need (get-now-tz zone.sta)))
+    =/  now=@da  (need (to-tz:~(ez zn:pytz zone.sta) now.gowl))
+    =/  =date  (yore now)
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     =/  =manx  month-view:components:(month-view zone.sta [y m]:date)
     (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
     ::
       [%'GET' ~ *]
+    =/  now=@da  (need (to-tz:~(ez zn:pytz zone.sta) now.gowl))
     ?-    view.sta
         %day
-      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore (need (get-now-tz zone.sta))))
+      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore now))
       =/  =manx  day-view:components:(day-view zone.sta day)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu (need (get-now-tz zone.sta))))
+      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu now))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %month
-      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore (need (get-now-tz zone.sta))))
+      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore now))
       =/  =manx  month-view:components:(month-view zone.sta month)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
     ==
@@ -146,29 +127,22 @@
       [%'POST' [%set-current-zone ~] *]
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
     =/  zone=@t  (need (get-key:kv 'zone' args))
-    =/  zone-by-names=(map @t zid:t)
-      %-  ~(gas by *(map @t zid:t))
-      %+  turn  ~(tap by zones)
-      |=  [=zid:t =zone:t]
-      [name.zone zid]
-    =.  zone.sta
-      ?:  =('' zone)
-        ~
-      [~ (~(got by zone-by-names) zone)]
+    =.  zone.sta  zone
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
+    =/  now=@da  (need (to-tz:~(ez zn:pytz zone.sta) now.gowl))
     ?-    view.sta
         %day
-      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore (need (get-now-tz zone.sta))))
+      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore now))
       =/  =manx  day-view:components:(day-view zone.sta day)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu (need (get-now-tz zone.sta))))
+      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu now))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %month
-      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore (need (get-now-tz zone.sta))))
+      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore now))
       =/  =manx  month-view:components:(month-view zone.sta month)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
     ==
@@ -178,19 +152,20 @@
     =/  view=@t  (fall (get-key:kv 'view' args) %month)
     =.  view.sta  ;;(?(%day %week %month) view)
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
+    =/  now=@da  (need (to-tz:~(ez zn:pytz zone.sta) now.gowl))
     ?-    view.sta
         %day
-      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore (need (get-now-tz zone.sta))))
+      =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore now))
       =/  =manx  day-view:components:(day-view zone.sta day)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu (need (get-now-tz zone.sta))))
+      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu now))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %month
-      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore (need (get-now-tz zone.sta))))
+      =/  month=[@ud @ud]  (fall month.sta [y m]:(yore now))
       =/  =manx  month-view:components:(month-view zone.sta month)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
     ==

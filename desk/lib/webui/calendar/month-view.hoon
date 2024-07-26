@@ -1,9 +1,8 @@
-/-  t=timezones
-/+  *ventio, server, htmx, nooks, html-utils, tu=time-utils,
+/+  *ventio, server, htmx, nooks, pytz, html-utils, tu=time-utils,
     fi=webui-feather-icons,
     webui-calendar-scripts,
     webui-calendar-month-view-day-square
-|_  $:  [zid=(unit zid:t) y=@ud m=@ud]
+|_  $:  [zid=@t y=@ud m=@ud]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -11,13 +10,8 @@
     ==
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
-    now  (need (get-now-tz zid))
-::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
+    ez   ~(ez zn:pytz zid)
+    now  (fall (to-utc:~(ez zn:pytz zid) now.gowl) now.gowl)
 ::
 ++  globe
   =/  =manx  (make:fi %globe)
@@ -30,30 +24,6 @@
   :-  [zid y m date]
   :+  gowl  (weld base /day-square/(crip (en:date-input:tu [y m d.t]:date)))
   [[eyre-id req] [ext site] args]
-::
-++  get-now-tz
-  |=  zone=(unit zid:t)
-  ^-  (unit @da)
-  ?~  zone
-    `now.gowl
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) now.gowl)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
-::
-++  get-offset
-  |=  zone=(unit zid:t)
-  ^-  delta:tu
-  ?~  zone
-    [%& ~s0]
-  .^  delta:tu  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /offset/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
 ::
 ++  left-arrow
   ^-  manx
@@ -174,23 +144,15 @@
           ;+  (~(set-style mx right-arrow) "height: .95em; width: .95em;")
         ==
       ==
-      ;+  =/  timezones=(list [zid:t tape])
-            %+  sort
-              %+  turn  ~(tap by zones)
-              |=([=zid:t =zone:t] [zid (trip name.zone)])
-            |=  [[* a=tape] [* b=tape]]
-            (alphabetical:htmx a b)
-          ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
+      ;+  ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
             =name       "zone"
             =hx-post    "{(spud (moup:htmx 2 base))}/set-current-zone"
             =hx-target  "#{(en-html-id:htmx (moup:htmx 2 base))}"
             =hx-swap    "outerHTML"
-            ;+  ?^  zid
-                  ;option(value ""): UTC
-                ;option(value "", selected ""): UTC
-            ;*  %+  turn  timezones
-                |=  [=zid:t name=tape]
-                ?.  =(^zid [~ zid])
+            ;*  %+  turn  names.pytz
+                |=  n=@t
+                =/  name=tape  (trip n)
+                ?.  =(n zid)
                   ;option(value "{name}"): {name}
                 ;option(value "{name}", selected ""): {name}
           ==
@@ -206,7 +168,7 @@
         ;+  globe
       ==
       ;span.text-gray-800.text-2xl: {(snag (sub m 1) month-fullname)} {(numb:htmx y)}
-      ;+  (timer (get-offset zid))
+      ;+  (timer (fall (~(active-offset zn:pytz zid) now.gowl) *delta:tu))
     ==
   ::
   ++  month-panel

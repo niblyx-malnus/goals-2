@@ -103,14 +103,16 @@
     =/  times=(list @da)  (tz-to-utc-list d.dext)
     :: return the time at the requested index
     ::
-    ?:((lte (lent times) i.dext) ~ (some (snag i.dext times)))
+    ?:  (lte (lent times) i.dext)
+      ~
+    [~ (snag i.dext times)]
   :: time ordered list of valid candidates
   ::
   ++  tz-to-utc-list
     ^-  tz-to-utc-list:tu
     |=  tz-time=@da
-    |^
     ^-  (list @da)
+    |^
     (sort candidates lth)
     :: invert this time for all offsets of the timezone
     ::
@@ -129,9 +131,22 @@
     ++  validate
       |=  [utc-time=@da offset=delta:tu]
       ^-  ?
-      ?~  off=(active-offset time)
+      ?~  off=(active-offset utc-time)
         %.n
       =(offset u.off)
+    --
+  ::
+  ++  ez
+    |%
+    ++  to-tz
+      |=  utc-time=@da
+      ^-  (unit @da)
+      (bind (utc-to-tz utc-time) tail)
+    ::
+    ++  to-utc
+      |=  tz-time=@da
+      ^-  (unit @da)
+      (tz-to-utc 0+tz-time)
     --
   --
 --

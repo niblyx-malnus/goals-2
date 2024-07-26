@@ -1,9 +1,10 @@
-/-  t=timezones, c=calendar
-/+  *ventio, server, htmx, nooks, fi=webui-feather-icons, html-utils,
-    tu=time-utils, clib=calendar,
+/-  c=calendar
+/+  *ventio, server, htmx, nooks, pytz,
+    html-utils, tu=time-utils, clib=calendar,
+    fi=webui-feather-icons,
     webui-calendar-scripts,
     webui-calendar-update-event-panel
-|_  $:  [zid=(unit zid:t) y=@ud w=@ud =date =cid:c =iref:c]
+|_  $:  [zid=@t y=@ud w=@ud =date =cid:c =iref:c]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -12,11 +13,10 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    now       (need (get-now-tz zid))
+    now  (fall (bind (~(utc-to-tz zn:pytz zid) now.gowl) tail) now.gowl)
     calendar  (get-calendar cid)
 ::
 ++  update-event-panel
-  |=  [zid=(unit zid:t) =^date =cid:c =iref:c]
   %~  .
     webui-calendar-update-event-panel
   :-  [zid date cid iref]
@@ -36,33 +36,11 @@
   =.  manx   (pus:~(at mx manx) "height: .875em; width: .875em;")
   (pac:~(at mx manx) "text-4xl text-blue-500 animate-spin")
 ::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
-::
 ++  get-calendar
   |=  =cid:c
   .^  calendar:c  %gx
     (scot %p our.gowl)  %calendar  (scot %da now.gowl)
     /calendar/(scot %p host.cid)/[name.cid]/noun
-  ==
-::
-++  get-now-tz  |=(zone=(unit zid:t) (get-utc-to-tz now.gowl zone))
-::
-++  get-utc-to-tz
-  |=  [=time zone=(unit zid:t)]
-  ^-  (unit @da)
-  ?~  zone
-    `time
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) time)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
   ==
 ::
 +$  state  ? :: hidden update-event-panel
@@ -96,7 +74,7 @@
     ::
       [%'POST' [%update-event-panel ?(%update-event %delete-event) ~] *]
     :: send the update then hide container
-    ;<  *  bind:m  handle:(update-event-panel zid date cid iref)
+    ;<  *  bind:m  handle:update-event-panel
     ;<  ~  bind:m
       %+  send-refresh:htmx  [our dap]:gowl
       %+  murn  ~(tap of (dip:nuk /))
@@ -107,7 +85,7 @@
     (pure:m !>(~))
     ::
       [* [%update-event-panel *] *]
-    handle:(update-event-panel zid date cid iref)
+    handle:update-event-panel
   ==
 ::
 ++  components
@@ -128,9 +106,9 @@
     ?>  ?=(%span -.instance)
     ?>  ?=(%& -.p.instance)
     =/  start=^date
-      (yore (max (need (get-utc-to-tz l.p.p.instance zid)) (year date)))
+      (yore (max (year date) (need (bind (~(utc-to-tz zn:pytz zid) l.p.p.instance) tail))))
     =/  end=^date
-      (yore (min (need (get-utc-to-tz r.p.p.instance zid)) (add ~d1 (year date))))
+      (yore (min (add ~d1 (year date)) (need (bind (~(utc-to-tz zn:pytz zid) r.p.p.instance) tail))))
     ?:  =(start end)
       ;div(id html-id);
     =/  start-px=@ud   (add (mul 50 h.t.start) (div (mul 50 m.t.start) 60))
@@ -180,7 +158,7 @@
                 ;+  fi-x
               ==
             ==
-            ;+  (default:components:(update-event-panel zid date cid iref) %update)
+            ;+  (default:components:update-event-panel %update)
           ==
         ==
       == 

@@ -1,7 +1,8 @@
-/-  c=calendar, r=rules, t=timezones
-/+  *ventio, htmx, server, nooks, html-utils, tu=time-utils, fi=webui-feather-icons,
+/-  c=calendar, r=rules
+/+  *ventio, htmx, server, nooks, pytz,
+    html-utils, tu=time-utils, fi=webui-feather-icons,
     inputs=webui-calendar-inputs
-|_  $:  [zid=(unit zid:t) =date =cid:c =iref:c]
+|_  $:  [zid=@t =date =cid:c =iref:c]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -10,7 +11,7 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    now  (need (get-now-tz zid))
+    now  (fall (bind (~(utc-to-tz zn:pytz zid) now.gowl) tail) now.gowl)
     calendar  (get-calendar cid)
     event     (~(got by events:calendar) eid.iref)
     rules  
@@ -31,12 +32,6 @@
   ?>  ?=([p=@ta q=@ta r=@ta ~] pole)
   [?~(p.pole ~ `(slav %p p.pole)) ;;(rule-type:r q.pole) r.pole]
 ::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
-::
 ++  get-calendar
   |=  =cid:c
   .^  calendar:c  %gx
@@ -54,35 +49,6 @@
   ^-  manx
   (pac:~(at mx fi-loader) "text-4xl text-blue-500")
 ::
-++  get-now-tz  |=(zone=(unit zid:t) (get-utc-to-tz now.gowl zone))
-::
-++  get-utc-to-tz
-  |=  [=time zone=(unit zid:t)]
-  ^-  (unit @da)
-  ?~  zone
-    `time
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) time)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
-::
-++  get-tz-to-utc
-  |=  [=time zone=(unit zid:t)]
-  ^-  (unit @da)
-  ?~  zone
-    `time
-  =;  tz-to-utc
-    :: assume first occurence of time in timezone (0 in dext)
-    ::
-    ((need tz-to-utc) 0 time)
-  .^  (unit tz-to-utc:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /tz-to-utc/(scot %p p.u.zone)/[q.u.zone]/noun
-  ==
 ::
 ++  input-style-classes
   """
@@ -235,33 +201,21 @@
       %skip  ~
       ::
         %left
-      :-  (extract-timezone (reed:kv (~(get of brac) /tz)))
+      :-  (reed:kv (~(get of brac) /tz))
       (extract-duration (~(dip of brac) /d))
       ::
         %both
-      :-  (extract-timezone (reed:kv (~(get of brac) /lz)))
-      (extract-timezone (reed:kv (~(get of brac) /rz)))
+      :-  (reed:kv (~(get of brac) /lz))
+      (reed:kv (~(get of brac) /rz))
     ==
-  ::
-  ++  extract-timezone
-    |=  zone=@t
-    ^-  (unit zid:t)
-    =/  zone-by-names=(map @t zid:t)
-      %-  ~(gas by *(map @t zid:t))
-      %+  turn  ~(tap by zones)
-      |=  [=zid:t =zone:t]
-      [name.zone zid]
-    ?:  =('' zone)
-      ~
-    [~ (~(got by zone-by-names) zone)]
   --
 ::
 +$  state
   $:  date=(unit @da)
       kind=@t
       $=  rids
-      $:  both=[lz=(unit zid:t) rz=(unit zid:t) =rid:r]
-          left=[tz=(unit zid:t) d=@dr =rid:r]
+      $:  both=[lz=@t rz=@t =rid:r]
+          left=[tz=@t d=@dr =rid:r]
           fuld=rid:r
           jump=rid:r
       ==
@@ -577,12 +531,6 @@
     ^-  manx
     ?.  ?=(?(%left %both) kind.sta)
       ;div.hidden;
-    =/  timezones=(list [zid:t tape])
-      %+  sort
-        %+  turn  ~(tap by zones)
-        |=([=zid:t =zone:t] [zid (trip name.zone)])
-      |=  [[* a=tape] [* b=tape]]
-      (alphabetical:htmx a b)
     ?-    kind.sta
       ::
         %left
@@ -591,12 +539,10 @@
           ;span.m-2.font-medium.text-sm.text-gray-700: Select Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
             =name  "ruledata[kind][tz]"
-            ;+  ?^  tz.left.rids.sta
-                  ;option(value ""): UTC
-                ;option(value "", selected ""): UTC
-            ;*  %+  turn  timezones
-                |=  [=zid:t name=tape]
-                ?.  =([~ zid] tz.left.rids.sta)
+            ;*  %+  turn  names.pytz
+                |=  n=@t
+                =/  name=tape  (trip n)
+                ?.  =(n zid)
                   ;option(value "{name}"): {name}
                 ;option(value "{name}", selected ""): {name}
           ==
@@ -615,12 +561,10 @@
           ;span.m-2.font-medium.text-sm.text-gray-700: Select Start Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
             =name  "ruledata[kind][lz]"
-            ;+  ?^  lz.both.rids.sta
-                  ;option(value ""): UTC
-                ;option(value "", selected ""): UTC
-            ;*  %+  turn  timezones
-                |=  [=zid:t name=tape]
-                ?.  =([~ zid] lz.both.rids.sta)
+            ;*  %+  turn  names.pytz
+                |=  n=@t
+                =/  name=tape  (trip n)
+                ?.  =(n zid)
                   ;option(value "{name}"): {name}
                 ;option(value "{name}", selected ""): {name}
           ==
@@ -629,12 +573,10 @@
           ;span.m-2.font-medium.text-sm.text-gray-700: Select End Timezone:
           ;select.w-60.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-700
             =name  "ruledata[kind][rz]"
-            ;+  ?^  rz.both.rids.sta
-                  ;option(value ""): UTC
-                ;option(value "", selected ""): UTC
-            ;*  %+  turn  timezones
-                |=  [=zid:t name=tape]
-                ?.  =([~ zid] rz.both.rids.sta)
+            ;*  %+  turn  names.pytz
+                |=  n=@t
+                =/  name=tape  (trip n)
+                ?.  =(n zid)
                   ;option(value "{name}"): {name}
                 ;option(value "{name}", selected ""): {name}
           ==

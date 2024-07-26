@@ -1,10 +1,11 @@
-/-  t=timezones, c=calendar
-/+  *ventio, server, htmx, nooks, fi=webui-feather-icons, html-utils,
-    tu=time-utils, clib=calendar,
+/-  c=calendar
+/+  *ventio, server, htmx, nooks, pytz,
+    html-utils, tu=time-utils, clib=calendar,
+    fi=webui-feather-icons,
     webui-calendar-week-view-fullday-square-event,
     webui-calendar-week-view-fullday-square-add-event
 ::
-|_  $:  [zid=(unit zid:t) y=@ud w=@ud =date collapse=?]
+|_  $:  [zid=@t y=@ud w=@ud =date collapse=?]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -13,18 +14,13 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    now           (need (get-now-tz zid))
+    ez   ~(ez zn:pytz zid)
+    now  (fall (to-tz:~(ez zn:pytz zid) now.gowl) now.gowl)
     cid           [our.gowl %our]
     calendar      (get-calendar cid) :: just %our calendar for now
 ::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
-::
 ++  event
-  |=  [zid=(unit zid:t) y=@ud w=@ud =^date =cid:c =iref:c]
+  |=  [=cid:c =iref:c]
   %~  .
     webui-calendar-week-view-fullday-square-event
   :-  [zid y w date cid iref]
@@ -34,7 +30,6 @@
   [[eyre-id req] [ext site] args]
 ::
 ++  add-event
-  |=  [zid=(unit zid:t) y=@ud w=@ud =^date]
   %~  .
     webui-calendar-week-view-fullday-square-add-event
   :-  [zid y w date]
@@ -48,20 +43,6 @@
   .^  calendar:c  %gx
     (scot %p our.gowl)  %calendar  (scot %da now.gowl)
     /calendar/(scot %p host.cid)/[name.cid]/noun
-  ==
-::
-++  get-now-tz
-  |=  zone=(unit zid:t)
-  ^-  (unit @da)
-  ?~  zone
-    `now.gowl
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) now.gowl)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
   ==
 ::
 ++  month-abbrv
@@ -85,12 +66,12 @@
     (give-html-manx:htmx [our dap]:gowl eyre-id fullday-square:components |)
     ::
       [* [%add-event *] *]
-    handle:(add-event zid y w date)
+    handle:add-event
     ::
       [* [%event host=@t name=@t eid=@t i=@t *] *]
     =/  =cid:c   [(slav %p host.cad.parms) name.cad.parms]
     =/  =iref:c  [eid.cad.parms (slav %ud i.cad.parms)] 
-    handle:(event zid y w date cid iref)
+    handle:(event cid iref)
   ==
 ::
 ++  components
@@ -104,11 +85,11 @@
       ;*  ?.  &(collapse (lth 3 (lent irefs)))
             %+  turn  irefs
             |=  =iref:c
-            (event:components:(event zid y w date cid iref) &)
+            (event:components:(event cid iref) &)
           %+  welp
             %+  turn  (scag 2 irefs)
             |=  =iref:c
-            (event:components:(event zid y w date cid iref) &)
+            (event:components:(event cid iref) &)
           :_  ~
           ;div
             =id          (en-html-id:htmx (weld base /more))
@@ -134,7 +115,7 @@
         =hx-swap     "outerHTML"
         ;
       ==
-      ;+  (add-event:components:(add-event zid y w date) &)
+      ;+  (add-event:components:add-event &)
       ;+  events
     ==
   --

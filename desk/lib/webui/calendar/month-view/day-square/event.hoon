@@ -1,9 +1,9 @@
-/-  t=timezones, c=calendar
-/+  *ventio, server, htmx, nooks, fi=webui-feather-icons, html-utils,
-    tu=time-utils, clib=calendar,
+/-  c=calendar
+/+  *ventio, server, htmx, nooks, pytz,
+    fi=webui-feather-icons, html-utils, tu=time-utils, clib=calendar,
     webui-calendar-scripts,
     webui-calendar-update-event-panel
-|_  $:  [zid=(unit zid:t) y=@ud m=@ud =date =cid:c =iref:c]
+|_  $:  [zid=@t y=@ud m=@ud =date =cid:c =iref:c]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -12,11 +12,11 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    now       (need (get-now-tz zid))
+    now  (fall (bind (~(utc-to-tz zn:pytz zid) now.gowl) tail) now.gowl)
     calendar  (get-calendar cid)
 ::
 ++  update-event-panel
-  |=  [zid=(unit zid:t) =^date =cid:c =iref:c]
+  |=  [zid=@t =^date =cid:c =iref:c]
   %~  .
     webui-calendar-update-event-panel
   :-  [zid date cid iref]
@@ -36,33 +36,11 @@
   =.  manx   (pus:~(at mx manx) "height: .875em; width: .875em;")
   (pac:~(at mx manx) "text-4xl text-blue-500 animate-spin")
 ::
-++  zones
-  .^  zones:t  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /zones/noun
-  ==
-::
 ++  get-calendar
   |=  =cid:c
   .^  calendar:c  %gx
     (scot %p our.gowl)  %calendar  (scot %da now.gowl)
     /calendar/(scot %p host.cid)/[name.cid]/noun
-  ==
-::
-++  get-now-tz  |=(zone=(unit zid:t) (get-utc-to-tz now.gowl zone))
-::
-++  get-utc-to-tz
-  |=  [=time zone=(unit zid:t)]
-  ^-  (unit @da)
-  ?~  zone
-    `time
-  =;  utc-to-tz
-    ?~  utz=((need utc-to-tz) time)
-      ~
-    `d.u.utz
-  .^  (unit utc-to-tz:t)  %gx
-    (scot %p our.gowl)  %timezones  (scot %da now.gowl)
-    /utc-to-tz/(scot %p p.u.zone)/[q.u.zone]/noun
   ==
 ::
 +$  state  ? :: hidden update-event-panel
@@ -129,7 +107,7 @@
     ::
     ?:  ?=(%span -.instance)
       ?>  ?=(%& -.p.instance)
-      =/  start=@da    (max (need (get-utc-to-tz l.p.p.instance zid)) (year date))
+      =/  start=@da    (max (year date) (need (bind (~(utc-to-tz zn:pytz zid) l.p.p.instance) tail)))
       ;div(id html-id)
         ;div
           =class       "flex gap-1 items-center overflow-hidden hover:bg-gray-100 rounded cursor-pointer mb-[4px] px-2 py-1"

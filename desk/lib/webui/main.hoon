@@ -1,4 +1,4 @@
-/-  p=pools, gol=goals, act=action, ui=goals-ui, tz=timezones
+/-  p=pools, gol=goals, act=action, ui=goals-ui
 /+  *ventio, string, tu=time-utils, htmx, bind, server, goals-api, fi=webui-feather-icons,
     webui-calendar-main, html-utils
 |%

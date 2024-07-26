@@ -15,7 +15,8 @@
     ==
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
-    now  (fall (~(utc-to-tz zn:pytz zid) now.gowl) now.gowl)
+    ez   ~(ez zn:pytz zid)
+    now  (fall (to-tz:~(ez zn:pytz zid) now.gowl) now.gowl)
 ::
 ++  globe
   =/  =manx  (make:fi %globe)
@@ -186,9 +187,6 @@
             =hx-post    "{(spud (moup:htmx 2 base))}/set-current-zone"
             =hx-target  "#{(en-html-id:htmx (moup:htmx 2 base))}"
             =hx-swap    "outerHTML"
-            ;+  ?^  zid
-                  ;option(value ""): UTC
-                ;option(value "", selected ""): UTC
             ;*  %+  turn  names.pytz
                 |=  n=@t
                 =/  name=tape  (trip n)
@@ -208,7 +206,7 @@
         ;+  globe
       ==
       ;span.text-gray-800.text-2xl: {month-title}
-      ;+  (timer (get-offset zid))
+      ;+  (timer (need (active-offset:ez now.gowl)))
     ==
   ::
   ++  week-panel
@@ -218,7 +216,7 @@
     =/  days=(list date)
       %+  turn  (gulf 0 6)
       |=(idx=@ (yore (add sunday (mul idx ~d1))))
-    =/  rul=(unit tz-rule:t)  (active-rule thursday)
+    =/  rul=(unit [* offset=delta:tu name=@t])  (active-rule:ez thursday)
     =/  rule-name=tape  ?~(rul "" (trip name.u.rul))
     =/  offset-name=tape
       ?~(rul "UTC" (weld "UTC" (print-utc-offset:tu offset.u.rul)))
@@ -332,7 +330,7 @@
         ::
         ;div.flex-auto.grid.grid-cols-7.relative
           ;+  cursor
-          ;script: {(position-cursor:webui-calendar-scripts (en-html-id:htmx (weld base /cursor)) (~(active-offset zn zid) now.gowl) (yore sunday))}
+          ;script: {(position-cursor:webui-calendar-scripts (en-html-id:htmx (weld base /cursor)) (need (active-offset:ez now.gowl)) (yore sunday))}
           ;*  %+  turn  days
               |=  =date
               day-square:components:(day-square date)

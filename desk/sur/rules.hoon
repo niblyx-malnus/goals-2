@@ -20,8 +20,8 @@
 :: skip: a skip exception denoting a skipped instance
 ::
 +$  kind  
-  $%  [%both lz=(unit zone-flag) rz=(unit zone-flag)]
-      [%left tz=(unit zone-flag) d=@dr]
+  $%  [%both lz=@t rz=@t]
+      [%left tz=@t d=@dr]
       [%fuld ~]
       [%skip ~]
   ==
@@ -35,13 +35,11 @@
 +$  span-exception
   $%  rule-exception
       [%bad-index l=(unit localtime) r=(unit localtime)]
-      [%out-of-bounds tz=(unit zone-flag) d=@da] :: right end out-of-bounds
+      [%out-of-bounds tz=@t d=@da] :: right end out-of-bounds
       $:  %out-of-order 
           l=[loc=localtime utc=@da] 
           r=[loc=localtime utc=@da]
       ==
-      [%failed-to-retrieve-tz-to-utc tz=(unit zone-flag)]
-      [%failed-to-retrieve-utc-to-tz tz=(unit zone-flag)]
   ==
 ::
 +$  span-instance     (each span span-exception)

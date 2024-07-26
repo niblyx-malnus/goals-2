@@ -1,12 +1,11 @@
-/-  *calendar, r=rules, t=timezones
-/+  clib=calendar, rlib=rules
+/-  *calendar, r=rules
+/+  clib=calendar, rlib=rules, p=pytz
 |%
 +$  card  card:agent:gall
 +$  sign  sign:agent:gall
 ++  agent
   =|  =rules:r
   =|  =cache:r
-  =|  =zones:t
   =|  cards=(list card)
   |_  [=bowl:gall state-0]
   +*  this   .
@@ -24,11 +23,6 @@
       .^  =cache:r  %gx
         (scot %p our.bowl)  %rule-store  (scot %da now.bowl)
         /cache/noun
-      ==
-        zones
-      .^  =zones:t  %gx
-        (scot %p our.bowl)  %timezones  (scot %da now.bowl)
-        /zones/noun
       ==
     ==
   ::
@@ -89,30 +83,6 @@
     |=  tan=calendar-transition
     [%give %fact ~[(en-path cid)] goals-calendar-transition+!>(tan)]
   ::
-  ++  get-tz-to-utc
-    |=  uzid=(unit zid:t)
-    ^-  (unit tz-to-utc:t)
-    ?~  uzid  `|=(dext `d)
-    =/  [=ship =term]  u.uzid
-    .^  (unit tz-to-utc:t)  %gx
-      ;:  weld
-        /(scot %p our.bowl)/timezones/(scot %da now.bowl)
-        /tz-to-utc/(scot %p ship)/[term]/noun
-      ==
-    ==
-  ::
-  ++  get-utc-to-tz
-    |=  uzid=(unit zid:t)
-    ^-  (unit utc-to-tz:t)
-    ?~  uzid  `|=(d=@da [~ 0 d])
-    =/  [=ship =term]  u.uzid
-    .^  (unit utc-to-tz:t)  %gx
-      ;:  weld
-        /(scot %p our.bowl)/timezones/(scot %da now.bowl)
-        /utc-to-tz/(scot %p ship)/[term]/noun
-      ==
-    ==
-  ::
   ++  get-to-fullday
     |=  [=rid =kind =args]
     ^-  to-fullday:r
@@ -134,13 +104,10 @@
       =/  =to-to-both:r  (~(got by to-to-boths.cache) rid)
       =/  =to-both:r     (to-to-both args)
       =/  out=(each [l=dext:r r=dext:r] rule-exception:r)  (to-both idx)
-      ?:  ?=(%| -.out)  [%| p.out]
-      ?~  letz=(get-tz-to-utc lz.kind)
-        [%| %failed-to-retrieve-tz-to-utc lz.kind]
-      ?~  ritz=(get-tz-to-utc rz.kind)
-        [%| %failed-to-retrieve-tz-to-utc rz.kind]
-      =/  l  (u.letz l.p.out)
-      =/  r  (u.ritz r.p.out)
+      ?:  ?=(%| -.out)
+        [%| p.out]
+      =/  l=(unit @da)  (~(tz-to-utc zn:p lz.kind) l.p.out)
+      =/  r=(unit @da)  (~(tz-to-utc zn:p rz.kind) r.p.out)
       ?:  ?&(?=(^ l) ?=(^ r))
         ?:  (lte u.l u.r)
           [%& u.l u.r]
@@ -159,14 +126,12 @@
       =/  =to-left:r     (to-to-left args)
       =/  out=(each dext:r rule-exception:r)  (to-left idx)
       ?:  ?=(%| -.out)  [%| p.out]
-      ?~  tz-to-utc=(get-tz-to-utc tz.kind)
-        [%| %failed-to-retrieve-tz-to-utc tz.kind]
-      ?~  utc-to-tz=(get-utc-to-tz tz.kind)
-        [%| %failed-to-retrieve-utc-to-tz tz.kind]
-      =/  l  (u.tz-to-utc p.out)
-      ?~  l  [%| %bad-index `[tz.kind p.out] ~]
+      =/  l=(unit @da)   (~(tz-to-utc zn:p tz.kind) p.out)
+      ?~  l
+        [%| %bad-index `[tz.kind p.out] ~]
       =/  r=@da  (add u.l d.kind)
-      ?^  (u.utc-to-tz r)  [%& u.l r]
+      ?^  (~(utc-to-tz zn:p tz.kind) r)
+        [%& u.l r]
       [%| %out-of-bounds tz.kind r]
     ==
   :: TODO: check permissions on these things

@@ -1,4 +1,4 @@
-/-  c=calendar, r=rules, t=timezones
+/-  c=calendar, r=rules
 /+  vlib=event
 ::
 =|  tans=(list calendar-transition:c)
