@@ -11,7 +11,7 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-::
+:: ::
 ++  month-view
   |=  [zid=@t y=@ud m=@ud]
   %~  .
@@ -98,15 +98,18 @@
       [%'POST' ~ *]
     =/  args=key-value-list:kv  (parse-body:kv body.request.req)
     =/  iana-zone=@t  (fall (get-key:kv 'timezone-getter' args) 'UTC')
-    =.  zone.sta  iana-zone
-    =/  now=@da  (need (to-tz:~(ez zn:pytz zone.sta) now.gowl))
+    =.  zone.sta  
+      ?.  (~(has by zones:zn:pytz) iana-zone)
+        'UTC'
+      iana-zone
+    =/  now=@da  (~(localize zn:pytz zone.sta) now.gowl)
     =/  =date  (yore now)
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     =/  =manx  month-view:components:(month-view zone.sta [y m]:date)
     (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
     ::
       [%'GET' ~ *]
-    =/  now=@da  (need (to-tz:~(ez zn:pytz zone.sta) now.gowl))
+    =/  now=@da  (~(localize zn:pytz zone.sta) now.gowl)
     ?-    view.sta
         %day
       =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore now))
@@ -129,7 +132,7 @@
     =/  zone=@t  (need (get-key:kv 'zone' args))
     =.  zone.sta  zone
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
-    =/  now=@da  (need (to-tz:~(ez zn:pytz zone.sta) now.gowl))
+    =/  now=@da  (~(localize zn:pytz zone.sta) now.gowl)
     ?-    view.sta
         %day
       =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore now))
@@ -152,7 +155,7 @@
     =/  view=@t  (fall (get-key:kv 'view' args) %month)
     =.  view.sta  ;;(?(%day %week %month) view)
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
-    =/  now=@da  (need (to-tz:~(ez zn:pytz zone.sta) now.gowl))
+    =/  now=@da  (~(localize zn:pytz zone.sta) now.gowl)
     ?-    view.sta
         %day
       =/  day=[@ud @ud @ud]  (fall day.sta [y m d.t]:(yore now))

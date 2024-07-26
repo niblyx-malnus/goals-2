@@ -13,8 +13,8 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    ez   ~(ez zn:pytz zid)
-    now  (fall (to-tz:~(ez zn:pytz zid) now.gowl) now.gowl)
+    zn   ~(. zn:pytz zid)
+    now  (fall (~(localize-soft zn:pytz zid) now.gowl) now.gowl)
     calendar  (get-calendar cid)
 ::
 ++  update-event-panel
@@ -109,9 +109,9 @@
     ?>  ?=(%span -.instance)
     ?>  ?=(%& -.p.instance)
     =/  start=^date
-      (yore (max (need (to-tz:ez l.p.p.instance)) (year date)))
+      (yore (max (localize:zn l.p.p.instance) (year date)))
     =/  end=^date
-      (yore (min (need (to-tz:ez r.p.p.instance)) (add ~d1 (year date))))
+      (yore (min (localize:zn r.p.p.instance) (add ~d1 (year date))))
     ?:  =(start end)
       ;div(id html-id);
     =/  start-px=@ud   (add (mul 50 h.t.start) (div (mul 50 m.t.start) 60))

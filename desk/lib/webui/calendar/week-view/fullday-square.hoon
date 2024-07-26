@@ -14,8 +14,8 @@
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
     kv   kv:html-utils
-    ez   ~(ez zn:pytz zid)
-    now  (fall (to-tz:~(ez zn:pytz zid) now.gowl) now.gowl)
+    zn   ~(. zn:pytz zid)
+    now  (fall (~(localize-soft zn:pytz zid) now.gowl) now.gowl)
     cid           [our.gowl %our]
     calendar      (get-calendar cid) :: just %our calendar for now
 ::

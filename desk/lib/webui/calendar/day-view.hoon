@@ -16,8 +16,8 @@
     ==
 +*  nuk  ~(. nooks gowl)
     mx   mx:html-utils
-    ez   ~(ez zn:pytz zid)
-    now  (fall (to-tz:~(ez zn:pytz zid) now.gowl) now.gowl)
+    zn   ~(. zn:pytz zid)
+    now  (fall (~(localize-soft zn:pytz zid) now.gowl) now.gowl)
 ::
 ++  globe
   =/  =manx  (make:fi %globe)
@@ -197,14 +197,14 @@
         ;+  globe
       ==
       ;span.text-gray-800.text-2xl: {month-title}
-      ;+  (timer (need (active-offset:ez now.gowl)))
+      ;+  (timer (need (active-offset:zn now.gowl)))
     ==
   ::
   ++  day-panel
     ^-  manx
     =/  today=@da  (year [[& y] m d 0 0 0 ~])
     =/  this-week=[y=@ud w=@ud]  (da-to-week-number:tu today)
-    =/  rul=(unit [* offset=delta:tu name=@t])  (active-rule:ez today)
+    =/  rul=(unit [* offset=delta:tu name=@t])  (active-rule:zn today)
     =/  rule-name=tape  ?~(rul "" (trip name.u.rul))
     =/  offset-name=tape
       ?~(rul "UTC" (weld "UTC" (print-utc-offset:tu offset.u.rul)))
@@ -312,7 +312,7 @@
         ::
         ;div.flex-auto.grid.grid-cols-1.relative
           ;+  cursor
-          ;script: {(position-cursor:webui-calendar-scripts (en-html-id:htmx (weld base /cursor)) (need (active-offset:ez now.gowl)) (yore today))}
+          ;script: {(position-cursor:webui-calendar-scripts (en-html-id:htmx (weld base /cursor)) (need (active-offset:zn now.gowl)) (yore today))}
           ;+  day-square:components:day-square
         ==
       ==

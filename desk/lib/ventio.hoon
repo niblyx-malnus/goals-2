@@ -69,7 +69,7 @@
   =/  m  (strand ,dude:gall)
   ^-  form:m
   :: DEPRECATED: ;<  =desk  bind:m  get-desk
-  =/  =desk          %goals
+  ;<  =desk  bind:m  get-desk
   :: DEPRECATED: =/  vap=dude:gall  (cat 3 desk '-venter')
   =/  vap=dude:gall  %venter
   ;<  dudes=(set [=dude:gall live=?])  bind:m

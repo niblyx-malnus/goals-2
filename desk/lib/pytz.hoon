@@ -1,67 +1,70 @@
 /+  tu=time-utils
 /~  files  wain  /lib/pytz
-|%
-+$  rule  [offset=delta:tu name=@t]
-+$  zone  ((mop @da rule) lth)
-++  zon   ((on @da rule) lth)
-:: version of pytz python library used to generate dataset
+=>  |%
+    +$  rule  [offset=delta:tu name=@t]
+    +$  zone  ((mop @da rule) lth)
+    ++  zon   ((on @da rule) lth)
+    :: version of pytz python library used to generate dataset
+    ::
+    ++  version  `@t`(snag 0 (~(got by files) %version))
+    ::
+    ++  to-filename
+      |=  n=@t
+      ^-  term
+      =/  name=tape  (cass (trip n))
+      %+  rap  3
+      |-
+      ?~  name
+        ~
+      :_  $(name t.name)
+      ?+  i.name  i.name
+        %'/'  '-'
+        %'_'  '-'
+        %'+'  '--'
+      ==
+    ::
+    ++  parse-zone-rows
+      |=  rows=wain
+      ^-  (list [@da rule])
+      ?>  ?=(^ rows)
+      ?>  =('Time,Offset,Name' i.rows)
+      =/  contents=wain  t.rows
+      |-
+      ?~  contents
+        ~
+      :-  (rash i.contents parse-zone-row)
+      $(contents t.contents)
+    ::
+    ++  parse-zone-row
+      =,  monadic-parsing:tu
+      ;<  jump=@da   bind  parse:datetime-local:tu
+      ;<  *          bind  com
+      ;<  =delta:tu  bind  parse:offset:tu
+      ;<  *          bind  com
+      ;<  name=@t    bind  (cook crip (star prn))
+      (easy [jump delta name])
+    --
 ::
-++  version  `@t`(snag 0 (~(got by files) %version))
-++  names    `(list @t)`(~(got by files) %names)
-::
-++  to-filename
-  |=  n=@t
-  ^-  term
-  =/  name=tape  (trip n)
-  %+  rap  3
-  |-
-  ?~  name
-    ~
-  :_  $(name t.name)
-  ?+  i.name  i.name
-    %'/'  '-'
-    %'_'  '-'
-    %'+'  '--'
-  ==
-::
-++  parse-zone-rows
-  |=  rows=wain
-  ^-  (list [@da rule])
-  ?>  ?=(^ rows)
-  ?>  =('Time,Offset,Name\0d' i.rows)
-  =/  contents=wain  t.rows
-  |-
-  ?~  contents
-    ~
-  :-  (rash i.contents parse-zone-row)
-  $(contents t.contents)
-::
-++  parse-zone-row
-  =,  monadic-parsing:tu
-  ;<  jump=@da   bind  parse:datetime-local:tu
-  ;<  *          bind  com
-  ;<  =delta:tu  bind  parse:offset:tu
-  ;<  *          bind  com
-  ;<  name=@t    bind  (cook crip (star prn))
-  ;<  *          bind  (jest '\0d')
-  (easy [jump delta name])
-::
-++  zones
-  ^~
+=/  names=(list @t)  (~(got by files) %names)
+=/  zones=(map @t zone)
   %-  ~(gas by *(map @t zone))
-  %+  turn  names
-  |=  name=@t
-  ^-  [@t zone]
-  ~&  >>  "loading timezone: {(trip name)}"
-  :-  name
+  =/  idx=@ud  1
+  =/  total=@ud  (lent names)
+  ^-  (list [@t zone])
+  |-
+  ?~  names
+    ~
+  ~&  >>  "loading timezone [{(numb:tu idx)}/{(numb:tu total)}]: {(trip i.names)}"
+  :_  $(idx +(idx), names t.names)
+  :-  i.names
   %+  gas:zon  *zone
   %-  parse-zone-rows
   %-  ~(got by files)
-  (to-filename name)
-::
+  (to-filename i.names)
+|%
 ++  zn
   |_  name=@t
-  ++  zone  (~(got by zones) name)
+  ++  zone   (~(got by zones) name)
   ::
   ++  active-rule
     |=  utc-time=@da
@@ -136,17 +139,26 @@
       =(offset u.off)
     --
   ::
-  ++  ez
-    |%
-    ++  to-tz
-      |=  utc-time=@da
-      ^-  (unit @da)
-      (bind (utc-to-tz utc-time) tail)
-    ::
-    ++  to-utc
-      |=  tz-time=@da
-      ^-  (unit @da)
-      (tz-to-utc 0+tz-time)
-    --
+  ++  localize
+    |=  utc-time=@da
+    ^-  @da
+    (tail (need (utc-to-tz utc-time)))
+  ::
+  ++  localize-soft
+    |=  utc-time=@da
+    ^-  (unit @da)
+    (bind (utc-to-tz utc-time) tail)
+  ::
+  ++  universalize
+    =|  idx=@ud
+    |=  tz-time=@da
+    ^-  @da
+    (need (tz-to-utc idx tz-time))
+  ::
+  ++  universalize-soft
+    =|  idx=@ud
+    |=  tz-time=@da
+    ^-  (unit @da)
+    (tz-to-utc idx tz-time)
   --
 --
