@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, server, htmx, nooks, pytz,
+/+  *ventio, *numb, server, htmx, nooks, pytz,
     html-utils, tu=time-utils, clib=calendar,
     fi=webui-feather-icons,
     webui-calendar-scripts,
@@ -101,13 +101,13 @@
     =/  end=@dr    (min (add ~h1 start) ~d1)
     =/  start-hr=tape  (dr-format:tu '12' start)
     =/  end-hr=tape    (dr-format:tu '12' end)
-    =/  height=tape    (numb:tu ?:((lth ~d1 end) 25 50))
+    =/  height=tape    (numb ?:((lth ~d1 end) 25 50))
     ?:  hidden
       ;div(id html-id);
     ;div(id html-id, class "relative")
       ;div
         =class  "shadow-lg shadow-gray-400 absolute flex flex-col cursor-pointer mb-[4px] px-2 py-1 text-xs rounded truncate bg-green-500 text-white border border-white border-solid"
-        =style  "top: {(numb:tu (mul chunk 25))}px; height: {height}px; z-index: 10000; width: calc(100% - 12px);"
+        =style  "top: {(numb (mul chunk 25))}px; height: {height}px; z-index: 10000; width: calc(100% - 12px);"
         ;span: (No title)
         ;span(class "text-[0.9em]"): {start-hr} - {end-hr}
       ==

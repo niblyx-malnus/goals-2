@@ -1,4 +1,4 @@
-/+  tu=time-utils
+/+  tu=time-utils, *numb
 /~  files  wain  /lib/pytz
 =>  |%
     +$  rule  [offset=delta:tu name=@t]
@@ -54,7 +54,7 @@
   |-
   ?~  names
     ~
-  ~&  >>  "loading timezone [{(numb:tu idx)}/{(numb:tu total)}]: {(trip i.names)}"
+  ~&  >>  "loading timezone [{(numb idx)}/{(numb total)}]: {(trip i.names)}"
   :_  $(idx +(idx), names t.names)
   :-  i.names
   %+  gas:zon  *zone

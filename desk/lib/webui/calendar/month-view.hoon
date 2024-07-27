@@ -1,4 +1,4 @@
-/+  *ventio, server, htmx, nooks, pytz, html-utils, tu=time-utils,
+/+  *ventio, *numb, server, htmx, nooks, pytz, html-utils, tu=time-utils,
     fi=webui-feather-icons,
     webui-calendar-scripts,
     webui-calendar-month-view-day-square
@@ -167,7 +167,7 @@
         =hx-swap     "outerHTML"
         ;+  globe
       ==
-      ;span.text-gray-800.text-2xl: {(snag (sub m 1) month-fullname)} {(numb:htmx y)}
+      ;span.text-gray-800.text-2xl: {(snag (sub m 1) month-fullname)} {(numb y)}
       ;+  (timer (fall (~(active-offset zn:pytz zid) now.gowl) *delta:tu))
     ==
   ::
@@ -208,7 +208,7 @@
       ==
       ;div.flex.flex-grow
         ;div
-          =class  "grid grid-cols-1 grid-rows-{(numb:htmx (lent weeks))} gap-0"
+          =class  "grid grid-cols-1 grid-rows-{(numb (lent weeks))} gap-0"
           =style  "width: 20px; min-width: 20px;"
           ;*  %+  turn  weeks
               |=  week=@ud
@@ -216,7 +216,7 @@
                 {(scow %ud week)}
               ==
         ==
-        ;div(class "flex-grow grid grid-cols-7 grid-rows-{(numb:htmx (lent weeks))} gap-0")
+        ;div(class "flex-grow grid grid-cols-7 grid-rows-{(numb (lent weeks))} gap-0")
           ;*  %+  turn  days
               |=  =date
               day-square:components:(day-square date)

@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, server, htmx, nooks, pytz,
+/+  *ventio, *numb, server, htmx, nooks, pytz,
     html-utils, tu=time-utils, clib=calendar,
     fi=webui-feather-icons,
     webui-calendar-scripts,
@@ -126,7 +126,7 @@
       ;div
         :: TODO: border-white only when not z-0 (bottom layer)
         =class       "absolute flex flex-col cursor-pointer mb-[4px] px-2 py-1 text-xs rounded truncate bg-green-500 text-white border border-white border-solid"
-        =style       "top: {(numb:tu start-px)}px; height: {(numb:tu dif-px)}px; z-index: 1; width: calc(100% - 12px);"
+        =style       "top: {(numb start-px)}px; height: {(numb dif-px)}px; z-index: 1; width: calc(100% - 12px);"
         =hx-trigger  "click"
         =hx-post     "{(spud base)}/unhide"
         =hx-target   "#{html-id}"

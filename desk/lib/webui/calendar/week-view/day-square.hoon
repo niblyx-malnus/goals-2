@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, server, htmx, nooks, pytz,
+/+  *ventio, *numb, server, htmx, nooks, pytz,
     html-utils, tu=time-utils, clib=calendar,
     fi=webui-feather-icons,
     webui-calendar-week-view-day-square-event,
@@ -108,7 +108,7 @@
       ;div
         =id          "{(en-html-id:htmx (weld base /chunk/(scot %ud chunk)))}"
         =class       "absolute w-full h-[25px] z-0"
-        =style       "top: {(numb:htmx (mul chunk 25))}px;"
+        =style       "top: {(numb (mul chunk 25))}px;"
         =hx-post     "{(spud base)}/add-event/{(scow %ud chunk)}/unhide"
         =hx-target   "#{(en-html-id:htmx (weld base /add-event/(scot %ud chunk)))}"
         =hx-trigger  "click"

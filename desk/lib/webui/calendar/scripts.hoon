@@ -1,4 +1,4 @@
-/+  htmx, tu=time-utils
+/+  *numb, htmx, tu=time-utils
 |%
 ++  position-cursor
   |=  [id=tape offset=delta:tu sunday=date]
@@ -6,7 +6,7 @@
   =/  offset-tape=tape
     %+  weld  
       ?:(sign.offset "" "-")
-    (numb:htmx (div d.offset ~s1))
+    (numb (div d.offset ~s1))
   """
   function positionCursor() \{
     const cursor = document.getElementById('{id}');
@@ -19,7 +19,7 @@
       const offsetTime = utcTime + {offset-tape} * 1000;
       const offsetDate = new Date(offsetTime);
 
-      const minimum = Date.UTC({(numb:tu y.sunday)}, {(numb:tu (dec m.sunday))}, {(numb:tu d.t.sunday)});
+      const minimum = Date.UTC({(numb y.sunday)}, {(numb (dec m.sunday))}, {(numb d.t.sunday)});
       const maximum = minimum + 7 * 24 * 60 * 60 * 1000;
       
       if (offsetTime < minimum || offsetTime >= maximum) \{
@@ -55,7 +55,7 @@
   =/  offset-tape=tape
     %+  weld  
       ?:(sign.offset "" "-")
-    (numb:htmx (div d.offset ~s1))
+    (numb (div d.offset ~s1))
   """
   function startTimer() \{
     const timer = document.getElementById('{id}');

@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, server, htmx, nooks, pytz,
+/+  *ventio, *numb, server, htmx, nooks, pytz,
     html-utils, tu=time-utils, clib=calendar, fi=webui-feather-icons,
     webui-calendar-scripts,
     webui-calendar-week-view-day-square,
@@ -138,10 +138,10 @@
     =/  [y2=@ud m2=@ud]  [y m]:saturday
     =/  month-title=tape
       ?:  =(m1 m2)
-        "{(snag (sub m1 1) month-abbrv)} {(numb:htmx y1)}"
+        "{(snag (sub m1 1) month-abbrv)} {(numb y1)}"
       ?.  =(y1 y2)
-        "{(snag (sub m1 1) month-abbrv)}-{(snag (sub m2 1) month-abbrv)} {(numb:htmx y1)}-{(numb:htmx y2)}"
-      "{(snag (sub m1 1) month-abbrv)}-{(snag (sub m2 1) month-abbrv)} {(numb:htmx y1)}"
+        "{(snag (sub m1 1) month-abbrv)}-{(snag (sub m2 1) month-abbrv)} {(numb y1)}-{(numb y2)}"
+      "{(snag (sub m1 1) month-abbrv)}-{(snag (sub m2 1) month-abbrv)} {(numb y1)}"
     ::
     ;div(class "p-2 flex items-center space-x-4")
       ;select.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
@@ -228,8 +228,8 @@
       ;div.weekday-labels
         ;div.relative.min-w-0
           ;div.flex.flex-col
-            ;span.text-xs.text-gray-400: Week {(numb:htmx w)}
-            ;span.text-xs.text-gray-400: {(numb:htmx y)}
+            ;span.text-xs.text-gray-400: Week {(numb w)}
+            ;span.text-xs.text-gray-400: {(numb y)}
           ==
         ==
         ;*  |-
@@ -302,7 +302,7 @@
               |=  n=@ud
               ^-  manx
               ;div.hour-label.text-xs.text-gray-400
-                =style  "top: {(numb:htmx (sub (mul 50 n) 8))}px;"
+                =style  "top: {(numb (sub (mul 50 n) 8))}px;"
                 ;*  ?:  (lth n 12)
                       ; {(scow %ud n)} AM
                     ?:  =(n 12)

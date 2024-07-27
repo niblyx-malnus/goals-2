@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, server, htmx, nooks, pytz,
+/+  *ventio, *numb, server, htmx, nooks, pytz,
     html-utils, tu=time-utils, clib=calendar,
     fi=webui-feather-icons,
     webui-calendar-day-view-fullday-square-event,
@@ -101,7 +101,7 @@
             =hx-target   "#{(en-html-id:htmx (moup:htmx 2 base))}"
             =hx-trigger  "click" 
             =hx-swap     "outerHTML"
-            ; {(numb:tu (sub (lent irefs) 2))} more
+            ; {(numb (sub (lent irefs) 2))} more
           ==
     ==
   ::

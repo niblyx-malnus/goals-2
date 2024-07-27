@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, server, htmx, nooks, pytz,
+/+  *ventio, *numb, server, htmx, nooks, pytz,
     html-utils, tu=time-utils, clib=calendar,
     fi=webui-feather-icons,
     webui-calendar-scripts,
@@ -132,7 +132,7 @@
     =/  this-day=@da  (year [& y] m d 0 0 0 ~)
     =/  day-before=[y=@ud m=@ud d=@ud]  [y m d.t]:(yore (sub this-day ~d1))
     =/  day-after=[y=@ud m=@ud d=@ud]   [y m d.t]:(yore (add this-day ~d1))
-    =/  month-title=tape  "{(snag (sub m 1) month-abbrv)} {(numb:htmx y)}"
+    =/  month-title=tape  "{(snag (sub m 1) month-abbrv)} {(numb y)}"
     ::
     ;div(class "p-2 flex items-center space-x-4")
       ;select.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
@@ -216,8 +216,8 @@
       ;div.weekday-labels
         ;div.relative.min-w-0
           ;div.flex.flex-col
-            ;span.text-xs.text-gray-400: Week {(numb:htmx w.this-week)}
-            ;span.text-xs.text-gray-400: {(numb:htmx y)}
+            ;span.text-xs.text-gray-400: Week {(numb w.this-week)}
+            ;span.text-xs.text-gray-400: {(numb y)}
           ==
         ==
         ;+  =/  weekday=tape  (snag `@`(get-weekday:tu today) weekday-headers)
@@ -284,7 +284,7 @@
               |=  n=@ud
               ^-  manx
               ;div.hour-label.text-xs.text-gray-400
-                =style  "top: {(numb:htmx (sub (mul 50 n) 8))}px;"
+                =style  "top: {(numb (sub (mul 50 n) 8))}px;"
                 ;*  ?:  (lth n 12)
                       ; {(scow %ud n)} AM
                     ?:  =(n 12)

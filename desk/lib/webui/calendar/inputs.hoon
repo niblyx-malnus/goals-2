@@ -1,4 +1,4 @@
-/+  tu=time-utils, html-utils, htmx
+/+  tu=time-utils, html-utils, htmx, *numb
 =*  mx  mx:html-utils
 |%
 :: %dr
@@ -21,7 +21,7 @@
   ++  defaults
     ^-  [d=tape h=tape m=tape s=tape]
     =/  d-num    (div default ~d1)
-    =/  d        ?:(=(0 d-num) "" (numb:htmx d-num))
+    =/  d        ?:(=(0 d-num) "" (numb d-num))
     =.  default  (mod default ~d1)
     =/  h-num    (div default ~h1)
     =/  h        ?:(=(0 h-num) "" (scow %ud h-num))
@@ -67,7 +67,7 @@
   ;input
     =style        "width: 100%"
     =name         "{name}"
-    =value        "{(numb:tu default)}"
+    =value        "{(numb default)}"
     =placeholder  "0"
     =min          "0"
     ;

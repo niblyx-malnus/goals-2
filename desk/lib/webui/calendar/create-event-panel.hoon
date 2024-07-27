@@ -1,5 +1,5 @@
 /-  c=calendar, r=rules
-/+  *ventio, htmx, server, nooks, pytz,
+/+  *ventio, *numb, htmx, server, nooks, pytz,
     html-utils, tu=time-utils, fi=webui-feather-icons,
     inputs=webui-calendar-inputs
 |_  $:  [zid=@t =date minute=(unit @dr) default=?(%fuld %left)]
@@ -481,7 +481,7 @@
           =value        "1"
           =required     ""
           =min          "1"
-          =max          "{(numb:htmx max-instances:c)}"
+          =max          "{(numb max-instances:c)}"
           =class        "p-2 w-60 text-sm border rounded focus:outline-none focus:border-b-4 focus:border-blue-600 caret-blue-600 !important"
           ;
         ==
