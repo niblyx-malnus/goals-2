@@ -1,6 +1,6 @@
 /-  c=calendar
-/+  *ventio, *numb, server, htmx, nooks, pytz,
-    html-utils, tu=time-utils, clib=calendar,
+/+  *ventio, *numb, server, htmx, nooks, pytz, iso=iso-8601,
+    html-utils, tu=time-utils, clib=calendar, 
     fi=webui-feather-icons,
     webui-calendar-scripts,
     webui-calendar-create-event-panel
@@ -101,8 +101,8 @@
     =/  html-id=tape  (en-html-id:htmx base)
     =/  start=@dr  (mul ~m30 chunk)
     =/  end=@dr    (min (add ~h1 start) ~d1)
-    =/  start-hr=tape  (dr-format:tu '12' start)
-    =/  end-hr=tape    (dr-format:tu '12' end)
+    =/  start-hr=tape  (dr-format:iso '12' start)
+    =/  end-hr=tape    (dr-format:iso '12' end)
     =/  height=tape    (numb ?:((lth ~d1 end) 25 50))
     ?:  hidden
       ;div(id html-id);

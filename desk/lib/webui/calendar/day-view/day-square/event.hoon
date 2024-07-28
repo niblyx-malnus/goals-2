@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, *numb, server, htmx, nooks, pytz,
+/+  *ventio, *numb, server, htmx, nooks, pytz, iso=iso-8601,
     html-utils, tu=time-utils, clib=calendar,
     fi=webui-feather-icons,
     webui-calendar-scripts,
@@ -120,8 +120,8 @@
         1.200
       (add (mul 50 h.t.end) (div (mul 50 m.t.end) 60))
     =/  dif-px=@ud     (sub end-px start-px)
-    =/  start-hr=tape  (dr-format:tu '12' (mod (year start) ~d1))
-    =/  end-hr=tape    (dr-format:tu '12' (mod (year end) ~d1))
+    =/  start-hr=tape  (dr-format:iso '12' (mod (year start) ~d1))
+    =/  end-hr=tape    (dr-format:iso '12' (mod (year end) ~d1))
     ;div.relative(id html-id)
       ;div
         :: TODO: border-white only when not z-0 (bottom layer)

@@ -1,5 +1,6 @@
-/+  *ventio, htmx, pytz, server, nooks, html-utils, fi=webui-feather-icons,
-    tu=time-utils,
+/+  *ventio, htmx, pytz, server, nooks, html-utils, tu=time-utils,
+    iso=iso-8601,
+    fi=webui-feather-icons,
     webui-calendar-month-view,
     webui-calendar-week-view,
     webui-calendar-day-view
@@ -19,7 +20,7 @@
   :-  [zid y m]
   :+  gowl
     %+  weld  base
-    /month-view/(crip (en:month-input:tu y m))
+    /month-view/(crip (en:month-input:iso y m))
   [[eyre-id req] [ext site] args]
 ::
 ++  week-view
@@ -29,7 +30,7 @@
   :-  [zid y w]
   :+  gowl
     %+  weld  base
-    /week-view/(crip (en:week-input:tu y w))
+    /week-view/(crip (en:week-input:iso y w))
   [[eyre-id req] [ext site] args]
 ::
 ++  day-view
@@ -39,7 +40,7 @@
   :-  [zid y m d]
   :+  gowl
     %+  weld  base
-    /day-view/(crip (en:date-input:tu y m d))
+    /day-view/(crip (en:date-input:iso y m d))
   [[eyre-id req] [ext site] args]
 ::
 ++  blue-fi-loader
@@ -174,19 +175,19 @@
     ==
     ::
       [* [%day-view date=@ta *] *]
-    =/  day=[@ud @ud @ud]  (de:date-input:tu date.cad.parms)
+    =/  day=[@ud @ud @ud]  (de:date-input:iso date.cad.parms)
     =.  day.sta  [~ day]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     handle:(day-view zone.sta day)
     ::
       [* [%week-view week=@ta *] *]
-    =/  week=[@ud @ud]  (de:week-input:tu week.cad.parms)
+    =/  week=[@ud @ud]  (de:week-input:iso week.cad.parms)
     =.  week.sta  [~ week]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     handle:(week-view zone.sta week)
     ::
       [* [%month-view date=@ta *] *]
-    =/  month=[@ud @ud]  (de:month-input:tu date.cad.parms)
+    =/  month=[@ud @ud]  (de:month-input:iso date.cad.parms)
     =.  month.sta  [~ month]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
     handle:(month-view zone.sta month)

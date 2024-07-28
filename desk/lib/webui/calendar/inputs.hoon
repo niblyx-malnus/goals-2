@@ -1,4 +1,4 @@
-/+  tu=time-utils, html-utils, htmx, *numb
+/+  tu=time-utils, html-utils, htmx, iso=iso-8601, *numb
 =*  mx  mx:html-utils
 |%
 :: %dr
@@ -140,7 +140,7 @@
     =style        "width: 100%"
     =type         "date"
     =name         "{name}"
-    =value        "{(en:date-input:tu default)}"
+    =value        "{(en:date-input:iso default)}"
     ;
   ==
 :: %dl
@@ -194,7 +194,7 @@
     =style        "width: 100%"
     =type         "time"
     =name         "{name}"
-    =value        "{(en:time-input:tu default)}"
+    =value        "{(en:time-input:iso default)}"
     ;
   ==
 ::  %da
@@ -207,7 +207,7 @@
     =style        "width: 100%"
     =type         "datetime-local"
     =name         "{name}"
-    =value        "{(en:datetime-local:tu default)}"
+    =value        "{(en:datetime-local:iso default)}"
     ;
   ==
 :: %mt
@@ -220,7 +220,7 @@
     =style        "width: 100%"
     =type         "month"
     =name         "{name}"
-    =value        "{(en:month-input:tu default)}"
+    =value        "{(en:month-input:iso default)}"
     ;
   ==
 :: %wk
@@ -233,7 +233,7 @@
     =style        "width: 100%"
     =type         "week"
     =name         "{name}"
-    =value        "{(en:week-input:tu default)}"
+    =value        "{(en:week-input:iso default)}"
     ;
   ==
 :: %dx
@@ -256,7 +256,7 @@
       =style        "width: 80%"
       =type         "datetime-local"
       =name         "{name}[d]"
-      =value        "{(en:datetime-local:tu default)}"
+      =value        "{(en:datetime-local:iso default)}"
       ;
     ==
   ==

@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, server, htmx, nooks, pytz,
+/+  *ventio, server, htmx, nooks, pytz, iso=iso-8601,
     fi=webui-feather-icons, html-utils, tu=time-utils, clib=calendar,
     webui-calendar-scripts,
     webui-calendar-update-event-panel
@@ -121,7 +121,7 @@
           ==
           ;div.flex.gap-1.items-center
             ;+  %-  need  %-  de-xml:html  %-  crip
-                "<span class=\"text-xs text-gray-800 truncate\">{(dr-format:tu '12' (mod start ~d1))} <strong>{title}</strong></span>"
+                "<span class=\"text-xs text-gray-800 truncate\">{(dr-format:iso '12' (mod start ~d1))} <strong>{title}</strong></span>"
           ==
         ==
         ;+  (modal-container hidden)

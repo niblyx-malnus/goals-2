@@ -1,5 +1,5 @@
 /-  c=calendar
-/+  *ventio, *numb, server, htmx, nooks, pytz,
+/+  *ventio, *numb, server, htmx, nooks, pytz, iso=iso-8601,
     html-utils, tu=time-utils, clib=calendar,
     fi=webui-feather-icons,
     webui-calendar-scripts,
@@ -27,7 +27,7 @@
   %~  .
     webui-calendar-day-view-day-square
   :-  [zid y m d]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:tu y m d)))
+  :+  gowl  (weld base /day-square/(crip (en:date-input:iso y m d)))
   [[eyre-id req] [ext site] args]
 ::
 ++  fullday-square
@@ -35,7 +35,7 @@
   %~  .
     webui-calendar-day-view-fullday-square
   :-  [zid y m d collapse]
-  :+  gowl  (weld base /fullday-square/(crip (en:date-input:tu y m d)))
+  :+  gowl  (weld base /fullday-square/(crip (en:date-input:iso y m d)))
   [[eyre-id req] [ext site] args]
 ::
 ++  left-arrow
@@ -145,7 +145,7 @@
         ;option(value "month"): Month
       ==
       ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
-        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu [y m d.t]:(yore now))}"
+        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:iso [y m d.t]:(yore now))}"
         =hx-target   "#{(en-html-id:htmx base)}"
         =hx-trigger  "click" 
         =hx-swap     "outerHTML"
@@ -153,7 +153,7 @@
       ==
       ;div(class "flex items-center space-x-1")
         ;button
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu day-before)}"
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:iso day-before)}"
           =hx-target   "#{(en-html-id:htmx base)}"
           =hx-trigger  "click"
           =hx-swap     "outerHTML"
@@ -163,7 +163,7 @@
           ;+  (~(set-style mx left-arrow) "height: .95em; width: .95em;")
         ==
         ;button
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:tu day-after)}"
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:iso day-after)}"
           =hx-target   "#{(en-html-id:htmx base)}"
           =hx-trigger  "click"
           =hx-swap     "outerHTML"
@@ -207,7 +207,7 @@
     =/  rul=(unit [* offset=delta:tu name=@t])  (active-rule:zn today)
     =/  rule-name=tape  ?~(rul "" (trip name.u.rul))
     =/  offset-name=tape
-      ?~(rul "UTC" (weld "UTC" (print-utc-offset:tu offset.u.rul)))
+      ?~(rul "UTC" (weld "UTC" (print-utc-offset:iso offset.u.rul)))
     ;div(class "p-4 flex flex-col h-full w-full min-w-[950px] min-h-[600px]")
       ;style: {style}
       ;+  toolbar

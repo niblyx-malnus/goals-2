@@ -1,12 +1,82 @@
-/+  tu=time-utils, *numb
 /~  files  wain  /lib/pytz
+:: helper structures and functions
+::
 =>  |%
-    +$  rule  [offset=delta:tu name=@t]
-    +$  zone  ((mop @da rule) lth)
-    ++  zon   ((on @da rule) lth)
+    +$  dext     [i=@ud d=@da]  :: indexed time
+    +$  delta    [sign=? d=@dr] :: positive or negative offset
+    ::
+    ++  apply-delta
+      |=  [=time =delta]
+      ^+  time
+      (?:(sign.delta add sub) time d.delta)
+    ::
+    ++  invert-delta  |=(=delta delta(sign !sign.delta))
+    ::
+    ++  apply-invert-delta
+      |=  [=time =delta]
+      ^+  time
+      (apply-delta time (invert-delta delta))
+    ::
+    ++  compose-deltas
+      |=  [a=delta b=delta]
+      ^-  delta
+      ?:  =(sign.a sign.b)
+        [sign.a (add d.a d.b)]
+      ?:  (gte d.a d.b)
+        [sign.a (sub d.a d.b)]
+      [sign.b (sub d.b d.a)]
+    ::
+    ++  numb :: adapted from numb:enjs:format
+      |=  a=@u
+      ^-  tape
+      ?:  =(0 a)  "0"
+      %-  flop
+      |-  ^-  tape
+      ?:(=(0 a) ~ [(add '0' (mod a 10)) $(a (div a 10))])
+    ::
+    ++  monadic-parsing
+      |%
+      :: parser bind
+      ::
+      ++  bind  
+        |*  =mold
+        |*  [sef=rule gat=$-(mold rule)]
+        |=  tub=nail
+        =/  vex  (sef tub)
+        ?~  q.vex  vex
+        ((gat p.u.q.vex) q.u.q.vex)
+      :: lookahead arbitrary rule
+      ::
+      ++  peek
+        |*  sef=rule
+        |=  tub=nail
+        =+  vex=(sef tub)
+        ?~  q.vex
+          [p=p.vex q=[~ u=[p=~ q=tub]]]
+        [p=p.vex q=[~ u=[p=[~ p.u.q.vex] q=tub]]]
+      ::
+      ++  exact-dem
+        |=  n=@ud
+        =|  digits=(list @ud)
+        |-
+        ?:  =(0 n)
+          %-  easy
+          %+  roll  (flop digits)
+          =|([p=@ q=@] |.((add p (mul 10 q)))) :: code from +bass
+        ;<  d=@ud  bind  dit
+        $(n (dec n), digits [d digits])
+      --
+    --
+:: timezone-specific structures and parsers
+::
+=>  |%
     :: version of pytz python library used to generate dataset
     ::
     ++  version  `@t`(snag 0 (~(got by files) %version))
+    ::
+    +$  rule  [offset=delta name=@t]
+    +$  zone  ((mop @da rule) lth)
+    ++  zon   ((on @da rule) lth)
     ::
     ++  to-filename
       |=  n=@t
@@ -36,14 +106,48 @@
       $(contents t.contents)
     ::
     ++  parse-zone-row
-      =,  monadic-parsing:tu
-      ;<  jump=@da   bind  parse:datetime-local:tu
+      =,  monadic-parsing
+      ;<  jump=@da   bind  parse-datetime
       ;<  *          bind  com
-      ;<  =delta:tu  bind  parse:offset:tu
+      ;<  =delta     bind  parse-offset
       ;<  *          bind  com
       ;<  name=@t    bind  (cook crip (star prn))
       (easy [jump delta name])
+    ::
+    ++  parse-datetime
+      =,  monadic-parsing
+      ;<  y=@ud   bind  (exact-dem 4)
+      ;<  *       bind  hep
+      ;<  mo=@ud  bind  (exact-dem 2)
+      ;<  *       bind  hep
+      ;<  d=@ud   bind  (exact-dem 2)
+      ;<  *       bind  (just 'T')
+      ;<  h=@ud   bind  (exact-dem 2)
+      ;<  *       bind  col
+      ;<  mi=@ud  bind  (exact-dem 2)
+      =/  d=@da   (year [& y] mo d h mi 0 ~)
+      ;<  is-col=(unit *)  bind  (peek col)
+      ?~  is-col
+        (easy d)
+      ;<  *      bind  col
+      ;<  s=@ud  bind  (exact-dem 2)
+      =.  d      (add d (mul s ~s1))
+      ;<  is-dot=(unit *)  bind  (peek dot)
+      ?~  is-dot
+        (easy d)
+      ;<  *      bind  dot
+      ;<  f=@ud  bind  (exact-dem 3)
+      (easy (add d (div (mul f ~s1) 1.000)))
+    ::
+    ++  parse-offset
+      =,  monadic-parsing
+      ;<  sign=?  bind  (cook |=(=@t =(t '+')) ;~(pose lus hep))
+      ;<  h=@ud   bind  (exact-dem 2)
+      ;<  *       bind  col
+      ;<  m=@ud   bind  (exact-dem 2)
+      (easy `delta`[sign (add (mul h ~h1) (mul m ~m1))])
     --
+:: materialize the timezones
 ::
 =/  names=(list @t)  (~(got by files) %names)
 =/  zones=(map @t zone)
@@ -53,6 +157,7 @@
   ^-  (list [@t zone])
   |-
   ?~  names
+    ~&  >  "timezones were successfully loaded!"
     ~
   ~&  >>  "loading timezone [{(numb idx)}/{(numb total)}]: {(trip i.names)}"
   :_  $(idx +(idx), names t.names)
@@ -61,6 +166,8 @@
   %-  parse-zone-rows
   %-  ~(got by files)
   (to-filename i.names)
+:: timezone conversion core
+::
 |%
 ++  zn
   |_  name=@t
@@ -73,23 +180,22 @@
   ::
   ++  active-offset
     |=  utc-time=@da
-    ^-  (unit delta:tu)
+    ^-  (unit delta)
     (bind (active-rule utc-time) (cork tail head))
   :: set of all offsets in the timezone
   ::
   ++  offsets
-    ^-  (set delta:tu)
-    %-  ~(gas in *(set delta:tu))
+    ^-  (set delta)
+    %-  ~(gas in *(set delta))
     %+  turn  (tap:zon zone)
     (cork tail head)
   ::
   ++  utc-to-tz
-    ^-  utc-to-tz:tu
     |=  utc-time=@da
-    ^-  (unit dext:tu)
+    ^-  (unit dext)
     ?~  off=(active-offset utc-time)
       ~
-    =/  tz-time=@da  (apply-delta:tu utc-time u.off)
+    =/  tz-time=@da  (apply-delta utc-time u.off)
     :: is this the first or second occurence of this tz-time?
     ::
     =/  times=(list @da)  (tz-to-utc-list tz-time)
@@ -98,8 +204,7 @@
     [~ u.idx tz-time]
   ::
   ++  tz-to-utc
-    ^-  tz-to-utc:tu
-    |=  =dext:tu
+    |=  =dext
     ^-  (unit @da)
     :: generate all possible times
     ::
@@ -112,7 +217,6 @@
   :: time ordered list of valid candidates
   ::
   ++  tz-to-utc-list
-    ^-  tz-to-utc-list:tu
     |=  tz-time=@da
     ^-  (list @da)
     |^
@@ -122,9 +226,9 @@
     ++  candidates
       ^-  (list @da)
       %+  murn  ~(tap in offsets)
-      |=  offset=delta:tu
+      |=  offset=delta
       ^-  (unit @da)
-      =/  utc-candidate=@da  (apply-invert-delta:tu tz-time offset)
+      =/  utc-candidate=@da  (apply-invert-delta tz-time offset)
       ?.  (validate utc-candidate offset)
         ~
       [~ utc-candidate]
@@ -132,7 +236,7 @@
     :: generated by the given offset
     ::
     ++  validate
-      |=  [utc-time=@da offset=delta:tu]
+      |=  [utc-time=@da offset=delta]
       ^-  ?
       ?~  off=(active-offset utc-time)
         %.n

@@ -1,5 +1,5 @@
 /+  *ventio, *numb, server, htmx, nooks, pytz, html-utils, tu=time-utils,
-    fi=webui-feather-icons,
+    fi=webui-feather-icons, iso=iso-8601,
     webui-calendar-scripts,
     webui-calendar-month-view-day-square
 |_  $:  [zid=@t y=@ud m=@ud]
@@ -22,7 +22,7 @@
   %~  .
     webui-calendar-month-view-day-square
   :-  [zid y m date]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:tu [y m d.t]:date)))
+  :+  gowl  (weld base /day-square/(crip (en:date-input:iso [y m d.t]:date)))
   [[eyre-id req] [ext site] args]
 ::
 ++  left-arrow
@@ -73,7 +73,7 @@
     (give-html-manx:htmx [our dap]:gowl eyre-id month-view:components |)
     ::
       [* [%day-square date=@ta *] *]
-    =/  [y=@ud m=@ud d=@ud]  (de:date-input:tu date.cad.parms)
+    =/  [y=@ud m=@ud d=@ud]  (de:date-input:iso date.cad.parms)
     handle:(day-square [& y] m d 0 0 0 ~)
   ==
 ::
@@ -116,7 +116,7 @@
         ;option(value "month", selected ""): Month
       ==
       ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
-        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu [y m]:(yore now))}"
+        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:iso [y m]:(yore now))}"
         =hx-target   "#{(en-html-id:htmx base)}"
         =hx-trigger  "click" 
         =hx-swap     "outerHTML"
@@ -124,7 +124,7 @@
       ==
       ;div(class "flex items-center space-x-1")
         ;button
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu last-month)}"
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:iso last-month)}"
           =hx-target   "#{(en-html-id:htmx base)}"
           =hx-trigger  "click"
           =hx-swap     "outerHTML"
@@ -134,7 +134,7 @@
           ;+  (~(set-style mx left-arrow) "height: .95em; width: .95em;")
         ==
         ;button
-          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:tu next-month)}"
+          =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:iso next-month)}"
           =hx-target   "#{(en-html-id:htmx base)}"
           =hx-trigger  "click"
           =hx-swap     "outerHTML"

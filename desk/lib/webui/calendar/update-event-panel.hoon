@@ -1,5 +1,5 @@
 /-  c=calendar, r=rules
-/+  *ventio, htmx, server, nooks, pytz,
+/+  *ventio, htmx, server, nooks, pytz, iso=iso-8601,
     html-utils, tu=time-utils, fi=webui-feather-icons,
     inputs=webui-calendar-inputs
 |_  $:  [zid=@t =date =cid:c =iref:c]
@@ -153,16 +153,16 @@
       ?+    q.i.parm  !!
         %ud  ud+(rash (reed:kv (~(get of brac) /[p.i.parm])) dem)
         %od  od+;;(ord:tu (reed:kv (~(get of brac) /[p.i.parm])))
-        %da  da+(de:datetime-local:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %da  da+(de:datetime-local:iso (reed:kv (~(get of brac) /[p.i.parm])))
         %dr  dr+(extract-duration (~(dip of brac) /[p.i.parm]))
         %dl  dl+(extract-delta (~(dip of brac) /[p.i.parm]))
         %dx  dx+(extract-dext (~(dip of brac) /[p.i.parm]))
         %wd  wd+;;(wkd:tu (reed:kv (~(get of brac) /[p.i.parm])))
         %wl  wl+;;((list wkd:tu) (need (~(get of brac) /[p.i.parm])))
-        %dt  dt+(de:date-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
-        %ct  ct+(de:time-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
-        %mt  mt+(de:month-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
-        %wk  wk+(de:week-input:tu (reed:kv (~(get of brac) /[p.i.parm])))
+        %dt  dt+(de:date-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
+        %ct  ct+(de:time-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
+        %mt  mt+(de:month-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
+        %wk  wk+(de:week-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
       ==
     ==
   ::
@@ -188,7 +188,7 @@
     |=  =brac:kv
     ^-  dext:tu
     :-  (rash (reed:kv (~(get of brac) /i)) dem)
-    (de:datetime-local:tu (reed:kv (~(get of brac) /d)))
+    (de:datetime-local:iso (reed:kv (~(get of brac) /d)))
   ::
   ++  extract-rule-kind
     |=  =brac:kv
