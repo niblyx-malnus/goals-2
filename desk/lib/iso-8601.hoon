@@ -144,8 +144,6 @@
     "{(dr-format '24' (sub d ~h12))}pm"
   ==
 :: TODO: parse basic (non-extended) format for ISO 8601 (no separators)
-:: TODO: implement ordinal date parsing (YYYY-DDD)
-:: TODO: implement week date parsing (YYYY-Www-D)
 :: TODO: implement offset parsing (Z and +-hh:mm)
 :: TODO: implement duration parsing (PnYnMnDTnHnMnS)
 :: TODO: implement recurring intervals (Rn/PnYnMnDTnHnMnS)
@@ -336,5 +334,47 @@
     ;<  *            bind  ;~(plug hep (just 'W'))
     ;<  w=@ud        bind  (exact-dem 2)
     (easy [[a y] w])
+  --
+:: YYYY-Www-D
+::
+++  week-date
+  |%
+  ++  en
+    |=  [[a=? y=@ud] w=@ud d=@ud]
+    ^-  tape
+    ;:  weld
+      (en:week-input [a y] w)
+      "-"
+      (numb +(d)) :: d is 0-indexed on Urbit
+    ==
+  ++  de       |=(=@t `[[a=? y=@ud] w=@ud d=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [[a=? y=@ud] w=@ud d=@ud])`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  [[a=? y=@ud] w=@ud]  bind  parse:week-input
+    ;<  *                    bind  hep
+    ;<  d=@ud                bind  (exact-dem 1)
+    (easy [[a y] w (dec d)]) :: d is 0-indexed on Urbit
+  --
+:: YYYY-DDD
+::
+++  ordinal-date
+  |%
+  ++  en
+    |=  [[a=? y=@ud] n=@ud]
+    ^-  tape
+    ;:  weld
+      (en:year-input a y)
+      "-"
+      (zfill 3 (numb n))
+    ==
+  ++  de       |=(=@t `[[a=? y=@ud] n=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [[a=? y=@ud] n=@ud])`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  [a=? y=@ud]  bind  parse:year-input
+    ;<  *            bind  hep
+    ;<  n=@ud        bind  (exact-dem 3)
+    (easy [[a y] n])
   --
 --
