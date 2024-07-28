@@ -40,12 +40,25 @@
         |=  n=@ud
         =|  digits=(list @ud)
         |-
-        ?:  =(0 n)
-          %-  easy
-          %+  roll  (flop digits)
-          =|([p=@ q=@] |.((add p (mul 10 q)))) :: code from +bass
-        ;<  d=@ud  bind  dit
-        $(n (dec n), digits [d digits])
+        ?.  =(0 n)
+          ;<  d=@ud  bind  dit
+          $(n (dec n), digits [d digits])
+        %-  easy
+        %+  roll  (flop digits)
+        =|([p=@ q=@] |.((add p (mul 10 q)))) :: code from +bass
+      ::
+      ++  at-least-dem
+        |=  n=@ud
+        =|  digits=(list @ud)
+        |-
+        ?.  =(0 n)
+          ;<  d=@ud  bind  dit
+          $(n (dec n), digits [d digits])
+        ;<  rest=@ud  bind  dem
+        %-  easy
+        %+  add  rest
+        %+  roll  (flop digits)
+        =|([p=@ q=@] |.((add p (mul 10 q)))) :: code from +bass
       --
     --
 |%
@@ -56,9 +69,21 @@
   =/  minutes=@ud  (div (mod d.offset ~h1) ~m1)
   ;:  weld
     ?:(sign.offset "+" "-")
-    (zfill 2 (scow %ud hours))
-    ?:(=(0 minutes) "" ":{(zfill 2 (scow %ud minutes))}")
+    (zfill 2 (numb hours))
+    ?:(=(0 minutes) "" ":{(zfill 2 (numb minutes))}")
   ==
+::
+++  utc-relative-name
+  |=  =delta
+  ^-  tape
+  ?:  =(0 d.delta)
+    "UTC"
+  =/  hours=@ud    (div (mod d.delta ~d1) ~h1)
+  =/  minutes=@ud  (div (mod d.delta ~h1) ~m1)
+  =/  start=tape  [?:(sign.delta '+' '-') (zfill 2 (numb hours))]
+  ?:  =(0 minutes)
+    start
+  :(weld start ":" (zfill 2 (numb minutes)))
 ::
 ++  timespan-description
   |=  [a=? d=@dr]
@@ -87,17 +112,37 @@
     "a year"
   "{(numb (div (add d ~d182.h15) ~d365.h6))} days"
 ::
-++  utc-relative-name
-  |=  =delta
+++  dr-format
+  |=  [as=@t d=@dr]
   ^-  tape
-  ?:  =(0 d.delta)
-    "UTC"
-  =/  hours=@ud    (div (mod d.delta ~d1) ~h1)
-  =/  minutes=@ud  (div (mod d.delta ~h1) ~m1)
-  =/  start=tape  [?:(sign.delta '+' '-') (zfill 2 (numb hours))]
-  ?:  =(0 minutes)
-    start
-  :(weld start ":" (zfill 2 (numb minutes)))
+  ?+    as  !!
+      %'24'
+    ?>  (lth d ~d1)
+    :: unlike time-input (ISO-8601), no leading hour zero
+    ::
+    =/  =tape  (numb (div d ~h1))
+    =.  d      (mod d ~h1)
+    ?:  =(0 d)
+      tape
+    =.  tape   :(weld tape ":" (zfill 2 (numb (div d ~m1))))
+    =.  d      (mod d ~m1)
+    ?:  =(0 d)
+      tape
+    =.  tape  :(weld tape ":" (zfill 2 (numb (div d ~s1))))
+    =.  d      (mod d ~s1)
+    ?:  =(0 d)
+      tape
+    :(weld tape "." (zfill 3 (numb (div (mul d 1.000) ~s1))))
+    ::
+      %'12'
+    ?:  (lth d ~h1)
+      "{(dr-format '24' (add d ~h12))}am"
+    ?:  (lth d ~h12)
+      "{(dr-format '24' d)}am"
+    ?:  (lth d ~h13)
+      "{(dr-format '24' d)}pm"
+    "{(dr-format '24' (sub d ~h12))}pm"
+  ==
 :: TODO: parse basic (non-extended) format for ISO 8601 (no separators)
 :: TODO: implement ordinal date parsing (YYYY-DDD)
 :: TODO: implement week date parsing (YYYY-Www-D)
@@ -108,31 +153,30 @@
 :: TODO: recurring intervals WITH start or end [of recurrence]
 :: (None of the above are valid for any standard HTML inputs)
 ::
-:: TODO: make sure to handle 24:00 as 00:00 of the next day
-:: TODO: a comma is a valid fractional separator in the HH:MM... portion
-:: TODO: parameterize number of decimal places (datetime-local uses 3)
+:: TODO: rename cores/gates in line with ISO-8601
+::       instead of HTML inputs
 ::
 :: YYYY-MM-DDTHH:MM[:SS[.SSS]]
 ::
 ++  datetime-local
-|%
-++  en
-  |=  d=@da
-  ^-  tape
-  =/  date=tape   (en:date-input [y m d.t]:(yore d))
-  =/  clock=tape  (en:time-input `@dr`(mod d ~d1))
-  :(weld date "T" clock)
-  ::
-  ++  de       |=(=@t `@da`(rash t parse))
-  ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
-  ++  parse
-    =,  monadic-parsing
-    ;<  [y=@ud m=@ud d=@ud]  bind  parse:date-input
-    ;<  *                    bind  (just 'T')
-    ;<  clock=@dr            bind  parse:time-input
-    =/  d=@da  (year [& y] m d 0 0 0 ~)
-    (easy (add d clock))
-  --
+  |%
+  ++  en
+    |=  d=@da
+    ^-  tape
+    =/  date=tape   (en:date-input [[a y] m d.t]:(yore d))
+    =/  clock=tape  (en:time-input `@dr`(mod d ~d1))
+    :(weld date "T" clock)
+    ::
+    ++  de       |=(=@t `@da`(rash t parse))
+    ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
+    ++  parse
+      =,  monadic-parsing
+      ;<  [[a=? y=@ud] m=@ud d=@ud]  bind  parse:date-input
+      ;<  *                          bind  (just 'T')
+      ;<  clock=@dr                  bind  parse:time-input
+      =/  d=@da  (year [a y] m d 0 0 0 ~)
+      (easy (add d clock))
+    --
 ::
 ++  offset
   |%
@@ -158,76 +202,80 @@
     ;<  m=@ud   bind  (exact-dem 2)
     (easy `delta`[sign (add (mul h ~h1) (mul m ~m1))])
   --
+:: YYYY, -YYYY..., +YYYYY...
+::
+++  year-input
+  |%
+  ++  en
+    |=  [a=? y=@ud]
+    ^-  tape
+    ?.  a
+      ['-' (zfill 4 (numb (dec y)))] :: year 1 BC is year 0 in ISO-8601
+    ?:  (lth y 10.000)
+      (zfill 4 (numb y))
+    ['+' (numb y)]
+  ++  de       |=(=@t `[a=? y=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [a=? y=@ud])`(rush t parse))
+  ++  parse
+    =,  monadic-parsing
+    ;<  is-sign=(unit *)  bind  (peek ;~(pose hep lus))
+    ?~  is-sign
+      ;<  y=@ud  bind  (exact-dem 4)
+      (easy [& y])
+    ;<  is-hep=(unit *)  bind  (peek hep)
+    ?^  is-hep
+      ;<  *      bind  hep
+      ;<  y=@ud  bind  (at-least-dem 4)
+      (easy [| +(y)])
+    ;<  *      bind  lus
+    ;<  y=@ud  bind  (at-least-dem 5)
+    (easy [& y])
+  --
 :: YYYY-MM-DD
 ::
 ++  date-input
   |%
   ++  en
-    |=  [y=@ud m=@ud d=@ud]
+    |=  [[a=? y=@ud] m=@ud d=@ud]
     ^-  tape
-    "{(zfill 4 (numb y))}-{(zfill 2 (numb m))}-{(zfill 2 (numb d))}"
-  ++  de       |=(=@t `[y=@ud m=@ud d=@ud]`(rash t parse))
-  ++  de-soft  |=(=@t `(unit [y=@ud m=@ud d=@ud])`(rush t parse))
+    %+  weld
+      (en:year-input a y)
+    "-{(zfill 2 (numb m))}-{(zfill 2 (numb d))}"
+  ++  de       |=(=@t `[[a=? y=@ud] m=@ud d=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [[a=? y=@ud] m=@ud d=@ud])`(rush t parse))
   ++  parse
     =,  monadic-parsing
-    ;<  y=@ud  bind  (exact-dem 4)
-    ;<  *      bind  hep
-    ;<  m=@ud  bind  (exact-dem 2)
-    ;<  *      bind  hep
-    ;<  d=@ud  bind  (exact-dem 2)
-    (easy [y m d])
+    ;<  [a=? y=@ud]  bind  parse:year-input
+    ;<  *            bind  hep
+    ;<  m=@ud        bind  (exact-dem 2)
+    ;<  *            bind  hep
+    ;<  d=@ud        bind  (exact-dem 2)
+    (easy [[a y] m d])
   --
-::
-++  dr-format
-  |=  [as=@t d=@dr]
-  ^-  tape
-  ?+    as  !!
-      %'24'
-    ?>  (lth d ~d1)
-    :: unlike time-input (ISO-8601), no leading hour zero
-    ::
-    =/  =tape  (scow %ud (div d ~h1))
-    =.  d      (mod d ~h1)
-    ?:  =(0 d)
-      tape
-    =.  tape   :(weld tape ":" (zfill 2 (scow %ud (div d ~m1))))
-    =.  d      (mod d ~m1)
-    ?:  =(0 d)
-      tape
-    =.  tape  :(weld tape ":" (zfill 2 (scow %ud (div d ~s1))))
-    =.  d      (mod d ~s1)
-    ?:  =(0 d)
-      tape
-    :(weld tape "." (zfill 3 (scow %ud (div (mul d 1.000) ~s1))))
-    ::
-      %'12'
-    ?:  (lth d ~h1)
-      "{(dr-format '24' (add d ~h12))}am"
-    ?:  (lth d ~h12)
-      "{(dr-format '24' d)}am"
-    ?:  (lth d ~h13)
-      "{(dr-format '24' d)}pm"
-    "{(dr-format '24' (sub d ~h12))}pm"
-  ==
 :: HH:MM[:SS[.SSS]]
 ::
 ++  time-input
+  =|  sep=?(%',' %'.')
+  =/  places=@ud  3
   |%
   ++  en
     |=  d=@dr
     ^-  tape
-    ?>  (lth d ~d1)
-    =/  =tape  (weld (zfill 2 (scow %ud (div d ~h1))) ":")
+    =/  =tape  (weld (zfill 2 (numb (div d ~h1))) ":")
     =.  d      (mod d ~h1)
-    =.  tape   (weld tape (zfill 2 (scow %ud (div d ~m1))))
+    =.  tape   (weld tape (zfill 2 (numb (div d ~m1))))
     =.  d      (mod d ~m1)
     ?:  =(0 d)
       tape
-    =.  tape  :(weld tape ":" (zfill 2 (scow %ud (div d ~s1))))
+    =.  tape  :(weld tape ":" (zfill 2 (numb (div d ~s1))))
     =.  d      (mod d ~s1)
     ?:  =(0 d)
       tape
-    :(weld tape "." (zfill 3 (scow %ud (div (mul d 1.000) ~s1))))
+    ;:  weld
+      tape
+      (trip sep)
+      (zfill places (numb (div (mul d (pow 10 places)) ~s1)))
+    ==
   ++  de       |=(=@t `@dr`(rash t parse))
   ++  de-soft  |=(=@t `(unit @dr)`(rush t parse))
   ++  parse
@@ -242,48 +290,51 @@
     ;<  *      bind  col
     ;<  s=@ud  bind  (exact-dem 2)
     =.  d      (add d (mul s ~s1))
-    ;<  is-dot=(unit *)  bind  (peek dot)
-    ?~  is-dot
+    ;<  is-sep=(unit *)  bind  (peek ;~(pose dot com))
+    ?~  is-sep
       (easy d)
     ;<  *      bind  dot
-    ;<  f=@ud  bind  (exact-dem 3)
-    (easy (add d (div (mul f ~s1) 1.000)))
+    ;<  f=@ud  bind  (exact-dem places)
+    (easy (add d (div (mul f ~s1) (pow 10 places))))
   --
 :: YYYY-MM
 ::
 ++  month-input
   |%
   ++  en
-    |=  [y=@ud m=@ud]
+    |=  [[a=? y=@ud] m=@ud]
     ^-  tape
-    "{(numb y)}-{(zfill 2 (numb m))}"
-  ++  de       |=(=@t `[y=@ud m=@ud]`(rash t parse))
-  ++  de-soft  |=(=@t `(unit [y=@ud m=@ud])`(rush t parse))
+    %+  weld
+      (en:year-input a y)
+    "-{(zfill 2 (numb m))}"
+  ++  de       |=(=@t `[[a=? y=@ud] m=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [[a=? y=@ud] m=@ud])`(rush t parse))
   ++  parse
     =,  monadic-parsing
-    ;<  y=@ud  bind  dem
-    ;<  *      bind  hep
-    ;<  m=@ud  bind  dem
-    (easy [y m])
+    ;<  [a=? y=@ud]  bind  parse:year-input
+    ;<  *            bind  hep
+    ;<  m=@ud        bind  (exact-dem 2)
+    (easy [[a y] m])
   --
+:: YYYY-Www
 ::
 ++  week-input
   |%
   ++  en
-    |=  [y=@ud w=@ud]
+    |=  [[a=? y=@ud] w=@ud]
     ^-  tape
     ;:  weld
-      (numb y)
+      (en:year-input a y)
       "-W"
-      (zfill 2 (scow %ud w))
+      (zfill 2 (numb w))
     ==
-  ++  de       |=(=@t `[y=@ud w=@ud]`(rash t parse))
-  ++  de-soft  |=(=@t `(unit [y=@ud w=@ud])`(rush t parse))
+  ++  de       |=(=@t `[[a=? y=@ud] w=@ud]`(rash t parse))
+  ++  de-soft  |=(=@t `(unit [[a=? y=@ud] w=@ud])`(rush t parse))
   ++  parse
     =,  monadic-parsing
-    ;<  y=@ud  bind  dem
-    ;<  *      bind  ;~(plug hep (just 'W'))
-    ;<  w=@ud  bind  dem
-    (easy [y w])
+    ;<  [a=? y=@ud]  bind  parse:year-input
+    ;<  *            bind  ;~(plug hep (just 'W'))
+    ;<  w=@ud        bind  (exact-dem 2)
+    (easy [[a y] w])
   --
 --

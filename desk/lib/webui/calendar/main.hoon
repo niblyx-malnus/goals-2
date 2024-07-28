@@ -20,7 +20,7 @@
   :-  [zid y m]
   :+  gowl
     %+  weld  base
-    /month-view/(crip (en:month-input:iso y m))
+    /month-view/(crip (en:month-input:iso [& y] m))
   [[eyre-id req] [ext site] args]
 ::
 ++  week-view
@@ -30,7 +30,7 @@
   :-  [zid y w]
   :+  gowl
     %+  weld  base
-    /week-view/(crip (en:week-input:iso y w))
+    /week-view/(crip (en:week-input:iso [& y] w))
   [[eyre-id req] [ext site] args]
 ::
 ++  day-view
@@ -40,7 +40,7 @@
   :-  [zid y m d]
   :+  gowl
     %+  weld  base
-    /day-view/(crip (en:date-input:iso y m d))
+    /day-view/(crip (en:date-input:iso [& y] m d))
   [[eyre-id req] [ext site] args]
 ::
 ++  blue-fi-loader
@@ -118,7 +118,7 @@
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu now))
+      =/  week=[@ud @ud]  (fall week.sta [y w]:`[[? y=@ud] w=@ud]`(da-to-week:tu now))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
@@ -141,7 +141,7 @@
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu now))
+      =/  week=[@ud @ud]  (fall week.sta [y w]:`[[? y=@ud] w=@ud]`(da-to-week:tu now))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
@@ -164,7 +164,7 @@
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
         %week
-      =/  week=[@ud @ud]  (fall week.sta (da-to-week-number:tu now))
+      =/  week=[@ud @ud]  (fall week.sta [y w]:`[[? y=@ud] w=@ud]`(da-to-week:tu now))
       =/  =manx  week-view:components:(week-view zone.sta week)
       (give-html-manx:htmx [our dap]:gowl eyre-id (contain manx) |)
       ::
@@ -175,22 +175,22 @@
     ==
     ::
       [* [%day-view date=@ta *] *]
-    =/  day=[@ud @ud @ud]  (de:date-input:iso date.cad.parms)
-    =.  day.sta  [~ day]
+    =/  day=[[? y=@ud] m=@ud d=@ud]  (de:date-input:iso date.cad.parms)
+    =.  day.sta  [~ [y m d]:day]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
-    handle:(day-view zone.sta day)
+    handle:(day-view zone.sta [y m d]:day)
     ::
       [* [%week-view week=@ta *] *]
-    =/  week=[@ud @ud]  (de:week-input:iso week.cad.parms)
-    =.  week.sta  [~ week]
+    =/  week=[[? y=@ud] w=@ud]  (de:week-input:iso week.cad.parms)
+    =.  week.sta  [~ [y w]:week]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
-    handle:(week-view zone.sta week)
+    handle:(week-view zone.sta [y w]:week)
     ::
       [* [%month-view date=@ta *] *]
-    =/  month=[@ud @ud]  (de:month-input:iso date.cad.parms)
-    =.  month.sta  [~ month]
+    =/  month=[[? y=@ud] m=@ud]  (de:month-input:iso date.cad.parms)
+    =.  month.sta  [~ [y m]:month]
     ;<  sta=state  bind:m  ((put:nuk state) base sta)
-    handle:(month-view zone.sta month)
+    handle:(month-view zone.sta [y m]:month)
   ==
 ::
 ++  contain

@@ -27,6 +27,13 @@
 +$  span     [l=@da r=@da] :: UTC datetime pair
 +$  fullday  @da           :: must be divisible by ~d1
 +$  jump     @da
+::
++$  anum  [a=? y=@ud]               :: a signed year
++$  munt  [[a=? y=@ud] m=@ud]       :: month of year
++$  fuld  [[a=? y=@ud] m=@ud d=@ud] :: date by day of month
++$  week  [[a=? y=@ud] w=@ud]       :: week of year
++$  dawk  [[a=? y=@ud] w=@ud d=@ud] :: date by day of week
++$  nord  [[a=? y=@ud] n=@ud]       :: ordinal date (nth day of year)
 :: CALENDAR rule; NOT TIMEZONE rule
 ::
 +$  rule-exception
@@ -40,7 +47,7 @@
   $%  [%ud p=@ud]                 :: natural number (unsigned decimal)
       [%od p=ord]                 :: ordinal numbers for weekday in a month
       [%da p=@da]                 :: datetime-local
-      [%dr p=@dr]                 :: duration (?)
+      [%dr p=@dr]                 :: duration
       [%dl p=delta]               :: delta (signed @dr)
       [%dx p=dext]                :: indexed datetime
       [%wd p=wkd]                 :: weekday
@@ -83,6 +90,15 @@
   ?:  =(5 num)  %sat
   ?:  =(6 num)  %sun
   !!
+::
+++  shift-anum
+  |=  [[a=? y=@ud] sign=? n=@ud]
+  ^-  anum
+  ?:  =(a sign)
+    [a (add a n)]
+  ?:  (lth n y)
+    [a (sub y n)]
+  [!a +((sub n y))] :: .+ because year 0 does not exist
 :: ~2000.1.1 was a saturday
 :: 0, 1, 2, 3, 4, 5, 6
 :: m, t, w, t, f, s, s
@@ -155,33 +171,34 @@
   [sign.b (sub d.b d.a)]
 :: first day of week is monday
 :: first week is the week containing first thursday of the year
+:: (according to ISO-8601)
 ::
 ++  first-day-first-week
-  |=  y=@ud
+  |=  [a=? y=@ud]
   ^-  @da
-  =/  f=@da  (year [%.y y] 1 1 0 0 0 ~)
+  =/  f=@da  (year [a y] 1 1 0 0 0 ~)
   =/  w=@    (get-weekday f)
   ?:  (lte w 3)
     (sub f (mul w ~d1))
   (add f (mul (sub 7 w) ~d1))
 ::
-++  da-to-week-number
+++  da-to-week
   |=  d=@da
-  ^-  [y=@ud w=@ud]
+  ^-  week
   =/  =date  (yore d)
-  =/  dof=@da  (first-day-first-week y.date)
-  =/  dol=@da  (first-day-first-week (dec y.date))
+  =/  dof=@da  (first-day-first-week [a y]:date)
+  =/  dol=@da  (first-day-first-week (shift-anum [a y]:date | 1))
   ?:  (lth d dof)
-    [(dec y.date) +((div (sub d dol) ~d7))]
-  =/  don=@da  (first-day-first-week +(y.date))
+    [(shift-anum [a y]:date | 1) +((div (sub d dol) ~d7))]
+  =/  don=@da  (first-day-first-week (shift-anum [a y]:date & 1))
   ?:  (gte d don)
-    [+(y.date) 1]
-  [y.date +((div (sub d dof) ~d7))]
+    [(shift-anum [a y]:date & 1) 1]
+  [[a y]:date +((div (sub d dof) ~d7))]
 ::
-++  week-number-to-first-da
-  |=  [y=@ud w=@ud]
+++  week-to-first-da
+  |=  [[a=? y=@ud] w=@ud]
   ^-  @da
-  (add (mul ~d7 (dec w)) (first-day-first-week y))
+  (add (mul ~d7 (dec w)) (first-day-first-week a y))
 ::
 ++  nth-weekday
   |=  [[a=? y=@ud] m=@ud =ord =wkd]

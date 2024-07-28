@@ -87,7 +87,7 @@
   (pac:~(at mx m) input-style-classes)
 ::
 ++  date-input
-  |=  [name=tape default=[y=@ud m=@ud d=@ud]]
+  |=  [name=tape default=[[a=? y=@ud] m=@ud d=@ud]]
   =/  m=manx  (date-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
@@ -105,12 +105,12 @@
   (pac:tan:mx input-style-classes)
 ::
 ++  month-input
-  |=  [name=tape default=[y=@ud w=@ud]]
+  |=  [name=tape default=[[a=? y=@ud] w=@ud]]
   =/  m=manx  (month-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
 ++  week-input
-  |=  [name=tape default=[y=@ud w=@ud]]
+  |=  [name=tape default=[[a=? y=@ud] w=@ud]]
   =/  m=manx  (week-input:inputs name & default)
   (pac:~(at mx m) input-style-classes)
 ::
@@ -152,10 +152,10 @@
         %dx  dx+(extract-dext (~(dip of brac) /[p.i.parm]))
         %wd  wd+;;(wkd:tu (reed:kv (~(get of brac) /[p.i.parm])))
         %wl  wl+;;((list wkd:tu) (need (~(get of brac) /[p.i.parm])))
-        %dt  dt+(de:date-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
+        %dt  dt+=-([y m d] `[[a=? y=@ud] m=@ud d=@ud]`(de:date-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
         %ct  ct+(de:time-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
-        %mt  mt+(de:month-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
-        %wk  wk+(de:week-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
+        %mt  mt+=-([y m] `[[a=? y=@ud] m=@ud]`(de:month-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
+        %wk  wk+=-([y w] `[[a=? y=@ud] w=@ud]`(de:week-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
       ==
     ==
     ::
@@ -465,10 +465,10 @@
                     %dx  (indexed-time n (add day min))
                     %wd  (weekday-input n weekday)
                     %wl  (weekday-list n ~[weekday])
-                    %dt  (date-input n [y m d.t]:(yore day))
+                    %dt  (date-input n [[a y] m d.t]:(yore day))
                     %ct  (time-input n min)
-                    %mt  (month-input n [y m]:(yore day))
-                    %wk  (week-input n (da-to-week-number:tu day))
+                    %mt  (month-input n [[a y] m]:(yore day))
+                    %wk  (week-input n (da-to-week:tu day))
                   ==
             ==
           ==

@@ -133,7 +133,7 @@
 :: %dt
 ::
 ++  date-input
-  |=  [name=tape r=? default=[y=@ud m=@ud d=@ud]]
+  |=  [name=tape r=? default=[[a=? y=@ud] m=@ud d=@ud]]
   ^-  manx
   =;  m=manx  (req:~(at mx m) r)
   ;input
@@ -213,7 +213,7 @@
 :: %mt
 ::
 ++  month-input
-  |=  [name=tape r=? default=[y=@ud m=@ud]]
+  |=  [name=tape r=? default=[[a=? y=@ud] m=@ud]]
   ^-  manx
   =;  m=manx  (req:~(at mx m) r)
   ;input
@@ -226,7 +226,7 @@
 :: %wk
 ::
 ++  week-input
-  |=  [name=tape r=? default=[y=@ud w=@ud]]
+  |=  [name=tape r=? default=[[a=? y=@ud] w=@ud]]
   ^-  manx
   =;  m=manx  (req:~(at mx m) r)
   ;input

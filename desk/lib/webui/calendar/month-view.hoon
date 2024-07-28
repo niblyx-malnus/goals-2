@@ -22,7 +22,7 @@
   %~  .
     webui-calendar-month-view-day-square
   :-  [zid y m date]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:iso [y m d.t]:date)))
+  :+  gowl  (weld base /day-square/(crip (en:date-input:iso [[a y] m d.t]:date)))
   [[eyre-id req] [ext site] args]
 ::
 ++  left-arrow
@@ -73,8 +73,8 @@
     (give-html-manx:htmx [our dap]:gowl eyre-id month-view:components |)
     ::
       [* [%day-square date=@ta *] *]
-    =/  [y=@ud m=@ud d=@ud]  (de:date-input:iso date.cad.parms)
-    handle:(day-square [& y] m d 0 0 0 ~)
+    =/  [[a=? y=@ud] m=@ud d=@ud]  (de:date-input:iso date.cad.parms)
+    handle:(day-square [a y] m d 0 0 0 ~)
   ==
 ::
 ++  components
@@ -99,11 +99,11 @@
   ::
   ++  toolbar
     ^-  manx
-    =/  last-month=[y=@ud m=@ud]
-      ?:(=(m 1) [(sub y 1) 12] [y (sub m 1)])
+    =/  last-month=[[a=? y=@ud] m=@ud]
+      ?:(=(m 1) [&+(sub y 1) 12] [&+y (sub m 1)])
     ::
-    =/  next-month=[y=@ud m=@ud]
-      ?:(=(m 12) [(add y 1) 1] [y (add m 1)])
+    =/  next-month=[[a=? y=@ud] m=@ud]
+      ?:(=(m 12) [&+(add y 1) 1] [&+y (add m 1)])
     ::
     ;div(class "p-2 flex items-center space-x-4")
       ;select.p-2.border.border-gray-300.rounded-md.font-medium.text-sm.text-gray-800
@@ -116,7 +116,7 @@
         ;option(value "month", selected ""): Month
       ==
       ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
-        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:iso [y m]:(yore now))}"
+        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:month-input:iso [[a y] m]:(yore now))}"
         =hx-target   "#{(en-html-id:htmx base)}"
         =hx-trigger  "click" 
         =hx-swap     "outerHTML"
@@ -189,7 +189,7 @@
     =/  weeks=(list @ud)
       %+  turn  (gulf 1 (div total-cells 7))
       |=  idx=@
-      w:(da-to-week-number:tu (add start-time (mul ~d1 +((mul 7 (dec idx))))))
+      w:(da-to-week:tu (add start-time (mul ~d1 +((mul 7 (dec idx))))))
     ::
     ;div.flex-grow.flex.flex-col
       =style  "border-right: 1px solid #e5e7eb;"

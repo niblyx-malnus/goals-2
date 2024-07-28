@@ -8,7 +8,7 @@
 :: specified by the date of the monday
 :: (even though we display with Sunday first)
 ::
-|_  $:  [zid=@T y=@ud m=@ud d=@ud]
+|_  $:  [zid=@t y=@ud m=@ud d=@ud]
         =gowl 
         base=(pole @t)
         [eyre-id=@ta req=inbound-request:eyre]
@@ -27,7 +27,7 @@
   %~  .
     webui-calendar-day-view-day-square
   :-  [zid y m d]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:iso y m d)))
+  :+  gowl  (weld base /day-square/(crip (en:date-input:iso [& y] m d)))
   [[eyre-id req] [ext site] args]
 ::
 ++  fullday-square
@@ -35,7 +35,7 @@
   %~  .
     webui-calendar-day-view-fullday-square
   :-  [zid y m d collapse]
-  :+  gowl  (weld base /fullday-square/(crip (en:date-input:iso y m d)))
+  :+  gowl  (weld base /fullday-square/(crip (en:date-input:iso [& y] m d)))
   [[eyre-id req] [ext site] args]
 ::
 ++  left-arrow
@@ -128,10 +128,9 @@
   ::
   ++  toolbar
     ^-  manx
-    =/  today=[y=@ud m=@ud d=@ud]  [y m d.t]:(yore now)
     =/  this-day=@da  (year [& y] m d 0 0 0 ~)
-    =/  day-before=[y=@ud m=@ud d=@ud]  [y m d.t]:(yore (sub this-day ~d1))
-    =/  day-after=[y=@ud m=@ud d=@ud]   [y m d.t]:(yore (add this-day ~d1))
+    =/  day-before=[[a=? y=@ud] m=@ud d=@ud]  [[a y] m d.t]:(yore (sub this-day ~d1))
+    =/  day-after=[[a=? y=@ud] m=@ud d=@ud]   [[a y] m d.t]:(yore (add this-day ~d1))
     =/  month-title=tape  "{(snag (sub m 1) month-abbrv)} {(numb y)}"
     ::
     ;div(class "p-2 flex items-center space-x-4")
@@ -145,7 +144,7 @@
         ;option(value "month"): Month
       ==
       ;button(class "text-gray-500 bg-white hover:bg-gray-100 transition duration-150 ease-in-out rounded-md border border-gray-20 p-2")
-        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:iso [y m d.t]:(yore now))}"
+        =hx-get      "{(spud (moup:htmx 1 base))}/{(en:date-input:iso [[a y] m d.t]:(yore now))}"
         =hx-target   "#{(en-html-id:htmx base)}"
         =hx-trigger  "click" 
         =hx-swap     "outerHTML"
@@ -203,7 +202,7 @@
   ++  day-panel
     ^-  manx
     =/  today=@da  (year [[& y] m d 0 0 0 ~])
-    =/  this-week=[y=@ud w=@ud]  (da-to-week-number:tu today)
+    =/  this-week=[[a=? y=@ud] w=@ud]  (da-to-week:tu today)
     =/  rul=(unit [* offset=delta:tu name=@t])  (active-rule:zn today)
     =/  rule-name=tape  ?~(rul "" (trip name.u.rul))
     =/  offset-name=tape

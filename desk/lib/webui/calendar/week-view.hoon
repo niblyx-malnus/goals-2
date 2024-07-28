@@ -27,7 +27,7 @@
   %~  .
     webui-calendar-week-view-day-square
   :-  [zid y w date]
-  :+  gowl  (weld base /day-square/(crip (en:date-input:iso [y m d.t]:date)))
+  :+  gowl  (weld base /day-square/(crip (en:date-input:iso [[a y] m d.t]:date)))
   [[eyre-id req] [ext site] args]
 ::
 ++  fullday-square
@@ -35,7 +35,7 @@
   %~  .
     webui-calendar-week-view-fullday-square
   :-  [zid y w date collapse]
-  :+  gowl  (weld base /fullday-square/(crip (en:date-input:iso [y m d.t]:date)))
+  :+  gowl  (weld base /fullday-square/(crip (en:date-input:iso [[a y] m d.t]:date)))
   [[eyre-id req] [ext site] args]
 ::
 ++  left-arrow
@@ -100,12 +100,12 @@
     (give-html-manx:htmx [our dap]:gowl eyre-id ~(week-view components sta) |)
     ::
       [* [%day-square date=@ta *] *]
-    =/  [y=@ud m=@ud d=@ud]  (de:date-input:iso date.cad.parms)
-    handle:(day-square [& y] m d 0 0 0 ~)
+    =/  [[a=? y=@ud] m=@ud d=@ud]  (de:date-input:iso date.cad.parms)
+    handle:(day-square [a y] m d 0 0 0 ~)
     ::
       [* [%fullday-square date=@ta *] *]
-    =/  [y=@ud m=@ud d=@ud]  (de:date-input:iso date.cad.parms)
-    handle:(fullday-square [[& y] m d 0 0 0 ~] sta)
+    =/  [[a=? y=@ud] m=@ud d=@ud]  (de:date-input:iso date.cad.parms)
+    handle:(fullday-square [[a y] m d 0 0 0 ~] sta)
   ==
 ::
 ++  components
@@ -128,10 +128,10 @@
   ::
   ++  toolbar
     ^-  manx
-    =/  this-week=@da  (week-number-to-first-da:tu y w)
-    =/  last-week=[y=@ud w=@ud]  (da-to-week-number:tu (sub this-week ~d7))
-    =/  next-week=[y=@ud w=@ud]  (da-to-week-number:tu (add this-week ~d7))
-    =/  today=[y=@ud w=@ud]  (da-to-week-number:tu now)
+    =/  this-week=@da  (week-to-first-da:tu [& y] w)
+    =/  last-week=[[a=? y=@ud] w=@ud]  (da-to-week:tu (sub this-week ~d7))
+    =/  next-week=[[a=? y=@ud] w=@ud]  (da-to-week:tu (add this-week ~d7))
+    =/  today=[[a=? y=@ud] w=@ud]  (da-to-week:tu now)
     =/  sunday=date    (yore (sub this-week ~d1))
     =/  saturday=date  (yore (add this-week ~d5))
     =/  [y1=@ud m1=@ud]  [y m]:sunday
@@ -211,7 +211,7 @@
   ::
   ++  week-panel
     ^-  manx
-    =/  sunday=@da  (sub (week-number-to-first-da:tu y w) ~d1)
+    =/  sunday=@da  (sub (week-to-first-da:tu [& y] w) ~d1)
     =/  thursday=@da  (add sunday ~d4)
     =/  days=(list date)
       %+  turn  (gulf 0 6)
