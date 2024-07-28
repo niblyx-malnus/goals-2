@@ -108,11 +108,9 @@
 :: TODO: recurring intervals WITH start or end [of recurrence]
 :: (None of the above are valid for any standard HTML inputs)
 ::
-:: TODO: separate into an ISO 8601 library
 :: TODO: make sure to handle 24:00 as 00:00 of the next day
 :: TODO: a comma is a valid fractional separator in the HH:MM... portion
 :: TODO: parameterize number of decimal places (datetime-local uses 3)
-:: TODO: datetime-local should reuse code from date and time parsers
 ::
 :: YYYY-MM-DDTHH:MM[:SS[.SSS]]
 ::
@@ -121,54 +119,19 @@
 ++  en
   |=  d=@da
   ^-  tape
-  =+  (yore d)
-  =/  =tape
-  ;:  weld
-  (numb y)
-  "-"
-  (zfill 2 (scow %ud m))
-  "-"
-  (zfill 2 (scow %ud d.t))
-  "T"
-  ==
-  =.  d     (mod d ~d1)
-  =.  tape  :(weld tape (zfill 2 (scow %ud (div d ~h1))) ":")
-  =.  d     (mod d ~h1)
-  =.  tape  (weld tape (zfill 2 (scow %ud (div d ~m1))))
-  =.  d     (mod d ~m1)
-  ?:  =(0 d)
-  tape
-  =.  tape  :(weld tape ":" (zfill 2 (scow %ud (div d ~s1))))
-  =.  d     (mod d ~s1)
-  ?:  =(0 d)
-  tape
-  :(weld tape "." (zfill 3 (scow %ud (div (mul d 1.000) ~s1))))
+  =/  date=tape   (en:date-input [y m d.t]:(yore d))
+  =/  clock=tape  (en:time-input `@dr`(mod d ~d1))
+  :(weld date "T" clock)
+  ::
   ++  de       |=(=@t `@da`(rash t parse))
   ++  de-soft  |=(=@t `(unit @da)`(rush t parse))
   ++  parse
     =,  monadic-parsing
-    ;<  y=@ud   bind  (exact-dem 4)
-    ;<  *       bind  hep
-    ;<  mo=@ud  bind  (exact-dem 2)
-    ;<  *       bind  hep
-    ;<  d=@ud   bind  (exact-dem 2)
-    ;<  *       bind  (just 'T')
-    ;<  h=@ud   bind  (exact-dem 2)
-    ;<  *       bind  col
-    ;<  mi=@ud  bind  (exact-dem 2)
-    =/  d=@da   (year [& y] mo d h mi 0 ~)
-    ;<  is-col=(unit *)  bind  (peek col)
-    ?~  is-col
-      (easy d)
-    ;<  *      bind  col
-    ;<  s=@ud  bind  (exact-dem 2)
-    =.  d      (add d (mul s ~s1))
-    ;<  is-dot=(unit *)  bind  (peek dot)
-    ?~  is-dot
-      (easy d)
-    ;<  *      bind  dot
-    ;<  f=@ud  bind  (exact-dem 3)
-    (easy (add d (div (mul f ~s1) 1.000)))
+    ;<  [y=@ud m=@ud d=@ud]  bind  parse:date-input
+    ;<  *                    bind  (just 'T')
+    ;<  clock=@dr            bind  parse:time-input
+    =/  d=@da  (year [& y] m d 0 0 0 ~)
+    (easy (add d clock))
   --
 ::
 ++  offset
@@ -202,7 +165,7 @@
   ++  en
     |=  [y=@ud m=@ud d=@ud]
     ^-  tape
-    "{(numb y)}-{(zfill 2 (numb m))}-{(zfill 2 (numb d))}"
+    "{(zfill 4 (numb y))}-{(zfill 2 (numb m))}-{(zfill 2 (numb d))}"
   ++  de       |=(=@t `[y=@ud m=@ud d=@ud]`(rash t parse))
   ++  de-soft  |=(=@t `(unit [y=@ud m=@ud d=@ud])`(rush t parse))
   ++  parse
