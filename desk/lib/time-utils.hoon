@@ -23,11 +23,11 @@
 +$  tz-to-utc-list  $-(@da (list @da))
 +$  tz-to-utc       $-(dext (unit @da))
 +$  utc-to-tz       $-(@da (unit dext))
+:: TODO: replace $fullday with %fuld everywhere
 ::
-+$  span     [l=@da r=@da] :: UTC datetime pair
-+$  fullday  @da           :: must be divisible by ~d1
-+$  jump     @da
-::
++$  fullday  @da                    :: must be divisible by ~d1
++$  span  [l=@da r=@da]             :: UTC datetime pair
++$  jump  @da                       :: instantaneous event
 +$  anum  [a=? y=@ud]               :: a signed year
 +$  munt  [[a=? y=@ud] m=@ud]       :: month of year
 +$  fuld  [[a=? y=@ud] m=@ud d=@ud] :: date by day of month
@@ -42,6 +42,7 @@
   ==
 :: Should never abandon support for any of these...
 :: If need to update an arg, add a version like %ud-1...
+:: TODO: replace %mt with $munt, %wk with $week, %dt with $fuld
 ::
 +$  arg
   $%  [%ud p=@ud]                 :: natural number (unsigned decimal)
@@ -182,6 +183,21 @@
     (sub f (mul w ~d1))
   (add f (mul (sub 7 w) ~d1))
 ::
+++  da-to-anum
+  |=  d=@da
+  ^-  anum
+  [a y]:(yore d)
+::
+++  da-to-munt
+  |=  d=@da
+  ^-  munt
+  [[a y] m]:(yore d)
+::
+++  da-to-fuld
+  |=  d=@da
+  ^-  fuld
+  [[a y] m d.t]:(yore d)
+::
 ++  da-to-week
   |=  d=@da
   ^-  week
@@ -194,6 +210,20 @@
   ?:  (gte d don)
     [(shift-anum [a y]:date & 1) 1]
   [[a y]:date +((div (sub d dof) ~d7))]
+:: week value is 0-indexed in contrast to ISO-8601
+::
+++  da-to-dawk
+  |=  d=@da
+  ^-  dawk
+  =/  [[a=? y=@ud] w=@ud]  (da-to-week d)
+  [[a y] w (get-weekday d)]
+::
+++  da-to-nord
+  |=  d=@da
+  ^-  nord
+  =+  (yore d)
+  :-  [a y]
+  +((div (sub d (year [a y] 1 1 0 0 0 ~)) ~d1))
 ::
 ++  week-to-first-da
   |=  [[a=? y=@ud] w=@ud]
