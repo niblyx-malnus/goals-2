@@ -301,8 +301,8 @@
   |=  start=fuld
   |=  idx=@ud
   ^-  (unit fuld) :: null if does not exist
-  =/  curr-year=anum   (shift-anum [a y]:start & (div (add idx m.start) 12))
-  =/  curr-month=@ud   +((mod (add idx m.start) 12))
+  =/  curr-year=anum   (shift-anum [a y]:start & (div (add idx (dec m.start)) 12))
+  =/  curr-month=@ud   +((mod (add idx (dec m.start)) 12))
   =/  =fuld  [curr-year curr-month d.start]
   ?.  (valid-fuld fuld)
     ~
