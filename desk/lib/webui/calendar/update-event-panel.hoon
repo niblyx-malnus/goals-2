@@ -159,10 +159,10 @@
         %dx  dx+(extract-dext (~(dip of brac) /[p.i.parm]))
         %wd  wd+;;(wkd:tu (reed:kv (~(get of brac) /[p.i.parm])))
         %wl  wl+;;((list wkd:tu) (need (~(get of brac) /[p.i.parm])))
-        %dt  dt+=-([y m d] `[[a=? y=@ud] m=@ud d=@ud]`(de:date-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
+        %dt  dt+(de:date-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
         %ct  ct+(de:time-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
-        %mt  mt+=-([y m] `[[a=? y=@ud] m=@ud]`(de:month-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
-        %wk  wk+=-([y w] `[[a=? y=@ud] w=@ud]`(de:week-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
+        %mt  mt+(de:month-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
+        %wk  wk+(de:week-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
       ==
     ==
   ::
@@ -664,8 +664,6 @@
                     ?~  args
                       (date-input n [[a y] m d.t]:(yore day))
                     %+  date-input  n
-                    =;  [y=@ud m=@ud d=@ud]
-                      [[& y] m d]
                     p:;;($>(%dt arg:tu) (~(got by u.args) name))
                     ::
                       %ct
@@ -678,16 +676,12 @@
                     ?~  args
                       (month-input n [[a y] m]:(yore day))
                     %+  month-input  n
-                    =;  [y=@ud m=@ud]
-                      [[& y] m]
                     p:;;($>(%mt arg:tu) (~(got by u.args) name))
                     ::
                       %wk
                     ?~  args
                       (week-input n (da-to-week:tu day))
                     %+  week-input  n
-                    =;  [y=@ud w=@ud]
-                      [[& y] w]
                     p:;;($>(%wk arg:tu) (~(got by u.args) name))
                   ==
             ==

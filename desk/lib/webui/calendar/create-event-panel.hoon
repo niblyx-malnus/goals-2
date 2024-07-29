@@ -152,10 +152,10 @@
         %dx  dx+(extract-dext (~(dip of brac) /[p.i.parm]))
         %wd  wd+;;(wkd:tu (reed:kv (~(get of brac) /[p.i.parm])))
         %wl  wl+;;((list wkd:tu) (need (~(get of brac) /[p.i.parm])))
-        %dt  dt+=-([y m d] `[[a=? y=@ud] m=@ud d=@ud]`(de:date-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
+        %dt  dt+(de:date-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
         %ct  ct+(de:time-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
-        %mt  mt+=-([y m] `[[a=? y=@ud] m=@ud]`(de:month-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
-        %wk  wk+=-([y w] `[[a=? y=@ud] w=@ud]`(de:week-input:iso (reed:kv (~(get of brac) /[p.i.parm]))))
+        %mt  mt+(de:month-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
+        %wk  wk+(de:week-input:iso (reed:kv (~(get of brac) /[p.i.parm])))
       ==
     ==
     ::

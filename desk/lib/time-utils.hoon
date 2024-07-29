@@ -23,7 +23,6 @@
 +$  tz-to-utc-list  $-(@da (list @da))
 +$  tz-to-utc       $-(dext (unit @da))
 +$  utc-to-tz       $-(@da (unit dext))
-:: TODO: replace $fullday with %fuld everywhere
 ::
 +$  span  [l=@da r=@da]             :: UTC datetime pair
 +$  jump  @da                       :: instantaneous event
@@ -44,18 +43,18 @@
 :: TODO: replace %mt with $munt, %wk with $week, %dt with $fuld
 ::
 +$  arg
-  $%  [%ud p=@ud]                 :: natural number (unsigned decimal)
-      [%od p=ord]                 :: ordinal numbers for weekday in a month
-      [%da p=@da]                 :: datetime-local
-      [%dr p=@dr]                 :: duration
-      [%dl p=delta]               :: delta (signed @dr)
-      [%dx p=dext]                :: indexed datetime
-      [%wd p=wkd]                 :: weekday
-      [%wl p=(list wkd)]          :: weekday list
-      [%dt p=[y=@ud m=@ud d=@ud]] :: date-input
-      [%ct p=@dr]                 :: clocktime / time-input
-      [%mt p=[y=@ud m=@ud]]       :: month-input
-      [%wk p=[y=@ud w=@ud]]       :: week-input
+  $%  [%ud p=@ud]        :: natural number (unsigned decimal)
+      [%od p=ord]        :: ordinal numbers for weekday in a month
+      [%da p=@da]        :: datetime-local
+      [%dr p=@dr]        :: duration
+      [%dl p=delta]      :: delta (signed @dr)
+      [%dx p=dext]       :: indexed datetime
+      [%wd p=wkd]        :: weekday
+      [%wl p=(list wkd)] :: weekday list
+      [%dt p=fuld]       :: date-input
+      [%ct p=@dr]        :: clocktime / time-input
+      [%mt p=munt]       :: month-input
+      [%wk p=week]       :: week-input
   ==
 ::
 ++  wkd-to-num
