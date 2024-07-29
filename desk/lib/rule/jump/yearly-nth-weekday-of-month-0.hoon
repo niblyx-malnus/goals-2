@@ -16,8 +16,7 @@
 ^-  $-(@ud (each jump rule-exception))
 |=  idx=@ud
 =/  =anum  (shift-anum [a y]:sm & idx)
-=/  day=(unit @da)  (nth-weekday anum m.sm ord wkd)
-?~  day
-  [%| %rule-error (crip "This date does not exist.")]
-[%& (apply-invert-delta (add u.day time) delta)]
+=/  =fuld  (monthly-nth-weekday [anum m.sm] ord wkd)
+=/  day=@da  (fuld-to-da fuld)
+[%& (apply-invert-delta (add day time) delta)]
 '''

@@ -131,13 +131,18 @@
   (div (sub (year [a +(y)]:(yore time) 1 1 0 0 0 ~) time) ~d1)
 ::
 ++  is-leap-year  yelp
+:: days from weekday a to the last weekday b
+:: i.e. days between wedneday and last monday
 ::
 ++  sub-wkd
   |=  [a=@ud b=@ud]
   ^-  @ud
   ?>  &((lth a 7) (lth b 7))
-  ?:  (gte a b)  (sub a b)
+  ?:  (gte a b)
+    (sub a b)
   (add a (sub 7 b))
+:: check if a date is in a range where the beginning or end
+:: may not be defined
 ::
 ++  btwn
   |=  [=@da s=moment e=moment]
@@ -232,54 +237,51 @@
   |=  [[a=? y=@ud] w=@ud]
   ^-  @da
   (add (mul ~d7 (dec w)) (first-day-first-week a y))
+:: check date existence/correctness
 ::
-++  nth-weekday
-  |=  [[a=? y=@ud] m=@ud =ord =wkd]
-  ^-  (unit @da)
-  =/  nwkd=date  [[a y] m 1 0 0 0 ~]
-  :: shift to first w
+++  valid-date  |=(=date `?`=(date (yore (year date))))
+++  valid-fuld  |=(fuld `?`(valid-date [[a y] m d 0 0 0 ~]))
+::
+++  monthly-nth-weekday
+  |=  [=munt =ord =wkd]
+  ^-  fuld
+  =/  day=fuld  [[a y] m 1]:munt
+  :: shift to first instance of the weekday
   ::
-  =/  v  (get-weekday (year nwkd))
-  =.  d.t.nwkd  (add d.t.nwkd (sub-wkd (wkd-to-num wkd) v))
-  =.  nwkd
-    ?+    ord  nwkd
-      %second  nwkd(d.t (add 7 d.t.nwkd))
-      %third   nwkd(d.t (add 14 d.t.nwkd))
-      %fourth  nwkd(d.t (add 21 d.t.nwkd))
-      ::
-        %last
-      ?.  (lte (add 28 d.t.nwkd) (days-in-month [[a y] m]:nwkd))
-        nwkd(d.t (add 21 d.t.nwkd))
-      nwkd(d.t (add 28 d.t.nwkd))
-    ==
-  :: assert date existence/correctness
+  =/  w  (get-weekday (year [[a y] m 1 0 0 0 ~]:munt))
+  =/  d
+    ?:  =(w (wkd-to-num wkd))
+      0
+    (sub-wkd (wkd-to-num wkd) w)
+  =.  d.day  (add d d.day)
+  :: add n weeks
   ::
-  ?.(=(nwkd (yore (year nwkd))) ~ `(year nwkd))
+  ?-    ord
+    %first   day
+    %second  day(d (add 7 d.day))
+    %third   day(d (add 14 d.day))
+    %fourth  day(d (add 21 d.day))
+    ::
+      %last
+    ?.  (lte (add 28 d.day) (days-in-month [[a y] m]:day))
+      day(d (add 21 d.day))
+    day(d (add 28 d.day))
+  ==
 ::
 ++  first-weekday-after
-  |=  [[a=? y=@ud] m=@ud d=@ud =wkd]
-  ^-  (unit @da)
-  =/  nwkd=date  [[a y] m d 0 0 0 ~]
-  ?.  =(nwkd (yore (year nwkd)))  ~  :: assert date existence/correctness
-  =/  v  (get-weekday (year nwkd))
-  =.  d.t.nwkd  (add d.t.nwkd (sub-wkd (wkd-to-num wkd) v))
-  :: assert date existence/correctness
-  ::
-  ?.(=(nwkd (yore (year nwkd))) ~ `(year nwkd))
-::
-++  date-of-month
-  |=  [[a=? y=@ud] m=@ud d=@ud]
-  ^-  (unit @da)
-  =/  nwkd=date  [[a y] m d 0 0 0 ~]
-  :: assert date existence/correctness
-  ::
-  ?.(=(nwkd (yore (year nwkd))) ~ `(year nwkd))
+  |=  [=fuld =wkd]
+  ^+  fuld
+  =/  day=@da  (fuld-to-da fuld)
+  =/  w=@ud  (get-weekday day)            :: starting weekday
+  =/  d=@ud  (sub-wkd (wkd-to-num wkd) w) :: distance from wkd
+  (da-to-fuld (add day (mul d ~d1)))
 ::
 ++  days-of-week
   |=  [start=@da weekdays=(list wkd)]
   =/  weekdays=(list wkd-num)  (turn weekdays wkd-to-num)
   |=  idx=@ud
-  |^  ^-  @da
+  |^
+  ^-  @da
   =.  start               (sane-fd start)
   =/  cycle-count=@ud     (div idx (lent weekdays))
   =/  cycle-offset=@ud    (mod idx (lent weekdays))
@@ -294,18 +296,15 @@
   ++  shifted-days  (turn (tap:on weekdays-mop) head)
   --
 ::
-++  monthly-nth-weekday
-  |=  [start=@da =ord =wkd]
+++  monthly-nth-weekday-after
+  |=  [start=fuld =ord =wkd]
   |=  idx=@ud
-  ^-  (unit @da) :: null if does not exist
-  =.  start            (sane-fd start)
-  =/  start-year=@ud   y:(yore start)
-  =/  start-month=@ud  (dec m:(yore start)) :: 0-indexed
-  =/  curr-year=@ud    (add (div (add idx start-month) 12) start-year)
-  =/  curr-month=@ud   +((mod (add idx start-month) 12))
-  :: Assumes date is A.D.
-  ::
-  (nth-weekday [& curr-year] curr-month ord wkd)
+  ^-  fuld
+  =/  start-month=@ud  (dec m.start) :: 0-indexed
+  =/  new-years=@ud    (div (add idx (dec m.start)) 12)
+  =/  curr-year=anum   (shift-anum [a y]:start & new-years)
+  =/  curr-month=@ud   +((mod (add idx (dec m.start)) 12))
+  (monthly-nth-weekday [curr-year curr-month] ord wkd)
 ::
 ++  monthly-on-day
   |=  start=@da
@@ -318,7 +317,9 @@
   =/  curr-year=@ud    (add (div (add idx start-month) 12) start-year)
   =/  curr-month=@ud   +((mod (add idx start-month) 12))
   =/  datetime=@da     (year [[& curr-year] curr-month day 0 0 0 ~])
-  ?.(=(day d.t:(yore datetime)) ~ `datetime)
+  ?.  =(day d.t:(yore datetime))
+    ~
+  [~ datetime]
 ::
 ++  yearly-on-date
   |=  start=@da
@@ -329,5 +330,7 @@
   =/  [m=@ud d=@ud]    [m d.t]:(yore start)
   =/  curr-year=@ud    (add idx start-year)
   =/  datetime=@da     (year [[& curr-year] m d 0 0 0 ~])
-  ?.(=([m d] [m d.t]:(yore datetime)) ~ `datetime)
+  ?.  =([m d] [m d.t]:(yore datetime))
+    ~
+  [~ datetime]
 --

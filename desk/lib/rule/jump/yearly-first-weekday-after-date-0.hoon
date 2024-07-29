@@ -13,9 +13,9 @@
 =/  =delta     +:;;($>(%dl arg) (~(got by args) 'Offset'))
 ^-  $-(@ud (each jump rule-exception))
 |=  idx=@ud
-=/  =anum  (shift-anum [a y]:sd & idx)
-=/  day=(unit @da)  (first-weekday-after anum m.sd d.sd wkd)
-?~  day
-  [%| %rule-error (crip "This date does not exist.")]
-[%& (apply-invert-delta (add u.day time) delta)]
+=/  =fuld  [(shift-anum [a y]:sd & idx) [m d]:sd]
+?.  (valid-fuld fuld)
+  [%| %rule-error 'This day does not exist.']
+=/  day=@da  (fuld-to-da (first-weekday-after fuld wkd))
+[%& (apply-invert-delta (add day time) delta)]
 '''

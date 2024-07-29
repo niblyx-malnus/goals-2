@@ -13,9 +13,7 @@
 =/  =wkd       +:;;($>(%wd arg) (~(got by args) 'Weekday'))
 ^-  $-(@ud (each dext rule-exception))
 |=  idx=@ud
-=/  start=@da  (year [a y]:sd m.sd d.sd 0 0 0 ~)
-=/  day=(unit @da)  ((monthly-nth-weekday start ord wkd) idx)
-?~  day
-  [%| %rule-error 'This day does not exist in this month.']
-[%& 0 (add u.day ct)]
+=/  =fuld  ((monthly-nth-weekday-after sd ord wkd) idx)
+=/  day=@da  (fuld-to-da fuld)
+[%& 0 (add day ct)]
 '''
