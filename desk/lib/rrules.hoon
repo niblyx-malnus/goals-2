@@ -1,7 +1,5 @@
-/+  *time-utils2, p=pytz
+/+  *time, *pytz
 |%
-+$  dext   dext:p
-+$  delta  delta:p
 :: Parameters for recurrence rule builders
 ::
 +$  arg
@@ -21,14 +19,14 @@
 ::
 +$  args  (map @t arg)
 ::
-+$  fuld-rule      $-(@ud fuld)
-+$  span-rule      $-(@ud [@da @da])
-+$  paxt-rule      $-(@ud [dext dext])
-+$  date-rule      $-(@ud @da)
-+$  dext-rule      $-(@ud dext)
++$  fuld-rule  $-(@ud fuld)
++$  span-rule  $-(@ud [@da @da])
++$  paxt-rule  $-(@ud [dext dext])
++$  date-rule  $-(@ud @da)
++$  dext-rule  $-(@ud dext)
 ::
-+$  both-rule      [lz=@t rz=@t =paxt-rule]
-+$  left-rule      [tz=@t d=@dr =dext-rule]
++$  both-rule  [lz=@t rz=@t =paxt-rule]
++$  left-rule  [tz=@t d=@dr =dext-rule]
 ::
 ++  both-to-span-rule
   |=  [lz=@t rz=@t =paxt-rule]
@@ -38,10 +36,10 @@
   =/  [l=dext r=dext]  ~|("paxt rule crash" (paxt-rule idx))
   =/  l-utc=@da
     ~|  "invalid start localtime"
-    (need (~(tz-to-utc zn:p lz) l))
+    (need (~(tz-to-utc zn lz) l))
   =/  r-utc=@da
     ~|  "invalid end localtime"
-    (need (~(tz-to-utc zn:p rz) r))
+    (need (~(tz-to-utc zn rz) r))
   ~|  "out of order"
   ?>  (lte l-utc r-utc)
   [l-utc r-utc]
@@ -54,7 +52,7 @@
   =/  =dext  ~|("dext rule crash" (dext-rule idx))
   =/  l-utc=@da
     ~|  "invalid start localtime"
-    (need (~(tz-to-utc zn:p tz) dext))
+    (need (~(tz-to-utc zn tz) dext))
   =/  r-utc=@da  (add l-utc d)
   [l-utc r-utc]
 ::
@@ -284,7 +282,7 @@
         ~|  'The reference day does not exist.'
         !!
       =/  day=@da  (fuld-to-da (first-weekday-after:helpers fuld wkd))
-      (apply-invert-delta:p (add day time) delta)
+      (apply-invert-delta (add day time) delta)
     ::
     ++  yearly-nth-weekday-of-month
       |=  =args
@@ -298,7 +296,7 @@
       =/  =anum  (shift-anum [a y]:start & idx)
       =/  =fuld  (nth-weekday-of-month:helpers [anum m.start] ord wkd)
       =/  day=@da  (fuld-to-da fuld)
-      (apply-invert-delta:p (add day time) delta)
+      (apply-invert-delta (add day time) delta)
     ::
     ++  yearly-on-date
       |=  =args
@@ -311,7 +309,7 @@
       ?.  (valid-fuld fuld)
         ~|  'This date does not exist.'
         !!
-      (apply-invert-delta:p (add (fuld-to-da fuld) time) delta)
+      (apply-invert-delta (add (fuld-to-da fuld) time) delta)
     --
   --
 --
