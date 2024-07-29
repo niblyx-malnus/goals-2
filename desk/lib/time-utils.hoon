@@ -185,6 +185,11 @@
     (sub f (mul w ~d1))
   (add f (mul (sub 7 w) ~d1))
 ::
+++  week-to-first-da
+  |=  [[a=? y=@ud] w=@ud]
+  ^-  @da
+  (add (mul ~d7 (dec w)) (first-day-first-week a y))
+::
 ++  da-to-anum
   |=  d=@da
   ^-  anum
@@ -231,23 +236,18 @@
   =+  (yore d)
   :-  [a y]
   +((div (sub d (year [a y] 1 1 0 0 0 ~)) ~d1))
-::
-++  week-to-first-da
-  |=  [[a=? y=@ud] w=@ud]
-  ^-  @da
-  (add (mul ~d7 (dec w)) (first-day-first-week a y))
 :: check date existence/correctness
 ::
 ++  valid-date  |=(=date `?`=(date (yore (year date))))
 ++  valid-fuld  |=(fuld `?`(valid-date [[a y] m d 0 0 0 ~]))
 ::
 ++  monthly-nth-weekday
-  |=  [=munt =ord =wkd]
+  |=  [month=munt =ord =wkd]
   ^-  fuld
-  =/  day=fuld  [[a y] m 1]:munt
+  =/  day=fuld  [[a y] m 1]:month
   :: shift to first instance of the weekday
   ::
-  =/  w  (get-weekday (year [[a y] m 1 0 0 0 ~]:munt))
+  =/  w  (get-weekday (year [[a y] m 1 0 0 0 ~]:month))
   =/  d
     ?:  =(w (wkd-to-num wkd))
       0
@@ -268,9 +268,9 @@
   ==
 ::
 ++  first-weekday-after
-  |=  [=fuld =wkd]
-  ^+  fuld
-  =/  day=@da  (fuld-to-da fuld)
+  |=  [start=fuld =wkd]
+  ^-  fuld
+  =/  day=@da  (fuld-to-da start)
   =/  w=@ud  (get-weekday day)            :: starting weekday
   =/  d=@ud  (sub-wkd (wkd-to-num wkd) w) :: distance from wkd
   (da-to-fuld (add day (mul d ~d1)))
