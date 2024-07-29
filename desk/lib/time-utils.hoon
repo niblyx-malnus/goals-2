@@ -94,7 +94,7 @@
   |=  [[a=? y=@ud] sign=? n=@ud]
   ^-  anum
   ?:  =(a sign)
-    [a (add a n)]
+    [a (add y n)]
   ?:  (lth n y)
     [a (sub y n)]
   [!a +((sub n y))] :: .+ because year 0 does not exist
@@ -105,10 +105,11 @@
 ++  get-weekday
   |=  d=@da
   ;;  wkd-num
-  %-  (curr mod 7)  %+  add  5  :: center on saturday
+  %-  (curr mod 7)
+  %+  add  5  :: center on saturday
   ?:  (gth d ~2000.1.1)
     (mod (div (sub d ~2000.1.1) ~d1) 7)
-  (sub 7 (mod +((div (sub ~2000.1.1 d) ~d1)) 7))
+  (sub 7 (mod (div (sub ~2000.1.1 d) ~d1) 7))
 ::
 ++  get-prev-monday  |=(d=@da (sub d (mul ~d1 (get-weekday d))))
 ++  get-next-monday
@@ -278,23 +279,15 @@
 ::
 ++  days-of-week
   |=  [start=@da weekdays=(list wkd)]
-  =/  weekdays=(list wkd-num)  (turn weekdays wkd-to-num)
   |=  idx=@ud
-  |^
   ^-  @da
-  =.  start               (sane-fd start)
-  =/  cycle-count=@ud     (div idx (lent weekdays))
-  =/  cycle-offset=@ud    (mod idx (lent weekdays))
-  =/  total-offset=@ud    (add (mul 7 cycle-count) (snag cycle-offset shifted-days))
+  =/  weekdays=(list wkd-num)  (turn weekdays wkd-to-num)
+  =/  cycle-count=@ud          (div idx (lent weekdays))
+  =/  cycle-offset=@ud         (mod idx (lent weekdays))
+  =/  start-weekday=wkd-num    (get-weekday start)
+  =/  shifted-days=(list @ud)  (sort (turn weekdays (curr sub-wkd start-weekday)) lth)
+  =/  total-offset=@ud         (add (mul 7 cycle-count) (snag cycle-offset shifted-days))
   (add start (mul ~d1 total-offset))
-  ++  start-wkd     `wkd-num`(wkd-num (get-weekday start))
-  ++  on            ((^on @ @) lth)
-  ++  shift         |=(w=@ :_(~ (sub-wkd w start-wkd)))
-  ++  weekdays-mop
-    ^-  ((mop @ @) lth)
-    (gas:on *((mop @ @) gth) (turn weekdays shift))
-  ++  shifted-days  (turn (tap:on weekdays-mop) head)
-  --
 ::
 ++  monthly-nth-weekday-after
   |=  [start=fuld =ord =wkd]

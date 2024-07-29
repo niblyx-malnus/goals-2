@@ -15,7 +15,7 @@
 |=  idx=@ud
 =/  =fuld  [(shift-anum [a y]:sd & idx) [m d]:sd]
 ?.  (valid-fuld fuld)
-  [%| %rule-error 'This day does not exist.']
+  [%| %rule-error 'The reference day does not exist.']
 =/  day=@da  (fuld-to-da (first-weekday-after fuld wkd))
 [%& (apply-invert-delta (add day time) delta)]
 '''
