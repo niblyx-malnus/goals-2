@@ -42,12 +42,12 @@
   |=  =(pole knot)
   ^-  (unit (unit cage))
   ?+    pole  (on-peek:def pole)
-    [%x %rules ~]           ``noun+!>(rules)
-    [%x %cache ~]           ``noun+!>(cache)
-    [%x %to-to-boths ~]     ``noun+!>(to-to-boths.cache)
-    [%x %to-to-lefts ~]     ``noun+!>(to-to-lefts.cache)
-    [%x %to-to-fulldays ~]  ``noun+!>(to-to-fulldays.cache)
-    [%x %to-to-jumps ~]     ``noun+!>(to-to-jumps.cache)
+    [%x %rules ~]        ``noun+!>(rules)
+    [%x %cache ~]        ``noun+!>(cache)
+    [%x %to-to-boths ~]  ``noun+!>(to-to-boths.cache)
+    [%x %to-to-lefts ~]  ``noun+!>(to-to-lefts.cache)
+    [%x %to-to-fulds ~]  ``noun+!>(to-to-fulds.cache)
+    [%x %to-to-jumps ~]  ``noun+!>(to-to-jumps.cache)
     ::
       [%x %rules p=@ta q=@ta r=@ta ~]
     =/  =rid:r  [?~(p ~ `(slav %p p)) ;;(rule-type:^r q) r]:[pole .]
@@ -66,11 +66,11 @@
     :-  ~  :-  ~  :-  %noun  !>
     (~(get by to-to-lefts.cache) rid)
     ::
-      [%x %to-to-fullday p=@ta q=@ta r=@ta ~]
+      [%x %to-to-fuld p=@ta q=@ta r=@ta ~]
     ?.  ?=(%fuld q.pole)  ~
     =/  =rid:r  [?~(p ~ `(slav %p p)) q r]:[pole .]
     :-  ~  :-  ~  :-  %noun  !>
-    (~(get by to-to-fulldays.cache) rid)
+    (~(get by to-to-fulds.cache) rid)
     ::
       [%x %to-to-jump p=@ta q=@ta r=@ta ~]
     ?.  ?=(%jump q.pole)  ~

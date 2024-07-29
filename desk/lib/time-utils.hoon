@@ -25,7 +25,6 @@
 +$  utc-to-tz       $-(@da (unit dext))
 :: TODO: replace $fullday with %fuld everywhere
 ::
-+$  fullday  @da                    :: must be divisible by ~d1
 +$  span  [l=@da r=@da]             :: UTC datetime pair
 +$  jump  @da                       :: instantaneous event
 +$  anum  [a=? y=@ud]               :: a signed year
@@ -197,6 +196,11 @@
   |=  d=@da
   ^-  fuld
   [[a y] m d.t]:(yore d)
+::
+++  fuld-to-da
+  |=  [[a=? y=@ud] m=@ud d=@ud]
+  ^-  @da
+  (year [a y] m d 0 0 0 ~)
 ::
 ++  da-to-week
   |=  d=@da

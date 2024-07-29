@@ -9,13 +9,13 @@
 ++  emit  |=(tan=event-transition:c this(tans [tan tans]))
 ++  emil  |=(tanz=(list event-transition:c) this(tans (weld tanz tans)))
 ::
-++  get-to-to-fullday
+++  get-to-to-fuld
   |=  =rid:r
   ?>  ?=(%fuld q.rid)
-  .^  (unit to-to-fullday:r)  %gx
+  .^  (unit to-to-fuld:r)  %gx
     %+  weld
       /(scot %p our.bowl)/rule-store/(scot %da now.bowl)
-    /to-to-fullday/[?~(p.rid %$ (scot %p u.p.rid))]/fuld/[r.rid]/noun
+    /to-to-fuld/[?~(p.rid %$ (scot %p u.p.rid))]/fuld/[r.rid]/noun
   ==
 ::
 ++  get-to-to-both
@@ -36,14 +36,14 @@
     /to-to-left/[?~(p.rid %$ (scot %p u.p.rid))]/left/[r.rid]/noun
   ==
 ::
-++  get-to-fullday
+++  get-to-fuld
   |=  ruledata:c
-  ^-  to-fullday:r
+  ^-  to-fuld:r
   ?>  ?=(%fuld q.rid)
   ?>  ?=(%fuld -.kind)
-  =/  =to-to-fullday:r
-    (need (get-to-to-fullday rid))
-  (to-to-fullday args)
+  =/  =to-to-fuld:r
+    (need (get-to-to-fuld rid))
+  (to-to-fuld args)
 ::
 ++  get-to-span
   |=  ruledata:c
@@ -159,7 +159,7 @@
     =/  =instance:c
       ?-    -.kind.ruledata
         %skip           skip+~
-        %fuld           fuld+(~+((get-to-fullday ruledata)) i.idx-list.tan)
+        %fuld           fuld+(~+((get-to-fuld ruledata)) i.idx-list.tan)
         ?(%left %both)  span+(~+((get-to-span ruledata)) i.idx-list.tan)
       ==
     %=  $

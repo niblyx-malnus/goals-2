@@ -1,6 +1,6 @@
 :+  'Skip'  ~
 '''
 |=  args=(map @t arg)
-^-  $-(@ud (each fullday rule-exception))
+^-  $-(@ud (each fuld rule-exception))
 |=(idx=@ud [%| %skip ~])
 '''

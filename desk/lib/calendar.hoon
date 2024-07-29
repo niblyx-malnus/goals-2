@@ -1,5 +1,5 @@
 /-  c=calendar, r=rules
-/+  vlib=event
+/+  vlib=event, tu=time-utils
 ::
 =|  tans=(list calendar-transition:c)
 |_  [=bowl:gall =calendar:c]
@@ -155,7 +155,7 @@
     ?>  (lte l r)
     %-  zing  %+  turn
       :: (dec l) to be left inclusive
-      (tap:fon:fo (lot:fon:fo fullday-order.calendar `r `(dec l)))
+      (tap:fon:fo (lot:fon:fo fuld-order.calendar `r `(dec l)))
     |=([key=@da val=(set iref:c)] ~(tap in val))
   ::
   ++  del
@@ -163,8 +163,8 @@
     ^-  _this
     ~&  %deleting
     %=  this
-      span-order.calendar     (~(del so span-order.calendar) iref)
-      fullday-order.calendar  (~(del fo fullday-order.calendar) iref)
+      span-order.calendar  (~(del so span-order.calendar) iref)
+      fuld-order.calendar  (~(del fo fuld-order.calendar) iref)
     ==
   ::
   ++  pur
@@ -187,8 +187,8 @@
       ::
       %=    this
         span-order.calendar  (~(del so span-order.calendar) iref)
-          fullday-order.calendar
-        (~(rep fo fullday-order.calendar) iref p.p.instance)
+          fuld-order.calendar
+        (~(rep fo fuld-order.calendar) iref p.p.instance)
       ==
       ::
         %span
@@ -197,7 +197,7 @@
       :: replace this instance in span-order
       ::
       %=    this
-        fullday-order.calendar  (~(del fo fullday-order.calendar) iref)
+        fuld-order.calendar  (~(del fo fuld-order.calendar) iref)
           span-order.calendar
         (~(rep so span-order.calendar) iref p.p.instance)
       ==
@@ -227,7 +227,7 @@
     ++  son  ((on @da (set mome:c)) gth)
     ++  get-time
       |=  =mome:c
-      ^-  (unit time)
+      ^-  (unit @da)
       =/  ven=event:c     (~(got by events.calendar) eid.iref.mome)
       ?~  i=(~(get by instances.ven) i.iref.mome)  ~
       ?.  ?=(%span -.u.i)  ~
@@ -242,7 +242,7 @@
     ++  del-mome
       |=  =mome:c
       ^+  ord
-      =/  time=(unit time)  (get-time mome)
+      =/  time=(unit @da)  (get-time mome)
       ?~  time  ord
       ~|  time+time
       =/  mom=(set mome:c)  (fall (get:son ord u.time) ~)
@@ -297,27 +297,30 @@
       ?~  list  ord
       $(list t.list, ord (rep i.list))
     --
-  :: fullday-order core
+  :: fuld-order core
   ::
   ++  fo
     |_  ord=((mop @da (set iref:c)) gth)
     ++  fon  ((on @da (set iref:c)) gth)
     ++  get-time
       |=  =iref:c
-      ^-  (unit time)
+      ^-  (unit @da)
       =/  ven=event:c  (~(got by events.calendar) eid.iref)
-      ?~  i=(~(get by instances.ven) i.iref)  ~
-      ?.  ?=(%fuld -.u.i)  ~
+      ?~  i=(~(get by instances.ven) i.iref)
+        ~
+      ?.  ?=(%fuld -.u.i)
+        ~
       ?-  -.p.u.i
         %|  ~
-        %&  (some p.p.u.i)
+        %&  [~ (fuld-to-da:tu p.p.u.i)]
       ==
     ::
     ++  del
       |=  =iref:c
       ^+  ord
-      =/  time=(unit time)  (get-time iref)
-      ?~  time  ord
+      =/  time=(unit @)  (get-time iref)
+      ?~  time
+        ord
       =/  ref=(set iref:c)  (fall (get:fon ord u.time) ~)
       =.  ref               (~(del in ref) iref)
       ?:  =(~ ref)
@@ -325,26 +328,27 @@
       (put:fon ord u.time ref)
     ::
     ++  put
-      |=  [=iref:c =fullday:c]
+      |=  [=iref:c =fuld:c]
       ^+  ord
       =/  ref=(set iref:c)
-        ?^  uref=(get:fon ord fullday)
+        ?^  uref=(get:fon ord (fuld-to-da:tu fuld))
           (~(put in u.uref) iref)
         (~(put in *(set iref:c)) iref)
-      (put:fon ord fullday ref)
+      (put:fon ord (fuld-to-da:tu fuld) ref)
     :: replace
     ::
     ++  rep
-      |=  [=iref:c =fullday:c]
+      |=  [=iref:c =fuld:c]
       ^+  ord
       =.  ord  (del iref)
-      (put iref fullday)
+      (put iref fuld)
     :: replace many
     ::
     ++  rap
-      |=  =(list [iref:c fullday:c])
+      |=  =(list [iref:c fuld:c])
       ^+  ord
-      ?~  list  ord
+      ?~  list
+        ord
       $(list t.list, ord (rep i.list))
     --
   --

@@ -41,7 +41,7 @@
 ::
 +$  instance
   $%  [%span p=span-instance]
-      [%fuld p=fullday-instance]
+      [%fuld p=fuld-instance]
       [%skip ~]
   ==
 ::
@@ -58,8 +58,8 @@
   ==
 +$  events  (map eid event)
 ::
-+$  fullday-order  ((mop @da (set iref)) gth) :: timezone independent
-+$  span-order     ((mop @da (set mome)) gth) 
++$  fuld-order  ((mop @da (set iref)) gth) :: timezone independent
++$  span-order  ((mop @da (set mome)) gth) 
 ::
 +$  calendar
   $:  =cid
@@ -67,7 +67,7 @@
       =perms
       =events
       =rdates
-      =fullday-order
+      =fuld-order
       =span-order
       =metadata
       metadata-properties=(map @t metadata)
@@ -188,7 +188,7 @@
       =metadata
       $=  i
       $%  [%span p=span]
-          [%fuld p=fullday]
+          [%fuld p=fuld]
       ==
   ==
 ::

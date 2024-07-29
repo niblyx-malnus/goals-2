@@ -10,7 +10,7 @@
     +$  cache
       $:  to-to-boths=(map rid to-to-both)
           to-to-lefts=(map rid to-to-left)
-          to-to-fulldays=(map rid to-to-fullday)
+          to-to-fulds=(map rid to-to-fuld)
           to-to-jumps=(map rid to-to-jump)
       ==
     +$  card  card:agent:gall
@@ -71,7 +71,7 @@
     ?+  q.rid  cache
       %both  cache(to-to-boths (~(put by to-to-boths.cache) rid !<(to-to-both -)))
       %left  cache(to-to-lefts (~(put by to-to-lefts.cache) rid !<(to-to-left -)))
-      %fuld  cache(to-to-fulldays (~(put by to-to-fulldays.cache) rid !<(to-to-fullday -)))
+      %fuld  cache(to-to-fulds (~(put by to-to-fulds.cache) rid !<(to-to-fuld -)))
       %jump  cache(to-to-jumps (~(put by to-to-jumps.cache) rid !<(to-to-jump -)))
     ==
   ==

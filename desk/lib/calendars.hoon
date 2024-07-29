@@ -1,5 +1,5 @@
 /-  *calendar, r=rules
-/+  clib=calendar, rlib=rules, p=pytz
+/+  clib=calendar, rlib=rules, p=pytz, tu=time-utils
 |%
 +$  card  card:agent:gall
 +$  sign  sign:agent:gall
@@ -83,14 +83,14 @@
     |=  tan=calendar-transition
     [%give %fact ~[(en-path cid)] goals-calendar-transition+!>(tan)]
   ::
-  ++  get-to-fullday
+  ++  get-to-fuld
     |=  [=rid =kind =args]
-    ^-  to-fullday:r
+    ^-  to-fuld:r
     ?>  ?=(%fuld q.rid)
     ?>  ?=(%fuld -.kind)
-    =/  =to-to-fullday:r
-      (~(got by to-to-fulldays.cache) rid)
-    (to-to-fullday args)
+    =/  =to-to-fuld:r
+      (~(got by to-to-fulds.cache) rid)
+    (to-to-fuld args)
   ::
   ++  get-to-span
     |=  [=rid =kind =args]
@@ -289,7 +289,7 @@
       =/  ven=event  (~(got by events.cal) eid.iref)
       [iref (~(get-full-row vn eid.iref ven) i.iref)]
     ::
-    ++  fulldays-in-subdomain
+    ++  fulds-in-subdomain
       |=  [l=@da r=@da]
       ^-  range
       ?>  (lte l r)
@@ -297,7 +297,7 @@
       %+  turn
         ^-  (list iref)
         %-  zing  %+  turn
-          (tap:fon:fo (lot:fon:fo fullday-order.cal `+(r) `(dec l)))
+          (tap:fon:fo (lot:fon:fo fuld-order.cal `+(r) `(dec l)))
         |=([key=@da val=(set iref)] ~(tap in val))
       |=  =iref
       =/  ven=event  (~(got by events.cal) eid.iref)
@@ -308,7 +308,7 @@
       ^-  range
       ?>  (lte l r)
       %-  ~(uni by (spans-in-subdomain l r))
-      (fulldays-in-subdomain l r)
+      (fulds-in-subdomain l r)
     ::
     ++  get-all-rules
       ^-  (set rid)
@@ -470,27 +470,30 @@
         ?~  list  ord
         $(list t.list, ord (rep i.list))
       --
-    :: fullday-order core
+    :: fuld-order core
     ::
     ++  fo
       |_  ord=((mop @da (set iref)) gth)
       ++  fon  ((on @da (set iref)) gth)
       ++  get-time
         |=  =iref
-        ^-  (unit time)
+        ^-  (unit @da)
         =/  ven=event  (~(got by events.cal) eid.iref)
-        ?~  i=(~(get by instances.ven) i.iref)  ~
-        ?.  ?=(%fuld -.u.i)  ~
+        ?~  i=(~(get by instances.ven) i.iref)
+          ~
+        ?.  ?=(%fuld -.u.i)
+          ~
         ?-  -.p.u.i
           %|  ~
-          %&  (some p.p.u.i)
+          %&  [~ (fuld-to-da:tu p.p.u.i)]
         ==
       ::
       ++  del
         |=  =iref
         ^+  ord
-        =/  time=(unit time)  (get-time iref)
-        ?~  time  ord
+        =/  time=(unit @)  (get-time iref)
+        ?~  time
+          ord
         =/  ref=(set ^iref)   (fall (get:fon ord u.time) ~)
         =.  ref               (~(del in ref) iref)
         ?:  =(~ ref)
@@ -498,26 +501,27 @@
         (put:fon ord u.time ref)
       ::
       ++  put
-        |=  [=iref =fullday]
+        |=  [=iref =fuld]
         ^+  ord
         =/  ref=(set ^iref)
-          ?^  uref=(get:fon ord fullday)
+          ?^  uref=(get:fon ord (fuld-to-da:tu fuld))
             (~(put in u.uref) iref)
           (~(put in *(set ^iref)) iref)
-        (put:fon ord fullday ref)
+        (put:fon ord (fuld-to-da:tu fuld) ref)
       :: replace
       ::
       ++  rep
-        |=  [=iref =fullday]
+        |=  [=iref =fuld]
         ^+  ord
         =.  ord  (del iref)
-        (put iref fullday)
+        (put iref fuld)
       :: replace many
       ::
       ++  rap
-        |=  =(list [iref fullday])
+        |=  =(list [iref fuld])
         ^+  ord
-        ?~  list  ord
+        ?~  list
+          ord
         $(list t.list, ord (rep i.list))
       --
     ::
@@ -530,15 +534,15 @@
         :: delete an instance
         ::
         %=  cal
-          span-order     (~(del so span-order.cal) [eid p.p.upd])
-          fullday-order  (~(del fo fullday-order.cal) [eid p.p.upd])
+          span-order  (~(del so span-order.cal) [eid p.p.upd])
+          fuld-order  (~(del fo fuld-order.cal) [eid p.p.upd])
         ==
           %&
         ?-    -.instance.p.p.upd
               %skip
             %=  cal
-              span-order     (~(del so span-order.cal) [eid idx.p.p.upd])
-              fullday-order  (~(del fo fullday-order.cal) [eid idx.p.p.upd])
+              span-order  (~(del so span-order.cal) [eid idx.p.p.upd])
+              fuld-order  (~(del fo fuld-order.cal) [eid idx.p.p.upd])
             ==
             ::
             %fuld
@@ -547,8 +551,8 @@
           ::
           %=    cal
             span-order  (~(del so span-order.cal) [eid idx.p.p.upd])
-              fullday-order
-            %-  ~(rep fo fullday-order.cal)
+              fuld-order
+            %-  ~(rep fo fuld-order.cal)
             :-  [eid idx.p.p.upd]
             p.p.instance.p.p.upd
           ==
@@ -558,7 +562,7 @@
           :: replace this instance in span-order
           ::
           %=    cal
-            fullday-order  (~(del fo fullday-order.cal) [eid idx.p.p.upd])
+            fuld-order  (~(del fo fuld-order.cal) [eid idx.p.p.upd])
               span-order
             %-  ~(rep so span-order.cal)
             :-  [eid idx.p.p.upd]
@@ -721,7 +725,7 @@
         =/  new=instance
           ?-    -.kind
             %skip           skip+~
-            %fuld           fuld+(~+((get-to-fullday (~(got by ruledata.ven) aid))) i.idx-list)
+            %fuld           fuld+(~+((get-to-fuld (~(got by ruledata.ven) aid))) i.idx-list)
             ?(%left %both)  span+(~+((get-to-span (~(got by ruledata.ven) aid))) i.idx-list)
           ==
         $(idx-list t.idx-list)
@@ -741,14 +745,14 @@
         =/  new=instance  
           ?-    -.kind
             %skip           skip+~
-            %fuld           fuld+(~+((get-to-fullday rid kind args)) idx)
+            %fuld           fuld+(~+((get-to-fuld rid kind args)) idx)
             ?(%left %both)  span+(~+((get-to-span rid kind args)) idx)
           ==
         :: if we pass until, stop
         ::
         ?:  ?+  -.new  |
               %span  &(?=(%& -.p.new) (gth l.p.p.new until))
-              %fuld  &(?=(%& -.p.new) (gth p.p.new until))
+              %fuld  &(?=(%& -.p.new) (gth (fuld-to-da:tu p.p.new) until))
             ==
           (do-update %dom [l.dom.ven (dec idx)])
         =.  this

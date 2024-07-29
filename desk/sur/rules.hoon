@@ -15,9 +15,10 @@
 :: both: the rule determines both left and right ends
 :: left: the rule determines the left end, and the
 ::       right end is determined by duration
-:: fuld: fullday (must be divisible by ~d1)
+:: fuld: fullday ([[a=? y=@ud] m=@ud d=@ud]
 :: jump: for timezones; UTC-time at which we jump to a new offset
 :: skip: a skip exception denoting a skipped instance
+:: TODO: add jump
 ::
 +$  kind  
   $%  [%both lz=@t rz=@t]
@@ -42,31 +43,31 @@
       ==
   ==
 ::
-+$  span-instance     (each span span-exception)
-+$  fullday-instance  (each fullday rule-exception)
++$  span-instance  (each span span-exception)
++$  fuld-instance  (each fuld rule-exception)
 +$  jump-instance     (each jump rule-exception)
 :: types for basic recurrence rule functions
 ::
-+$  to-both        $-(@ud (each [dext dext] rule-exception))
++$  to-both     $-(@ud (each [dext dext] rule-exception))
 :: only start (left) is specified; end (right) comes from duration
 ::
-+$  to-left        $-(@ud (each dext rule-exception))
++$  to-left     $-(@ud (each dext rule-exception))
 ::
-+$  to-span        $-(@ud span-instance)
-+$  to-fullday     $-(@ud fullday-instance)
-+$  to-jump        $-(@ud jump-instance)
++$  to-span     $-(@ud span-instance)
++$  to-fuld     $-(@ud fuld-instance)
++$  to-jump     $-(@ud jump-instance)
 ::
-+$  to-to-both     $-(args to-both)
-+$  to-to-left     $-(args to-left)
-+$  to-to-fullday  $-(args to-fullday)
-+$  to-to-jump     $-(args to-jump)
++$  to-to-both  $-(args to-both)
++$  to-to-left  $-(args to-left)
++$  to-to-fuld  $-(args to-fuld)
++$  to-to-jump  $-(args to-jump)
 ::
 +$  state-0  [%0 =rules]
 ::
 +$  cache
   $:  to-to-boths=(map rid to-to-both)
       to-to-lefts=(map rid to-to-left)
-      to-to-fulldays=(map rid to-to-fullday)
+      to-to-fulds=(map rid to-to-fuld)
       to-to-jumps=(map rid to-to-jump)
   ==
 ::
