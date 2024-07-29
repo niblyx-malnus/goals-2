@@ -3,13 +3,11 @@
   ==
 '''
 |=  args=(map @t arg)
-=/  sd=[[a=? y=@ud] m=@ud d=@ud]
-  +:;;($>(%dt arg) (~(got by args) 'Start'))
-=/  start=@da  (year [a y]:sd m.sd d.sd 0 0 0 ~)
+=/  start=fuld  +:;;($>(%dt arg) (~(got by args) 'Start'))
 ^-  $-(@ud (each fuld rule-exception))
 |=  idx=@ud
-=/  day=(unit @da)  ((yearly-on-date start) idx)
-?~  day
-  [%| %rule-error (crip "This date does not exist.")]
-[%& (da-to-fuld u.day)]
+=/  fuld=(unit fuld)  ((yearly-on-date start) idx)
+?~  fuld
+  [%| %rule-error 'This date does not exist.']
+[%& u.fuld]
 '''

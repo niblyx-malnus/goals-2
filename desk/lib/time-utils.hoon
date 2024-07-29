@@ -152,8 +152,6 @@
       ?~(s & (gte da u.s))
   ==
 ::
-++  sane-fd  |=(fd=@da ~|(%insane-fullday ?>(=(0 (mod fd ~d1)) fd)))
-::
 ++  apply-delta
   |=  [=time =delta]
   ^+  time
@@ -278,16 +276,16 @@
   (da-to-fuld (add day (mul d ~d1)))
 ::
 ++  days-of-week
-  |=  [start=@da weekdays=(list wkd)]
+  |=  [start=fuld weekdays=(list wkd)]
   |=  idx=@ud
-  ^-  @da
+  ^-  fuld
   =/  weekdays=(list wkd-num)  (turn weekdays wkd-to-num)
   =/  cycle-count=@ud          (div idx (lent weekdays))
   =/  cycle-offset=@ud         (mod idx (lent weekdays))
-  =/  start-weekday=wkd-num    (get-weekday start)
+  =/  start-weekday=wkd-num    (get-weekday (fuld-to-da start))
   =/  shifted-days=(list @ud)  (sort (turn weekdays (curr sub-wkd start-weekday)) lth)
   =/  total-offset=@ud         (add (mul 7 cycle-count) (snag cycle-offset shifted-days))
-  (add start (mul ~d1 total-offset))
+  (da-to-fuld (add (fuld-to-da start) (mul ~d1 total-offset)))
 ::
 ++  monthly-nth-weekday-after
   |=  [start=fuld =ord =wkd]
@@ -300,30 +298,23 @@
   (monthly-nth-weekday [curr-year curr-month] ord wkd)
 ::
 ++  monthly-on-day
-  |=  start=@da
+  |=  start=fuld
   |=  idx=@ud
-  ^-  (unit @da) :: null if does not exist
-  =.  start            (sane-fd start)
-  =/  start-year=@ud   y:(yore start)
-  =/  start-month=@ud  (dec m:(yore start)) :: 0-indexed
-  =/  day=@ud          d.t:(yore start)
-  =/  curr-year=@ud    (add (div (add idx start-month) 12) start-year)
-  =/  curr-month=@ud   +((mod (add idx start-month) 12))
-  =/  datetime=@da     (year [[& curr-year] curr-month day 0 0 0 ~])
-  ?.  =(day d.t:(yore datetime))
+  ^-  (unit fuld) :: null if does not exist
+  =/  curr-year=anum   (shift-anum [a y]:start & (div (add idx m.start) 12))
+  =/  curr-month=@ud   +((mod (add idx m.start) 12))
+  =/  =fuld  [curr-year curr-month d.start]
+  ?.  (valid-fuld fuld)
     ~
-  [~ datetime]
+  [~ fuld]
 ::
 ++  yearly-on-date
-  |=  start=@da
+  |=  start=fuld
   |=  idx=@ud
-  ^-  (unit @da) :: null if does not exist
-  =.  start            (sane-fd start)
-  =/  start-year=@ud   y:(yore start)
-  =/  [m=@ud d=@ud]    [m d.t]:(yore start)
-  =/  curr-year=@ud    (add idx start-year)
-  =/  datetime=@da     (year [[& curr-year] m d 0 0 0 ~])
-  ?.  =([m d] [m d.t]:(yore datetime))
+  ^-  (unit fuld) :: null if does not exist
+  =/  curr-year=anum  (shift-anum [a y]:start & idx)
+  =/  =fuld  [curr-year [m d]:start]
+  ?.  (valid-fuld fuld)
     ~
-  [~ datetime]
+  [~ fuld]
 --

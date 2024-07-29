@@ -12,6 +12,6 @@
 ^-  $-(@ud (each dext rule-exception))
 |=  idx=@ud
 =/  start=@da  (year [a y]:sd m.sd d.sd 0 0 0 ~)
-=/  =time  (add (sane-fd start) (mul idx period))
+=/  =time  (add start (mul idx period))
 [%& 0 (add time ct)]
 '''

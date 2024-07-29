@@ -9,5 +9,5 @@
 =/  period=@dr  +:;;($>(%dr arg) (~(got by args) 'Period'))
 =/  start=@da  (year [a y]:sd m.sd d.sd 0 0 0 ~)
 ^-  $-(@ud (each fuld rule-exception))
-|=(idx=@ud [%& (da-to-fuld (add (sane-fd start) (mul idx period)))])
+|=(idx=@ud [%& (da-to-fuld (add start (mul idx period)))])
 '''
