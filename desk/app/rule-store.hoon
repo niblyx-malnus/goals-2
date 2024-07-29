@@ -1,6 +1,8 @@
 /-  r=rules
-/+  rlib=rules, vent, bind, server, dbug, verb, default-agent
+/+  rlib=rules, vent, bind, server, dbug, verb, default-agent,
 :: Import to force compilation during development.
+::
+    rrules
 ::
 |%
 +$  card            card:agent:gall

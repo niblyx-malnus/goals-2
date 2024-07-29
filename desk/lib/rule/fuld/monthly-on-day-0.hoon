@@ -11,4 +11,3 @@
   [%| %rule-error 'This day does not exist in this month.']
 [%& u.fuld]
 '''
-

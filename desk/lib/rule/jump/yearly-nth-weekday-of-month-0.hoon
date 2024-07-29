@@ -16,7 +16,7 @@
 ^-  $-(@ud (each jump rule-exception))
 |=  idx=@ud
 =/  =anum  (shift-anum [a y]:sm & idx)
-=/  =fuld  (monthly-nth-weekday [anum m.sm] ord wkd)
+=/  =fuld  (nth-weekday-of-month [anum m.sm] ord wkd)
 =/  day=@da  (fuld-to-da fuld)
 [%& (apply-invert-delta (add day time) delta)]
 '''

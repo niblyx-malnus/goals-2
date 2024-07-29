@@ -16,7 +16,7 @@
 :: left: the rule determines the left end, and the
 ::       right end is determined by duration
 :: fuld: fullday ([[a=? y=@ud] m=@ud d=@ud]
-:: jump: for timezones; UTC-time at which we jump to a new offset
+:: jump: instantaneous events
 :: skip: a skip exception denoting a skipped instance
 :: TODO: add jump
 ::
@@ -45,12 +45,10 @@
 ::
 +$  span-instance  (each span span-exception)
 +$  fuld-instance  (each fuld rule-exception)
-+$  jump-instance     (each jump rule-exception)
++$  jump-instance  (each jump rule-exception)
 :: types for basic recurrence rule functions
 ::
 +$  to-both     $-(@ud (each [dext dext] rule-exception))
-:: only start (left) is specified; end (right) comes from duration
-::
 +$  to-left     $-(@ud (each dext rule-exception))
 ::
 +$  to-span     $-(@ud span-instance)

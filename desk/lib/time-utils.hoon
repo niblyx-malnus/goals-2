@@ -25,22 +25,18 @@
 +$  utc-to-tz       $-(@da (unit dext))
 ::
 +$  span  [l=@da r=@da]             :: UTC datetime pair
-+$  jump  @da                       :: instantaneous event
++$  jump  @da                       :: instantaneous UTC event
 +$  anum  [a=? y=@ud]               :: a signed year
 +$  munt  [[a=? y=@ud] m=@ud]       :: month of year
 +$  fuld  [[a=? y=@ud] m=@ud d=@ud] :: date by day of month
 +$  week  [[a=? y=@ud] w=@ud]       :: week of year
 +$  dawk  [[a=? y=@ud] w=@ud d=@ud] :: date by day of week
 +$  nord  [[a=? y=@ud] n=@ud]       :: ordinal date (nth day of year)
-:: CALENDAR rule; NOT TIMEZONE rule
 ::
 +$  rule-exception
   $%  [%skip ~]
       [%rule-error msg=@t]
   ==
-:: Should never abandon support for any of these...
-:: If need to update an arg, add a version like %ud-1...
-:: TODO: replace %mt with $munt, %wk with $week, %dt with $fuld
 ::
 +$  arg
   $%  [%ud p=@ud]        :: natural number (unsigned decimal)
@@ -56,6 +52,8 @@
       [%mt p=munt]       :: month-input
       [%wk p=week]       :: week-input
   ==
+::
++$  args  (map @t arg)
 ::
 ++  wkd-to-num
   |=(=wkd `wkd-num`?-(wkd %mon %0, %tue %1, %wed %2, %thu %3, %fri %4, %sat %5, %sun %6))
@@ -241,7 +239,7 @@
 ++  valid-date  |=(=date `?`=(date (yore (year date))))
 ++  valid-fuld  |=(fuld `?`(valid-date [[a y] m d 0 0 0 ~]))
 ::
-++  monthly-nth-weekday
+++  nth-weekday-of-month
   |=  [month=munt =ord =wkd]
   ^-  fuld
   =/  day=fuld  [[a y] m 1]:month
@@ -295,7 +293,7 @@
   =/  new-years=@ud    (div (add idx (dec m.start)) 12)
   =/  curr-year=anum   (shift-anum [a y]:start & new-years)
   =/  curr-month=@ud   +((mod (add idx (dec m.start)) 12))
-  (monthly-nth-weekday [curr-year curr-month] ord wkd)
+  (nth-weekday-of-month [curr-year curr-month] ord wkd)
 ::
 ++  monthly-on-day
   |=  start=fuld

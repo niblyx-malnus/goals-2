@@ -36,14 +36,41 @@
     /to-to-left/[?~(p.rid %$ (scot %p u.p.rid))]/left/[r.rid]/noun
   ==
 ::
-++  get-to-fuld
-  |=  ruledata:c
-  ^-  to-fuld:r
-  ?>  ?=(%fuld q.rid)
-  ?>  ?=(%fuld -.kind)
-  =/  =to-to-fuld:r
-    (need (get-to-to-fuld rid))
-  (to-to-fuld args)
+++  both-to-span
+  |=  [lz=@t rz=@t =to-both:r]
+  ^-  to-span:r
+  |=  idx=@ud
+  ^-  span-instance:r
+  =/  out=(each [l=dext:r r=dext:r] rule-exception:r)  (to-both idx)
+  ?:  ?=(%| -.out)
+    [%| p.out]
+  =/  l=(unit @da)  (~(tz-to-utc zn:p lz) l.p.out)
+  =/  r=(unit @da)  (~(tz-to-utc zn:p rz) r.p.out)
+  ?:  ?&(?=(^ l) ?=(^ r))
+    ?:  (lte u.l u.r)
+      [%& u.l u.r]
+    :^  %|  %out-of-order
+      [[lz l.p.out] u.l]
+    [[rz r.p.out] u.r]
+  :^  %|  %bad-index
+    ?^(l ~ `[lz l.p.out])
+  ?^(r ~ `[rz r.p.out])
+::
+++  left-to-span
+  |=  [tz=@t d=@dr =to-left:r]
+  ^-  to-span:r
+  |=  idx=@ud
+  ^-  span-instance:r
+  =/  out=(each dext:r rule-exception:r)  (to-left idx)
+  ?:  ?=(%| -.out)
+    [%| p.out]
+  =/  l=(unit @da)   (~(tz-to-utc zn:p tz) p.out)
+  ?~  l
+    [%| %bad-index `[tz p.out] ~]
+  =/  r=@da  (add u.l d)
+  ?^  (~(utc-to-tz zn:p tz) r)
+    [%& u.l r]
+  [%| %out-of-bounds tz r]
 ::
 ++  get-to-span
   |=  ruledata:c
@@ -52,41 +79,25 @@
   ?-    q.rid
       %both
     ?>  ?=(%both -.kind)
-    |=  idx=@ud
-    ^-  span-instance:r
     =/  =to-to-both:r  (need (get-to-to-both rid))
     =/  =to-both:r     (to-to-both args)
-    =/  out=(each [l=dext:r r=dext:r] rule-exception:r)  (to-both idx)
-    ?:  ?=(%| -.out)
-      [%| p.out]
-    =/  l=(unit @da)  (~(tz-to-utc zn:p lz.kind) l.p.out)
-    =/  r=(unit @da)  (~(tz-to-utc zn:p rz.kind) r.p.out)
-    ?:  ?&(?=(^ l) ?=(^ r))
-      ?:  (lte u.l u.r)
-        [%& u.l u.r]
-      :^  %|  %out-of-order
-        [[lz.kind l.p.out] u.l]
-      [[rz.kind r.p.out] u.r]
-    :^  %|  %bad-index
-      ?^(l ~ `[lz.kind l.p.out])
-    ?^(r ~ `[rz.kind r.p.out])
+    (both-to-span lz.kind rz.kind to-both)
     ::
       %left
     ?>  ?=(%left -.kind)
-    |=  idx=@ud
-    ^-  span-instance:r
     =/  =to-to-left:r  (need (get-to-to-left rid))
     =/  =to-left:r     (to-to-left args)
-    =/  out=(each dext:r rule-exception:r)  (to-left idx)
-    ?:  ?=(%| -.out)  [%| p.out]
-    =/  l=(unit @da)   (~(tz-to-utc zn:p tz.kind) p.out)
-    ?~  l
-      [%| %bad-index `[tz.kind p.out] ~]
-    =/  r=@da  (add u.l d.kind)
-    ?^  (~(utc-to-tz zn:p tz.kind) r)
-      [%& u.l r]
-    [%| %out-of-bounds tz.kind r]
+    (left-to-span tz.kind d.kind to-left)
   ==
+::
+++  get-to-fuld
+  |=  ruledata:c
+  ^-  to-fuld:r
+  ?>  ?=(%fuld q.rid)
+  ?>  ?=(%fuld -.kind)
+  =/  =to-to-fuld:r
+    (need (get-to-to-fuld rid))
+  (to-to-fuld args)
 ::
 ++  handle-transition
   |=  tan=event-transition:c
