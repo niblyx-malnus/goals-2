@@ -10,6 +10,7 @@
         request-line:server :: pre-parsed
     ==
 +*  nuk  ~(. nooks gowl)
+    kv   kv:html-utils
     mx   mx:html-utils
     now  (need (get-now-tz zid))
 ::
@@ -22,6 +23,12 @@
 ++  globe
   =/  =manx  (make:fi %globe)
   (pus:~(at mx manx) "height: .875em; width: .875em;")
+::
+++  fi-x
+  ^-  manx
+  =/  =manx  (make:fi %x)
+  =.  manx   (pus:~(at mx manx) "height: .875em; width: .875em;")
+  (pac:~(at mx manx) "inline text-lg")
 ::
 ++  day-square
   |=  =date
@@ -101,6 +108,32 @@
     ::
       [%'GET' ~ *]
     (give-html-manx:htmx [our dap]:gowl eyre-id month-view:components |)
+    ::
+      [%'GET' [%small-calendar ~] *]
+    =/  hide=?  ?=(%true (need (get-key:kv 'hide' args)))
+    ~&  >>  %small-calendar
+    =/  =manx
+      ?:  hide
+        ;div.hidden
+          =id  (en-html-id:htmx (weld base /small-calendar))
+          ;
+        ==
+      ;div.flex.flex-col
+        =id  (en-html-id:htmx (weld base /small-calendar))
+        ;div.header-bar
+          ;button
+            =hx-get      "{(spud base)}/small-calendar?hide=true"
+            =hx-target   "#{(en-html-id:htmx (weld base /small-calendar))}"
+            =hx-trigger  "click"
+            =hx-swap     "outerHTML"
+            ;+  fi-x
+          ==
+        ==
+        ;div.small-calendar
+          calendar placeholder
+        ==
+      ==
+    (give-html-manx:htmx [our dap]:gowl eyre-id manx |)
     ::
       [* [%day-square date=@ta *] *]
     handle:(day-square (yore (de:date-input:tu date.cad.parms)))
@@ -206,7 +239,19 @@
         =hx-swap     "outerHTML"
         ;+  globe
       ==
-      ;span.text-gray-800.text-2xl: {(snag (sub m 1) month-fullname)} {(numb:htmx y)}
+      ;div
+        ;span.text-gray-800.text-2xl.cursor-pointer
+          =hx-get      "{(spud base)}/small-calendar?hide=false"
+          =hx-target   "#{(en-html-id:htmx (weld base /small-calendar))}"
+          =hx-trigger  "click"
+          =hx-swap     "outerHTML"
+            ; {(snag (sub m 1) month-fullname)} {(numb:htmx y)}
+        ==
+        ;div.hidden
+          =id  (en-html-id:htmx (weld base /small-calendar))
+          ;
+        ==
+      ==
       ;+  (timer (get-offset zid))
     ==
   ::
